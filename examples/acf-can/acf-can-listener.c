@@ -168,12 +168,34 @@ void print_can_acf(uint8_t* acf_pdu)
     fprintf(stderr, "Pad: %"PRIu64"\n", pad);
 }
 
-static int is_valid_cf_packet(uint8_t* pdu,
-                              ssize_t *proc_bytes) {
+static int new_packet(int sk_fd, int can_socket) {
 
-    uint64_t subtype;
-    uint64_t pdu_length;
-    int res;
+    int res;      
+    uint64_t msg_length, proc_bytes = 0;
+    uint64_t can_frame_id, udp_seq_num = 0, subtype;
+    uint16_t payload_length, pdu_length;
+    uint8_t *can_payload, i;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t* cf_pdu;
+    uint8_t* acf_pdu;
+    Avtp_UDP_t *udp_pdu;
+    char stdout_string[1000] = "\0";
+	struct can_frame frame;
+
+    res = recv(sk_fd, pdu, MAX_PDU_SIZE, 0);    
+
+    if (res < 0 || res > MAX_PDU_SIZE) {
+        perror("Failed to receive data");
+        return -1;
+    }
+
+    if (use_udp) {
+        udp_pdu = (Avtp_UDP_t *) pdu;
+        Avtp_UDP_GetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, &udp_seq_num);
+        cf_pdu = pdu + sizeof(Avtp_UDP_t);        
+    } else {
+        cf_pdu = pdu;
+    }
 
     res = Avtp_CommonHeader_GetField((Avtp_CommonHeader_t*)pdu, AVTP_COMMON_HEADER_FIELD_SUBTYPE, &subtype);
     if (res < 0) {
@@ -183,56 +205,25 @@ static int is_valid_cf_packet(uint8_t* pdu,
 
     if (!((subtype == AVTP_SUBTYPE_NTSCF) || 
         (subtype == AVTP_SUBTYPE_TSCF))) {
-        fprintf(stderr, "Subtype mismatch: expected %u or %u, got %"PRIu64"\n",
+        fprintf(stderr, "Subtype mismatch: expected %u or %u, got %"PRIu64". Dropping packet\n",
                 AVTP_SUBTYPE_NTSCF, AVTP_SUBTYPE_TSCF, subtype);
+        return -1;        
+    }        
+
+    if(subtype == AVTP_SUBTYPE_TSCF){
+        proc_bytes += AVTP_TSCF_HEADER_LEN;        
+        res = Avtp_Tscf_GetField((Avtp_Tscf_t*)pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, (uint64_t *) &msg_length);
+    }else{
+        proc_bytes += AVTP_NTSCF_HEADER_LEN;        
+        res = Avtp_Ntscf_GetField((Avtp_Ntscf_t*)pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, (uint64_t *) &msg_length);
+    }
+
+    if (res < 0) {
+        fprintf(stderr, "Failed to get message length: %d\n", res);
         return 0;
     }
 
-    if (subtype == AVTP_SUBTYPE_NTSCF) {
-        pdu_length = AVTP_NTSCF_HEADER_LEN;
-    } else if (subtype == AVTP_SUBTYPE_TSCF) {
-        pdu_length = AVTP_TSCF_HEADER_LEN;
-    }
-    *proc_bytes += pdu_length;
-    return 1;
-
-}
-
-static int new_packet(int sk_fd, int can_socket) {
-
-    int res;
-    ssize_t recd_bytes, proc_bytes = 0;
-    uint16_t payload_length, pdu_length;
-    uint64_t can_frame_id, udp_seq_num = 0;
-    uint8_t *can_payload, i;
-    uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t* cf_pdu;
-    uint8_t* acf_pdu;
-    Avtp_UDP_t *udp_pdu;
-    char stdout_string[1000] = "\0";
-	struct can_frame frame;
-
-    recd_bytes = recv(sk_fd, pdu, MAX_PDU_SIZE, 0);
-    if (recd_bytes < 0 || recd_bytes > MAX_PDU_SIZE) {
-        perror("Failed to receive data");
-        return -1;
-    }
-
-    if (use_udp) {
-        udp_pdu = (Avtp_UDP_t *) pdu;
-        Avtp_UDP_GetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, &udp_seq_num);
-        cf_pdu = pdu + sizeof(Avtp_UDP_t);
-        proc_bytes += sizeof(Avtp_UDP_t);
-    } else {
-        cf_pdu = pdu;
-    }
-
-    if (!is_valid_cf_packet(cf_pdu, &proc_bytes)) {
-        fprintf(stderr, "Dropping packet\n");
-        return 0;
-    }
-
-    while (proc_bytes < recd_bytes) {
+    while (proc_bytes < msg_length) {        
 
         acf_pdu = &pdu[proc_bytes];
 
