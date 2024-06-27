@@ -10,7 +10,6 @@ avtp_lib = library(
     'open1722',
     [
      'src/avtp.c',
-     'src/avtp_cvf.c',
      'src/avtp_ieciidc.c',
      'src/avtp_stream.c',
 
@@ -28,6 +27,10 @@ avtp_lib = library(
      'src/avtp/Udp.c',
      'src/avtp/Rvf.c',
      'src/avtp/Crf.c',
+     'src/avtp/cvf/Cvf.c',
+     'src/avtp/cvf/H264.c',
+     'src/avtp/cvf/Jpeg2000.c',
+     'src/avtp/cvf/Mjpeg.c',
     ],
     version: meson.project_version(),
     include_directories: include_directories('include'),
@@ -65,6 +68,14 @@ install_headers(
     'include/avtp/aaf/PcmStream.h',
     'include/avtp/aaf/CommonStream.h',
     subdir : 'avtp/aaf'
+)
+
+install_headers(
+    'src/avtp/cvf/Cvf.c',
+    'src/avtp/cvf/H264.c',
+    'src/avtp/cvf/Jpeg2000.c',
+    'src/avtp/cvf/Mjpeg.c',
+    subdir : 'avtp/cvf'
 )
 
 pkg = import('pkgconfig')
