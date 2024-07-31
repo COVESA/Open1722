@@ -34,6 +34,9 @@
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include <sys/time.h>
+#include <signal.h>
+#include <stdbool.h>
 
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -62,27 +65,58 @@ static int priority = -1;
 static uint8_t seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
-static uint8_t multi_can_frames = 1;
+static bool timeout_flag = false;    // true when user supplies cmd line arg
+static bool count_flag = false;
+static uint32_t max_can_frames = 1;
+static uint32_t max_timeout = 0;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
+struct itimerval timer;
 
-static char doc[] = "\nacf-can-talker -- a program designed to send CAN messages to \
-                    a remote CAN bus over Ethernet using Open1722 \
-                    \vEXAMPLES\
-                    \n\n  acf-can-talker eth0 aa:bb:cc:ee:dd:ff\
-                    \n\n    (tunnel transactions from STDIN to a remote CAN bus over Ethernet)\
-                    \n\n  acf-can-talker --count 10 eth0 aa:bb:cc:ee:dd:ff\
-                    \n\n    (as above, but pack 10 CAN frames in one Ethernet frame)\
-                    \n\n  acf-can-talker -u 10.0.0.2:17220 vcan1\
-                    \n\n    (tunnel transactions from can1 interface to a remote CAN bus over IP)\
-                    \n\n  candump can1 | acf-can-talker -u 10.0.0.2:17220\
-                    \n\n    (another method to tunnel transactions from vcan1 to a remote CAN bus)";
+static char doc[] =
+"\n"
+"acf-can-talker -- a program designed to send CAN messages to a remote CAN bus\n"
+"                  over Ethernet using Open1722. The default behavior is to\n"
+"                  pack as many CAN frames as possible into the Ethernet frame\n"
+"                  before sending the Ethernet frame.\n"
+"\n"
+"OPTIONS\n"
+"\vBUFFERING\n\n"
+"  acf-can-talker, by default, packs as many CAN frames as it can into the \n"
+"  Ethernet frame before sending it. Use the --timeout and/or --count options \n"
+"  to change this behavior.\n\n"
+"  --timeout <time> where <time> is maximum integer number of microseconds \n"
+"                   (not milliseconds), to wait after arrival of last CAN \n"
+"                   message before transmitting the Ethernet frame. This \n"
+"                   option makes is possible to support the use case of \n"
+"                   limiting packing to 'bursts' of traffic. \n"
+"                   minimum: 0\n"
+"                   maximum: 2^32-1\n"
+"                   default: maximum value\n\n"
+"  --count <count>  where <count> is the max number of CAN frames allowed in \n"
+"                   an Ethernet frame.\n"
+"                   minimum: 1\n"
+"                   maximum: 2^32-1\n"
+"                   default: maximum value\n\n"
+"EXAMPLES\n"
+"  acf-can-talker eth0 aa:bb:cc:ee:dd:ff\n\n"
+"    (tunnel transactions from STDIN to a remote CAN bus over Ethernet)\n\n\n"
+"  acf-can-talker --count 10 eth0 aa:bb:cc:ee:dd:ff\n\n"
+"    (as above, but send Ethernet frame as soon as we have 10 CAN frames)\n\n\n"
+"  acf-can-talker --timeout 400 eth0 aa:bb:cc:ee:dd:ff\n\n"
+"    (as above, but send Ethernet frame if 400 usec have passed since \n"
+"     arrival of last CAN frame) \n\n\n"
+"  acf-can-talker -u 10.0.0.2:17220 vcan1\n\n"
+"    (tunnel transactions from can1 interface to a remote CAN bus over IP)\n\n\n"
+"  candump can1 | acf-can-talker -u 10.0.0.2:17220\n\n"
+"    (another method to tunnel transactions from vcan1 to a remote CAN bus)\n\n\n";
 
 static char args_doc[] = "[ifname] dst-mac-address/dst-nw-address:port [can ifname]";
 
 static struct argp_option options[] = {            
     {"tscf", 't', 0, 0, "Use TSCF"},
     {"udp",  'u', 0, 0, "Use UDP" },
-    {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
+    {"timeout", 501, "TIME", 0, "Set max delay of CAN message arrival before sending Ethernet frame"},
+    {"count", 502, "COUNT", 0, "Set max count of CAN messages per Ethernet frame"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDIN by default)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
@@ -102,8 +136,15 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 'u':
         use_udp = 1;
         break;
-    case 'c':
-        multi_can_frames = atoi(arg);
+    case 501:
+        max_timeout = atoi(arg);
+        timer.it_value.tv_sec = 0;
+        timer.it_value.tv_usec = max_timeout;
+        timeout_flag = true;
+        break;
+    case 502:
+        max_can_frames = atoi(arg);
+        count_flag = true;
         break;
 
     case ARGP_KEY_NO_ARGS:
@@ -217,42 +258,52 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
 
 static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uint8_t *length) {
 
-    char stdin_str[1000];
-    char can_str[10];
-    char can_payload[1000];
-    char *token;
-    size_t n;
-    int res;
+  char stdin_str[1000];
+  char can_str[10];
+  char can_payload[1000];
+  char *token;
+  size_t n;
+  int res;
 	struct can_frame frame;
 
-    if (can_socket == 0) {
-        n = read(STDIN_FILENO, stdin_str, 1000);
-        if (n < 0) {
-            return -1;
-        }
+  if (can_socket == 0) {
+      n = read(STDIN_FILENO, stdin_str, 1000);    // EINTR detects interrupt
+      if (n == -1 && errno == EINTR) {            // (our timeout)
+          return -1;
+      } else if (n < 0) {                         // other failure
+        return -1;
+      }
 
-        res = sscanf(stdin_str, "%s %x [%hhu] %[0-9A-F ]s", can_str, frame_id,
-                                                        length, can_payload);
-        if (res < 0) {
-            return -1;
-        }
+      res = sscanf(stdin_str, "%s %x [%hhu] %[0-9A-F ]s", can_str, frame_id,
+                                                      length, can_payload);
+      if (res < 0) {
+          return -1;
+      }
 
-        token = strtok(can_payload, " ");
-        int index = 0;
-        while (token != NULL) {
-            payload[index++] = (unsigned short)strtol(token, NULL, 16);
-            token = strtok(NULL, " ");
-        }
-    } else {
-        n = read(can_socket, &frame, sizeof(struct can_frame));
-        if (n > 0) {
-            *frame_id = (uint32_t) frame.can_id;
-            *length = (uint8_t) frame.can_dlc;
-            memcpy(payload, frame.data, (size_t) *length);
-        }
-    }
-    
-    return n;
+      token = strtok(can_payload, " ");
+      int index = 0;
+      while (token != NULL) {
+          payload[index++] = (unsigned short)strtol(token, NULL, 16);
+          token = strtok(NULL, " ");
+      }
+  } else {
+      n = read(can_socket, &frame, sizeof(struct can_frame));
+      if (n > 0) {
+          *frame_id = (uint32_t) frame.can_id;
+          *length = (uint8_t) frame.can_dlc;
+          memcpy(payload, frame.data, (size_t) *length);
+      } else if (n == -1 && errno == EINTR) {   // detect our timeout
+        return -1;
+      } else {
+        return -1;
+      }
+  }
+  
+  return n;
+}
+
+void handle_timeout(int signum) {
+  printf("done waiting! time to send ethernet frame\n");
 }
 
 int main(int argc, char *argv[])
@@ -270,8 +321,11 @@ int main(int argc, char *argv[])
     uint32_t pdu_length;
 
     int can_socket = 0;
-	struct sockaddr_can can_addr;
-	struct ifreq ifr;
+	  struct sockaddr_can can_addr;
+	  struct ifreq ifr;
+
+    // used to timeout the packing of Ethernet frame with CAN frames
+    signal(SIGALRM, handle_timeout);
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -283,7 +337,11 @@ int main(int argc, char *argv[])
     if (fd < 0)
         return 1;
 
-    num_acf_msgs = multi_can_frames;
+    // enforce timeout and count constraints
+    if      (!timeout_flag && !count_flag) { num_acf_msgs = 1; }
+    else if (!timeout_flag &&  count_flag) { num_acf_msgs = max_can_frames; } 
+    else if ( timeout_flag && !count_flag) { num_acf_msgs = 2^32 - 1; }
+    else                                   { num_acf_msgs = max_can_frames; } 
 
     // Open a CAN socket for reading frames if required
     if (strcmp(can_ifname, "STDIN\0")) {
@@ -334,13 +392,27 @@ int main(int argc, char *argv[])
             goto err;
         pdu_length += res;
 
+        
+        uint32_t initial_pdu_length = pdu_length;
         int i = 0;
-        while (i < num_acf_msgs) {
-            // Get payload -- will 'spin' here until we get the requested number
-            //                of CAN frames.
+        // TODO real logic for launching 1722 on "full" 1722 frame
+        // TODO consider how to handle interrupt in the middle of reading frame
+        // Get payload -- will loop here until we get the requested number
+        //                of CAN frames, or until timeout
+        // 24 is max for CLASSIC CAN (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 8)
+        // 80 is max for CAN FD (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 64)
+        // + 4 when using UDP, so 28 or 84 are the valid magic numbers.
+        while ((i < num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
             res = get_payload(can_socket, payload, &frame_id, &payload_length);
-            if (!res) {
-                continue;
+            if (res < 0) {
+              // handle the fact that our timer expired by declaring victory 
+              // regarding collecting CAN by breaking out of the loop.
+              break;
+            }
+            
+            // on reception of 1st msg we may need to set our timer
+            if (pdu_length == initial_pdu_length && max_timeout > 0) {
+                res = setitimer(ITIMER_REAL, &timer, NULL);
             }
 
             uint8_t* acf_pdu = cf_pdu + pdu_length;
@@ -351,7 +423,8 @@ int main(int argc, char *argv[])
 
             i++;
         }
-        
+        alarm(0);      // disarm timer 
+
         res = update_pdu_length(cf_pdu, pdu_length);
         if (res < 0)
             goto err;
