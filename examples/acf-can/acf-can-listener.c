@@ -50,11 +50,13 @@
 #include "avtp/CommonHeader.h"
 
 #define MAX_PDU_SIZE                1500
+#define CAN_FD_OPTION               500
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t use_udp;
 static uint32_t udp_port = 17220;
+static Can_Variant_t can_variant = CAN_CLASSIC;
 static char can_ifname[IFNAMSIZ] = "STDOUT\0";
 
 static char doc[] = "\nacf-can-listener -- a program designed to receive CAN messages from \
@@ -72,6 +74,7 @@ static char args_doc[] = "[ifname] dst-mac-address [can ifname]";
 static struct argp_option options[] = {
     {"port", 'p', "UDP_PORT", 0, "UDP Port to listen on if UDP enabled"},
     {"udp", 'u', 0, 0, "Use UDP"},
+    {"fd", CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDOUT by default)"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)" },
@@ -89,6 +92,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 'u':
         use_udp = 1;
         break;
+    case CAN_FD_OPTION:
+        can_variant = CAN_FD;
 
     case ARGP_KEY_NO_ARGS:
         break;
@@ -180,7 +185,7 @@ static int new_packet(int sk_fd, int can_socket) {
     uint8_t* acf_pdu;
     Avtp_UDP_t *udp_pdu;
     char stdout_string[1000] = "\0";
-    struct can_frame frame;
+    struct canfd_frame frame;
     uint64_t eff;
 
     res = recv(sk_fd, pdu, MAX_PDU_SIZE, 0);
@@ -271,9 +276,9 @@ static int new_packet(int sk_fd, int can_socket) {
             if (eff) {
               frame.can_id |= CAN_EFF_FLAG;
             }
-            frame.can_dlc = payload_length;
+            frame.len = payload_length;
             memcpy(frame.data, can_payload, payload_length);
-            if (write(can_socket, &frame, sizeof(struct can_frame)) != sizeof(struct can_frame)) {
+            if (write(can_socket, &frame, sizeof(struct canfd_frame)) != sizeof(struct canfd_frame)) {
                 return 1;
             }
         }
@@ -304,6 +309,13 @@ int main(int argc, char *argv[])
         memset(&can_addr, 0, sizeof(can_addr));
         can_addr.can_family = AF_CAN;
         can_addr.can_ifindex = ifr.ifr_ifindex;
+
+        if (can_variant == CAN_FD) {
+            int enable_canfx = 1;
+            setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
+                        &enable_canfx, sizeof(enable_canfx));
+        }
+
         if (bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr)) < 0)
             return 1;
     }

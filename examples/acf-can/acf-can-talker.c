@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -53,6 +53,7 @@
 #define MAX_PDU_SIZE                1500
 #define STREAM_ID                   0xAABBCCDDEEFF0001
 #define CAN_PAYLOAD_MAX_SIZE        16*4
+#define CAN_FD_OPTION               500
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -62,6 +63,7 @@ static int priority = -1;
 static uint8_t seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
+static Can_Variant_t can_variant = CAN_CLASSIC;
 static uint8_t multi_can_frames = 1;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
 
@@ -79,14 +81,15 @@ static char doc[] = "\nacf-can-talker -- a program designed to send CAN messages
 
 static char args_doc[] = "[ifname] dst-mac-address/dst-nw-address:port [can ifname]";
 
-static struct argp_option options[] = {            
+static struct argp_option options[] = {
     {"tscf", 't', 0, 0, "Use TSCF"},
-    {"udp",  'u', 0, 0, "Use UDP" },
+    {"udp", 'u', 0, 0, "Use UDP" },
+    {"fd", CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDIN by default)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
-    {"dst-nw-address:port", 0, 0, OPTION_DOC, "Stream destination network address and port (If UDP)"},    
+    {"dst-nw-address:port", 0, 0, OPTION_DOC, "Stream destination network address and port (If UDP)"},
     { 0 }
 };
 
@@ -105,6 +108,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 'c':
         multi_can_frames = atoi(arg);
         break;
+    case CAN_FD_OPTION:
+        can_variant = CAN_FD;
+        break;
 
     case ARGP_KEY_NO_ARGS:
         argp_usage(state);
@@ -113,14 +119,14 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
         if(state->argc < 2){
             argp_usage(state);
-        }    
+        }
 
         if(!use_udp){
 
-            strncpy(ifname, arg, sizeof(ifname) - 1);       
+            strncpy(ifname, arg, sizeof(ifname) - 1);
 
             if(state->next < state->argc)
-            {             
+            {
                 res = sscanf(state->argv[state->next], "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
                         &macaddr[0], &macaddr[1], &macaddr[2],
                         &macaddr[3], &macaddr[4], &macaddr[5]);
@@ -128,7 +134,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
                     fprintf(stderr, "Invalid MAC address\n\n");
                     argp_usage(state);
                 }
-                state->next += 1;   
+                state->next += 1;
             }
 
         } else {
@@ -142,13 +148,13 @@ static error_t parser(int key, char *arg, struct argp_state *state)
                 fprintf(stderr, "Invalid IP address\n\n");
                 argp_usage(state);
             }
-        } 
-          
+        }
+
         if(state->next < state->argc)
-        {                                   
-            strncpy(can_ifname, state->argv[state->next], sizeof(can_ifname) - 1);            
+        {
+            strncpy(can_ifname, state->argv[state->next], sizeof(can_ifname) - 1);
             state->next = state->argc;
-        }         
+        }
 
         break;
     }
@@ -206,11 +212,12 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     // Prepare ACF PDU for CAN
     Avtp_Can_Init(pdu);
     clock_gettime(CLOCK_REALTIME, &now);
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MESSAGE_TIMESTAMP, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
+    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MESSAGE_TIMESTAMP, 
+                      (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
     Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MTV, 1U);
 
     // Copy payload to ACF CAN PDU
-    processedBytes = Avtp_Can_SetPayload(pdu, can_frame_id, payload, length, CAN_CLASSIC);
+    processedBytes = Avtp_Can_SetPayload(pdu, can_frame_id, payload, length, can_variant);
 
     return processedBytes;
 }
@@ -223,7 +230,7 @@ static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uin
     char *token;
     size_t n;
     int res;
-	struct can_frame frame;
+    struct canfd_frame frame;
 
     if (can_socket == 0) {
         n = read(STDIN_FILENO, stdin_str, 1000);
@@ -244,14 +251,14 @@ static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uin
             token = strtok(NULL, " ");
         }
     } else {
-        n = read(can_socket, &frame, sizeof(struct can_frame));
+        n = read(can_socket, &frame, sizeof(struct canfd_frame));
         if (n > 0) {
             *frame_id = (uint32_t) frame.can_id;
-            *length = (uint8_t) frame.can_dlc;
+            *length = (uint8_t) frame.len;
             memcpy(payload, frame.data, (size_t) *length);
         }
     }
-    
+
     return n;
 }
 
@@ -270,8 +277,8 @@ int main(int argc, char *argv[])
     uint32_t pdu_length;
 
     int can_socket = 0;
-	struct sockaddr_can can_addr;
-	struct ifreq ifr;
+    struct sockaddr_can can_addr;
+    struct ifreq ifr;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -297,7 +304,14 @@ int main(int argc, char *argv[])
         memset(&can_addr, 0, sizeof(can_addr));
         can_addr.can_family = AF_CAN;
         can_addr.can_ifindex = ifr.ifr_ifindex;
-        if (bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr)) < 0) 
+
+        if (can_variant == CAN_FD) {
+            int enable_canfx = 1;
+            setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
+                        &enable_canfx, sizeof(enable_canfx));
+        }
+
+        if (bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr)) < 0)
             return 1;
     }
 
@@ -351,7 +365,7 @@ int main(int argc, char *argv[])
 
             i++;
         }
-        
+
         res = update_pdu_length(cf_pdu, pdu_length);
         if (res < 0)
             goto err;
