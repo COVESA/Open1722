@@ -69,6 +69,7 @@ static bool timeout_flag = false;    // true when user supplies cmd line arg
 static bool count_flag = false;
 static uint32_t max_can_frames = 1;
 static uint32_t max_timeout = 0;
+volatile sig_atomic_t send_ethernet = false;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
 struct itimerval timer;
 
@@ -137,10 +138,19 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         use_udp = 1;
         break;
     case 501:
-        max_timeout = atoi(arg);
-        timer.it_value.tv_sec = 0;
-        timer.it_value.tv_usec = max_timeout;
-        timeout_flag = true;
+        char units[3];
+        sscanf(arg, "%d%2s", &max_timeout, units);
+        if (strcmp(units, "ms") == 0) {
+          timer.it_value.tv_sec = 0;
+          timer.it_value.tv_usec = max_timeout * 1e3;
+          timeout_flag = true;
+        } else if (strcmp(units, "us") == 0) {
+          timer.it_value.tv_sec = 0;
+          timer.it_value.tv_usec = max_timeout;
+          timeout_flag = true;
+        } else {
+          fprintf(stderr, "unknown --timeout units");
+        }
         break;
     case 502:
         max_can_frames = atoi(arg);
@@ -271,7 +281,7 @@ static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uin
       if (n == -1 && errno == EINTR) {            // (our timeout)
           return -1;
       } else if (n < 0) {                         // other failure
-        return -1;
+        return -2;
       }
 
       res = sscanf(stdin_str, "%s %x [%hhu] %[0-9A-F ]s", can_str, frame_id,
@@ -303,7 +313,23 @@ static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uin
 }
 
 void handle_timeout(int signum) {
-  printf("done waiting! time to send ethernet frame\n");
+  send_ethernet = true;
+}
+
+// prevent an interrupted system call (like 'read' from being restarted)
+// from 'Advanced Programming in the UNIX Environment', figure 10.19
+typedef void Sigfunc(int);
+Sigfunc * signal_intr(int signo, Sigfunc *func) {
+  struct sigaction act, oact;
+  act.sa_handler = func;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+#ifdef  SA_INTERRUPT
+  act.sa_flags |= SA_INTERRUPT;
+#endif
+  if (sigaction(signo, &act, &oact) < 0) 
+    return(SIG_ERR);
+  return(oact.sa_handler);
 }
 
 int main(int argc, char *argv[])
@@ -324,8 +350,14 @@ int main(int argc, char *argv[])
 	  struct sockaddr_can can_addr;
 	  struct ifreq ifr;
 
+    struct timespec start_time, end_time;    // for debugging --timeout
+
     // used to timeout the packing of Ethernet frame with CAN frames
-    signal(SIGALRM, handle_timeout);
+    //if (signal(SIGALRM, handle_timeout) == SIG_ERR)
+    if (signal_intr(SIGALRM, handle_timeout) == SIG_ERR)
+      perror("main(), setting handler: \n");
+    else
+      fprintf(stderr, "main() set SIGALRM handler.\n");
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -393,7 +425,7 @@ int main(int argc, char *argv[])
         pdu_length += res;
 
         
-        uint32_t initial_pdu_length = pdu_length;
+        bool first_msg_is_next = true;
         int i = 0;
         // TODO real logic for launching 1722 on "full" 1722 frame
         // TODO consider how to handle interrupt in the middle of reading frame
@@ -403,16 +435,34 @@ int main(int argc, char *argv[])
         // 80 is max for CAN FD (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 64)
         // + 4 when using UDP, so 28 or 84 are the valid magic numbers.
         while ((i < num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
+            clock_gettime(CLOCK_REALTIME, &start_time);
             res = get_payload(can_socket, payload, &frame_id, &payload_length);
-            if (res < 0) {
-              // handle the fact that our timer expired by declaring victory 
-              // regarding collecting CAN by breaking out of the loop.
+            fprintf(stderr, "res --> %d\n", res); fflush(stderr);
+            clock_gettime(CLOCK_REALTIME, &end_time);
+            // Calculate the elapsed time in seconds and nanoseconds
+            long elapsed_sec = end_time.tv_sec - start_time.tv_sec;
+            long elapsed_nsec = end_time.tv_nsec - start_time.tv_nsec;
+            if (elapsed_nsec < 0) {
+                elapsed_sec--;
+                elapsed_nsec += 1000000000;
+            }
+
+            // Print the elapsed time
+            printf("i: [%d] Elapsed time: %ld seconds %f msec\n", i, elapsed_sec, elapsed_nsec/1E6);
+            fflush(stdout);
+
+            if (send_ethernet) {
+              printf("send_ethernet flag set; so send Ethernet\n");fflush(stdout);
+              send_ethernet = false;
               break;
             }
-            
-            // on reception of 1st msg we may need to set our timer
-            if (pdu_length == initial_pdu_length && max_timeout > 0) {
+           
+            // on reception of 1st msg we need to set our timer
+            if (first_msg_is_next) {
                 res = setitimer(ITIMER_REAL, &timer, NULL);
+                printf("time is set: sec [%ld] usec [%ld]\n", 
+                       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
+                first_msg_is_next = false;
             }
 
             uint8_t* acf_pdu = cf_pdu + pdu_length;
@@ -424,7 +474,7 @@ int main(int argc, char *argv[])
             i++;
         }
         alarm(0);      // disarm timer 
-
+        printf("should send Ethernet here\n");fflush(stdout);
         res = update_pdu_length(cf_pdu, pdu_length);
         if (res < 0)
             goto err;
