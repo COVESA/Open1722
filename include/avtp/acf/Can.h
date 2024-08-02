@@ -48,9 +48,9 @@ typedef struct {
 } Avtp_Can_t;
 
 typedef enum {
-    CAN_CLASSIC = 0,
-    CAN_FD
-} Can_Variant_t;
+    AVTP_CAN_CLASSIC = 0,
+    AVTP_CAN_FD
+} Avtp_CanVariant_t;
 
 typedef enum  {
 
@@ -115,7 +115,7 @@ int Avtp_Can_SetField(Avtp_Can_t* can_pdu, Avtp_CanFields_t field, uint64_t valu
  * @returns Returns number of processed bytes (header + payload + padding)
  */
 int Avtp_Can_SetPayload(Avtp_Can_t* can_pdu, uint32_t frame_id , uint8_t* payload, 
-                        uint16_t payload_length, Can_Variant_t can_variant);
+                        uint16_t payload_length, Avtp_CanVariant_t can_variant);
 
 /**
  * Returns pointer to payload of an ACF CAN frame.

@@ -90,7 +90,7 @@ static void can_set_payload(void **state) {
 
     // Set payload and check for EFF
     Avtp_Can_SetPayload((Avtp_Can_t*)pdu, set_frame_id, set_payload, 
-                        CAN_PAYLOAD_SIZE, CAN_CLASSIC);
+                        CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
     assert_int_equal(htonl(set_frame_id), (uint32_t) *((int*)pdu+3));
     assert_memory_equal(set_payload, pdu+16, CAN_PAYLOAD_SIZE);
     assert_int_equal(0x0, *(pdu+2)&0x08);    // Check EFF
@@ -98,7 +98,7 @@ static void can_set_payload(void **state) {
     // Check EFF for extended Frame IDs
     set_frame_id = 0x800;
     Avtp_Can_SetPayload((Avtp_Can_t*)pdu, set_frame_id, set_payload, 
-                        CAN_PAYLOAD_SIZE, CAN_CLASSIC);
+                        CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
     assert_int_equal(htonl(set_frame_id), (uint32_t) *((int*)pdu+3));
     assert_int_equal(0x8, *(pdu+2)&0x08);    // Check EFF
 
@@ -109,7 +109,7 @@ static void can_set_payload(void **state) {
         memset(pdu, 0, MAX_PDU_SIZE);
         Avtp_Can_Init((Avtp_Can_t*)pdu);
         ret = Avtp_Can_SetPayload((Avtp_Can_t*)pdu, set_frame_id, set_payload, 
-                        i, CAN_CLASSIC);
+                        i, AVTP_CAN_CLASSIC);
         assert_int_equal(ret, AVTP_CAN_HEADER_LEN+i+((4 - i%4)&0x3));
         assert_memory_equal(set_payload, pdu+16, i);
         assert_memory_equal(zero_array, pdu+16+i, CAN_PAYLOAD_SIZE-i);

@@ -56,7 +56,7 @@ static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t use_udp;
 static uint32_t udp_port = 17220;
-static Can_Variant_t can_variant = CAN_CLASSIC;
+static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static char can_ifname[IFNAMSIZ] = "STDOUT\0";
 
 static char doc[] = "\nacf-can-listener -- a program designed to receive CAN messages from \
@@ -93,7 +93,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         use_udp = 1;
         break;
     case CAN_FD_OPTION:
-        can_variant = CAN_FD;
+        can_variant = AVTP_CAN_FD;
 
     case ARGP_KEY_NO_ARGS:
         break;
@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
         can_addr.can_family = AF_CAN;
         can_addr.can_ifindex = ifr.ifr_ifindex;
 
-        if (can_variant == CAN_FD) {
+        if (can_variant == AVTP_CAN_FD) {
             int enable_canfx = 1;
             setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
                         &enable_canfx, sizeof(enable_canfx));

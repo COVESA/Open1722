@@ -78,7 +78,7 @@ int Avtp_CanBrief_SetField(Avtp_CanBrief_t* can_pdu, Avtp_CanBriefFields_t field
 }
 
 int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8_t* payload, 
-                        uint16_t payload_length, Can_Variant_t can_variant) {
+                        uint16_t payload_length, Avtp_CanVariant_t can_variant) {
 
     int ret = 0;
     int eff;

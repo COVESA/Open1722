@@ -63,7 +63,7 @@ static int priority = -1;
 static uint8_t seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
-static Can_Variant_t can_variant = CAN_CLASSIC;
+static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t multi_can_frames = 1;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
 
@@ -109,7 +109,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         multi_can_frames = atoi(arg);
         break;
     case CAN_FD_OPTION:
-        can_variant = CAN_FD;
+        can_variant = AVTP_CAN_FD;
         break;
 
     case ARGP_KEY_NO_ARGS:
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
         can_addr.can_family = AF_CAN;
         can_addr.can_ifindex = ifr.ifr_ifindex;
 
-        if (can_variant == CAN_FD) {
+        if (can_variant == AVTP_CAN_FD) {
             int enable_canfx = 1;
             setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
                         &enable_canfx, sizeof(enable_canfx));
