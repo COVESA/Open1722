@@ -93,7 +93,7 @@ list(APPEND TEST_TARGETS test-rvf)
 # list(APPEND TEST_TARGETS test-stream)
 
 foreach(TEST_TARGET IN LISTS TEST_TARGETS)
-    add_executable(${TEST_TARGET} "unit/${TEST_TARGET}.c")
+    add_executable(${TEST_TARGET} EXCLUDE_FROM_ALL "unit/${TEST_TARGET}.c")
     target_include_directories(${TEST_TARGET} PRIVATE "include")
     target_link_libraries(${TEST_TARGET} open1722 cmocka m)
     add_test(NAME ${TEST_TARGET} COMMAND "${PROJECT_BINARY_DIR}/${TEST_TARGET}")
