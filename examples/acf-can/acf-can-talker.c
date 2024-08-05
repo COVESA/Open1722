@@ -30,9 +30,7 @@
 #include <linux/if_packet.h>
 #include <linux/if.h>
 #include <linux/if_ether.h>
-#include <linux/can.h>
 #include <linux/can/raw.h>
-#include <sys/ioctl.h>
 #include <time.h>
 
 #include <arpa/inet.h>
@@ -47,13 +45,13 @@
 #include "avtp/Udp.h"
 #include "avtp/acf/Ntscf.h"
 #include "avtp/acf/Tscf.h"
-#include "avtp/acf/Can.h"
 #include "avtp/CommonHeader.h"
+#include "acf-can-common.h"
 
 #define MAX_PDU_SIZE                1500
 #define STREAM_ID                   0xAABBCCDDEEFF0001
 #define CAN_PAYLOAD_MAX_SIZE        16*4
-#define CAN_FD_OPTION               500
+#define ARGPARSE_CAN_FD_OPTION      500
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -61,11 +59,12 @@ static uint8_t ip_addr[sizeof(struct in_addr)];
 static uint32_t udp_port=17220;
 static int priority = -1;
 static uint8_t seq_num = 0;
+static uint32_t udp_seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
-static uint8_t multi_can_frames = 1;
-static char can_ifname[IFNAMSIZ] = "STDIN\0";
+static uint8_t num_acf_msgs = 1;
+static char can_ifname[IFNAMSIZ];
 
 static char doc[] = "\nacf-can-talker -- a program designed to send CAN messages to \
                     a remote CAN bus over Ethernet using Open1722 \
@@ -84,7 +83,7 @@ static char args_doc[] = "[ifname] dst-mac-address/dst-nw-address:port [can ifna
 static struct argp_option options[] = {
     {"tscf", 't', 0, 0, "Use TSCF"},
     {"udp", 'u', 0, 0, "Use UDP" },
-    {"fd", CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
+    {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDIN by default)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)"},
@@ -106,9 +105,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         use_udp = 1;
         break;
     case 'c':
-        multi_can_frames = atoi(arg);
+        num_acf_msgs = atoi(arg);
         break;
-    case CAN_FD_OPTION:
+    case ARGPARSE_CAN_FD_OPTION:
         can_variant = AVTP_CAN_FD;
         break;
 
@@ -186,21 +185,20 @@ static int init_cf_pdu(uint8_t* pdu)
     return res;
 }
 
-static int update_pdu_length(uint8_t* pdu, uint64_t length)
+static int update_cf_length(uint8_t* cf_pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetField((Avtp_Tscf_t*)pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
+        Avtp_Tscf_SetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
+        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
     }
     return 0;
 }
 
 static int prepare_acf_packet(uint8_t* acf_pdu,
-                          uint8_t* payload, uint8_t length,
-                          uint32_t can_frame_id) {
+                              struct canfd_frame frame) {
 
     int processedBytes;
     struct timespec now;
@@ -216,116 +214,54 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
                       (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
     Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MTV, 1U);
 
-    // Copy payload to ACF CAN PDU
-    processedBytes = Avtp_Can_SetPayload(pdu, can_frame_id, payload, length, can_variant);
+    // Set required CAN Flags
+    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_RTR, frame.can_id & CAN_RTR_FLAG);
+    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_EFF, frame.can_id & CAN_EFF_FLAG);
 
-    return processedBytes;
-}
-
-static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uint8_t *length) {
-
-    char stdin_str[1000];
-    char can_str[10];
-    char can_payload[1000];
-    char *token;
-    size_t n;
-    int res;
-    struct canfd_frame frame;
-
-    if (can_socket == 0) {
-        n = read(STDIN_FILENO, stdin_str, 1000);
-        if (n < 0) {
-            return -1;
-        }
-
-        res = sscanf(stdin_str, "%s %x [%hhu] %[0-9A-F ]s", can_str, frame_id,
-                                                        length, can_payload);
-        if (res < 0) {
-            return -1;
-        }
-
-        token = strtok(can_payload, " ");
-        int index = 0;
-        while (token != NULL) {
-            payload[index++] = (unsigned short)strtol(token, NULL, 16);
-            token = strtok(NULL, " ");
-        }
-    } else {
-        n = read(can_socket, &frame, sizeof(struct canfd_frame));
-        if (n > 0) {
-            *frame_id = (uint32_t) frame.can_id;
-            *length = (uint8_t) frame.len;
-            memcpy(payload, frame.data, (size_t) *length);
-        }
+    if (can_variant == AVTP_CAN_FD) {
+        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_BRS, frame.flags & CANFD_BRS);
+        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_FDF, frame.flags & CANFD_FDF);
+        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_ESI, frame.flags & CANFD_ESI);
     }
 
-    return n;
+    // Copy payload to ACF CAN PDU
+    processedBytes = Avtp_Can_SetPayload(pdu, frame.can_id & CAN_EFF_MASK, frame.data, 
+                                         frame.len, can_variant);
+
+    return processedBytes;
 }
 
 int main(int argc, char *argv[])
 {
 
-    int fd, res;
+    int fd, res, can_socket=0;
     struct sockaddr_ll sk_ll_addr;
     struct sockaddr_in sk_udp_addr;
     uint8_t pdu[MAX_PDU_SIZE];
-
-    uint8_t payload[CAN_PAYLOAD_MAX_SIZE];
-    uint8_t payload_length = 0;
-    uint32_t frame_id = 0;
-    uint8_t num_acf_msgs = 1;
-    uint32_t pdu_length;
-
-    int can_socket = 0;
-    struct sockaddr_can can_addr;
-    struct ifreq ifr;
+    uint16_t pdu_length, cf_length;
+    struct canfd_frame can_frame;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
+    // Create an appropriate talker socket: UDP or Ethernet raw
+    // Setup the socket for sending to the destination
     if (use_udp) {
         fd = create_talker_socket_udp(priority);
-    } else {
-        fd = create_talker_socket(priority);
-    }
-    if (fd < 0)
-        return 1;
+        if (fd < 0) return fd;
 
-    num_acf_msgs = multi_can_frames;
-
-    // Open a CAN socket for reading frames if required
-    if (strcmp(can_ifname, "STDIN\0")) {
-        can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-        if (can_socket < 0)
-            return 1;
-
-        strcpy(ifr.ifr_name, can_ifname);
-        ioctl(can_socket, SIOCGIFINDEX, &ifr);
-
-        memset(&can_addr, 0, sizeof(can_addr));
-        can_addr.can_family = AF_CAN;
-        can_addr.can_ifindex = ifr.ifr_ifindex;
-
-        if (can_variant == AVTP_CAN_FD) {
-            int enable_canfx = 1;
-            setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
-                        &enable_canfx, sizeof(enable_canfx));
-        }
-
-        if (bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr)) < 0)
-            return 1;
-    }
-
-
-    if (use_udp) {
         res = setup_udp_socket_address((struct in_addr*) ip_addr,
                                        udp_port, &sk_udp_addr);
-        if (res < 0)
-            goto err;
     } else {
-        res = setup_socket_address(fd, ifname, macaddr, ETH_P_TSN, &sk_ll_addr);
-        if (res < 0)
-            goto err;
+        fd = create_talker_socket(priority);
+        if (fd < 0) return fd;
+        res = setup_socket_address(fd, ifname, macaddr, 
+                                   ETH_P_TSN, &sk_ll_addr);
     }
+    if (res < 0) goto err;
+
+    // Open a CAN socket for reading frames
+    can_socket = setup_can_socket(can_ifname, can_variant);
+    if (!can_socket) goto err;
 
     // Sending loop
     for(;;) {
@@ -333,58 +269,52 @@ int main(int argc, char *argv[])
         // Pack into control formats
         uint8_t *cf_pdu;
         pdu_length = 0;
+        cf_length = 0;
 
+        // Usage of UDP means the PDU needs a 
         if (use_udp) {
             Avtp_UDP_t *udp_pdu = (Avtp_UDP_t *) pdu;
             Avtp_UDP_SetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO,
-                              seq_num);
-            cf_pdu = &pdu[sizeof(Avtp_UDP_t)];
-        } else {
-            cf_pdu = pdu;
+                              udp_seq_num++);
+            pdu_length +=  sizeof(Avtp_UDP_t);
         }
 
+        cf_pdu = pdu + pdu_length;
         res = init_cf_pdu(cf_pdu);
         if (res < 0)
             goto err;
         pdu_length += res;
+        cf_length += res;
 
         int i = 0;
         while (i < num_acf_msgs) {
             // Get payload -- will 'spin' here until we get the requested number
             //                of CAN frames.
-            res = get_payload(can_socket, payload, &frame_id, &payload_length);
-            if (!res) {
-                continue;
-            }
+            res = read(can_socket, &can_frame, sizeof(struct canfd_frame));
+            if (!res) continue;
 
-            uint8_t* acf_pdu = cf_pdu + pdu_length;
-            res = prepare_acf_packet(acf_pdu, payload, payload_length, frame_id);
-            if (res < 0)
-                goto err;
+            uint8_t* acf_pdu = pdu + pdu_length;
+            res = prepare_acf_packet(acf_pdu, can_frame);
+            if (res < 0) goto err;
             pdu_length += res;
-
+            cf_length += res;
             i++;
         }
 
-        res = update_pdu_length(cf_pdu, pdu_length);
+        res = update_cf_length(cf_pdu, cf_length);
         if (res < 0)
             goto err;
 
         if (use_udp) {
-            pdu_length += sizeof(uint32_t);
             res = sendto(fd, pdu, pdu_length, 0,
                     (struct sockaddr *) &sk_udp_addr, sizeof(sk_udp_addr));
-            if (res < 0) {
-                perror("Failed to send data");
-                goto err;
-            }
         } else {
             res = sendto(fd, pdu, pdu_length, 0,
                          (struct sockaddr *) &sk_ll_addr, sizeof(sk_ll_addr));
-            if (res < 0) {
-                perror("Failed to send data");
-                goto err;
-            }
+        }
+        if (res < 0) {
+            perror("Failed to send data");
+            goto err;
         }
     }
 

@@ -48,16 +48,17 @@
 #include "avtp/acf/Common.h"
 #include "avtp/acf/Can.h"
 #include "avtp/CommonHeader.h"
+#include "acf-can-common.h"
 
 #define MAX_PDU_SIZE                1500
-#define CAN_FD_OPTION               500
+#define ARGPARSE_CAN_FD_OPTION      500
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t use_udp;
 static uint32_t udp_port = 17220;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
-static char can_ifname[IFNAMSIZ] = "STDOUT\0";
+static char can_ifname[IFNAMSIZ];
 
 static char doc[] = "\nacf-can-listener -- a program designed to receive CAN messages from \
                     a remote CAN bus over Ethernet using Open1722 \
@@ -74,7 +75,7 @@ static char args_doc[] = "[ifname] dst-mac-address [can ifname]";
 static struct argp_option options[] = {
     {"port", 'p', "UDP_PORT", 0, "UDP Port to listen on if UDP enabled"},
     {"udp", 'u', 0, 0, "Use UDP"},
-    {"fd", CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
+    {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDOUT by default)"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)" },
@@ -92,7 +93,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 'u':
         use_udp = 1;
         break;
-    case CAN_FD_OPTION:
+    case ARGPARSE_CAN_FD_OPTION:
         can_variant = AVTP_CAN_FD;
 
     case ARGP_KEY_NO_ARGS:
@@ -105,7 +106,6 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         }
 
         if(!use_udp){
-
             strncpy(ifname, arg, sizeof(ifname) - 1);
 
             if(state->next < state->argc)
@@ -159,7 +159,7 @@ void print_can_acf(uint8_t* acf_pdu)
 
     Avtp_Can_t *pdu = (Avtp_Can_t*) acf_pdu;
 
-    Avtp_Can_GetField(pdu, AVTP_ACF_FIELD_ACF_MSG_LENGTH, &acf_msg_len);
+    Avtp_Can_GetField(pdu, AVTP_CAN_FIELD_ACF_MSG_LENGTH, &acf_msg_len);
     Avtp_Can_GetField(pdu, AVTP_CAN_FIELD_CAN_BUS_ID, &can_bus_id);
     Avtp_Can_GetField(pdu, AVTP_CAN_FIELD_MESSAGE_TIMESTAMP, &timestamp);
     Avtp_Can_GetField(pdu, AVTP_CAN_FIELD_CAN_IDENTIFIER, &can_identifier);
@@ -177,17 +177,13 @@ static int new_packet(int sk_fd, int can_socket) {
 
     int res;
     uint64_t msg_length, proc_bytes = 0, msg_proc_bytes = 0;
-    uint64_t can_frame_id, udp_seq_num = 0, subtype;
+    uint64_t can_frame_id, udp_seq_num, subtype, flag;
     uint16_t payload_length, pdu_length;
-    uint8_t *can_payload, i;
-    uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t* cf_pdu;
-    uint8_t* acf_pdu;
-    Avtp_UDP_t *udp_pdu;
-    char stdout_string[1000] = "\0";
+    uint8_t pdu[MAX_PDU_SIZE], i;
+    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, *can_payload;
     struct canfd_frame frame;
-    uint64_t eff;
 
+    memset(&frame, 0, sizeof(struct canfd_frame));
     res = recv(sk_fd, pdu, MAX_PDU_SIZE, 0);
 
     if (res < 0 || res > MAX_PDU_SIZE) {
@@ -196,8 +192,8 @@ static int new_packet(int sk_fd, int can_socket) {
     }
 
     if (use_udp) {
-        udp_pdu = (Avtp_UDP_t *) pdu;
-        Avtp_UDP_GetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, &udp_seq_num);
+        udp_pdu = pdu;
+        Avtp_UDP_GetField((Avtp_UDP_t *)udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, &udp_seq_num);
         cf_pdu = pdu + AVTP_UDP_HEADER_LEN;
         proc_bytes += AVTP_UDP_HEADER_LEN;
     } else {
@@ -219,15 +215,10 @@ static int new_packet(int sk_fd, int can_socket) {
 
     if(subtype == AVTP_SUBTYPE_TSCF){
         proc_bytes += AVTP_TSCF_HEADER_LEN;
-        res = Avtp_Tscf_GetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, (uint64_t *) &msg_length);
+        Avtp_Tscf_GetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, (uint64_t *) &msg_length);
     }else{
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
-        res = Avtp_Ntscf_GetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, (uint64_t *) &msg_length);
-    }
-
-    if (res < 0) {
-        fprintf(stderr, "Failed to get message length: %d\n", res);
-        return -1;
+        Avtp_Ntscf_GetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, (uint64_t *) &msg_length);
     }
 
     while (msg_proc_bytes < msg_length) {
@@ -239,56 +230,50 @@ static int new_packet(int sk_fd, int can_socket) {
             return -1;
         }
 
-        res = Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_CAN_IDENTIFIER,
-                                &can_frame_id);
-        if (res < 0) {
-            fprintf(stderr, "Error: Getting CAN frame ID\n");
-            return -1;
-        }
+        Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_CAN_IDENTIFIER,
+                                &(can_frame_id));
+        frame.can_id = can_frame_id;
 
         can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu, &payload_length, &pdu_length);
         msg_proc_bytes += pdu_length*4;
 
-        res = Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_EFF, &eff);
-        if (res < 0) {
-            fprintf(stderr, "Failed to get eff field: %d\n", res);
-            return -1;
-        }
-
-        if (can_frame_id > 0x7FF && !eff) {
+        // Handle EFF Flag
+        Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_EFF, &flag);
+        if (frame.can_id > 0x7FF && !flag) {
           fprintf(stderr, "Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
           return -1;
         }
+        if (flag) frame.can_id |= CAN_EFF_FLAG;
 
-        if (can_socket == 0) {
-            for (i = 0; i < payload_length; i++) {
-                sprintf(stdout_string+(2*i), "%02x", can_payload[i]);
-            }
+        // Handle RTR Flag
+        Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_RTR, &flag);
+        if (flag) frame.can_id |= CAN_RTR_FLAG;
 
-            if (eff) {
-              fprintf(stdout, "(000000.000000) elmcan 0000%03lx#%s\n", can_frame_id, stdout_string);
-            } else {
-              fprintf(stdout, "(000000.000000) elmcan %03lx#%s\n", can_frame_id, stdout_string);
-            }
-            fflush(stdout);
-        } else {
-            frame.can_id = (canid_t) can_frame_id;
-            if (eff) {
-              frame.can_id |= CAN_EFF_FLAG;
-            }
-            frame.len = payload_length;
-            memcpy(frame.data, can_payload, payload_length);
-            if (write(can_socket, &frame, sizeof(struct canfd_frame)) != sizeof(struct canfd_frame)) {
-                return 1;
-            }
+        if (can_variant == AVTP_CAN_FD) {
+            Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_BRS, &flag);
+            if (flag) frame.flags |= CANFD_BRS;
+
+            Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_FDF, &flag);
+            if (flag) frame.flags |= CANFD_FDF;
+
+            Avtp_Can_GetField((Avtp_Can_t*)acf_pdu, AVTP_CAN_FIELD_ESI, &flag);
+            if (flag) frame.flags |= CANFD_ESI;
         }
+
+        frame.len = payload_length;
+        memcpy(frame.data, can_payload, payload_length);
+        res = write(can_socket, &frame, sizeof(struct canfd_frame)) != sizeof(struct canfd_frame);
+        if (res < 0) {
+            return res;
+        }
+
     }
     return 1;
 }
 
 int main(int argc, char *argv[])
 {
-    int sk_fd, res;
+    int fd, res;
     struct pollfd fds;
 
     int can_socket = 0;
@@ -297,39 +282,21 @@ int main(int argc, char *argv[])
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
-    // Open a CAN socket for reading frames if required
-    if (strcmp(can_ifname, "STDOUT\0")) {
-        can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-        if (can_socket < 0)
-            return 1;
-
-        strcpy(ifr.ifr_name, can_ifname);
-        ioctl(can_socket, SIOCGIFINDEX, &ifr);
-
-        memset(&can_addr, 0, sizeof(can_addr));
-        can_addr.can_family = AF_CAN;
-        can_addr.can_ifindex = ifr.ifr_ifindex;
-
-        if (can_variant == AVTP_CAN_FD) {
-            int enable_canfx = 1;
-            setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
-                        &enable_canfx, sizeof(enable_canfx));
-        }
-
-        if (bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr)) < 0)
-            return 1;
-    }
-
+    // Configure an appropriate socket: UDP or Ethernet Raw
     if (use_udp) {
-        sk_fd = create_listener_socket_udp(udp_port);
+        fd = create_listener_socket_udp(udp_port);
     } else {
-        sk_fd = create_listener_socket(ifname, macaddr, ETH_P_TSN);
+        fd = create_listener_socket(ifname, macaddr, ETH_P_TSN);
     }
-    fds.fd = sk_fd;
+    fds.fd = fd;
     fds.events = POLLIN;
 
-    if (sk_fd < 0)
+    if (fd < 0)
         return 1;
+
+    // Open a CAN socket for reading frames
+    can_socket = setup_can_socket(can_ifname, can_variant);
+    if (!can_socket) goto err;
 
     while (1) {
 
@@ -340,7 +307,7 @@ int main(int argc, char *argv[])
         }
 
         if (fds.revents & POLLIN) {
-            res = new_packet(sk_fd, can_socket);
+            res = new_packet(fd, can_socket);
             if (res < 0)
                 goto err;
         }
@@ -350,7 +317,7 @@ int main(int argc, char *argv[])
     return 0;
 
 err:
-    close(sk_fd);
+    close(fd);
     return 1;
 
 }

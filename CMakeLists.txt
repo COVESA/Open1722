@@ -49,12 +49,12 @@ target_include_directories(aaf-talker PRIVATE "examples" "include")
 target_link_libraries(aaf-talker open1722 open1722examples)
 
 # CAN talker app
-add_executable(acf-can-talker "examples/acf-can/acf-can-talker.c")
+add_executable(acf-can-talker "examples/acf-can/acf-can-talker.c" "examples/acf-can/acf-can-common.c")
 target_include_directories(acf-can-talker PRIVATE "examples" "include")
 target_link_libraries(acf-can-talker open1722 open1722examples)
 
 # CAN listener app
-add_executable(acf-can-listener "examples/acf-can/acf-can-listener.c")
+add_executable(acf-can-listener "examples/acf-can/acf-can-listener.c" "examples/acf-can/acf-can-common.c")
 target_include_directories(acf-can-listener PRIVATE "examples" "include")
 target_link_libraries(acf-can-listener open1722 open1722examples)
 

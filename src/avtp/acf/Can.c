@@ -131,7 +131,7 @@ int Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length) {
 uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* can_pdu, uint16_t* payload_length, uint16_t *pdu_length)
 {
     uint64_t pad_len, pdu_len;
-    int res = Avtp_Can_GetField((Avtp_Can_t*)can_pdu, AVTP_ACF_FIELD_ACF_MSG_LENGTH, 
+    int res = Avtp_Can_GetField((Avtp_Can_t*)can_pdu, AVTP_CAN_FIELD_ACF_MSG_LENGTH,
                                     &pdu_len);
     if (res < 0) {    
         return 0;
