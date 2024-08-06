@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <argp.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
@@ -85,13 +86,12 @@ static char doc[] =
 "  acf-can-talker, by default, packs as many CAN frames as it can into the \n"
 "  Ethernet frame before sending it. Use the --timeout and/or --count options \n"
 "  to change this behavior.\n\n"
-"  --timeout <time> where <time> is maximum integer number of microseconds \n"
-"                   (not milliseconds), to wait after arrival of last CAN \n"
-"                   message before transmitting the Ethernet frame. This \n"
-"                   option makes is possible to support the use case of \n"
-"                   limiting packing to 'bursts' of traffic. \n"
-"                   minimum: 0\n"
-"                   maximum: 2^32-1\n"
+"  --timeout <time> where <time> is maximum time to wait after arrival\n"
+"                   of the first CAN message before transmitting Ethnernet frame.\n"
+"                   <time> is an integer followed by units, either ms or us.\n"
+"                   Example: --timeout 20ms\n"
+"                   minimum: 0us or 0ms\n"
+"                   maximum: 2^32-1 us\n"
 "                   default: maximum value\n\n"
 "  --count <count>  where <count> is the max number of CAN frames allowed in \n"
 "                   an Ethernet frame.\n"
@@ -139,17 +139,20 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case 501:
         char units[3];
+        int divisor = 1;
         sscanf(arg, "%d%2s", &max_timeout, units);
-        if (strcmp(units, "ms") == 0) {
-          timer.it_value.tv_sec = 0;
-          timer.it_value.tv_usec = max_timeout * 1e3;
-          timeout_flag = true;
+        if (strcmp(units, "s") == 0) {
+            timer.it_value.tv_sec = max_timeout;
+            timer.it_value.tv_usec = 0;
+        } else if (strcmp(units, "ms") == 0) {
+            timer.it_value.tv_sec = floor(max_timeout/1e3);
+            timer.it_value.tv_usec = (max_timeout % 1000) * 1000;
         } else if (strcmp(units, "us") == 0) {
-          timer.it_value.tv_sec = 0;
-          timer.it_value.tv_usec = max_timeout;
-          timeout_flag = true;
-        } else {
-          fprintf(stderr, "unknown --timeout units");
+            timer.it_value.tv_sec = floor(max_timeout/1e6);
+            timer.it_value.tv_usec = (max_timeout % (uint32_t)1e6);
+        } else { 
+           fprintf(stderr, "error with timeout arg [%s]\n", arg);
+           argp_usage(state);
         }
         break;
     case 502:
