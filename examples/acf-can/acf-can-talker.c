@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
     uint8_t payload[CAN_PAYLOAD_MAX_SIZE];
     uint8_t payload_length = 0;
     uint32_t frame_id = 0;
-    uint8_t num_acf_msgs = 1;
+    uint32_t num_acf_msgs = 1;
     uint32_t pdu_length;
 
     int can_socket = 0;
