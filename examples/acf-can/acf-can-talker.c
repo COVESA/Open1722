@@ -154,6 +154,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
            fprintf(stderr, "error with timeout arg [%s]\n", arg);
            argp_usage(state);
         }
+        timeout_flag = true;
         break;
     case 502:
         max_can_frames = atoi(arg);
@@ -377,6 +378,9 @@ int main(int argc, char *argv[])
     else if (!timeout_flag &&  count_flag) { num_acf_msgs = max_can_frames; } 
     else if ( timeout_flag && !count_flag) { num_acf_msgs = 2^32 - 1; }
     else                                   { num_acf_msgs = max_can_frames; } 
+    fprintf(stderr, "timeout_flag = %d\n", timeout_flag);
+    fprintf(stderr, "count_flag = %d\t", count_flag);
+    fprintf(stderr, "num_acf_msgs = %d\n", num_acf_msgs); fflush(stderr);
 
     // Open a CAN socket for reading frames if required
     if (strcmp(can_ifname, "STDIN\0")) {
@@ -455,7 +459,8 @@ int main(int argc, char *argv[])
             fflush(stdout);
 
             if (send_ethernet) {
-              printf("send_ethernet flag set; so send Ethernet\n");fflush(stdout);
+              printf("timer interrupt: send_ethernet flag set; so send Ethernet\n");
+              fflush(stdout);
               send_ethernet = false;
               break;
             }
