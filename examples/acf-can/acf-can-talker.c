@@ -78,34 +78,30 @@ static char doc[] =
 "\n"
 "acf-can-talker -- a program designed to send CAN messages to a remote CAN bus\n"
 "                  over Ethernet using Open1722. The default behavior is to\n"
-"                  pack as many CAN frames as possible into the Ethernet frame\n"
-"                  before sending the Ethernet frame.\n"
+"                  send one CAN frame per Ethernet frame. However, a buffer can\n"
+"                  be used that gives the opportunity to pack more than one.\n"
 "\n"
 "OPTIONS\n"
 "\vBUFFERING\n\n"
-"  acf-can-talker, by default, packs as many CAN frames as it can into the \n"
-"  Ethernet frame before sending it. Use the --timeout and/or --count options \n"
-"  to change this behavior.\n\n"
-"  --timeout <time> where <time> is maximum time to wait after arrival\n"
-"                   of the first CAN message before transmitting Ethnernet frame.\n"
-"                   <time> is an integer followed by units, either ms or us.\n"
-"                   Example: --timeout 20ms\n"
-"                   minimum: 0us or 0ms\n"
-"                   maximum: 2^32-1 us\n"
-"                   default: maximum value\n\n"
-"  --count <count>  where <count> is the max number of CAN frames allowed in \n"
-"                   an Ethernet frame.\n"
-"                   minimum: 1\n"
-"                   maximum: 2^32-1\n"
-"                   default: maximum value\n\n"
+"  acf-can-talker, by default, packs only one CAN frame into an Ethernet frame.\n"
+"  Use the --timeout and/or --count options to change this behavior.\n\n"
+"  --timeout <time>   where <time> is an integer followed by units, \n"
+"                     e.g., '1s', or '400us'. Allowable units: 's', 'ms', 'us'.\n"
+"                     The Ethernet frame will be sent <time> after arrival \n"
+"                     of the first CAN message.\n\n"
+"  --count <count>    where <count> is the max number of CAN frames allowed in \n"
+"                     an Ethernet frame.\n\n"
+"  If both buffering options are presented, then whichever occurs first will\n"
+"  trigger the sending of the Ethernet frame.\n\n"
+"  In all cases, when the Ethernet frame is full it is sent.\n\n"
 "EXAMPLES\n"
 "  acf-can-talker eth0 aa:bb:cc:ee:dd:ff\n\n"
 "    (tunnel transactions from STDIN to a remote CAN bus over Ethernet)\n\n\n"
 "  acf-can-talker --count 10 eth0 aa:bb:cc:ee:dd:ff\n\n"
 "    (as above, but send Ethernet frame as soon as we have 10 CAN frames)\n\n\n"
-"  acf-can-talker --timeout 400 eth0 aa:bb:cc:ee:dd:ff\n\n"
-"    (as above, but send Ethernet frame if 400 usec have passed since \n"
-"     arrival of last CAN frame) \n\n\n"
+"  acf-can-talker --timeout 400ms eth0 aa:bb:cc:ee:dd:ff\n\n"
+"    (as above, but send Ethernet frame when 400 msec have passed since \n"
+"     arrival of first CAN frame) \n\n\n"
 "  acf-can-talker -u 10.0.0.2:17220 vcan1\n\n"
 "    (tunnel transactions from can1 interface to a remote CAN bus over IP)\n\n\n"
 "  candump can1 | acf-can-talker -u 10.0.0.2:17220\n\n"
@@ -116,8 +112,8 @@ static char args_doc[] = "[ifname] dst-mac-address/dst-nw-address:port [can ifna
 static struct argp_option options[] = {            
     {"tscf", 't', 0, 0, "Use TSCF"},
     {"udp",  'u', 0, 0, "Use UDP" },
-    {"timeout", 501, "TIME", 0, "Set max delay of CAN message arrival before sending Ethernet frame"},
-    {"count", 502, "COUNT", 0, "Set max count of CAN messages per Ethernet frame"},
+    {"timeout", 501, "TIME", 0, "Set time to wait for CAN messages to arrive"},
+    {"count", 502, "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDIN by default)"},
     {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
