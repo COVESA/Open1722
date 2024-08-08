@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
+#include <locale.h>
 
 #include "common/common.h"
 #include "avtp/Udp.h"
@@ -66,13 +67,13 @@ static int priority = -1;
 static uint8_t seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
-static bool timeout_flag = false;    // true when user supplies cmd line arg
-static bool count_flag = false;
-static uint32_t max_can_frames = 1;
-static uint32_t max_timeout = 0;
-volatile sig_atomic_t send_ethernet = false;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
-struct itimerval timer;
+static bool timeout_flag = false;            // true when user supplies
+static bool count_flag = false;              //    cmd line arg
+static uint32_t buf_timeout = 0;             // override with --timeout
+static uint32_t buf_can_frames = 1;          // override with --count
+volatile sig_atomic_t send_ethernet = false; // true on timeout interrupt
+struct itimerval timer;                      // used when --timeout given
 
 static char doc[] =
 "\n"
@@ -135,25 +136,24 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case 501:
         char units[3];
-        int divisor = 1;
-        sscanf(arg, "%d%2s", &max_timeout, units);
+        sscanf(arg, "%d%2s", &buf_timeout, units);
         if (strcmp(units, "s") == 0) {
-            timer.it_value.tv_sec = max_timeout;
+            timer.it_value.tv_sec = buf_timeout;
             timer.it_value.tv_usec = 0;
         } else if (strcmp(units, "ms") == 0) {
-            timer.it_value.tv_sec = floor(max_timeout/1e3);
-            timer.it_value.tv_usec = (max_timeout % 1000) * 1000;
+            timer.it_value.tv_sec = floor(buf_timeout/1e3);
+            timer.it_value.tv_usec = (buf_timeout % 1000) * 1000;
         } else if (strcmp(units, "us") == 0) {
-            timer.it_value.tv_sec = floor(max_timeout/1e6);
-            timer.it_value.tv_usec = (max_timeout % (uint32_t)1e6);
+            timer.it_value.tv_sec = floor(buf_timeout/1e6);
+            timer.it_value.tv_usec = (buf_timeout % (uint32_t)1e6);
         } else { 
-           fprintf(stderr, "error with timeout arg [%s]\n", arg);
+           fprintf(stderr, "error with timeout arg format; got: [%s]\n", arg);
            argp_usage(state);
         }
         timeout_flag = true;
         break;
     case 502:
-        max_can_frames = atoi(arg);
+        buf_can_frames = atoi(arg);
         count_flag = true;
         break;
 
@@ -312,12 +312,15 @@ static int get_payload(int can_socket, uint8_t* payload, uint32_t *frame_id, uin
   return n;
 }
 
+// On timeout signal set a flag for our read loop to detect
 void handle_timeout(int signum) {
   send_ethernet = true;
 }
 
-// prevent an interrupted system call (like 'read' from being restarted)
-// from 'Advanced Programming in the UNIX Environment', figure 10.19
+// Set a signal handler. This is a little more complicated than "normal"... in
+// that we need to prevent an interrupted system call (like 'read') from being
+// restarted. This function comes from 'Advanced Programming in the UNIX
+// Environment', figure 10.19.
 typedef void Sigfunc(int);
 Sigfunc * signal_intr(int signo, Sigfunc *func) {
   struct sigaction act, oact;
@@ -331,6 +334,8 @@ Sigfunc * signal_intr(int signo, Sigfunc *func) {
     return(SIG_ERR);
   return(oact.sa_handler);
 }
+
+
 
 int main(int argc, char *argv[])
 {
@@ -351,13 +356,11 @@ int main(int argc, char *argv[])
 	  struct ifreq ifr;
 
     struct timespec start_time, end_time;    // for debugging --timeout
+    setlocale(LC_NUMERIC, "");               // allow comma separator in printf
 
     // used to timeout the packing of Ethernet frame with CAN frames
-    //if (signal(SIGALRM, handle_timeout) == SIG_ERR)
     if (signal_intr(SIGALRM, handle_timeout) == SIG_ERR)
       perror("main(), setting handler: \n");
-    else
-      fprintf(stderr, "main() set SIGALRM handler.\n");
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -369,14 +372,11 @@ int main(int argc, char *argv[])
     if (fd < 0)
         return 1;
 
-    // enforce timeout and count constraints
+    // enforce timeout and count constraints, as requested
     if      (!timeout_flag && !count_flag) { num_acf_msgs = 1; }
-    else if (!timeout_flag &&  count_flag) { num_acf_msgs = max_can_frames; } 
+    else if (!timeout_flag &&  count_flag) { num_acf_msgs = buf_can_frames; } 
     else if ( timeout_flag && !count_flag) { num_acf_msgs = 2^32 - 1; }
-    else                                   { num_acf_msgs = max_can_frames; } 
-    fprintf(stderr, "timeout_flag = %d\n", timeout_flag);
-    fprintf(stderr, "count_flag = %d\t", count_flag);
-    fprintf(stderr, "num_acf_msgs = %d\n", num_acf_msgs); fflush(stderr);
+    else                                   { num_acf_msgs = buf_can_frames; } 
 
     // Open a CAN socket for reading frames if required
     if (strcmp(can_ifname, "STDIN\0")) {
@@ -429,43 +429,57 @@ int main(int argc, char *argv[])
 
         
         bool first_msg_is_next = true;
-        int i = 0;
-        // TODO real logic for launching 1722 on "full" 1722 frame
-        // TODO consider how to handle interrupt in the middle of reading frame
+        int i = 1;
         // Get payload -- will loop here until we get the requested number
-        //                of CAN frames, or until timeout
-        // 24 is max for CLASSIC CAN (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 8)
-        // 80 is max for CAN FD (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 64)
-        // + 4 when using UDP, so 28 or 84 are the valid magic numbers.
+        //                of CAN frames, or until timeout.
+        // magic numbers for detecting no more room in the Ethernet frame:
+        // * 24 is max for CLASSIC CAN (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 8)
+        // * 80 is max for CAN FD (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 64)
+        // and then + 4 when using UDP, so 28 or 84 are the valid magic numbers.
         while ((i < num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
-            clock_gettime(CLOCK_REALTIME, &start_time);
-            res = get_payload(can_socket, payload, &frame_id, &payload_length);
-            fprintf(stderr, "res --> %d\n", res); fflush(stderr);
-            clock_gettime(CLOCK_REALTIME, &end_time);
-            // Calculate the elapsed time in seconds and nanoseconds
-            long elapsed_sec = end_time.tv_sec - start_time.tv_sec;
-            long elapsed_nsec = end_time.tv_nsec - start_time.tv_nsec;
-            if (elapsed_nsec < 0) {
-                elapsed_sec--;
-                elapsed_nsec += 1000000000;
-            }
-
-            // Print the elapsed time
-            printf("i: [%d] Elapsed time: %ld seconds %f msec\n", i, elapsed_sec, elapsed_nsec/1E6);
-            fflush(stdout);
 
             if (send_ethernet) {
-              printf("timer interrupt: send_ethernet flag set; so send Ethernet\n");
-              fflush(stdout);
+              //printf("timer interrupt: send_ethernet flag set; so send Ethernet\n"); fflush(stdout);
               send_ethernet = false;
+              int width = 30;
+              if (res >= 0)
+                width+=(40-i);
+              fprintf(stderr, "%*s", width, "detect send_ethernet flag");
               break;
             }
+            
+            //clock_gettime(CLOCK_REALTIME, &start_time);
+            res = get_payload(can_socket, payload, &frame_id, &payload_length);
+            if (res < 0) { 
+              fprintf(stderr, "%*s", 40-i, "read() < 0");
+              continue;
+            } else if (res == 0)
+              fprintf(stderr, "*");
+            else
+              fprintf(stderr, "%d", i);
+
+
+            //clock_gettime(CLOCK_REALTIME, &end_time);
+            // Calculate the elapsed time in seconds and nanoseconds
+            //long elapsed_sec = end_time.tv_sec - start_time.tv_sec;
+            //long elapsed_nsec = end_time.tv_nsec - start_time.tv_nsec;
+            //if (elapsed_nsec < 0) {
+            //    elapsed_sec--;
+            //    elapsed_nsec += 1000000000;
+            //}
+
+            // Print the elapsed time
+            //fprintf(stderr, "msg[%2d] res = [%d]   ", i, res);
+            //fprintf(stderr, "Elapsed time: %ld s %'11ld nsec\n", elapsed_sec, elapsed_nsec);
+            //fflush(stderr);
+
            
-            // on reception of 1st msg we need to set our timer
-            if (first_msg_is_next) {
+            // on reception of 1st msg we need to set our timer if we allow more
+            // than one message per ethernet frame
+            if (first_msg_is_next && num_acf_msgs > 1) {
                 res = setitimer(ITIMER_REAL, &timer, NULL);
-                printf("time is set: sec [%ld] usec [%ld]\n", 
-                       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
+                //printf("timer is set: sec [%ld] usec [%ld]\n", 
+                //       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
                 first_msg_is_next = false;
             }
 
@@ -477,8 +491,16 @@ int main(int argc, char *argv[])
 
             i++;
         }
+
+        //
+        // done reading CAN for this Ethernet frame
+        //
+
+        fprintf(stderr, "\n");
+        fflush(stderr);
         alarm(0);      // disarm timer 
-        printf("should send Ethernet here\n");fflush(stdout);
+        //printf("should send Ethernet here\n");fflush(stdout);
+
         res = update_pdu_length(cf_pdu, pdu_length);
         if (res < 0)
             goto err;
