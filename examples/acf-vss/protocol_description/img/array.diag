@@ -1,0 +1,7 @@
+{
+  colwidth = 32
+  node_height = 72
+
+  0-15: ARRAY_LEN
+  16-63: VSS_VALUES (ARRAY_LEN times)
+ }

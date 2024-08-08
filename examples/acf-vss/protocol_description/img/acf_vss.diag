@@ -1,0 +1,15 @@
+{
+  colwidth = 32
+  node_height = 72
+
+  0-6: acf_msg_type
+  7-15: acf_msg_length
+  16-17: pad
+  18: mtv
+  19-20: addr_mode
+  21-23: vss_op
+  24-31: vss_datatype
+  32-95: message_timestamp
+  96-127: vss_path (32 bit or variable)
+  128-159: vss_data (variable len)
+}

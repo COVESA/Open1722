@@ -1,0 +1,7 @@
+{
+  colwidth = 32
+  node_height = 72
+
+  0-15: VSS_PATH_LEN
+  16-63: VSS_PATH (VSS_PATH_LEN octets)
+ }
