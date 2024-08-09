@@ -27,7 +27,7 @@ The VSS message defines the following message-specific fields
 - **addr_mode** (address mode): 2bits
 - **vss_op** (vss operation): 3 bits
 - **vss_datatype**: 8 bit
-- **message_timestamp**: 32 bit
+- **message_timestamp**: 64 bit
 - **vss_path**: 32 bits or variable
 - **vss_data**: variable depending on vss_datatype
 
@@ -99,7 +99,7 @@ This leads to the following valid values for vss_datatype:
 | 10001011<sub>2</sub>    / 8B<sub>16</sub> | string[]            | an array of UTF-8 encoded strings                         |
 | 8C<sub>16</sub>-FF<sub>16</sub>           | Reserved            | Reserved for future use                                   |
 
-## message_timestamp field: 32 bits
+## message_timestamp field: 64 bits
 
 The message_timestamp field contains the acquisition time in nanoseconds, if available, of the data contained in the  message.
 
