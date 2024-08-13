@@ -68,12 +68,13 @@ static uint8_t seq_num = 0;
 static uint8_t use_tscf;
 static uint8_t use_udp;
 static char can_ifname[IFNAMSIZ] = "STDIN\0";
+static bool verbose_flag = false;
 static bool timeout_flag = false;            // true when user supplies
 static bool count_flag = false;              //    cmd line arg
 static uint32_t buf_timeout = 0;             // override with --timeout
 static uint32_t buf_can_frames = 1;          // override with --count
 volatile sig_atomic_t send_ethernet = false; // true on timeout interrupt
-struct itimerval timer;                      // used when --timeout given
+struct itimerval timer;                      // used with --timeout 
 
 static char doc[] =
 "\n"
@@ -113,6 +114,7 @@ static char args_doc[] = "[ifname] dst-mac-address/dst-nw-address:port [can ifna
 static struct argp_option options[] = {            
     {"tscf", 't', 0, 0, "Use TSCF"},
     {"udp",  'u', 0, 0, "Use UDP" },
+    {"verbose",  'v', 0, 0, "Show building of Ethernet Frames" },
     {"timeout", 501, "TIME", 0, "Set time to wait for CAN messages to arrive"},
     {"count", 502, "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"can ifname", 0, 0, OPTION_DOC, "CAN interface (set to STDIN by default)"},
@@ -133,6 +135,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case 'u':
         use_udp = 1;
+        break;
+    case 'v':
+        verbose_flag = true;
         break;
     case 501:
         char units[3];
@@ -355,7 +360,7 @@ int main(int argc, char *argv[])
 	  struct sockaddr_can can_addr;
 	  struct ifreq ifr;
 
-    struct timespec start_time, end_time;    // for debugging --timeout
+    struct timespec start_time, end_time;    // for verbose 
     setlocale(LC_NUMERIC, "");               // allow comma separator in printf
 
     // used to timeout the packing of Ethernet frame with CAN frames
@@ -436,47 +441,53 @@ int main(int argc, char *argv[])
         // * 24 is max for CLASSIC CAN (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 8)
         // * 80 is max for CAN FD (CAN MESSAGE INFO + CAN BASE MESSAGE = 16 + 64)
         // and then + 4 when using UDP, so 28 or 84 are the valid magic numbers.
-        while ((i < num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
+        while ((i <= num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
 
+            // last read was interrupted by timeout?
             if (send_ethernet) {
-              //printf("timer interrupt: send_ethernet flag set; so send Ethernet\n"); fflush(stdout);
+              if (verbose_flag) {
+                  int width = 55-i;
+                  fprintf(stderr, "%*s", width, "--timeout");
+              }
               send_ethernet = false;
-              int width = 30;
-              if (res >= 0)
-                width+=(40-i);
-              fprintf(stderr, "%*s", width, "detect send_ethernet flag");
               break;
             }
             
-            //clock_gettime(CLOCK_REALTIME, &start_time);
             res = get_payload(can_socket, payload, &frame_id, &payload_length);
             if (res < 0) { 
-              fprintf(stderr, "%*s", 40-i, "read() < 0");
+
+              //if (verbose_flag) {
+              //    // Calculate the elapsed time in seconds and nanoseconds
+              //    clock_gettime(CLOCK_REALTIME, &end_time);
+              //    long elapsed_sec = end_time.tv_sec - start_time.tv_sec;
+              //    long elapsed_nsec = end_time.tv_nsec - start_time.tv_nsec;
+              //    if (elapsed_nsec < 0) {
+              //        elapsed_sec--;
+              //        elapsed_nsec += 1000000000;
+              //    }
+              //    // Print the elapsed time
+              //    char strbuff[50];
+              //    sprintf(strbuff, " %ld s %'11ld nsec", elapsed_sec, elapsed_nsec);
+              //    fprintf(stderr, "%*s", 55-i, strbuff);
+              //    //fprintf(stderr, "%*s", 55-i, "read() < 0");
+              //}
               continue;
-            } else if (res == 0)
-              fprintf(stderr, "*");
-            else
-              fprintf(stderr, "%d", i);
 
+            } else if (res == 0) {
+              if (verbose_flag)
+                  fprintf(stderr, "0");
 
-            //clock_gettime(CLOCK_REALTIME, &end_time);
-            // Calculate the elapsed time in seconds and nanoseconds
-            //long elapsed_sec = end_time.tv_sec - start_time.tv_sec;
-            //long elapsed_nsec = end_time.tv_nsec - start_time.tv_nsec;
-            //if (elapsed_nsec < 0) {
-            //    elapsed_sec--;
-            //    elapsed_nsec += 1000000000;
-            //}
+            } else {
+              if (verbose_flag)
+                  fprintf(stderr, "%d", i%10);
+            }
 
-            // Print the elapsed time
-            //fprintf(stderr, "msg[%2d] res = [%d]   ", i, res);
-            //fprintf(stderr, "Elapsed time: %ld s %'11ld nsec\n", elapsed_sec, elapsed_nsec);
-            //fflush(stderr);
 
            
             // on reception of 1st msg we need to set our timer if we allow more
             // than one message per ethernet frame
             if (first_msg_is_next && num_acf_msgs > 1) {
+                //clock_gettime(CLOCK_REALTIME, &start_time);
                 res = setitimer(ITIMER_REAL, &timer, NULL);
                 //printf("timer is set: sec [%ld] usec [%ld]\n", 
                 //       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
@@ -496,8 +507,10 @@ int main(int argc, char *argv[])
         // done reading CAN for this Ethernet frame
         //
 
-        fprintf(stderr, "\n");
-        fflush(stderr);
+        if (i > num_acf_msgs && verbose_flag) {
+              int width = 55-i;
+              fprintf(stderr, "%*s", width, "--count  ");
+        }
         alarm(0);      // disarm timer 
         //printf("should send Ethernet here\n");fflush(stdout);
 
@@ -521,6 +534,8 @@ int main(int argc, char *argv[])
                 goto err;
             }
         }
+        fprintf(stderr, "   ethersize: [%4d]\n", res);
+        fflush(stderr);
     }
 
 err:
