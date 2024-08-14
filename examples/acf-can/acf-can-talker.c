@@ -322,7 +322,7 @@ void handle_timeout(int signum) {
   send_ethernet = true;
 }
 
-// Set a signal handler. This is a little more complicated than "normal"... in
+// Set a signal handler. This is a little more complicated than "normal" in
 // that we need to prevent an interrupted system call (like 'read') from being
 // restarted. This function comes from 'Advanced Programming in the UNIX
 // Environment', figure 10.19.
@@ -444,7 +444,7 @@ int main(int argc, char *argv[])
         while ((i <= num_acf_msgs) && (pdu_length < MAX_PDU_SIZE - 28 )) {
 
             // last read was interrupted by timeout?
-            if (send_ethernet) {
+            if (send_ethernet && i > 1) {
               if (verbose_flag) {
                   int width = 55-i;
                   fprintf(stderr, "%*s", width, "--timeout");
@@ -475,25 +475,26 @@ int main(int argc, char *argv[])
 
             } else if (res == 0) {
               if (verbose_flag)
-                  fprintf(stderr, "0");
+                  fprintf(stderr, "*");
 
             } else {
-              if (verbose_flag)
+              if (verbose_flag) {
                   fprintf(stderr, "%d", i%10);
+              }
+              // on reception of 1st msg we need to set our timer if we allow more
+              // than one message per ethernet frame
+              if (first_msg_is_next && num_acf_msgs > 1) {
+                  //clock_gettime(CLOCK_REALTIME, &start_time);
+                  res = setitimer(ITIMER_REAL, &timer, NULL);
+                  //printf("timer is set: sec [%ld] usec [%ld]\n", 
+                  //       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
+                  first_msg_is_next = false;
+              }
+
             }
 
 
            
-            // on reception of 1st msg we need to set our timer if we allow more
-            // than one message per ethernet frame
-            if (first_msg_is_next && num_acf_msgs > 1) {
-                //clock_gettime(CLOCK_REALTIME, &start_time);
-                res = setitimer(ITIMER_REAL, &timer, NULL);
-                //printf("timer is set: sec [%ld] usec [%ld]\n", 
-                //       timer.it_value.tv_sec, timer.it_value.tv_usec); fflush(stdout);
-                first_msg_is_next = false;
-            }
-
             uint8_t* acf_pdu = cf_pdu + pdu_length;
             res = prepare_acf_packet(acf_pdu, payload, payload_length, frame_id);
             if (res < 0)
@@ -502,6 +503,7 @@ int main(int argc, char *argv[])
 
             i++;
         }
+        alarm(0);      // disarm timer 
 
         //
         // done reading CAN for this Ethernet frame
@@ -511,7 +513,6 @@ int main(int argc, char *argv[])
               int width = 55-i;
               fprintf(stderr, "%*s", width, "--count  ");
         }
-        alarm(0);      // disarm timer 
         //printf("should send Ethernet here\n");fflush(stdout);
 
         res = update_pdu_length(cf_pdu, pdu_length);
