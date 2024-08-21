@@ -149,20 +149,20 @@ with
 - String_data: The string encoded as UTF-8
 
 ## Arrays
-When arrays are transmitted (denoted by the first bit in vss-datatype being set to 1), the vss_data section starts with a two byte array_len field denoting the number of elements in the array followed by the specified number of the primitive type:
+When arrays are transmitted (denoted by the first bit in vss-datatype being set to 1), the vss_data section starts with a two byte array_len field denoting the space in bytes the array occupies:
 
 ![Array encoding](./img/array.svg)
 
-For example the vss_data section for  an array of uint 8 values (vss_datatype=80<sub>16</sub>) from 0 to 9 would be encoded as the following hex sequence
+For example the vss_data section for  an array of uint16 values (vss_datatype=82<sub>16</sub>) from 0 to 5 would be encoded as the following hex sequence
 
 ```hex
-00 0A 00 01 02 03 04 05 06 07 08 09
+00 0C 00 00 00 01 00 02 00 03 00 04 00 05
 ```
 
 The vss_data section for  an array strings (vss_datatype=8B<sub>16</sub>) including "VSS", "❤️", "IEEE1722" would be encoded as the following hex sequence
 
 ```hex
-00 03 00 03  56 53 53 
+00 17 00 03  56 53 53 
 00 06 E2 9D A4 EF B8 8F 
 00 08 49 45 45 45 31 37 32 32
 ```
