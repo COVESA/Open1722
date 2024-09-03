@@ -78,3 +78,24 @@ int Avtp_Vss_SetField(Avtp_Vss_t* vss_pdu,
     return Avtp_SetField(Avtp_VssFieldDesc, AVTP_VSS_FIELD_MAX,
                          (uint8_t *) vss_pdu, (uint8_t) field, value);
 }
+
+int Avtp_Vss_Pad(uint8_t* vss_pdu, uint16_t vss_length) {
+
+    int ret = 0;
+    uint8_t padSize;
+
+    // Check if padding is required
+    padSize = AVTP_QUADLET_SIZE - (vss_length % AVTP_QUADLET_SIZE);
+    if (vss_length % AVTP_QUADLET_SIZE) {
+        memset(vss_pdu + vss_length, 0xff, padSize);
+    }
+
+    // Set the length and padding fields
+    ret = Avtp_Vss_SetField((Avtp_Vss_t*)vss_pdu, AVTP_VSS_FIELD_ACF_MSG_LENGTH,
+                        (uint64_t) (vss_length+padSize)/AVTP_QUADLET_SIZE);
+    if (ret) return ret;
+    ret = Avtp_Vss_SetField((Avtp_Vss_t*)vss_pdu, AVTP_VSS_FIELD_PAD, padSize);
+    if (ret) return ret;
+
+    return padSize;
+}

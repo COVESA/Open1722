@@ -48,6 +48,44 @@ typedef struct {
     uint8_t payload[0];
 } Avtp_Vss_t;
 
+typedef enum vss_op_code {
+    PUBLISH_CURRENT_VALUE   = 0,
+    PUBLISH_TARGET_VALUE    = 1
+} Vss_Op_Code_t;
+
+typedef enum vss_addr_mode {
+    VSS_INTEROP_MODE    = 0,
+    VSS_STATIC_ID_MODE  = 1
+
+} Vss_Addr_Mode_t;
+
+typedef enum vss_datatype {
+    VSS_UINT8 = 0,
+    VSS_INT8 = 0x1,
+    VSS_UINT16 = 0x2,
+    VSS_INT16 = 0x3,
+    VSS_UINT32 = 0x4,
+    VSS_INT32 = 0x5,
+    VSS_UINT64 = 0x6,
+    VSS_INT64 = 0x7,
+    VSS_BOOL = 0x8,
+    VSS_FLOAT = 0x9,
+    VSS_DOUBLE = 0xA,
+    VSS_STRING = 0xB,
+    VSS_UINT8_ARRAY = 0x80,
+    VSS_INT8_ARRAY = 0x81,
+    VSS_UINT16_ARRAY = 0x82,
+    VSS_INT16_ARRAY = 0x83,
+    VSS_UINT32_ARRAY = 0x84,
+    VSS_INT32_ARRAY = 0x85,
+    VSS_UINT64_ARRAY = 0x86,
+    VSS_INT64_ARRAY = 0x87,
+    VSS_BOOL_ARRAY = 0x88,
+    VSS_FLOAT_ARRAY = 0x89,
+    VSS_DOUBLE_ARRAY = 0x8A,
+    VSS_STRING_ARRAY = 0x8B,
+} Vss_Datatype_t;
+
 typedef enum  {
 
     /* ACF common header fields */
@@ -98,36 +136,13 @@ int Avtp_Vss_GetField(Avtp_Vss_t* vss_pdu, Avtp_VssFields_t field, uint64_t* val
  */
 int Avtp_Vss_SetField(Avtp_Vss_t* vss_pdu, Avtp_VssFields_t field, uint64_t value);
 
-/**
- * Copies the payload data into the ACF VSS frame. This function will also set the
- * length and pad fields while inserting the padded bytes.
- *
- * @param vss_pdu Pointer to the first bit of an 1722 ACF VSS PDU.
- * @param frame_id ID of the VSS frame
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- * @returns Returns number of processed bytes (header + payload + padding)
- */
-int Avtp_Vss_SetPayload(Avtp_Vss_t* vss_pdu, uint32_t frame_id , uint8_t* payload,
-                        uint16_t payload_length);
-
-/**
- * Returns pointer to payload of an ACF VSS frame.
- *
- * @param vss_pdu Pointer to the first bit of an 1722 ACF VSS PDU.
- * @param payload_length payload length set by the function (if not NULL)
- * @param pdu_length total pdu length set by the function (if not NULL)
- * @return Pointer to ACF VSS frame payload
- */
-uint8_t* Avtp_Vss_GetPayload(Avtp_Vss_t* vss_pdu, uint16_t* payload_length, uint16_t *pdu_length);
 
 /**
  * Finalizes the ACF VSS frame. This function will set the
  * length and pad fields while inserting the padded bytes.
  *
  * @param vss_pdu Pointer to the first bit of an 1722 ACF VSS PDU.
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- * @returns Returns number of processed bytes (header + payload + padding)
+ * @param vss_length Length of the VSS payload.
+ * @returns Returns number of padded bytes
  */
-int Avtp_Vss_Finalize(Avtp_Vss_t* vss_pdu, uint16_t payload_length);
+int Avtp_Vss_Pad(uint8_t* vss_pdu, uint16_t vss_length);
