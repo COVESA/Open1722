@@ -84,6 +84,11 @@ add_executable(cvf-listener "examples/cvf/cvf-listener.c")
 target_include_directories(cvf-listener PRIVATE "examples" "include")
 target_link_libraries(cvf-listener open1722 open1722examples)
 
+# CVF talker app
+add_executable(acf-vss-talker "examples/acf-vss/acf-vss-talker.c")
+target_include_directories(acf-vss-talker PRIVATE "examples" "include")
+target_link_libraries(acf-vss-talker open1722 open1722examples)
+
 #### Tests ####################################################################
 
 enable_testing()
