@@ -53,12 +53,17 @@ Before building Open1722 make sure you have installed the following software :
 
 Alternatively, you can use VS Code to run the provided dev container which takes care of the dependencies.
 
-The first step to build Open1722 is to generate the Makefile and build the project.
+The first step to build Open1722 is to generate the Makefile and build the project (including example applications and tests).
 ```
 $ mkdir build
 $ cd buid
-$ cmake ..
+$ cmake -DOPEN1722_BUILD_TESTS=ON -DOPEN1722_BUILD_EXAMPLES=ON ..
 $ make
+```
+
+To build a static library you need to pass the following parameter to CMake
+```
+$ cmake -DBUILD_SHARED_LIBS=OFF
 ```
 
 The build can be cleaned using the following command:
