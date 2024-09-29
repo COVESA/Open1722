@@ -95,6 +95,8 @@ The following is the list of the formats currently supported by Open1722:
     - GPC
     - Sensor
     - Sensor Brief
+  - Custom formats not included in the standard but can be transported on top of IEEE 1722
+    - COVESA Vehicle Signal Specification (VSS) [(Protocol description)](./examples/acf-vss/protocol_description/acf-vss.md)
 
 ## Examples
 
@@ -102,7 +104,7 @@ The `examples/` directory provides sample applications which demonstrate the Ope
 
 To execute the IEEE 1722 CAN Talker application:
 ```
-$ ./bin/acf-can-talker
+$ ./build/acf-can-talker
 ```
 
 ### De/Serialization IEEE 1722 PDUs

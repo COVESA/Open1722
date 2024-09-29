@@ -29,12 +29,28 @@ add_library(open1722 SHARED
     "src/avtp/cvf/Cvf.c"
     "src/avtp/cvf/H264.c"
     "src/avtp/cvf/Jpeg2000.c"
-    "src/avtp/cvf/Mjpeg.c")
+    "src/avtp/cvf/Mjpeg.c"
+)
 set_target_properties(open1722 PROPERTIES VERSION ${PROJECT_VERSION})
-
 target_include_directories(open1722 PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
+
+add_library(open1722custom SHARED
+    "src/avtp/acf/custom/Vss.c"
+    "src/avtp/acf/custom/VssBrief.c"
+)
+set_target_properties(open1722custom PROPERTIES VERSION ${PROJECT_VERSION})
+target_include_directories(open1722custom PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+if (UNIT_TESTING)
+    target_compile_options(open1722 PRIVATE -coverage)
+    target_link_options(open1722 PRIVATE -coverage)
+    target_compile_options(open1722custom PRIVATE -coverage)
+    target_link_options(open1722custom PRIVATE -coverage)
+endif(UNIT_TESTING)
 
 #### Examples #################################################################
 
@@ -92,12 +108,19 @@ add_executable(hello-world-listener "examples/hello-world/hello-world-listener.c
 target_include_directories(hello-world-listener PRIVATE "examples" "include")
 target_link_libraries(hello-world-listener open1722 open1722examples)
 
+# VSS talker app
+add_executable(acf-vss-talker "examples/acf-vss/acf-vss-talker.c")
+target_include_directories(acf-vss-talker PRIVATE "examples" "include")
+target_link_libraries(acf-vss-talker open1722 open1722examples open1722custom)
+
+# VSS listener app
+add_executable(acf-vss-listener "examples/acf-vss/acf-vss-listener.c")
+target_include_directories(acf-vss-listener PRIVATE "examples" "include")
+target_link_libraries(acf-vss-listener open1722 open1722examples open1722custom)
+
 #### Tests ####################################################################
-
-enable_testing()
-
 if (UNIT_TESTING)
-
+    include(CTest)
     find_package(cmocka 1.1.0 REQUIRED)
 
     if (cmocka_FOUND)
@@ -107,11 +130,12 @@ if (UNIT_TESTING)
         list(APPEND TEST_TARGETS test-crf)
         list(APPEND TEST_TARGETS test-cvf)
         list(APPEND TEST_TARGETS test-rvf)
+        list(APPEND TEST_TARGETS test-vss)
 
         foreach(TEST_TARGET IN LISTS TEST_TARGETS)
             add_executable(${TEST_TARGET} "unit/${TEST_TARGET}.c")
             target_include_directories(${TEST_TARGET} PRIVATE "include")
-            target_link_libraries(${TEST_TARGET} open1722 cmocka m)
+            target_link_libraries(${TEST_TARGET} open1722 cmocka m open1722custom)
             add_test(NAME ${TEST_TARGET} COMMAND "${PROJECT_BINARY_DIR}/${TEST_TARGET}")
         endforeach()
     endif(cmocka_FOUND)

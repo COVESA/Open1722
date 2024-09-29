@@ -54,7 +54,7 @@ static void can_init(void **state) {
     // Check if the function is initializing properly
     Avtp_Can_Init((Avtp_Can_t*)pdu);
     memset(init_pdu, 0, AVTP_CAN_HEADER_LEN);
-    init_pdu[0] = 0x02; // Setting ACF type as ACF_CAN
+    init_pdu[0] = AVTP_ACF_TYPE_CAN << 1; // Setting ACF type as ACF_CAN
     assert_memory_equal(init_pdu, pdu, AVTP_CAN_HEADER_LEN);
 }
 

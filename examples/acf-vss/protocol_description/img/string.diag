@@ -1,0 +1,7 @@
+{
+  colwidth = 32
+  node_height = 72
+
+  0-15: STRING_LEN
+  16-63: STRING (STRING_LEN octets)
+ }
