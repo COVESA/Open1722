@@ -142,16 +142,16 @@ static int init_cf_pdu(uint8_t* pdu)
         Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_TU, 0U);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM, seq_num++);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_STREAM_ID, STREAM_ID);
+        Avtp_Tscf_SetTu(tscf_pdu, 0U);
+        Avtp_Tscf_SetSequenceNum(tscf_pdu, seq_num++);
+        Avtp_Tscf_SetStreamId(tscf_pdu, STREAM_ID);
         res = AVTP_TSCF_HEADER_LEN;
     } else {
         Avtp_Ntscf_t* ntscf_pdu = (Avtp_Ntscf_t*) pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM, seq_num++);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_STREAM_ID, STREAM_ID);
+        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num++);
+        Avtp_Ntscf_SetStreamId(ntscf_pdu, STREAM_ID);
         res = AVTP_NTSCF_HEADER_LEN;
     }
     return res;
@@ -161,10 +161,11 @@ static int update_pdu_length(uint8_t* pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetField((Avtp_Tscf_t*)pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)pdu, payloadLen);
+
     }
     return 0;
 }
@@ -181,8 +182,8 @@ static int prepare_acf_packet(uint8_t* acf_pdu, uint64_t gpc_code,
 
     // Prepare ACF PDU for CAN
     Avtp_Gpc_Init(pdu);
-    Avtp_Gpc_SetField(pdu, AVTP_GPC_FIELD_GPC_MSG_ID, gpc_code);
-    Avtp_Gpc_SetField(pdu, AVTP_GPC_FIELD_ACF_MSG_LENGTH, acf_length);
+    Avtp_Gpc_SetGpcMsgId(pdu, gpc_code);
+    Avtp_Gpc_SetAcfMsgLength(pdu, acf_length);
     memcpy(acf_pdu+AVTP_GPC_HEADER_LEN, payload, length);
     memset(acf_pdu+AVTP_GPC_HEADER_LEN+length, 0, acf_length*4 - length);
 
@@ -193,10 +194,11 @@ static int update_cf_length(uint8_t* cf_pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)cf_pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu, payloadLen);
+
     }
     return 0;
 }
@@ -240,8 +242,7 @@ int main(int argc, char *argv[])
         // Usage of UDP means the PDU needs an encapsulation number
         if (use_udp) {
             Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *) pdu;
-            Avtp_Udp_SetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO,
-                              udp_seq_num++);
+            Avtp_Udp_SetEncapsulationSeqNo(udp_pdu, udp_seq_num++);
             pdu_length +=  sizeof(Avtp_Udp_t);
         }
 
