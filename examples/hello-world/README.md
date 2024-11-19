@@ -10,15 +10,15 @@ Options are available to send the IEEE 1722 frame as layer 2 frame or as a UDP s
 
 To run over Ethernet
 ```
-$ ./hello-world-talker <Ethernet interface name> <Destination MAC address>
+$ ./hello-world-talker --ifname <Ethernet interface name> --dst-addr <Destination MAC address>
 ```
 
 To run over UDP
 ```
-$ ./hello-world-talker --udp <destination IP>:<Port>
+$ ./hello-world-talker --udp --dst-nw-addr <destination IP>:<Port>
 ```
 
-By running wireshark on an appropriate interface, IEEE 1722 frames can be observed.
+You can observe the IEEE1722 frames by running wireshark on the appropriate interface.
 
 
 ## hello-world-listener
@@ -26,10 +26,10 @@ _hello-world-listener_ receives the message string sent by the talker and prints
 
 To run over Ethernet
 ```
-$ ./hello-world-listener <Ethernet interface name>
+$ ./hello-world-listener --ifname <Ethernet interface name>
 ```
 
 To run over UDP
 ```
-$ ./hello-world-talker --udp <--port=<UDP port>
+$ ./hello-world-talker --udp <--udp-port=<UDP port>
 ```

@@ -54,10 +54,10 @@ static uint8_t use_udp;
 static uint32_t udp_port = 17220;
 
 static struct argp_option options[] = {
-    {"port", 'p', "UDP_PORT", 0, "UDP Port to listen on if UDP enabled"},
-    {"udp", 'u', 0, 0, "Use UDP"},
-    {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
-    {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)" },
+    {"udp", 'u', 0, 0, "Use UDP" },
+    {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
+    {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
+    {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
     { 0 }
 };
 
@@ -72,33 +72,17 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 'u':
         use_udp = 1;
         break;
-
-    case ARGP_KEY_NO_ARGS:
+    case 'i':
+        strncpy(ifname, arg, sizeof(ifname) - 1);
         break;
-
-    case ARGP_KEY_ARG:
-
-        if(state->argc < 2){
-            argp_usage(state);
+    case 'd':
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                &macaddr[0], &macaddr[1], &macaddr[2],
+                &macaddr[3], &macaddr[4], &macaddr[5]);
+        if (res != 6) {
+            fprintf(stderr, "Invalid MAC address\n");
+            exit(EXIT_FAILURE);
         }
-
-        if(!use_udp){
-
-            strncpy(ifname, arg, sizeof(ifname) - 1);
-
-            if(state->next < state->argc)
-            {
-                res = sscanf(state->argv[state->next], "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                        &macaddr[0], &macaddr[1], &macaddr[2],
-                        &macaddr[3], &macaddr[4], &macaddr[5]);
-                if (res != 6) {
-                    fprintf(stderr, "Invalid MAC address\n\n");
-                    argp_usage(state);
-                }
-                state->next += 1;
-            }
-        }
-
         break;
     }
 
