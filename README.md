@@ -109,7 +109,7 @@ $ ./build/acf-can-talker
 
 ### Programming Tutorial
 
-Here's a small example how the Open1722 library can be used to build and parse IEEE 1722 PDUs. First we define a C struct for a custom IEEE 1722 packet that can be used to transport a CAN, a LIN and a Flexray message. The frame begins with a Time-synchronous Control Format (TSCF) header. After the TSCF header a list of AVTP Control Format (ACF) messages follows. The first ACF message is a ACF CAN message which consists of ACF CAN header as well as a payload section to carry a 2Byte CAN frame. Similar than with the CAN message another ACF messages for LIN is added.
+Here's a small example how the Open1722 library can be used to build and parse IEEE 1722 Protocol Data Units (aka PDUs). First define a C struct for a custom IEEE 1722 packet that can be used to transport a CAN and a LIN message. The frame begins with a Time-synchronous Control Format (TSCF) header. Alternatively a Non-Timesynchronous Control Format (NTSCF) header could be used. After the TSCF header a list of AVTP Control Format (ACF) messages follows. The first ACF message is a ACF CAN message which consists of ACF CAN header as well as a payload section to carry a 2Byte CAN frame. Similar than with the CAN message another ACF messages for LIN is added.
 
 ``` C
 // my_1722_pdu.h
@@ -170,5 +170,9 @@ int main()
     memcpy(pdu.lin.payload, linFrame, LIN_PAYLOAD_LEN);
 
     // Send packet to network using socket API ...
+    uint8_t* data = &pdu;
+    size_t dataLen = sizeof(My1722Pdu_t);
+    // int socket = ...
+    // sendto(socket, data, dataLen, 0);
 }
 ```
