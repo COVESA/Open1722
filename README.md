@@ -167,8 +167,8 @@ int main()
     // Init LIN ACF message
     Avtp_Lin_Init(&pdu.lin);
     uint8_t linFrame[LIN_PAYLOAD_LEN] = {0x11, 0x22, 0x33};
-     memcpy(pdu.lin.payload, linFrame, LIN_PAYLOAD_LEN);
+    memcpy(pdu.lin.payload, linFrame, LIN_PAYLOAD_LEN);
 
-    // Send packet to network
+    // Send packet to network using socket API ...
 }
 ```
