@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     uint16_t pdu_length, cf_length;
     frame_t can_frame;
 
-    argp_parse(&argp, argc, argv, doc, NULL, NULL);
+    argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
     // Create an appropriate talker socket: UDP or Ethernet raw
     // Setup the socket for sending to the destination
