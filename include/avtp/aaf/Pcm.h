@@ -34,6 +34,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_PCM_HEADER_LEN              (6 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -213,3 +217,7 @@ int avtp_aaf_pdu_set(void *pdu, Avtp_PcmFields_t field,
  *    -EINVAL: If any argument is invalid.
  */
 int avtp_aaf_pdu_init(void *pdu);
+
+#ifdef __cplusplus
+}
+#endif

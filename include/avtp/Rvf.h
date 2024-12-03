@@ -35,6 +35,10 @@
 
 #include "avtp/Utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_RVF_HEADER_LEN (8 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_Rvf {
@@ -256,3 +260,7 @@ int avtp_rvf_pdu_set(void* pdu, Avtp_RvfField_t field, uint64_t val);
  *    -EINVAL: If any argument is invalid.
  */
 int avtp_rvf_pdu_init(void* pdu);
+
+#ifdef __cplusplus
+}
+#endif

@@ -33,6 +33,10 @@
 
 #include "avtp/Utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_JPEG2000_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_Jpeg2000 {
@@ -75,3 +79,7 @@ void Avtp_Jpeg2000_SetT(Avtp_Jpeg2000_t* pdu, uint8_t value);
 void Avtp_Jpeg2000_SetPriority(Avtp_Jpeg2000_t* pdu, uint8_t value);
 void Avtp_Jpeg2000_SetTileNumber(Avtp_Jpeg2000_t* pdu, uint16_t value);
 void Avtp_Jpeg2000_SetFragmentOffset(Avtp_Jpeg2000_t* pdu, uint32_t value);
+
+#ifdef __cplusplus
+}
+#endif

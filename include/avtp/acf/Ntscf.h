@@ -39,6 +39,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_NTSCF_HEADER_LEN              (3 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -97,3 +101,7 @@ void Avtp_Ntscf_SetVersion(Avtp_Ntscf_t* pdu, uint8_t value);
 void Avtp_Ntscf_SetNtscfDataLength(Avtp_Ntscf_t* pdu, uint16_t value);
 void Avtp_Ntscf_SetSequenceNum(Avtp_Ntscf_t* pdu, uint8_t value);
 void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif

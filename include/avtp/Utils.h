@@ -40,6 +40,9 @@
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Extracts a data field from a 1722 frame and handles necessary byte-order
@@ -64,3 +67,7 @@ uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
  */
 void Avtp_SetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
         uint8_t numFields, uint8_t* pdu, uint8_t field, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif

@@ -39,6 +39,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Length of ACF Most header. */
 #define AVTP_MOST_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
 
@@ -117,3 +121,7 @@ void Avtp_Most_SetFblockId(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetInstId(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetFuncId(Avtp_Most_t* pdu, uint16_t value);
 void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value);
+
+#ifdef __cplusplus
+}
+#endif

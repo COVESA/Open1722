@@ -33,6 +33,10 @@
 
 #include "avtp/Utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_CVF_HEADER_LEN (6 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_Cvf {
@@ -133,3 +137,6 @@ int avtp_cvf_pdu_set(void* pdu, Avtp_CvfField_t field, uint64_t val);
  */
 int avtp_cvf_pdu_init(void* pdu, uint8_t format_subtype);
 
+#ifdef __cplusplus
+}
+#endif

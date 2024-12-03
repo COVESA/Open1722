@@ -33,6 +33,10 @@
 
 #include "avtp/Utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_H246_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_H264 {
@@ -54,3 +58,7 @@ uint32_t Avtp_H264_GetTimestamp(Avtp_H264_t* pdu);
 
 void Avtp_H264_SetField(Avtp_H264_t* pdu, Avtp_H264Field_t field, uint64_t value);
 void Avtp_H264_SetTimestamp(Avtp_H264_t* pdu, uint32_t value);
+
+#ifdef __cplusplus
+}
+#endif

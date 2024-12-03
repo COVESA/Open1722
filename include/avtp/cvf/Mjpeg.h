@@ -33,6 +33,10 @@
 
 #include "avtp/Utils.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_MJPEG_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_Mjpeg {
@@ -71,3 +75,7 @@ void Avtp_Mjpeg_SetType(Avtp_Mjpeg_t* pdu, uint8_t value);
 void Avtp_Mjpeg_SetQ(Avtp_Mjpeg_t* pdu, uint8_t value);
 void Avtp_Mjpeg_SetWidth(Avtp_Mjpeg_t* pdu, uint8_t value);
 void Avtp_Mjpeg_SetHeight(Avtp_Mjpeg_t* pdu, uint8_t value);
+
+#ifdef __cplusplus
+}
+#endif

@@ -31,7 +31,9 @@
 
 #include <stdint.h>
 
-#define AVTP_API extern "C" __attribute__((visibility("default")))
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Max bits that the parser supports for a single data field within a 1722
@@ -56,3 +58,7 @@ typedef struct Avtp_FieldDescriptor {
     uint8_t offset;
     uint8_t bits;
 } Avtp_FieldDescriptor_t;
+
+#ifdef __cplusplus
+}
+#endif

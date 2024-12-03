@@ -40,6 +40,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_VSS_FIXED_HEADER_LEN         (3 * AVTP_QUADLET_SIZE)
 #define AVTP_ACF_TYPE_VSS           0x42
 
@@ -272,3 +276,7 @@ void Avtp_Vss_SetVssData(Avtp_Vss_t* pdu, VssData_t* val);
 void Avtp_Vss_SerializeStringArray(VssDataStringArray_t* vss_data_string_array,
                                    VssDataString_t* strings[],
                                    uint16_t num_strings);
+
+#ifdef __cplusplus
+}
+#endif

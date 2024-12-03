@@ -40,6 +40,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_CAN_HEADER_LEN         (4 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -174,3 +178,7 @@ void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
  * @return  Length of CAN payload in bytes
  */
 uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu);
+
+#ifdef __cplusplus
+}
+#endif

@@ -39,6 +39,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_UDP_HEADER_LEN               (1 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -84,3 +88,7 @@ uint32_t Avtp_Udp_GetEncapsulationSeqNo(Avtp_Udp_t* pdu);
 void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value);
 
 void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value);
+
+#ifdef __cplusplus
+}
+#endif

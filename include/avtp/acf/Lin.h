@@ -39,6 +39,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Length of ACF Lin header. */
 #define AVTP_LIN_HEADER_LEN (3 * AVTP_QUADLET_SIZE)
 
@@ -104,3 +108,7 @@ void Avtp_Lin_SetMtv(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetLinBusId(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetLinIdentifier(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif

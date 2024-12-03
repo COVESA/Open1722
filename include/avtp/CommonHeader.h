@@ -40,6 +40,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_COMMON_HEADER_LEN             (1 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -177,3 +181,7 @@ int avtp_pdu_get(const struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t fie
  */
 int avtp_pdu_set(struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field,
                                 uint32_t val);
+
+#ifdef __cplusplus
+}
+#endif

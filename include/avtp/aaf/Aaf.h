@@ -39,6 +39,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_AAF_HEADER_LEN              (6 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -114,3 +118,7 @@ void Avtp_Aaf_SetStreamDataLength(Avtp_Aaf_t* pdu, uint16_t value);
 void Avtp_Aaf_SetAfsd(Avtp_Aaf_t* pdu, uint8_t value);
 void Avtp_Aaf_SetSp(Avtp_Aaf_t* pdu, uint8_t value);
 void Avtp_Aaf_SetEvt(Avtp_Aaf_t* pdu, uint8_t value);
+
+#ifdef __cplusplus
+}
+#endif

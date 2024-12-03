@@ -39,6 +39,10 @@
 
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_VSS_BRIEF_HEADER_LEN   (1 * AVTP_QUADLET_SIZE)
 #define AVTP_ACF_TYPE_VSS_BRIEF     0x42
 
@@ -94,3 +98,7 @@ uint64_t Avtp_VssBrief_GetField(Avtp_VssBrief_t* vss_pdu, Avtp_VssBriefFields_t 
  * @param value Pointer to location to store the value.
  */
 void Avtp_VssBrief_SetField(Avtp_VssBrief_t* vss_pdu, Avtp_VssBriefFields_t field, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif

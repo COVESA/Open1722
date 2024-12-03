@@ -39,6 +39,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_GPC_HEADER_LEN         (2 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -93,3 +97,7 @@ void Avtp_Gpc_SetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field, uint64_t value);
 void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value);
 void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value);
 void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif

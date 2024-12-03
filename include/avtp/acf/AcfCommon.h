@@ -37,6 +37,10 @@
 #include <stdint.h>
 #include "avtp/Defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_ACF_COMMON_HEADER_LEN         (1 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -97,3 +101,7 @@ void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field
 
 void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t* pdu, Avtp_AcfMsgType_t value);
 void Avtp_AcfCommon_SetAcfMsgLength(Avtp_AcfCommon_t* pdu, uint16_t value);
+
+#ifdef __cplusplus
+}
+#endif

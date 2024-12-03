@@ -41,6 +41,10 @@
 #include "avtp/acf/AcfCommon.h"
 #include "avtp/acf/Can.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_CAN_BRIEF_HEADER_LEN         (2 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -142,3 +146,7 @@ int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8
  * @returns Returns number of processed bytes (header + payload + padding)
  */
 int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
+
+#ifdef __cplusplus
+}
+#endif

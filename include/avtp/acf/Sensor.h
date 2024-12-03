@@ -40,6 +40,10 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AVTP_SENSOR_HEADER_LEN         (3 * AVTP_QUADLET_SIZE)
 
 typedef struct {
@@ -104,3 +108,7 @@ void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value);
+
+#ifdef __cplusplus
+}
+#endif
