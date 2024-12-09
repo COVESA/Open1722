@@ -31,7 +31,6 @@
 #include <linux/if.h>
 #include <linux/if_ether.h>
 #include <linux/can/raw.h>
-#include <time.h>
 
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -39,16 +38,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <time.h>
 
 #include "common/common.h"
-#include "avtp/Udp.h"
-#include "avtp/acf/Ntscf.h"
-#include "avtp/acf/Tscf.h"
-#include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
-#define MAX_PDU_SIZE                1500
 #define STREAM_ID                   0xAABBCCDDEEFF0001
 #define CAN_PAYLOAD_MAX_SIZE        16*4
 #define ARGPARSE_CAN_FD_OPTION      500
@@ -59,12 +52,10 @@ static uint8_t macaddr[ETH_ALEN];
 static uint8_t ip_addr[sizeof(struct in_addr)];
 static uint32_t udp_port=17220;
 static int priority = -1;
-static uint8_t seq_num = 0;
-static uint32_t udp_seq_num = 0;
-static uint8_t use_tscf;
-static uint8_t use_udp;
+static uint8_t use_tscf = 0;
+static uint8_t use_udp = 0;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
-static uint8_t num_acf_msgs = 1;
+static uint8_t num_acf_msgs = 2;
 static char can_ifname[IFNAMSIZ];
 
 static char doc[] =
@@ -139,89 +130,13 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp argp = { options, parser, NULL, doc};
 
-static int init_cf_pdu(uint8_t* pdu)
-{
-    int res;
-    if (use_tscf) {
-        Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
-        memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
-        Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_TU, 0U);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM, seq_num++);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_STREAM_ID, STREAM_ID);
-        res = AVTP_TSCF_HEADER_LEN;
-    } else {
-        Avtp_Ntscf_t* ntscf_pdu = (Avtp_Ntscf_t*) pdu;
-        memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
-        Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM, seq_num++);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_STREAM_ID, STREAM_ID);
-        res = AVTP_NTSCF_HEADER_LEN;
-    }
-    return res;
-}
-
-static int update_cf_length(uint8_t* cf_pdu, uint64_t length)
-{
-    if (use_tscf) {
-        uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
-    } else {
-        uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
-    }
-    return 0;
-}
-
-static int prepare_acf_packet(uint8_t* acf_pdu,
-                              frame_t frame) {
-
-    int processedBytes;
-    struct timespec now;
-    Avtp_Can_t* pdu = (Avtp_Can_t*) acf_pdu;
-    canid_t can_id;
-
-    // Clear bits
-    memset(pdu, 0, AVTP_CAN_HEADER_LEN);
-
-    // Prepare ACF PDU for CAN
-    Avtp_Can_Init(pdu);
-    clock_gettime(CLOCK_REALTIME, &now);
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MESSAGE_TIMESTAMP,
-                      (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MTV, 1U);
-
-    // Set required CAN Flags
-    can_id = (can_variant == AVTP_CAN_FD) ? frame.fd.can_id : frame.cc.can_id;
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_RTR, can_id & CAN_RTR_FLAG);
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_EFF, can_id & CAN_EFF_FLAG);
-
-    if (can_variant == AVTP_CAN_FD) {
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_BRS, frame.fd.flags & CANFD_BRS);
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_FDF, frame.fd.flags & CANFD_FDF);
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_ESI, frame.fd.flags & CANFD_ESI);
-    }
-
-    // Copy payload to ACF CAN PDU
-    if(can_variant == AVTP_CAN_FD)
-        Avtp_Can_CreateAcfMessage(pdu, frame.fd.can_id & CAN_EFF_MASK, frame.fd.data,
-                                         frame.fd.len, can_variant);
-    else
-        Avtp_Can_CreateAcfMessage(pdu, frame.cc.can_id & CAN_EFF_MASK, frame.cc.data,
-                                         frame.cc.len, can_variant);
-
-    return Avtp_Can_GetAcfMsgLength(pdu)*4;
-}
-
 int main(int argc, char *argv[])
 {
 
     int fd, res, can_socket=0;
     struct sockaddr_ll sk_ll_addr;
     struct sockaddr_in sk_udp_addr;
-    uint8_t pdu[MAX_PDU_SIZE];
-    uint16_t pdu_length, cf_length;
-    frame_t can_frame;
+    struct sockaddr* dest_addr;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -233,11 +148,13 @@ int main(int argc, char *argv[])
 
         res = setup_udp_socket_address((struct in_addr*) ip_addr,
                                        udp_port, &sk_udp_addr);
+        dest_addr = (struct sockaddr*) &sk_udp_addr;
     } else {
         fd = create_talker_socket(priority);
         if (fd < 0) return fd;
         res = setup_socket_address(fd, ifname, macaddr,
                                    ETH_P_TSN, &sk_ll_addr);
+        dest_addr = (struct sockaddr*) &sk_ll_addr;
     }
     if (res < 0) goto err;
 
@@ -245,64 +162,9 @@ int main(int argc, char *argv[])
     can_socket = setup_can_socket(can_ifname, can_variant);
     if (!can_socket) goto err;
 
-    // Sending loop
-    for(;;) {
-
-        // Pack into control formats
-        uint8_t *cf_pdu;
-        pdu_length = 0;
-        cf_length = 0;
-
-        // Usage of UDP means the PDU needs a
-        if (use_udp) {
-            Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *) pdu;
-            Avtp_Udp_SetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO,
-                              udp_seq_num++);
-            pdu_length +=  sizeof(Avtp_Udp_t);
-        }
-
-        cf_pdu = pdu + pdu_length;
-        res = init_cf_pdu(cf_pdu);
-        if (res < 0)
-            goto err;
-        pdu_length += res;
-        cf_length += res;
-
-        int i = 0;
-        while (i < num_acf_msgs) {
-            // Get payload -- will 'spin' here until we get the requested number
-            //                of CAN frames.
-            if(can_variant == AVTP_CAN_FD){
-                res = read(can_socket, &can_frame.fd, sizeof(struct canfd_frame));
-            } else {
-                res = read(can_socket, &can_frame.cc, sizeof(struct can_frame));
-            }
-            if (!res) continue;
-
-            uint8_t* acf_pdu = pdu + pdu_length;
-            res = prepare_acf_packet(acf_pdu, can_frame);
-            if (res < 0) goto err;
-            pdu_length += res;
-            cf_length += res;
-            i++;
-        }
-
-        res = update_cf_length(cf_pdu, cf_length);
-        if (res < 0)
-            goto err;
-
-        if (use_udp) {
-            res = sendto(fd, pdu, pdu_length, 0,
-                    (struct sockaddr *) &sk_udp_addr, sizeof(sk_udp_addr));
-        } else {
-            res = sendto(fd, pdu, pdu_length, 0,
-                         (struct sockaddr *) &sk_ll_addr, sizeof(sk_ll_addr));
-        }
-        if (res < 0) {
-            perror("Failed to send data");
-            goto err;
-        }
-    }
+    // Invoke the spinning function to convert CAN frames to AVTP frames
+    can_to_avtp(fd, can_socket, can_variant, use_udp, use_tscf,
+                STREAM_ID, num_acf_msgs, dest_addr);
 
 err:
     close(fd);

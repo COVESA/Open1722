@@ -29,10 +29,42 @@
 
 #include "avtp/acf/Can.h"
 
+#define MAX_ETH_PDU_SIZE                1500
+
 /* CAN CC/FD frame union */
 typedef union {
-	struct can_frame cc;
-	struct canfd_frame fd;
+    struct can_frame cc;
+    struct canfd_frame fd;
 } frame_t;
 
+/**
+ * Creates a CAN socket.
+ *
+ * @param can_ifname Pointer to the first bit of an 1722 AVTP PDU.
+ * @param can_variant CAN or CAN-FD
+ * @returns CAN socket on success else the error
+ */
 int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
+
+/**
+ * Function that converts AVTP Frames to CAN
+ *
+ * @param eth_socket Ethernet/UDP socket.
+ * @param can_socket CAN/CAN-FD socket
+ * @param use_udp 1: UDP encapsulation, 0: Ethernet
+ * @param stream_id: AVTP stream ID of interest
+ */
+void avtp_to_can(int eth_socket, int can_socket, int use_udp, uint64_t stream_id);
+
+/**
+ * Function that converts AVTP Frames to CAN
+ *
+ * @param eth_socket Ethernet/UDP socket.
+ * @param can_socket CAN/CAN-FD socket
+ * @param use_udp 1: UDP encapsulation, 0: Ethernet
+ * @param stream_id: AVTP stream ID of interest
+ */
+void can_to_avtp(int eth_socket, int can_socket,
+                    Avtp_CanVariant_t can_variant,
+                     int use_udp, int use_tscf, uint64_t stream_id,
+                     uint8_t num_acf_msgs, struct sockaddr* dst_addr);
