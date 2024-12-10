@@ -33,6 +33,7 @@
 #include <linux/if_packet.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
+#include <poll.h>
 
 #include <unistd.h>
 #include <string.h>
@@ -40,6 +41,7 @@
 #include <stdio.h>
 
 #include "avtp/Udp.h"
+#include "avtp/CommonHeader.h"
 #include "avtp/acf/Ntscf.h"
 #include "avtp/acf/Tscf.h"
 #include "acf-can-common.h"
@@ -74,6 +76,118 @@ int setup_can_socket(const char* can_ifname,
     }
 
     return can_socket;
+}
+
+static int is_valid_acf_packet(uint8_t* acf_pdu)
+{
+    Avtp_AcfCommon_t *pdu = (Avtp_AcfCommon_t*) acf_pdu;
+    uint8_t acf_msg_type = Avtp_AcfCommon_GetAcfMsgType(pdu);
+    if (acf_msg_type != AVTP_ACF_TYPE_CAN) {
+        return 0;
+    }
+
+    return 1;
+}
+
+static int new_packet(int eth_socket, int can_socket,
+                      int use_udp, Avtp_CanVariant_t can_variant) {
+
+    int res = 0;
+    uint64_t proc_bytes = 0, msg_proc_bytes = 0;
+    uint32_t udp_seq_num;
+    uint16_t msg_length, can_payload_length, acf_msg_length;
+    uint8_t subtype;
+    uint8_t pdu[MAX_ETH_PDU_SIZE], i;
+    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, *can_payload;
+    frame_t frame;
+    canid_t can_id;
+
+    memset(&frame, 0, sizeof(struct canfd_frame));
+    res = recv(eth_socket, pdu, MAX_ETH_PDU_SIZE, 0);
+    if (res < 0 || res > MAX_ETH_PDU_SIZE) {
+        perror("Failed to receive data");
+        return 0;
+    }
+
+    if (use_udp) {
+        udp_pdu = pdu;
+        udp_seq_num = Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)udp_pdu);
+        cf_pdu = pdu + AVTP_UDP_HEADER_LEN;
+        proc_bytes += AVTP_UDP_HEADER_LEN;
+    } else {
+        cf_pdu = pdu;
+    }
+
+    subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
+    if (!((subtype == AVTP_SUBTYPE_NTSCF) ||
+        (subtype == AVTP_SUBTYPE_TSCF))) {
+        return 0;
+    }
+
+    if (subtype == AVTP_SUBTYPE_TSCF){
+        proc_bytes += AVTP_TSCF_HEADER_LEN;
+        msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
+    } else {
+        proc_bytes += AVTP_NTSCF_HEADER_LEN;
+        msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
+    }
+
+    while (msg_proc_bytes < msg_length) {
+
+        acf_pdu = &pdu[proc_bytes + msg_proc_bytes];
+
+        if (!is_valid_acf_packet(acf_pdu)) {
+            return 0;
+        }
+
+        can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
+
+        can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
+        acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;
+        can_payload_length = Avtp_Can_GetCanPayloadLength((Avtp_Can_t*)acf_pdu);
+        msg_proc_bytes += acf_msg_length;
+
+        // Handle EFF Flag
+        if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
+            can_id |= CAN_EFF_FLAG;
+        } else if (can_id > 0x7FF) {
+            fprintf(stderr, "Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
+            return 0;
+        }
+
+        // Handle RTR Flag
+        if (Avtp_Can_GetRtr((Avtp_Can_t*)acf_pdu)) {
+            can_id |= CAN_RTR_FLAG;
+        }
+
+        if (can_variant == AVTP_CAN_FD) {
+            if (Avtp_Can_GetBrs((Avtp_Can_t*)acf_pdu)) {
+                frame.fd.flags |= CANFD_BRS;
+            }
+            if (Avtp_Can_GetFdf((Avtp_Can_t*)acf_pdu)) {
+                frame.fd.flags |= CANFD_FDF;
+            }
+            if (Avtp_Can_GetEsi((Avtp_Can_t*)acf_pdu)) {
+                frame.fd.flags |= CANFD_ESI;
+            }
+            frame.fd.can_id = can_id;
+            frame.fd.len = can_payload_length;
+            memcpy(frame.fd.data, can_payload, can_payload_length);
+            res = write(can_socket, &frame.fd, sizeof(struct canfd_frame));
+        } else {
+            frame.cc.can_id = can_id;
+            frame.cc.len = can_payload_length;
+            memcpy(frame.cc.data, can_payload, can_payload_length);
+            res = write(can_socket, &frame.cc, sizeof(struct can_frame));
+        }
+
+        if(res < 0)
+        {
+            perror("Failed to write to CAN bus");
+            return 0;
+        }
+    }
+    return 1;
 }
 
 static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_num)
@@ -219,6 +333,30 @@ void can_to_avtp(int eth_socket, int can_socket,
 
 }
 
-void avtp_to_can(int eth_socket, int can_socket, int udp, uint64_t stream_id) {
+void avtp_to_can(int eth_socket, int can_socket,
+                    Avtp_CanVariant_t can_variant,
+                     int use_udp, uint64_t stream_id) {
 
+    uint8_t pdu[MAX_ETH_PDU_SIZE];
+    uint16_t pdu_length = 0, cf_length = 0;
+    frame_t can_frame;
+    struct pollfd fds;
+    int res;
+
+    fds.fd = eth_socket;
+    fds.events = POLLIN;
+
+    while (1) {
+
+        res = poll(&fds, 1, -1);
+        if (res < 0) {
+            perror("Failed to poll() fds");
+        }
+
+        if (fds.revents & POLLIN) {
+            res = new_packet(eth_socket, can_socket, use_udp, can_variant);
+            if (res < 0)
+                perror("Failed to process packet");
+        }
+    }
 }

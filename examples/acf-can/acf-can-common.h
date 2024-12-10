@@ -54,7 +54,9 @@ int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param stream_id: AVTP stream ID of interest
  */
-void avtp_to_can(int eth_socket, int can_socket, int use_udp, uint64_t stream_id);
+void avtp_to_can(int eth_socket, int can_socket,
+                    Avtp_CanVariant_t can_variant,
+                     int use_udp, uint64_t stream_id);
 
 /**
  * Function that converts AVTP Frames to CAN
@@ -62,7 +64,10 @@ void avtp_to_can(int eth_socket, int can_socket, int use_udp, uint64_t stream_id
  * @param eth_socket Ethernet/UDP socket.
  * @param can_socket CAN/CAN-FD socket
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
+ * @param use_tscf 1: TSCF, 0: NTSCF
  * @param stream_id: AVTP stream ID of interest
+ * @param num_acf_msgs: No. of ACF CAN messages to aggregate
+ * @param dst_addr: Destination
  */
 void can_to_avtp(int eth_socket, int can_socket,
                     Avtp_CanVariant_t can_variant,

@@ -28,7 +28,6 @@
  */
 
 #include <argp.h>
-#include <poll.h>
 #include <stdlib.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -53,6 +52,7 @@
 #define MAX_PDU_SIZE                1500
 #define ARGPARSE_CAN_FD_OPTION      500
 #define ARGPARSE_CAN_IF_OPTION      501
+#define STREAM_ID                   0xAABBCCDDEEFF0001
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -114,121 +114,10 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp argp = { options, parser, NULL, doc};
 
-static int is_valid_acf_packet(uint8_t* acf_pdu)
-{
-    Avtp_AcfCommon_t *pdu = (Avtp_AcfCommon_t*) acf_pdu;
-    uint8_t acf_msg_type = Avtp_AcfCommon_GetAcfMsgType(pdu);
-    if (acf_msg_type != AVTP_ACF_TYPE_CAN) {
-        return 0;
-    }
-
-    return 1;
-}
-
-static int new_packet(int sk_fd, int can_socket) {
-
-    int res = 0;
-    uint64_t proc_bytes = 0, msg_proc_bytes = 0;
-    uint32_t udp_seq_num;
-    uint16_t msg_length, can_payload_length, acf_msg_length;
-    uint8_t subtype;
-    uint8_t pdu[MAX_PDU_SIZE], i;
-    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, *can_payload;
-    frame_t frame;
-    canid_t can_id;
-
-    memset(&frame, 0, sizeof(struct canfd_frame));
-    res = recv(sk_fd, pdu, MAX_PDU_SIZE, 0);
-    if (res < 0 || res > MAX_PDU_SIZE) {
-        perror("Failed to receive data");
-        return 0;
-    }
-
-    if (use_udp) {
-        udp_pdu = pdu;
-        udp_seq_num = Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)udp_pdu);
-        cf_pdu = pdu + AVTP_UDP_HEADER_LEN;
-        proc_bytes += AVTP_UDP_HEADER_LEN;
-    } else {
-        cf_pdu = pdu;
-    }
-
-    subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
-    if (!((subtype == AVTP_SUBTYPE_NTSCF) ||
-        (subtype == AVTP_SUBTYPE_TSCF))) {
-        return 0;
-    }
-
-    if (subtype == AVTP_SUBTYPE_TSCF){
-        proc_bytes += AVTP_TSCF_HEADER_LEN;
-        msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
-    } else {
-        proc_bytes += AVTP_NTSCF_HEADER_LEN;
-        msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
-    }
-
-    while (msg_proc_bytes < msg_length) {
-
-        acf_pdu = &pdu[proc_bytes + msg_proc_bytes];
-
-        if (!is_valid_acf_packet(acf_pdu)) {
-            return 0;
-        }
-
-        can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
-
-        can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
-        acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;
-        can_payload_length = Avtp_Can_GetCanPayloadLength((Avtp_Can_t*)acf_pdu);
-        msg_proc_bytes += acf_msg_length;
-
-        // Handle EFF Flag
-        if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
-            can_id |= CAN_EFF_FLAG;
-        } else if (can_id > 0x7FF) {
-            fprintf(stderr, "Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
-            return 0;
-        }
-
-        // Handle RTR Flag
-        if (Avtp_Can_GetRtr((Avtp_Can_t*)acf_pdu)) {
-            can_id |= CAN_RTR_FLAG;
-        }
-
-        if (can_variant == AVTP_CAN_FD) {
-            if (Avtp_Can_GetBrs((Avtp_Can_t*)acf_pdu)) {
-                frame.fd.flags |= CANFD_BRS;
-            }
-            if (Avtp_Can_GetFdf((Avtp_Can_t*)acf_pdu)) {
-                frame.fd.flags |= CANFD_FDF;
-            }
-            if (Avtp_Can_GetEsi((Avtp_Can_t*)acf_pdu)) {
-                frame.fd.flags |= CANFD_ESI;
-            }
-            frame.fd.can_id = can_id;
-            frame.fd.len = can_payload_length;
-            memcpy(frame.fd.data, can_payload, can_payload_length);
-            res = write(can_socket, &frame.fd, sizeof(struct canfd_frame));
-        } else {
-            frame.cc.can_id = can_id;
-            frame.cc.len = can_payload_length;
-            memcpy(frame.cc.data, can_payload, can_payload_length);
-            res = write(can_socket, &frame.cc, sizeof(struct can_frame));
-        }
-
-        if(res < 0)
-        {
-            perror("Failed to write to CAN bus");
-            return 0;
-        }
-    }
-    return 1;
-}
-
 int main(int argc, char *argv[])
 {
     int fd, res;
-    struct pollfd fds;
+
 
     int can_socket = 0;
     struct sockaddr_can can_addr;
@@ -242,8 +131,6 @@ int main(int argc, char *argv[])
     } else {
         fd = create_listener_socket(ifname, macaddr, ETH_P_TSN);
     }
-    fds.fd = fd;
-    fds.events = POLLIN;
 
     if (fd < 0)
         return 1;
@@ -252,21 +139,7 @@ int main(int argc, char *argv[])
     can_socket = setup_can_socket(can_ifname, can_variant);
     if (!can_socket) goto err;
 
-    while (1) {
-
-        res = poll(&fds, 1, -1);
-        if (res < 0) {
-            perror("Failed to poll() fds");
-            goto err;
-        }
-
-        if (fds.revents & POLLIN) {
-            res = new_packet(fd, can_socket);
-            if (res < 0)
-                goto err;
-        }
-
-    }
+    avtp_to_can(fd, can_socket, can_variant, use_udp, STREAM_ID);
 
     return 0;
 
