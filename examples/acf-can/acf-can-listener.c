@@ -36,7 +36,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <linux/can.h>
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
 
@@ -49,7 +48,6 @@
 #include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
-#define MAX_PDU_SIZE                1500
 #define ARGPARSE_CAN_FD_OPTION      500
 #define ARGPARSE_CAN_IF_OPTION      501
 #define STREAM_ID                   0xAABBCCDDEEFF0001
@@ -117,8 +115,6 @@ static struct argp argp = { options, parser, NULL, doc};
 int main(int argc, char *argv[])
 {
     int fd, res;
-
-
     int can_socket = 0;
     struct sockaddr_can can_addr;
     struct ifreq ifr;
@@ -137,7 +133,7 @@ int main(int argc, char *argv[])
 
     // Open a CAN socket for reading frames
     can_socket = setup_can_socket(can_ifname, can_variant);
-    if (!can_socket) goto err;
+    if (can_socket < 0) goto err;
 
     avtp_to_can(fd, can_socket, can_variant, use_udp, STREAM_ID);
 

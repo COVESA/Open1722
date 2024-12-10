@@ -365,7 +365,6 @@ void avtp_to_can(int eth_socket, int can_socket,
             res = new_packet(eth_socket, can_socket, use_udp,
                                 can_variant, stream_id);
             if (res < 0) {
-                perror("Failed to process packet.");
                 continue;
             }
             if ((++seq_num != res) && (res != 0)) {
