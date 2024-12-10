@@ -90,12 +90,13 @@ static int is_valid_acf_packet(uint8_t* acf_pdu)
 }
 
 static int new_packet(int eth_socket, int can_socket,
-                      int use_udp, Avtp_CanVariant_t can_variant) {
+                      int use_udp, Avtp_CanVariant_t can_variant,
+                      uint64_t stream_id) {
 
     int res = 0;
-    uint64_t proc_bytes = 0, msg_proc_bytes = 0;
+    uint64_t proc_bytes = 0, msg_proc_bytes = 0, s_id;
     uint32_t udp_seq_num;
-    uint16_t msg_length, can_payload_length, acf_msg_length;
+    uint16_t msg_length, can_payload_length, acf_msg_length, seq_num;
     uint8_t subtype;
     uint8_t pdu[MAX_ETH_PDU_SIZE], i;
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, *can_payload;
@@ -106,9 +107,10 @@ static int new_packet(int eth_socket, int can_socket,
     res = recv(eth_socket, pdu, MAX_ETH_PDU_SIZE, 0);
     if (res < 0 || res > MAX_ETH_PDU_SIZE) {
         perror("Failed to receive data");
-        return 0;
+        return -1;
     }
 
+    // Check for UDP encapsulation
     if (use_udp) {
         udp_pdu = pdu;
         udp_seq_num = Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)udp_pdu);
@@ -118,18 +120,25 @@ static int new_packet(int eth_socket, int can_socket,
         cf_pdu = pdu;
     }
 
+    // Only NTSCF and TSCF formats allowed
     subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
-    if (!((subtype == AVTP_SUBTYPE_NTSCF) ||
-        (subtype == AVTP_SUBTYPE_TSCF))) {
-        return 0;
-    }
-
-    if (subtype == AVTP_SUBTYPE_TSCF){
+    if (subtype == AVTP_SUBTYPE_TSCF) {
         proc_bytes += AVTP_TSCF_HEADER_LEN;
         msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
-    } else {
+        s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t*)cf_pdu);
+        seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t*)cf_pdu);
+    } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
         msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
+        s_id = Avtp_Ntscf_GetStreamId((Avtp_Ntscf_t*)cf_pdu);
+        seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t*)cf_pdu);
+    } else {
+        return -1;
+    }
+
+    // Check for stream id
+    if (s_id != stream_id) {
+        return -1;
     }
 
     while (msg_proc_bytes < msg_length) {
@@ -137,7 +146,7 @@ static int new_packet(int eth_socket, int can_socket,
         acf_pdu = &pdu[proc_bytes + msg_proc_bytes];
 
         if (!is_valid_acf_packet(acf_pdu)) {
-            return 0;
+            return -1;
         }
 
         can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
@@ -152,7 +161,7 @@ static int new_packet(int eth_socket, int can_socket,
             can_id |= CAN_EFF_FLAG;
         } else if (can_id > 0x7FF) {
             fprintf(stderr, "Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
-            return 0;
+            return -1;
         }
 
         // Handle RTR Flag
@@ -184,10 +193,10 @@ static int new_packet(int eth_socket, int can_socket,
         if(res < 0)
         {
             perror("Failed to write to CAN bus");
-            return 0;
+            return res;
         }
     }
-    return 1;
+    return seq_num;
 }
 
 static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_num)
@@ -337,11 +346,10 @@ void avtp_to_can(int eth_socket, int can_socket,
                     Avtp_CanVariant_t can_variant,
                      int use_udp, uint64_t stream_id) {
 
-    uint8_t pdu[MAX_ETH_PDU_SIZE];
     uint16_t pdu_length = 0, cf_length = 0;
-    frame_t can_frame;
     struct pollfd fds;
     int res;
+    uint8_t seq_num = -1;
 
     fds.fd = eth_socket;
     fds.events = POLLIN;
@@ -354,9 +362,16 @@ void avtp_to_can(int eth_socket, int can_socket,
         }
 
         if (fds.revents & POLLIN) {
-            res = new_packet(eth_socket, can_socket, use_udp, can_variant);
-            if (res < 0)
-                perror("Failed to process packet");
+            res = new_packet(eth_socket, can_socket, use_udp,
+                                can_variant, stream_id);
+            if (res < 0) {
+                perror("Failed to process packet.");
+                continue;
+            }
+            if ((++seq_num != res) && (res != 0)) {
+                printf("Incorrect sequence num. Expected: %d Recd.: %d\n", seq_num, res);
+                seq_num = res;
+            }
         }
     }
 }
