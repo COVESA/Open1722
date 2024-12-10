@@ -78,6 +78,11 @@ add_executable(acf-can-listener "examples/acf-can/acf-can-listener.c" "examples/
 target_include_directories(acf-can-listener PRIVATE "examples" "include")
 target_link_libraries(acf-can-listener open1722 open1722examples)
 
+# CAN bridge app
+add_executable(acf-can-bridge "examples/acf-can/acf-can-bridge.c" "examples/acf-can/acf-can-common.c")
+target_include_directories(acf-can-bridge PRIVATE "examples" "include")
+target_link_libraries(acf-can-bridge open1722 open1722examples pthread)
+
 # CRF talker app
 add_executable(crf-talker "examples/crf/crf-talker.c")
 target_include_directories(crf-talker PRIVATE "examples" "include")

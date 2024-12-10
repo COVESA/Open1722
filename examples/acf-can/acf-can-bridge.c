@@ -27,44 +27,56 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <linux/if.h>
-#include <linux/if_ether.h>
 #include <linux/can/raw.h>
 
-#include <arpa/inet.h>
-#include <stdlib.h>
 #include <argp.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <pthread.h>
 
 #include "common/common.h"
+#include "avtp/Udp.h"
+#include "avtp/acf/Ntscf.h"
+#include "avtp/acf/Tscf.h"
+#include "avtp/acf/AcfCommon.h"
+#include "avtp/acf/Can.h"
+#include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
-#define STREAM_ID                   0xAABBCCDDEEFF0001
-#define CAN_PAYLOAD_MAX_SIZE        16*4
 #define ARGPARSE_CAN_FD_OPTION      500
 #define ARGPARSE_CAN_IF_OPTION      501
+#define TALKER_STREAM_ID            0xAABBCCDDEEFF0001
+#define LISTENER_STREAM_ID  	    0xAABBCCDDEEFF0001
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t ip_addr[sizeof(struct in_addr)];
-static uint32_t udp_port=17220;
 static int priority = -1;
 static uint8_t use_tscf = 0;
 static uint8_t use_udp = 0;
+static uint32_t udp_port = 17220;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
 
+int eth_socket, can_socket;
+struct sockaddr* dest_addr;
+
 static char doc[] =
-        "\nacf-can-talker -- a program designed to send CAN messages to a remote CAN bus over Ethernet using Open1722.\
-         \vEXAMPLES\n\
-         acf-can-talker -i eth0 -d aa:bb:cc:ee:dd:ff --canif vcan0\n\
-         \t(tunnel transactions from CAN vcan0 over Ethernet eth0)\n\n\
-         acf-can-talker -u --dst-nw-addr 10.0.0.2:17220 --canif vcan1\n\
-         \t(tunnel transactions from vcan1 interface using UDP)";
+        "\nacf-can-bridge -- a program designed to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
+        \vEXAMPLES\n\
+        acf-can-bridge -i eth0 -d aa:bb:cc:dd:ee:ff --canif can1\n\
+        \t(Bridge eth0 with can1 using Open1722 using Ethernet)\n\
+        acf-can-bridge --canif can1 -u -p 17220\n\
+        \t(Bridge eth0 with can1 using Open1722 over UDP)";
 
 static struct argp_option options[] = {
     {"tscf", 't', 0, 0, "Use TSCF"},
@@ -75,6 +87,7 @@ static struct argp_option options[] = {
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
+    {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
     { 0 }
 };
 
@@ -87,6 +100,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     case 't':
         use_tscf = 1;
         break;
+    case 'p':
+        udp_port = atoi(arg);
+        break;
     case 'u':
         use_udp = 1;
         break;
@@ -95,7 +111,6 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case ARGPARSE_CAN_FD_OPTION:
         can_variant = AVTP_CAN_FD;
-        break;
     case ARGPARSE_CAN_IF_OPTION:
         strncpy(can_ifname, arg, sizeof(can_ifname) - 1);
         break;
@@ -130,43 +145,64 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp argp = { options, parser, NULL, doc};
 
+void* can_to_avtp_runnable(void* args) {
+
+    // Invoke the spinning function to convert CAN frames to AVTP frames
+    can_to_avtp(eth_socket, can_socket, can_variant, use_udp, use_tscf,
+                TALKER_STREAM_ID, num_acf_msgs, dest_addr);
+}
+
+void* avtp_to_can_runnable(void* args) {
+
+    avtp_to_can(eth_socket, can_socket, can_variant,
+                 use_udp, LISTENER_STREAM_ID);
+
+    return NULL;
+}
+
 int main(int argc, char *argv[])
 {
-    int fd, res, can_socket=0;
+    int res;
+
     struct sockaddr_ll sk_ll_addr;
     struct sockaddr_in sk_udp_addr;
-    struct sockaddr* dest_addr;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
-    // Create an appropriate talker socket: UDP or Ethernet raw
+    // Create an appropriate sockets: UDP or Ethernet raw
     // Setup the socket for sending to the destination
     if (use_udp) {
-        fd = create_talker_socket_udp(priority);
-        if (fd < 0) return fd;
+        eth_socket = create_listener_socket_udp(udp_port);
+        if (eth_socket < 0) return 1;
 
+        // Prepare socket for sending to the destination
         res = setup_udp_socket_address((struct in_addr*) ip_addr,
                                        udp_port, &sk_udp_addr);
         dest_addr = (struct sockaddr*) &sk_udp_addr;
     } else {
-        fd = create_talker_socket(priority);
-        if (fd < 0) return fd;
-        res = setup_socket_address(fd, ifname, macaddr,
+        eth_socket = create_listener_socket(ifname, macaddr, ETH_P_TSN);
+        if (eth_socket < 0) return 1;
+
+        // Prepare socket for sending
+        res = setup_socket_address(eth_socket, ifname, macaddr,
                                    ETH_P_TSN, &sk_ll_addr);
         dest_addr = (struct sockaddr*) &sk_ll_addr;
     }
-    if (res < 0) goto err;
+    if (res < 0) return 1;
 
     // Open a CAN socket for reading frames
     can_socket = setup_can_socket(can_ifname, can_variant);
-    if (can_socket < 0) goto err;
+    if (can_socket < 0) return 1;
 
-    // Invoke the spinning function to convert CAN frames to AVTP frames
-    can_to_avtp(fd, can_socket, can_variant, use_udp, use_tscf,
-                STREAM_ID, num_acf_msgs, dest_addr);
+    pthread_t can_to_avtp_thread, avtp_to_can_thread;
 
-err:
-    close(fd);
+    // Start the threads for the bridge
+    pthread_create(&can_to_avtp_thread, NULL, can_to_avtp_runnable, NULL);
+    pthread_create(&avtp_to_can_thread, NULL, avtp_to_can_runnable, NULL);
+
+    // Wait for the threads to complete
+    pthread_join(can_to_avtp_thread, NULL);
+    pthread_join(avtp_to_can_thread, NULL);
+
     return 1;
-
 }
