@@ -48,9 +48,10 @@
 #include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
-#define ARGPARSE_CAN_FD_OPTION      500
-#define ARGPARSE_CAN_IF_OPTION      501
-#define STREAM_ID                   0xAABBCCDDEEFF0001
+#define ARGPARSE_CAN_FD_OPTION          500
+#define ARGPARSE_CAN_IF_OPTION          501
+#define ARGPARSE_LISTENER_ID_OPTION     503
+#define STREAM_ID                       0xAABBCCDDEEFF0001
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -58,6 +59,7 @@ static uint8_t use_udp;
 static uint32_t udp_port = 17220;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static char can_ifname[IFNAMSIZ];
+static uint64_t listener_stream_id = STREAM_ID;
 
 static char doc[] =
         "\nacf-can-listener -- a program designed to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
@@ -74,6 +76,7 @@ static struct argp_option options[] = {
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
+    {"stream-id", ARGPARSE_LISTENER_ID_OPTION, "STREAM_ID", 0, "Stream ID for listener stream"},
     { 0 }
 };
 
@@ -105,6 +108,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
             exit(EXIT_FAILURE);
         }
         break;
+    case ARGPARSE_LISTENER_ID_OPTION:
+        listener_stream_id = atoi(arg);
+        break;
     }
 
     return 0;
@@ -135,7 +141,7 @@ int main(int argc, char *argv[])
     can_socket = setup_can_socket(can_ifname, can_variant);
     if (can_socket < 0) goto err;
 
-    avtp_to_can(fd, can_socket, can_variant, use_udp, STREAM_ID);
+    avtp_to_can(fd, can_socket, can_variant, use_udp, listener_stream_id);
 
     return 0;
 

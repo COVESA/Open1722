@@ -53,6 +53,8 @@
 
 #define ARGPARSE_CAN_FD_OPTION      500
 #define ARGPARSE_CAN_IF_OPTION      501
+#define ARGPARSE_TALKER_ID_OPTION      502
+#define ARGPARSE_LISTENER_ID_OPTION     503
 #define TALKER_STREAM_ID            0xAABBCCDDEEFF0001
 #define LISTENER_STREAM_ID  	    0xAABBCCDDEEFF0001
 
@@ -66,6 +68,8 @@ static uint32_t udp_port = 17220;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
+static uint64_t talker_stream_id = TALKER_STREAM_ID;
+static uint64_t listener_stream_id = LISTENER_STREAM_ID;
 
 int eth_socket, can_socket;
 struct sockaddr* dest_addr;
@@ -88,6 +92,8 @@ static struct argp_option options[] = {
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
     {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
+    {"listener-stream-id", ARGPARSE_LISTENER_ID_OPTION, "STREAM_ID", 0, "Stream ID for listener stream"},
+    {"talker-stream-id", ARGPARSE_TALKER_ID_OPTION, "STREAM_ID", 0, "Stream ID for talker stream"},
     { 0 }
 };
 
@@ -138,6 +144,12 @@ static error_t parser(int key, char *arg, struct argp_state *state)
             exit(EXIT_FAILURE);
         }
         break;
+    case ARGPARSE_LISTENER_ID_OPTION:
+        listener_stream_id = atoi(arg);
+        break;
+    case ARGPARSE_TALKER_ID_OPTION:
+        talker_stream_id = atoi(arg);
+        break;
     }
 
     return 0;
@@ -149,13 +161,13 @@ void* can_to_avtp_runnable(void* args) {
 
     // Invoke the spinning function to convert CAN frames to AVTP frames
     can_to_avtp(eth_socket, can_socket, can_variant, use_udp, use_tscf,
-                TALKER_STREAM_ID, num_acf_msgs, dest_addr);
+                talker_stream_id, num_acf_msgs, dest_addr);
 }
 
 void* avtp_to_can_runnable(void* args) {
 
     avtp_to_can(eth_socket, can_socket, can_variant,
-                 use_udp, LISTENER_STREAM_ID);
+                 use_udp, listener_stream_id);
 
     return NULL;
 }

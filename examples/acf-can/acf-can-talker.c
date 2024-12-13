@@ -46,6 +46,7 @@
 #define CAN_PAYLOAD_MAX_SIZE        16*4
 #define ARGPARSE_CAN_FD_OPTION      500
 #define ARGPARSE_CAN_IF_OPTION      501
+#define ARGPARSE_TALKER_ID_OPTION      502
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -57,6 +58,7 @@ static uint8_t use_udp = 0;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
+static uint64_t talker_stream_id = STREAM_ID;
 
 static char doc[] =
         "\nacf-can-talker -- a program designed to send CAN messages to a remote CAN bus over Ethernet using Open1722.\
@@ -75,6 +77,7 @@ static struct argp_option options[] = {
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
+    {"stream-id", ARGPARSE_TALKER_ID_OPTION, "STREAM_ID", 0, "Stream ID for talker stream"},
     { 0 }
 };
 
@@ -123,6 +126,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
             exit(EXIT_FAILURE);
         }
         break;
+    case ARGPARSE_TALKER_ID_OPTION:
+        talker_stream_id = atoi(arg);
+        break;
     }
 
     return 0;
@@ -163,7 +169,7 @@ int main(int argc, char *argv[])
 
     // Invoke the spinning function to convert CAN frames to AVTP frames
     can_to_avtp(fd, can_socket, can_variant, use_udp, use_tscf,
-                STREAM_ID, num_acf_msgs, dest_addr);
+                talker_stream_id, num_acf_msgs, dest_addr);
 
 err:
     close(fd);
