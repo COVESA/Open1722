@@ -62,7 +62,7 @@ static char can_ifname[IFNAMSIZ];
 static uint64_t listener_stream_id = STREAM_ID;
 
 static char doc[] =
-        "\nacf-can-listener -- a program designed to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
+        "\nacf-can-listener -- a program to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
         \vEXAMPLES\n\
         acf-can-listener -i eth0 -d aa:bb:cc:dd:ee:ff --canif can1\n\
         \t(tunnel Open1722 CAN messages received from eth0 to can1)\n\
@@ -70,7 +70,7 @@ static char doc[] =
         \t(tunnel Open1722 CAN messages received over UDP from port 17220 to can1)";
 
 static struct argp_option options[] = {
-    {"udp", 'u', 0, 0, "Use UDP" },
+    {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)" },
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"canif", ARGPARSE_CAN_IF_OPTION, "CAN_IF", 0, "CAN interface"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},

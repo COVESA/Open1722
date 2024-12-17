@@ -61,7 +61,7 @@ static char can_ifname[IFNAMSIZ];
 static uint64_t talker_stream_id = STREAM_ID;
 
 static char doc[] =
-        "\nacf-can-talker -- a program designed to send CAN messages to a remote CAN bus over Ethernet using Open1722.\
+        "\nacf-can-talker -- a program to send CAN messages to a remote CAN bus over Ethernet using Open1722.\
          \vEXAMPLES\n\
          acf-can-talker -i eth0 -d aa:bb:cc:ee:dd:ff --canif vcan0\n\
          \t(tunnel transactions from CAN vcan0 over Ethernet eth0)\n\n\
@@ -69,8 +69,8 @@ static char doc[] =
          \t(tunnel transactions from vcan1 interface using UDP)";
 
 static struct argp_option options[] = {
-    {"tscf", 't', 0, 0, "Use TSCF"},
-    {"udp", 'u', 0, 0, "Use UDP" },
+    {"tscf", 't', 0, 0, "Use TSCF (Default: NTSCF)"},
+    {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)" },
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"canif", ARGPARSE_CAN_IF_OPTION, "CAN_IF", 0, "CAN interface"},
