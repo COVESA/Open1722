@@ -59,6 +59,7 @@ static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
 static uint64_t talker_stream_id = STREAM_ID;
+static char ip_addr_str[100];
 
 static char doc[] =
         "\nacf-can-talker -- a program to send CAN messages to a remote CAN bus over Ethernet using Open1722.\
@@ -84,7 +85,6 @@ static struct argp_option options[] = {
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
     int res;
-    char ip_addr_str[100];
 
     switch (key) {
     case 't':
@@ -144,6 +144,25 @@ int main(int argc, char *argv[])
     struct sockaddr* dest_addr;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
+    printf("acf-talker-configuration:\n");
+    if(use_tscf)
+        printf("\tUsing TSCF\n");
+    else
+        printf("\tUsing NTSCF\n");
+    if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Classic CAN\n");
+    else if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Ethernet\n");
+    if(use_udp) {
+        printf("\tUsing UDP\n");
+        printf("\tDestination IP: %s, Send port: %d\n", ip_addr_str, udp_port);
+    } else {
+        printf("\tUsing Ethernet\n");
+        printf("\tNetwork Interface: %s\n", ifname);
+        printf("\tDestination MAC Address: %x:%x:%x:%x:%x:%x\n", macaddr[0], macaddr[1], macaddr[2],
+                                                        macaddr[3], macaddr[4], macaddr[5]);
+    }
+    printf("\tTalker Stream ID: %lx\n", talker_stream_id);
 
     // Create an appropriate talker socket: UDP or Ethernet raw
     // Setup the socket for sending to the destination

@@ -56,8 +56,7 @@ CAN bus over Ethernet using Open1722.
 _acf-can-bridge_ bridges the Ethernet domain with the CAN domain, i.e., all received IEEE 1722 ACF frames will be parsed for extracting CAN frames which will be sent out on CAN bus and all received CAN frames will be packed into IEEE 1722 ACF messages and sent out on the Ethernet interface.
 
 ```
-acf-can-bridge -- a program designed to receive CAN messages from a remote CAN
-bus over Ethernet using Open1722.
+acf-can-bridge -- a program for bridging a CAN interface with an Ethernet interface using IEEE 1722.
 
       --canif=CAN_IF         CAN interface
   -c, --count=COUNT          Set count of CAN messages per Ethernet frame

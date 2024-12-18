@@ -126,6 +126,20 @@ int main(int argc, char *argv[])
     struct ifreq ifr;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
+    // Print current configuration
+    printf("acf-can-listener configuration:\n");
+    if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Classic CAN\n");
+    else if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Ethernet\n");
+    if(use_udp) {
+        printf("\tUsing UDP\n");
+        printf("\tListening port: %d\n", udp_port);
+    } else {
+        printf("\tUsing Ethernet\n");
+        printf("\tNetwork Interface: %s\n", ifname);
+    }
+    printf("\tListener Stream ID: %lx", listener_stream_id);
 
     // Configure an appropriate socket: UDP or Ethernet Raw
     if (use_udp) {

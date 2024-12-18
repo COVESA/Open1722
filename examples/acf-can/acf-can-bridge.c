@@ -64,18 +64,20 @@ static uint8_t ip_addr[sizeof(struct in_addr)];
 static int priority = -1;
 static uint8_t use_tscf = 0;
 static uint8_t use_udp = 0;
-static uint32_t udp_port = 17220;
+static uint32_t udp_listen_port = 17220;
+static uint32_t udp_send_port = 17220;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
 static uint64_t talker_stream_id = TALKER_STREAM_ID;
 static uint64_t listener_stream_id = LISTENER_STREAM_ID;
+static char ip_addr_str[100];
 
 int eth_socket, can_socket;
 struct sockaddr* dest_addr;
 
 static char doc[] =
-        "\nacf-can-bridge -- a program designed to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
+        "\nacf-can-bridge -- a program for bridging a CAN interface with an Ethernet interface using IEEE 1722.\
         \vEXAMPLES\n\
         acf-can-bridge -i eth0 -d aa:bb:cc:dd:ee:ff --canif can1\n\
         \t(Bridge eth0 with can1 using Open1722 using Ethernet)\n\
@@ -100,14 +102,13 @@ static struct argp_option options[] = {
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
     int res;
-    char ip_addr_str[100];
 
     switch (key) {
     case 't':
         use_tscf = 1;
         break;
     case 'p':
-        udp_port = atoi(arg);
+        udp_listen_port = atoi(arg);
         break;
     case 'u':
         use_udp = 1;
@@ -133,7 +134,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         }
         break;
     case 'n':
-        res = sscanf(arg, "%[^:]:%d", ip_addr_str, &udp_port);
+        res = sscanf(arg, "%[^:]:%d", ip_addr_str, &udp_send_port);
         if (!res) {
             fprintf(stderr, "Invalid IP address or port\n");
             exit(EXIT_FAILURE);
@@ -181,15 +182,36 @@ int main(int argc, char *argv[])
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
+    // Print current configuration
+    printf("acf-can-bridge configuration:\n");
+    if(use_tscf)
+        printf("\tUsing TSCF\n");
+    else
+        printf("\tUsing NTSCF\n");
+    if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Classic CAN\n");
+    else if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing Ethernet\n");
+    if(use_udp) {
+        printf("\tUsing UDP\n");
+        printf("\tDestination IP: %s, Send port: %d, listening port: %d\n", ip_addr_str, udp_send_port, udp_listen_port);
+    } else {
+        printf("\tUsing Ethernet\n");
+        printf("\tNetwork Interface: %s\n", ifname);
+        printf("\tDestination MAC Address: %x:%x:%x:%x:%x:%x\n", macaddr[0], macaddr[1], macaddr[2],
+                                                        macaddr[3], macaddr[4], macaddr[5]);
+    }
+    printf("\tListener Stream ID: %lx, Talker Stream ID: %lx\n", listener_stream_id, talker_stream_id);
+
     // Create an appropriate sockets: UDP or Ethernet raw
     // Setup the socket for sending to the destination
     if (use_udp) {
-        eth_socket = create_listener_socket_udp(udp_port);
+        eth_socket = create_listener_socket_udp(udp_listen_port);
         if (eth_socket < 0) return 1;
 
         // Prepare socket for sending to the destination
         res = setup_udp_socket_address((struct in_addr*) ip_addr,
-                                       udp_port, &sk_udp_addr);
+                                       udp_send_port, &sk_udp_addr);
         dest_addr = (struct sockaddr*) &sk_udp_addr;
     } else {
         eth_socket = create_listener_socket(ifname, macaddr, ETH_P_TSN);
