@@ -576,7 +576,7 @@ void Avtp_Vss_SetVssData(Avtp_Vss_t* pdu, VssData_t* val) {
 void Avtp_Vss_SerializeStringArray(VssDataStringArray_t* vss_data_string_array,
                                    VssDataString_t* strings[], uint16_t num_strings) {
 
-    uint16_t total_length = 0, idx = 0;
+    uint16_t total_length = 0;
     uint8_t* data = vss_data_string_array->data;
     for (int i = 0; i < num_strings; i++) {
         total_length += strings[i]->data_length+2;

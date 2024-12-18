@@ -163,6 +163,8 @@ void* can_to_avtp_runnable(void* args) {
     // Invoke the spinning function to convert CAN frames to AVTP frames
     can_to_avtp(eth_socket, can_socket, can_variant, use_udp, use_tscf,
                 talker_stream_id, num_acf_msgs, dest_addr);
+
+    return NULL;
 }
 
 void* avtp_to_can_runnable(void* args) {
