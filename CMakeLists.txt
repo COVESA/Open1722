@@ -1,166 +1,59 @@
+#
+# Copyright (c) 2024, COVESA
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#    # Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer.
+#    # Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
+#      documentation and/or other materials provided with the distribution.
+#    # Neither the name of COVESA nor the names of its contributors may be
+#      used to endorse or promote products derived from this software without
+#      specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
 cmake_minimum_required(VERSION 3.20)
-
-project(Open1722 VERSION 0.1)
-
+project(open1722 VERSION 0.1.0 LANGUAGES C DESCRIPTION "Library implementing IEEE 1722")
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
-#### Libraries ################################################################
+# Generate compile_commands.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
-add_library(open1722 SHARED
-    "src/avtp/CommonHeader.c"
-    "src/avtp/Crf.c"
-    "src/avtp/Rvf.c"
-    "src/avtp/Udp.c"
-    "src/avtp/Utils.c"
-    "src/avtp/aaf/Aaf.c"
-    "src/avtp/aaf/Pcm.c"
-    "src/avtp/acf/FlexRay.c"
-    "src/avtp/acf/Gpc.c"
-    "src/avtp/acf/Can.c"
-    "src/avtp/acf/CanBrief.c"
-    "src/avtp/acf/Lin.c"
-    "src/avtp/acf/Most.c"
-    "src/avtp/acf/AcfCommon.c"
-    "src/avtp/acf/Ntscf.c"
-    "src/avtp/acf/Sensor.c"
-    "src/avtp/acf/SensorBrief.c"
-    "src/avtp/acf/Tscf.c"
-    "src/avtp/cvf/Cvf.c"
-    "src/avtp/cvf/H264.c"
-    "src/avtp/cvf/Jpeg2000.c"
-    "src/avtp/cvf/Mjpeg.c"
-)
-set_target_properties(open1722 PROPERTIES VERSION ${PROJECT_VERSION})
-target_include_directories(open1722 PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+# Compiler setting
+add_compile_options(-Wfatal-errors)
+find_program(CCACHE_BIN ccache)
+if(CCACHE_BIN)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_BIN})
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_BIN})
+  message("Use ccache from ${CCACHE_BIN}")
+endif()
 
-add_library(open1722custom SHARED
-    "src/avtp/acf/custom/Vss.c"
-    "src/avtp/acf/custom/VssBrief.c"
-)
-set_target_properties(open1722custom PROPERTIES VERSION ${PROJECT_VERSION})
-target_include_directories(open1722custom PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+add_subdirectory(src)
+add_custom_target(examples)
+add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-if (UNIT_TESTING)
-    target_compile_options(open1722 PRIVATE -coverage)
-    target_link_options(open1722 PRIVATE -coverage)
-    target_compile_options(open1722custom PRIVATE -coverage)
-    target_link_options(open1722custom PRIVATE -coverage)
-endif(UNIT_TESTING)
+enable_testing()
+add_custom_target(unittests)
+add_subdirectory(unit EXCLUDE_FROM_ALL)
 
-#### Examples #################################################################
-
-# Common library accross all examples
-add_library(open1722examples STATIC "examples/common/common.c")
-target_include_directories(open1722examples PRIVATE "examples" "include")
-
-# AAF listener app
-add_executable(aaf-listener "examples/aaf/aaf-listener.c")
-target_include_directories(aaf-listener PRIVATE "examples" "include")
-target_link_libraries(aaf-listener open1722 open1722examples)
-
-# AAF talker app
-add_executable(aaf-talker "examples/aaf/aaf-talker.c")
-target_include_directories(aaf-talker PRIVATE "examples" "include")
-target_link_libraries(aaf-talker open1722 open1722examples)
-
-# CAN talker app
-add_executable(acf-can-talker "examples/acf-can/acf-can-talker.c" "examples/acf-can/acf-can-common.c")
-target_include_directories(acf-can-talker PRIVATE "examples" "include")
-target_link_libraries(acf-can-talker open1722 open1722examples)
-
-# CAN listener app
-add_executable(acf-can-listener "examples/acf-can/acf-can-listener.c" "examples/acf-can/acf-can-common.c")
-target_include_directories(acf-can-listener PRIVATE "examples" "include")
-target_link_libraries(acf-can-listener open1722 open1722examples)
-
-# CAN bridge app
-add_executable(acf-can-bridge "examples/acf-can/acf-can-bridge.c" "examples/acf-can/acf-can-common.c")
-target_include_directories(acf-can-bridge PRIVATE "examples" "include")
-target_link_libraries(acf-can-bridge open1722 open1722examples pthread)
-
-# CRF talker app
-add_executable(crf-talker "examples/crf/crf-talker.c")
-target_include_directories(crf-talker PRIVATE "examples" "include")
-target_link_libraries(crf-talker open1722 open1722examples m)
-
-# CRF listener app
-add_executable(crf-listener "examples/crf/crf-listener.c")
-target_include_directories(crf-listener PRIVATE "examples" "include")
-target_link_libraries(crf-listener open1722 open1722examples m)
-
-# CVF talker app
-add_executable(cvf-talker "examples/cvf/cvf-talker.c")
-target_include_directories(cvf-talker PRIVATE "examples" "include")
-target_link_libraries(cvf-talker open1722 open1722examples)
-
-# CVF listener app
-add_executable(cvf-listener "examples/cvf/cvf-listener.c")
-target_include_directories(cvf-listener PRIVATE "examples" "include")
-target_link_libraries(cvf-listener open1722 open1722examples)
-
-# Hello-world talker app
-add_executable(hello-world-talker "examples/hello-world/hello-world-talker.c")
-target_include_directories(hello-world-talker PRIVATE "examples" "include")
-target_link_libraries(hello-world-talker open1722 open1722examples)
-
-# Hello-world listener app
-add_executable(hello-world-listener "examples/hello-world/hello-world-listener.c")
-target_include_directories(hello-world-listener PRIVATE "examples" "include")
-target_link_libraries(hello-world-listener open1722 open1722examples)
-
-# VSS talker app
-add_executable(acf-vss-talker "examples/acf-vss/acf-vss-talker.c")
-target_include_directories(acf-vss-talker PRIVATE "examples" "include")
-target_link_libraries(acf-vss-talker open1722 open1722examples open1722custom)
-
-# VSS listener app
-add_executable(acf-vss-listener "examples/acf-vss/acf-vss-listener.c")
-target_include_directories(acf-vss-listener PRIVATE "examples" "include")
-target_link_libraries(acf-vss-listener open1722 open1722examples open1722custom)
-
-#### Tests ####################################################################
-if (UNIT_TESTING)
-    include(CTest)
-    find_package(cmocka 1.1.0 REQUIRED)
-
-    if (cmocka_FOUND)
-        list(APPEND TEST_TARGETS test-aaf)
-        list(APPEND TEST_TARGETS test-avtp)
-        list(APPEND TEST_TARGETS test-can)
-        list(APPEND TEST_TARGETS test-crf)
-        list(APPEND TEST_TARGETS test-cvf)
-        list(APPEND TEST_TARGETS test-rvf)
-        list(APPEND TEST_TARGETS test-vss)
-
-        foreach(TEST_TARGET IN LISTS TEST_TARGETS)
-            add_executable(${TEST_TARGET} "unit/${TEST_TARGET}.c")
-            target_include_directories(${TEST_TARGET} PRIVATE "include")
-            target_link_libraries(${TEST_TARGET} open1722 cmocka m open1722custom)
-            add_test(NAME ${TEST_TARGET} COMMAND "${PROJECT_BINARY_DIR}/${TEST_TARGET}")
-        endforeach()
-    endif(cmocka_FOUND)
-endif(UNIT_TESTING)
-
-
-#### Install ##################################################################
-
+install(DIRECTORY include/ DESTINATION include)
 install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)
-install(TARGETS
-    aaf-listener
-    aaf-talker
-    acf-can-listener
-    acf-can-talker
-    crf-listener
-    crf-talker
-    cvf-listener
-    cvf-talker
-    DESTINATION bin)
-install(DIRECTORY "include/" DESTINATION include)
 
 #### Export Configuration #####################################################
 
