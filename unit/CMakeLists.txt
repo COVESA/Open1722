@@ -30,6 +30,11 @@
 include(CTest)
 find_package(cmocka 1.1.0 REQUIRED)
 
+target_compile_options(open1722 PRIVATE -coverage)
+target_link_options(open1722 PRIVATE -coverage)
+target_compile_options(open1722custom PRIVATE -coverage)
+target_link_options(open1722custom PRIVATE -coverage)
+
 add_executable(test-can test-can.c)
 target_link_libraries(test-can open1722 cmocka m)
 target_include_directories(test-can PUBLIC ../include)
