@@ -4,8 +4,9 @@ set -ev
 rm -rf build
 mkdir build
 cd build
-cmake .. -DUNIT_TESTING=on
+cmake ..
 make -j`nproc`
+make unittests
 make test
 
 lcov -c -d . -o main_coverage.info

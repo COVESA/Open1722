@@ -56,15 +56,22 @@ Alternatively, you can use VS Code to run the provided dev container which takes
 The first step to build Open1722 is to generate the Makefile and build the project.
 ```
 $ mkdir build
-$ cd buid
+$ cd build
 $ cmake ..
 $ make
 ```
+This builds the libraries _libopen1722_ containing all the data formats specified in the IEEE 1722-2016 specification along with _libopen1722custom_ which contains customized serialization formats which can be sent over IEEE 1722.
 
-To execute available unit tests, set the Cmake variable UNIT_TESTING.
+To execute available unit tests:
 ```
-$ cmake .. -DUNIT_TESTING=on
-$ make
+$ cmake ..
+$ make unittests
+$ make test
+```
+
+The [examples](./examples/) can be built as follows:
+```
+$ make examples
 ```
 
 The build can be cleaned using the following command:
