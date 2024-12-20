@@ -38,7 +38,17 @@ target_include_directories(${LIB_NAME} PRIVATE
     $<INSTALL_INTERFACE:include>)
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
+add_library(${LIB_NAME}custom SHARED)
+target_compile_options(${LIB_NAME}custom PRIVATE -Wall -Wextra)
+target_include_directories(${LIB_NAME}custom PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+set_target_properties(${LIB_NAME}custom PROPERTIES VERSION ${PROJECT_VERSION})
+
 install(TARGETS ${LIB_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS ${LIB_NAME}custom
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 

@@ -31,7 +31,7 @@ add_library(open1722examples STATIC "common/common.c")
 target_include_directories(open1722examples PRIVATE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-    $(CMAKE_CURRENT_SOURCE_DIR))
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_dependencies(examples open1722examples)
 
