@@ -27,29 +27,39 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-set(LIB_NAME "${PROJECT_NAME}" )
+set(LIB_NAME "open1722" )
 
 file(GLOB LIB_SOURCES *.c)
 
-add_library(${LIB_NAME} SHARED ${LIB_SOURCES})
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    add_library(${LIB_NAME} SHARED ${LIB_SOURCES})
+elseif(DEFINED ENV{ZEPHYR_BASE})
+    add_library(${LIB_NAME} STATIC ${LIB_SOURCES})
+endif()
 target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra)
 target_include_directories(${LIB_NAME} PRIVATE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
-add_library(${LIB_NAME}custom SHARED)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    add_library(${LIB_NAME}custom SHARED ${LIB_SOURCES})
+elseif(DEFINED ENV{ZEPHYR_BASE})
+    add_library(${LIB_NAME}custom STATIC ${LIB_SOURCES})
+endif()
 target_compile_options(${LIB_NAME}custom PRIVATE -Wall -Wextra)
 target_include_directories(${LIB_NAME}custom PRIVATE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 set_target_properties(${LIB_NAME}custom PROPERTIES VERSION ${PROJECT_VERSION})
 
-install(TARGETS ${LIB_NAME}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS ${LIB_NAME}custom
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    install(TARGETS ${LIB_NAME}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    install(TARGETS ${LIB_NAME}custom
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
 
 add_subdirectory(avtp)

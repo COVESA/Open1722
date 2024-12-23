@@ -29,8 +29,6 @@
 
 # Setup target names
 
-set(LIB_NAME "${PROJECT_NAME}" )
-
 file(GLOB LIB_SOURCES *.c)
 
 target_sources(${LIB_NAME} PRIVATE ${LIB_SOURCES})

@@ -29,7 +29,7 @@
 
 # Setup target names
 
-set(LIB_NAME "${PROJECT_NAME}custom" )
+set(LIB_NAME "${LIB_NAME}custom" )
 
 file(GLOB LIB_SOURCES *.c)
 
