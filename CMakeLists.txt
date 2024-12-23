@@ -35,6 +35,11 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
+# Check if we are building for Zephyr and include its dependencies accordingly.
+if (DEFINED ENV{ZEPHYR_BASE})
+    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+endif()
+
 # Compiler setting
 add_compile_options(-Wfatal-errors)
 find_program(CCACHE_BIN ccache)
@@ -48,35 +53,38 @@ add_subdirectory(src)
 add_custom_target(examples)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-enable_testing()
-add_custom_target(unittests)
-add_subdirectory(unit EXCLUDE_FROM_ALL)
+# Build tests and install artefacts only for Linux systems
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    enable_testing()
+    add_custom_target(unittests)
+    add_subdirectory(unit EXCLUDE_FROM_ALL)
 
-install(DIRECTORY include/ DESTINATION include)
-install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)
+    install(DIRECTORY include/ DESTINATION include)
+    install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)
 
-#### Export Configuration #####################################################
+    #### Export Configuration #####################################################
 
-install(EXPORT Open1722Targets FILE Open1722Targets.cmake DESTINATION lib/cmake/Open1722)
+    install(EXPORT Open1722Targets FILE Open1722Targets.cmake DESTINATION lib/cmake/Open1722)
 
-include(CMakePackageConfigHelpers)
+    include(CMakePackageConfigHelpers)
 
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake"
-    INSTALL_DESTINATION "lib/cmake/Open1722")
+    configure_package_config_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake"
+        INSTALL_DESTINATION "lib/cmake/Open1722")
 
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
-    VERSION "${open1722_VERSION_MAJOR}.${open1722_VERSION_MINOR}"
-    COMPATIBILITY AnyNewerVersion)
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
+        VERSION "${open1722_VERSION_MAJOR}.${open1722_VERSION_MINOR}"
+        COMPATIBILITY AnyNewerVersion)
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
-    DESTINATION lib/cmake/Open1722)
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
+        DESTINATION lib/cmake/Open1722)
 
-export(EXPORT Open1722Targets FILE ${CMAKE_CURRENT_BINARY_DIR}/Open1722Targets.cmake)
+    export(EXPORT Open1722Targets FILE ${CMAKE_CURRENT_BINARY_DIR}/Open1722Targets.cmake)
+endif()
 
 #### Packaging ################################################################
 

@@ -46,3 +46,7 @@ install(TARGETS
     acf-can-talker
     acf-can-bridge
     RUNTIME DESTINATION bin)
+
+if (DEFINED ENV{ZEPHYR_BASE})
+    add_subdirectory(zephyr)
+endif()

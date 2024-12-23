@@ -27,17 +27,22 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_library(open1722examples STATIC "common/common.c")
-target_include_directories(open1722examples PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    ${CMAKE_CURRENT_SOURCE_DIR})
+# These examples are currently exclusively for Linux
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    add_library(open1722examples STATIC "common/common.c")
+    target_include_directories(open1722examples PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_dependencies(examples open1722examples)
+    add_dependencies(examples open1722examples)
 
-add_subdirectory(aaf)
+    add_subdirectory(aaf)
+    add_subdirectory(crf)
+    add_subdirectory(cvf)
+    add_subdirectory(hello-world)
+endif()
+
+# These examples can be also built for Zephyr
 add_subdirectory(acf-can)
 add_subdirectory(acf-vss)
-add_subdirectory(crf)
-add_subdirectory(cvf)
-add_subdirectory(hello-world)
