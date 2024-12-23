@@ -54,7 +54,10 @@ int setup_can_socket(const char* can_ifname,
     struct sockaddr_can can_addr;
 
     can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (can_socket < 0) return can_socket;
+    if (can_socket < 0) {
+        perror("Failed to create CAN socket");
+        return can_socket;
+    }
 
     strcpy(ifr.ifr_name, can_ifname);
     ioctl(can_socket, SIOCGIFINDEX, &ifr);
@@ -71,6 +74,7 @@ int setup_can_socket(const char* can_ifname,
 
     res = bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr));
     if (res < 0) {
+        perror("Failed to bind CAN socket");
         close(can_socket);
         return res;
     }
