@@ -28,7 +28,12 @@
 #
 
 include(CTest)
-find_package(cmocka 1.1.0 REQUIRED)
+find_package(cmocka 1.1.0 QUIET)
+
+if (NOT cmocka_FOUND)
+  message(STATUS "cmocka not found, tests will not be built")
+  return()
+endif()
 
 target_compile_options(open1722 PRIVATE -coverage)
 target_link_options(open1722 PRIVATE -coverage)
