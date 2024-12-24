@@ -115,6 +115,10 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case 'c':
         num_acf_msgs = atoi(arg);
+        if ((num_acf_msgs < 1) || (num_acf_msgs > MAX_CAN_FRAMES_IN_ACF)) {
+            fprintf(stderr, "Invalid number of CAN messages in one AVTP frame.\n");
+            exit(EXIT_FAILURE);
+        }
         break;
     case ARGPARSE_CAN_FD_OPTION:
         can_variant = AVTP_CAN_FD;
@@ -161,17 +165,91 @@ static struct argp argp = { options, parser, NULL, doc};
 
 void* can_to_avtp_runnable(void* args) {
 
-    // Invoke the spinning function to convert CAN frames to AVTP frames
-    can_to_avtp(eth_socket, can_socket, can_variant, use_udp, use_tscf,
-                talker_stream_id, num_acf_msgs, dest_addr);
+    uint8_t cf_seq_num = 0;
+    uint32_t udp_seq_num = 0;
+
+    uint8_t pdu[MAX_ETH_PDU_SIZE];
+    uint16_t pdu_length = 0;
+    frame_t can_frames[num_acf_msgs];
+    int res;
+
+    // Start an infinite loop to keep converting CAN frames to AVTP frames
+    for(;;) {
+
+        // Read acf_num_msgs number of CAN frames from the CAN socket
+        int i = 0;
+        while (i < num_acf_msgs) {
+            // Get payload -- will 'spin' here until we get the requested number
+            //                of CAN frames.
+            if(can_variant == AVTP_CAN_FD){
+                res = read(can_socket, &(can_frames[i].fd), sizeof(struct canfd_frame));
+            } else {
+                res = read(can_socket, &(can_frames[i].cc), sizeof(struct can_frame));
+            }
+            if (!res) {
+                perror("Error reading CAN frames");
+                continue;
+            }
+            i++;
+        }
+
+        // Pack all the read frames into an AVTP frame
+        pdu_length = can_to_avtp(can_frames, can_variant, pdu, use_udp, use_tscf,
+                                    talker_stream_id, num_acf_msgs, cf_seq_num++, udp_seq_num++);
+
+        // Send the packed frame out
+        if (use_udp) {
+            res = sendto(eth_socket, pdu, pdu_length, 0,
+                    (struct sockaddr *) dest_addr, sizeof(struct sockaddr_in));
+        } else {
+            res = sendto(eth_socket, pdu, pdu_length, 0,
+                         (struct sockaddr *) dest_addr, sizeof(struct sockaddr_ll));
+        }
+        if (res < 0) {
+            perror("Failed to send data");
+        }
+    }
 
     return NULL;
 }
 
 void* avtp_to_can_runnable(void* args) {
 
-    avtp_to_can(eth_socket, can_socket, can_variant,
-                 use_udp, listener_stream_id);
+    uint16_t pdu_length = 0, cf_length = 0;
+    uint8_t num_can_msgs = 0;
+    uint8_t exp_cf_seqnum = 0;
+    uint32_t exp_udp_seqnum = 0;
+    uint8_t pdu[MAX_ETH_PDU_SIZE];
+    frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
+
+    // Start an infinite loop to keep converting AVTP frames to CAN frames
+    for(;;) {
+
+        pdu_length = recv(eth_socket, pdu, MAX_ETH_PDU_SIZE, 0);
+        if (pdu_length < 0 || pdu_length > MAX_ETH_PDU_SIZE) {
+            perror("Failed to receive data");
+            continue;
+        }
+
+        num_can_msgs = avtp_to_can(pdu, pdu_length, can_frames, can_variant, use_udp,
+                             listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
+        exp_cf_seqnum++;
+        exp_udp_seqnum++;
+
+        for (int i = 0; i < num_can_msgs; i++) {
+            int res;
+            if (can_variant == AVTP_CAN_FD)
+                res = write(can_socket, &can_frames[i].fd, sizeof(struct canfd_frame));
+            else if (can_variant == AVTP_CAN_CLASSIC)
+                res = write(can_socket, &can_frames[i].cc, sizeof(struct can_frame));
+
+            if(res < 0)
+            {
+                perror("Failed to write to CAN bus");
+                continue;
+            }
+        }
+    }
 
     return NULL;
 }
@@ -205,6 +283,7 @@ int main(int argc, char *argv[])
                                                         macaddr[3], macaddr[4], macaddr[5]);
     }
     printf("\tListener Stream ID: %lx, Talker Stream ID: %lx\n", listener_stream_id, talker_stream_id);
+    printf("\tNumber of ACF messages per AVTP frame in talker stream: %d\n", num_acf_msgs);
 
     // Create an appropriate sockets: UDP or Ethernet raw
     // Setup the socket for sending to the destination

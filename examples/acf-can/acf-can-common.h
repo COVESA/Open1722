@@ -30,11 +30,14 @@
 #include "avtp/acf/Can.h"
 
 #define MAX_ETH_PDU_SIZE                1500
+#define MAX_CAN_FRAMES_IN_ACF           15
 
 /* CAN CC/FD frame union */
 typedef union {
     struct can_frame cc;
+#ifdef __linux__
     struct canfd_frame fd;
+#endif
 } frame_t;
 
 /**
@@ -49,27 +52,34 @@ int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
 /**
  * Function that converts AVTP Frames to CAN
  *
- * @param eth_socket Ethernet/UDP socket.
- * @param can_socket CAN/CAN-FD socket
+ * @param pdu: Start of the AVTP Frame
+ * @param pdu_length: Length of the read PDU
+ * @param can_frames: Array of CAM Frames to be recovered from AVTP Frames
+ * @param can_variant: AVTP_CAN_CLASSIC or AVTP_CAN_FD
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param stream_id: AVTP stream ID of interest
+ * @param exp_cf_seqnum: Expected Control format sequence num.
+ * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
+ * @return Number of CAN messages received
  */
-void avtp_to_can(int eth_socket, int can_socket,
-                    Avtp_CanVariant_t can_variant,
-                     int use_udp, uint64_t stream_id);
+int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
+                Avtp_CanVariant_t can_variant, int use_udp, uint64_t stream_id,
+                uint8_t* exp_cf_seqnum, uint32_t* exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
  *
- * @param eth_socket Ethernet/UDP socket.
- * @param can_socket CAN/CAN-FD socket
+ * @param can_frames: Array of CAM Frames to be translated to AVTP Frames
+ * @param can_variant: AVTP_CAN_CLASSIC or AVTP_CAN_FD
+ * @param pdu: Start of AVTP Frame
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param use_tscf 1: TSCF, 0: NTSCF
  * @param stream_id: AVTP stream ID of interest
  * @param num_acf_msgs: No. of ACF CAN messages to aggregate
- * @param dst_addr: Destination
+ * @param cf_seq_num: Control format sequence num.
+ * @param udp_seq_num: UDP Encapsulation sequence num.
+ * @return Length of the PDU
  */
-void can_to_avtp(int eth_socket, int can_socket,
-                    Avtp_CanVariant_t can_variant,
+int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu,
                      int use_udp, int use_tscf, uint64_t stream_id,
-                     uint8_t num_acf_msgs, struct sockaddr* dst_addr);
+                     uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num);

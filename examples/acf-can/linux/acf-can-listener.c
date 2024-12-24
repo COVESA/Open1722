@@ -125,6 +125,12 @@ int main(int argc, char *argv[])
     int can_socket = 0;
     struct sockaddr_can can_addr;
     struct ifreq ifr;
+    uint16_t pdu_length = 0, cf_length = 0;
+    uint8_t num_can_msgs = 0;
+    uint8_t exp_cf_seqnum = 0;
+    uint32_t exp_udp_seqnum = 0;
+    uint8_t pdu[MAX_ETH_PDU_SIZE];
+    frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
     // Print current configuration
@@ -140,7 +146,7 @@ int main(int argc, char *argv[])
         printf("\tUsing Ethernet\n");
         printf("\tNetwork Interface: %s\n", ifname);
     }
-    printf("\tListener Stream ID: %lx", listener_stream_id);
+    printf("\tListener Stream ID: %lx\n", listener_stream_id);
 
     // Configure an appropriate socket: UDP or Ethernet Raw
     if (use_udp) {
@@ -156,7 +162,34 @@ int main(int argc, char *argv[])
     can_socket = setup_can_socket(can_ifname, can_variant);
     if (can_socket < 0) goto err;
 
-    avtp_to_can(fd, can_socket, can_variant, use_udp, listener_stream_id);
+    // Start an infinite loop to keep converting AVTP frames to CAN frames
+    for(;;) {
+
+        pdu_length = recv(fd, pdu, MAX_ETH_PDU_SIZE, 0);
+        if (pdu_length < 0 || pdu_length > MAX_ETH_PDU_SIZE) {
+            perror("Failed to receive data");
+            continue;
+        }
+
+        num_can_msgs = avtp_to_can(pdu, pdu_length, can_frames, can_variant, use_udp,
+                             listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
+        exp_cf_seqnum++;
+        exp_udp_seqnum++;
+
+        for (int i = 0; i < num_can_msgs; i++) {
+            int res;
+            if (can_variant == AVTP_CAN_FD)
+                res = write(can_socket, &can_frames[i].fd, sizeof(struct canfd_frame));
+            else if (can_variant == AVTP_CAN_CLASSIC)
+                res = write(can_socket, &can_frames[i].cc, sizeof(struct can_frame));
+
+            if(res < 0)
+            {
+                perror("Failed to write to CAN bus");
+                continue;
+            }
+        }
+    }
 
     return 0;
 
