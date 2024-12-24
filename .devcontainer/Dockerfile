@@ -15,6 +15,6 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 
 # [Optional] Uncomment this section to install additional packages.
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends meson libcmocka0 \
+     && apt-get -y install --no-install-recommends libcmocka0 \
                       libcmocka-dev lcov gcovr gcc-aarch64-linux-gnu \
                       libc6-dev-arm64-cross binutils-aarch64-linux-gnu
