@@ -27,9 +27,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef LINUX_KERNEL1722
+#include <linux/errno.h>
+#else
 #include <errno.h>
-#include <stdio.h>
-#include <assert.h>
+#include <stddef.h>
+#endif
+
 
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
@@ -38,7 +42,7 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-int IsFieldDescriptorValid(const Avtp_FieldDescriptor_t* fieldDescriptor)
+static int IsFieldDescriptorValid(const Avtp_FieldDescriptor_t* fieldDescriptor)
 {
     return fieldDescriptor->bits <= 64 && fieldDescriptor->offset <= 31;
 }

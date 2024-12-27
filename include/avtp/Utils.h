@@ -36,7 +36,6 @@
 
 #pragma once
 
-#include <stdint.h>
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
 
