@@ -28,7 +28,7 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include "avtp/IntTypes.h"
 
 #ifdef __cplusplus
 extern "C" {

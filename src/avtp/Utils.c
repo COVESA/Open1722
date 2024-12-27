@@ -27,9 +27,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef LINUX_KERNEL1722
+#include <linux/errno.h>
+#else
 #include <errno.h>
-#include <stdio.h>
-#include <assert.h>
+#endif
+
 
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"

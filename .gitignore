@@ -15,6 +15,7 @@
 /CPackSourceConfig.cmake
 /install_manifest.txt
 /_CPack_Packages
-
+*.o
+*.o.cmd
 *~
 .vscode
