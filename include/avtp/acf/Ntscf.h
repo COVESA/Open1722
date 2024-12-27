@@ -35,7 +35,11 @@
 
 #pragma once
 
+#ifdef LINUX_KERNEL1722
+#include <linux/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #include "avtp/Defines.h"
 
@@ -48,7 +52,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_NTSCF_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Ntscf_t;
+} __attribute__((packed)) Avtp_Ntscf_t;
 
 typedef enum {
     AVTP_NTSCF_FIELD_SUBTYPE,

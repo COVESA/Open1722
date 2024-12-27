@@ -28,7 +28,11 @@
  */
 #pragma once
 
+#ifdef LINUX_KERNEL1722
+#include <linux/types.h>
+#else
 #include <stdint.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

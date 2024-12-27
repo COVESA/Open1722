@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <stdint.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -49,7 +48,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_CAN_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Can_t;
+} __attribute__((packed)) Avtp_Can_t;
 
 typedef enum {
     AVTP_CAN_CLASSIC = 0,

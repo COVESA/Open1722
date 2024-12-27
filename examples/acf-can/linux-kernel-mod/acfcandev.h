@@ -1,5 +1,7 @@
-/*
- * Copyright (c) 2024, COVESA
+/* acfcan.c - Virtual IEEE 1722 acf-can CAN interface
+ *
+ * Copyright (c) 2024 COVESA Open1722
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -9,7 +11,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -29,39 +31,37 @@
 
 #pragma once
 
-#ifdef LINUX_KERNEL1722
 #include <linux/types.h>
-#else
-#include <stdint.h>
-#endif
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <linux/can/can-ml.h>
+#include <net/net_trackers.h>
+#include <linux/list.h>
 
-/**
- * Max bits that the parser supports for a single data field within a 1722
- * frame. If for some niche use-case a data field bigger than 64bits must be
- * supported this data filed must be split into two or more fields.
- */
-#define AVTP_FIELD_MAX_BITS 64
+#define IEEE1722_PROTO 0x22f0
 
-// Sizes of 1722 PDU formats
-#define AVTP_QUADLET_SIZE 4
+#define TX_ENABLE (1 << 7)
+#define RX_ENABLE (1 << 6)
 
-/**
- * This type describes the position of a data field within an 1722 frame.
- * A data field can be uniquely identified by
- *
- * (1) the number of quadlet the contains the first bit of the data field,
- * (2) the bit position within the quadlet (aka shift) and
- * (3) The size of the data field in bits (max 64 bits).
- */
-typedef struct Avtp_FieldDescriptor {
-    uint8_t quadlet;
-    uint8_t offset;
-    uint8_t bits;
-} Avtp_FieldDescriptor_t;
+// this is more guesswork. We need some space and it seems
+// raw can is using one int.... Not sure what would happen with
+// ISO-TP and such things....
+#define SKB_CB_LOCATION 4
+#define SKB_CB_MINE (1 << 7)
 
-#ifdef __cplusplus
-}
-#endif
+/* Private per-device configuration */
+struct acfcan_cfg
+{
+    struct list_head list; // we need a list so we can map received ethernet packets
+    __u8 dstmac[6];        // send acf-can frames to this mac
+    __u64 rx_streamid;     // listen to this acf-can stream-id
+    __u64 tx_streamid;     // send acf-can frames with this stream-id
+    __u8 flags;
+    __u8 sequenceNum;
+    __u8 canbusId;
+    char ethif[IFNAMSIZ];
+    struct net_device *eth_netdev; // this is the eth if used for sending and receiving
+    struct net_device *can_netdev; // this is the (virtual) can if
+    netdevice_tracker tracker;
+};
+
+// get the acfcan_cfg struct from the device
+#define get_acfcan_cfg(dev) ((struct acfcan_cfg *)((char *)(can_get_ml_priv(dev)) + sizeof(struct can_ml_priv)))
