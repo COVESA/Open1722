@@ -29,6 +29,7 @@
 
 * [Naresh Nayak - Robert Bosch GmbH](https://github.com/nayakned)
 * [Adriaan Niess - Robert Bosch GmbH](https://github.com/adriaan-niess)
+* [Sebastian Schildt - ETAS](https://github.com/SebastianSchildt)
 * [Kamel Fakih - Robert Bosch GmbH](https://github.com/kamelfakihh/)
 
 ## Introduction
