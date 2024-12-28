@@ -27,17 +27,39 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef __linux__
+#include <linux/can.h>
+#elif defined(__ZEPHYR__)
+#include <zephyr/drivers/can.h>
+
+/* Defined missing in Zephyr or different from Linux but
+   required for acf-can applications*/
+#define CAN_EFF_FLAG 0x80000000U
+#define CAN_RTR_FLAG 0x40000000U
+#define CAN_ERR_FLAG 0x20000000U
+#define CAN_EFF_MASK 0x1FFFFFFFU
+#endif
+
 #include "avtp/acf/Can.h"
 
 #define MAX_ETH_PDU_SIZE                1500
 #define MAX_CAN_FRAMES_IN_ACF           15
 
-/* CAN CC/FD frame union */
-typedef union {
-    struct can_frame cc;
 #ifdef __linux__
-    struct canfd_frame fd;
+typedef struct can_frame can_frame_t;
+typedef struct canfd_frame canfd_frame_t;
+#elif defined (__ZEPHYR__)
+typedef struct can_frame can_frame_t;
+typedef struct can_frame canfd_frame_t;
 #endif
+
+/* CAN CC/FD frame union */
+/* This is needed because the data structures for CAN and CAN-FD in Linux
+    are slightly different. However, in Zephyr same data structure is used for both.
+*/
+typedef union {
+    can_frame_t cc;
+    canfd_frame_t fd;
 } frame_t;
 
 /**

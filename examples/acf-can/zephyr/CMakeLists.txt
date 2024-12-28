@@ -28,9 +28,9 @@
 #
 
 # By default build acf-can-listner
-target_sources(app PRIVATE acf-can-listener.c ../acf-can-common.c)
+#target_sources(app PRIVATE acf-can-bridge.c ../acf-can-common.c)
 
-add_executable(acf-can-listener-zephyr)
-target_sources(acf-can-listener-zephyr PRIVATE acf-can-listener.c ../acf-can-common.c)
-target_link_libraries(acf-can-listener-zephyr PRIVATE zephyr_interface open1722 open1722examples)
-target_include_directories(acf-can-listener-zephyr PUBLIC ${CMAKE_SOURCE_DIR}/include ../../)
+#add_executable(acf-can-bridge-zephyr)
+target_sources(app PRIVATE acf-can-bridge.c ../acf-can-common.c ../../common/common.c)
+target_link_libraries(app PUBLIC open1722 open1722examples zephyr_interface)
+target_include_directories(app PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
