@@ -27,10 +27,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-# By default build acf-can-listner
-#target_sources(app PRIVATE acf-can-bridge.c ../acf-can-common.c)
+# By default build acf-can-bridge
+if (NOT DEFINED OPEN1722_ZEPHYR_APP)
+    set(OPEN1722_ZEPHYR_APP "acf-can-bridge")
+endif()
 
-#add_executable(acf-can-bridge-zephyr)
-target_sources(app PRIVATE acf-can-bridge.c ../acf-can-common.c ../../common/common.c)
-target_link_libraries(app PUBLIC open1722 open1722examples zephyr_interface)
-target_include_directories(app PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
+if (${OPEN1722_ZEPHYR_APP} STREQUAL "acf-can-bridge")
+    target_sources(app PRIVATE acf-can-bridge.c ../acf-can-common.c ../../common/common.c)
+    target_link_libraries(app PUBLIC open1722 open1722examples zephyr_interface)
+    target_include_directories(app PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
+endif()
