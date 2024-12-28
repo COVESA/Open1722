@@ -28,15 +28,21 @@
  */
 
 #ifdef __linux__
-#include <linux/can.h>
 #include <linux/if_packet.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <sys/ioctl.h>
-#elif __ZEPHYR__
-#include <zephyr/drivers/can.h>
+#elif defined(__ZEPHYR__)
+#include <zephyr/kernel.h>
+#include <zephyr/net/socket.h>
+#include <zephyr/net/socketcan.h>
+#include <zephyr/net/socketcan_utils.h>
+#include <zephyr/net/ethernet.h>
+
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(acf_can_common, LOG_LEVEL_DBG);
 #endif
 
 #include <unistd.h>
@@ -51,14 +57,13 @@
 #include "acf-can-common.h"
 
 #ifdef __ZEPHYR__
-typedef canid_t uint32_t;
+typedef uint32_t canid_t;
 #endif
 
 int setup_can_socket(const char* can_ifname,
                      Avtp_CanVariant_t can_variant) {
 
     int can_socket, res;
-    struct ifreq ifr;
     struct sockaddr_can can_addr;
 
     can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -67,10 +72,12 @@ int setup_can_socket(const char* can_ifname,
         return can_socket;
     }
 
+    // Get the CAN address to bind the socket to.
+    memset(&can_addr, 0, sizeof(can_addr));
+#ifdef __linux__
+    struct ifreq ifr;
     strcpy(ifr.ifr_name, can_ifname);
     ioctl(can_socket, SIOCGIFINDEX, &ifr);
-
-    memset(&can_addr, 0, sizeof(can_addr));
     can_addr.can_family = AF_CAN;
     can_addr.can_ifindex = ifr.ifr_ifindex;
 
@@ -79,6 +86,10 @@ int setup_can_socket(const char* can_ifname,
         setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
                     &enable_canfx, sizeof(enable_canfx));
     }
+#elif defined(__ZEPHYR__)
+    can_addr.can_ifindex = net_if_get_by_name(can_ifname);
+    can_addr.can_family = AF_CAN;
+#endif
 
     res = bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr));
     if (res < 0) {
@@ -139,9 +150,9 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
                               frame_t* frame,
                               Avtp_CanVariant_t can_variant) {
 
-    int processedBytes;
     struct timespec now;
     canid_t can_id;
+    uint8_t can_payload_length;
 
     // Clear bits
     Avtp_Can_t* pdu = (Avtp_Can_t*) acf_pdu;
@@ -155,7 +166,13 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MTV, 1U);
 
     // Set required CAN Flags
+#ifdef __linux__
     can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.can_id : (*frame).cc.can_id;
+    can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.len : (*frame).cc.len;
+#elif defined(__ZEPHYR__)
+    can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.id : (*frame).cc.id;
+    can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.dlc : (*frame).cc.dlc;
+#endif
     Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_RTR, can_id & CAN_RTR_FLAG);
     Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_EFF, can_id & CAN_EFF_FLAG);
 
@@ -167,11 +184,11 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
 
     // Copy payload to ACF CAN PDU
     if(can_variant == AVTP_CAN_FD)
-        Avtp_Can_CreateAcfMessage(pdu, frame->fd.can_id & CAN_EFF_MASK, frame->fd.data,
-                                         frame->fd.len, can_variant);
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->fd.data,
+                                         can_payload_length, can_variant);
     else
-        Avtp_Can_CreateAcfMessage(pdu, frame->cc.can_id & CAN_EFF_MASK, frame->cc.data,
-                                         frame->cc.len, can_variant);
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->cc.data,
+                                         can_payload_length, can_variant);
 
     return Avtp_Can_GetAcfMsgLength(pdu)*4;
 }
@@ -219,7 +236,7 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
                 Avtp_CanVariant_t can_variant, int use_udp, uint64_t stream_id,
                 uint8_t* exp_cf_seqnum, uint32_t* exp_udp_seqnum) {
 
-    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, *can_payload, seq_num, i = 0;
+    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, seq_num, i = 0;
     uint32_t udp_seq_num;
     uint16_t proc_bytes = 0, msg_length;
     uint64_t s_id;
@@ -286,7 +303,7 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
         if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
             can_id |= CAN_EFF_FLAG;
         } else if (can_id > 0x7FF) {
-            fprintf(stderr, "Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
+            printf("Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
             return -1;
         }
 
@@ -305,12 +322,22 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
             if (Avtp_Can_GetEsi((Avtp_Can_t*)acf_pdu)) {
                 frame->fd.flags |= CANFD_ESI;
             }
+#ifdef __linux__
             frame->fd.can_id = can_id;
             frame->fd.len = can_payload_length;
+#elif defined(__ZEPHYR__)
+            frame->fd.id = can_id;
+            frame->fd.dlc = can_payload_length;
+#endif
             memcpy(frame->fd.data, can_payload, can_payload_length);
         } else {
+#ifdef __linux__
             frame->cc.can_id = can_id;
             frame->cc.len = can_payload_length;
+#elif defined(__ZEPHYR__)
+            frame->cc.id = can_id;
+            frame->cc.dlc = can_payload_length;
+#endif
             memcpy(frame->cc.data, can_payload, can_payload_length);
         }
     }
