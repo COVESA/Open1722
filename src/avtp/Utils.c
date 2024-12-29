@@ -31,6 +31,7 @@
 #include <linux/errno.h>
 #else
 #include <errno.h>
+#include <stddef.h>
 #endif
 
 
