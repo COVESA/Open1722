@@ -77,14 +77,14 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
     // Init TSCF header
     Avtp_Tscf_Init(&pdu.tscf);
     Avtp_Tscf_SetVersion(&pdu.tscf, 0);
-    Avtp_Tscf_SetSequenceNum(&pdu.tscf, 123); //This can't be right. Increase?
+    Avtp_Tscf_SetSequenceNum(&pdu.tscf, cfg->sequenceNum++); //This can't be right. Increase?
     Avtp_Tscf_SetStreamId(&pdu.tscf, cfg->streamid);
     Avtp_Tscf_SetTv(&pdu.tscf, 1);
     Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, 0x11223344); //This can't be good. Better find a timestamp from somehwere
 
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);
-    Avtp_Can_SetCanBusId(&pdu.can, 4); //maybe not good
+    Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); //maybe not good
     uint8_t canFrame[CAN_PAYLOAD_LEN] = {0x11, 0x22};
     memcpy(pdu.can.payload, cf->data, cf->len);
 

@@ -279,6 +279,8 @@ static void acfcan_setup(struct net_device *dev)
 	cfg->dstmac[5] = 0xff;
 	cfg->netdev = NULL;
 	cfg->ethif[0] = '\0';  //this is a string so setting first byte to 0 is fine
+	cfg->sequenceNum = 0;
+	cfg->canbusId = 0;
 	INIT_LIST_HEAD( & cfg->list);
 }
 

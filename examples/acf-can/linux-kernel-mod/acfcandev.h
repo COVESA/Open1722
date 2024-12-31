@@ -44,6 +44,8 @@ struct acfcan_cfg
     struct list_head list; //we need a list so we can map received ethernet packets
     __u8 dstmac[6]; //send acf-can frames to this mac
     __u64 streamid; //use acf-can stream-id
+	__u8 sequenceNum;
+	__u8 canbusId;
     char ethif[IFNAMSIZ];
     struct net_device *netdev; //use this interface for acf-can frames
     netdevice_tracker tracker;
@@ -165,6 +167,37 @@ static ssize_t streamid_store(struct device *dev, struct device_attribute *attr,
 	return count;
 }
 
+static ssize_t busid_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+	if (count == 1 && *buf == '\n') {
+		return 1;
+	}
+
+	struct net_device *net_dev = to_net_dev(dev);
+
+	// Check if the device is up
+    if (netif_running(net_dev)) {
+        printk(KERN_INFO "ACF-CAN: Cannot change bus id while device %s is up\n", net_dev->name);
+        return -EBUSY; // Return an appropriate error code
+    }
+
+
+	struct acfcan_cfg *cfg = get_acfcan_cfg(net_dev);
+
+    __u8 busid;
+    int rc = sscanf(buf, "%hhu", &busid);
+    if (!rc) {
+        printk(KERN_INFO "ACF-CAN: Invalid bus id\n");
+        return -EINVAL;
+    }
+
+    cfg->canbusId = busid;
+
+
+	printk(KERN_INFO "ACF-CAN setting busid to %u for %s\n", busid,net_dev->name);
+	return count;
+}
+
 
 static ssize_t streamid_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -174,11 +207,20 @@ static ssize_t streamid_show(struct device *dev, struct device_attribute *attr, 
 	return sprintf(buf, "0x%016llx", cfg->streamid);
 }
 
+static ssize_t busid_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct net_device *net_dev = to_net_dev(dev);
+	struct acfcan_cfg *cfg = get_acfcan_cfg(net_dev);
+
+	return sprintf(buf, "%i", cfg->canbusId);
+}
 
 
 static DEVICE_ATTR_RW(dstmac);
 static DEVICE_ATTR_RW(ethif);
 static DEVICE_ATTR_RW(streamid);
+static DEVICE_ATTR_RW(busid);
+
 
 
 
@@ -186,5 +228,6 @@ static struct attribute *dev_attrs[] = {
     &dev_attr_dstmac.attr,
 	&dev_attr_ethif.attr,
     &dev_attr_streamid.attr,
+	&dev_attr_busid.attr,
     NULL, /* NULL-terminated list */
 };
