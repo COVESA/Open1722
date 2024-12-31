@@ -5,6 +5,7 @@
 #include <linux/etherdevice.h>
 #include <linux/skbuff.h>
 #include <linux/if_ether.h>
+#include <linux/timekeeping.h>
 
 #include "acfcandev.h"
 
@@ -80,7 +81,8 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
     Avtp_Tscf_SetSequenceNum(&pdu.tscf, cfg->sequenceNum++); //This can't be right. Increase?
     Avtp_Tscf_SetStreamId(&pdu.tscf, cfg->streamid);
     Avtp_Tscf_SetTv(&pdu.tscf, 1);
-    Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, 0x11223344); //This can't be good. Better find a timestamp from somehwere
+    // add a ns avtp-ish timestamp. Note: this will roll over often (as designed)
+    Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, (uint32_t) (ktime_get_real_ns()&0xFFFFFFFF) ); //This can't be good. Better find a timestamp from somehwere
 
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);
