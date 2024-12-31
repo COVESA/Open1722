@@ -86,15 +86,31 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
 
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);
-    Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); //maybe not good
-    uint8_t canFrame[CAN_PAYLOAD_LEN] = {0x11, 0x22};
-    memcpy(pdu.can.payload, cf->data, cf->len);
+    Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); 
+    Avtp_Can_SetRtr(&pdu.can, cf->can_id & CAN_RTR_FLAG);
+    Avtp_Can_SetEff(&pdu.can, cf->can_id & CAN_EFF_FLAG);
+    
+
+    //FD stuff
+    /*
+    Avtp_Can_SetBrs(&pdu, cf->flags & CANFD_BRS);
+    Avtp_Can_SetFdf(&pdu.can, cf->flags & CANFD_FDF );
+    Avtp_Can_SetEsi(&pdu.can, cf->flags & CANFD_ESI);
+    */
+
+    if ( cf->can_id & CAN_EFF_FLAG) {
+        Avtp_Can_SetCanIdentifier(&pdu.can, cf->can_id & CAN_EFF_MASK );
+    }
+    else {
+        Avtp_Can_SetCanIdentifier(&pdu.can, cf->can_id & CAN_SFF_MASK );
+    }
+    
 
     // Prepare ethernet
     struct sk_buff *skb;
 
     // Allocate a socket buffer
-    skb = alloc_skb(ETH_HLEN + cf->len, GFP_KERNEL);
+    skb = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cf->len, GFP_KERNEL);
     if (!skb)
     {
         printk(KERN_ERR "Failed to allocate skb\n");
@@ -103,8 +119,10 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
 
     skb_reserve(skb, ETH_HLEN);                  // Reserve space for Ethernet header
     unsigned char *data = skb_put(skb, sizeof(pdu)); // Add payload data
-    // todo, add id first
-    memcpy(data, (uint8_t *) &pdu, sizeof(pdu)); // Fill payload with example data
+    memcpy(data, (uint8_t *) &pdu, sizeof(pdu)); // Fill payload with avtp +  acf-can header
+    data = skb_put(skb, cf->len); // Add payload data
+    memcpy(data, (uint8_t *) cf->data, cf->len); // Fill payload with avtp +  acf-can header
+
 
     // Set up the Ethernet header
 

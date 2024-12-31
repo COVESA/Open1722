@@ -14,8 +14,6 @@ typedef struct {
     Avtp_Tscf_t tscf;
     // IEEE 1722 ACF message #1
     Avtp_Can_t can;
-    uint8_t canPayload[CAN_PAYLOAD_LEN];
-    // IEEE 1722 ACF message #2
 } ACFCANPdu_t;
 
 
