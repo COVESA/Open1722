@@ -191,9 +191,9 @@ int main(int argc, char *argv[])
     else
         printf("\tUsing NTSCF\n");
     if(can_variant == AVTP_CAN_CLASSIC)
-        printf("\tUsing Classic CAN\n");
-    else if(can_variant == AVTP_CAN_CLASSIC)
-        printf("\tUsing Ethernet\n");
+        printf("\tUsing Classic CAN interface: %s\n", can_ifname);
+    else if(can_variant == AVTP_CAN_FD)
+        printf("\tUsing CAN FD interface: %s\n", can_ifname);
     if(use_udp) {
         printf("\tUsing UDP\n");
         printf("\tDestination IP: %s, Send port: %d, listening port: %d\n", ip_addr_str, udp_send_port, udp_listen_port);
