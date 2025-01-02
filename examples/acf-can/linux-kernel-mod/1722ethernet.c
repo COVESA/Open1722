@@ -19,7 +19,7 @@ int send_canfd_frame(struct net_device *can_dev, struct canfd_frame *cfd)
     }
     uint16_t datalen = 0;
     canid_t id = cfd->can_id;
-    printk(KERN_INFO "Sending CAN  packet,  ID: ");
+    printk(KERN_INFO "Sending CAN FD packet,  ID: ");
     if (id & CAN_EFF_FLAG)
     {
         printk(KERN_CONT "0x%08x", id & CAN_EFF_MASK);
@@ -145,12 +145,27 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
     // add a ns avtp-ish timestamp. Note: this will roll over often (as designed)
     Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, (uint32_t) (ktime_get_real_ns()&0xFFFFFFFF) ); //This can't be good. Better find a timestamp from somehwere
 
+    //1722 is a mess 
+    uint8_t padSize = ( AVTP_QUADLET_SIZE - ( (AVTP_CAN_HEADER_LEN+cf->len) % AVTP_QUADLET_SIZE) )  % AVTP_QUADLET_SIZE;
+    Avtp_Tscf_SetStreamDataLength(&pdu.tscf, (AVTP_CAN_HEADER_LEN+cf->len+padSize));
+
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);
     Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); 
     Avtp_Can_SetRtr(&pdu.can, cf->can_id & CAN_RTR_FLAG);
     Avtp_Can_SetEff(&pdu.can, cf->can_id & CAN_EFF_FLAG);
+    printk(KERN_INFO "can id is 0x%x, with mask is 0x%x",cf->can_id, cf->can_id & CAN_EFF_FLAG);
+    printk(KERN_INFO "ACF CAN EFF is 0x%x", Avtp_Can_GetEff(&pdu.can));
+
+    Avtp_Can_SetEff(&pdu.can, 1);
     
+    
+
+    //now then INSUDE Tscf we have ACF CAN, that does count in quadlets INCLUDING header
+    //Also quadlets... so we need ANOTHER field to tell it the pad length
+    Avtp_Can_SetAcfMsgLength(&pdu.can, (AVTP_CAN_HEADER_LEN+cf->len+padSize)/AVTP_QUADLET_SIZE);
+    printk(KERN_INFO "ACF CAN length: %d\n", Avtp_Can_GetAcfMsgLength(&pdu.can));
+    Avtp_Can_SetPad(&pdu.can, padSize);
 
     //FD stuff
     /*
@@ -171,7 +186,7 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
     struct sk_buff *skb;
 
     // Allocate a socket buffer
-    skb = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cf->len, GFP_KERNEL);
+    skb = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cf->len+padSize, GFP_KERNEL);
     if (!skb)
     {
         printk(KERN_ERR "Failed to allocate skb\n");
@@ -183,6 +198,11 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
     memcpy(data, (uint8_t *) &pdu, sizeof(pdu)); // Fill payload with avtp +  acf-can header
     data = skb_put(skb, cf->len); // Add payload data
     memcpy(data, (uint8_t *) cf->data, cf->len); // Fill payload with avtp +  acf-can header
+    
+    //Todo: Clear pad?
+    data = skb_put(skb, padSize); // Add payload data
+    memset(data,0,padSize);
+
 
 
     // Set up the Ethernet header
