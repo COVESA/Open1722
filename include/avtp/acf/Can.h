@@ -119,9 +119,9 @@ void Avtp_Can_SetField(Avtp_Can_t* can_pdu, Avtp_CanFields_t field, uint64_t val
 void Avtp_Can_SetAcfMsgType(Avtp_Can_t* pdu, uint8_t value);
 void Avtp_Can_SetAcfMsgLength(Avtp_Can_t* pdu, uint16_t value);
 void Avtp_Can_SetPad(Avtp_Can_t* pdu, uint8_t value);
-void Avtp_Can_SetMtv(Avtp_Can_t* pdu, uint8_t value);
-void Avtp_Can_SetRtr(Avtp_Can_t* pdu, uint8_t value);
-void Avtp_Can_SetEff(Avtp_Can_t* pdu, uint8_t value);
+void Avtp_Can_SetMtv(Avtp_Can_t* pdu, uint64_t value);
+void Avtp_Can_SetRtr(Avtp_Can_t* pdu, uint32_t value);
+void Avtp_Can_SetEff(Avtp_Can_t* pdu, uint32_t value);
 void Avtp_Can_SetBrs(Avtp_Can_t* pdu, uint8_t value);
 void Avtp_Can_SetFdf(Avtp_Can_t* pdu, uint8_t value);
 void Avtp_Can_SetEsi(Avtp_Can_t* pdu, uint8_t value);

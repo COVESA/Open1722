@@ -153,34 +153,58 @@ void Avtp_Can_SetPad(Avtp_Can_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CAN_FIELD_PAD, value);
 }
 
-void Avtp_Can_SetMtv(Avtp_Can_t* pdu, uint8_t value)
+void Avtp_Can_SetMtv(Avtp_Can_t* pdu, uint64_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_MTV, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_MTV, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_MTV, 0);
+    }
 }
 
-void Avtp_Can_SetRtr(Avtp_Can_t* pdu, uint8_t value)
+void Avtp_Can_SetRtr(Avtp_Can_t* pdu, uint32_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_RTR, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_RTR, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_RTR, 0);
+    }
 }
 
-void Avtp_Can_SetEff(Avtp_Can_t* pdu, uint8_t value)
+void Avtp_Can_SetEff(Avtp_Can_t* pdu, uint32_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_EFF, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_EFF, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_EFF, 0);
+    }
 }
 
 void Avtp_Can_SetBrs(Avtp_Can_t* pdu, uint8_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_BRS, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_BRS, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_BRS, 0);
+    }
 }
 
 void Avtp_Can_SetFdf(Avtp_Can_t* pdu, uint8_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_FDF, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_FDF, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_FDF, 0);
+    }
 }
 
 void Avtp_Can_SetEsi(Avtp_Can_t* pdu, uint8_t value)
 {
-    SET_FIELD(AVTP_CAN_FIELD_ESI, value);
+    if (value) {
+        SET_FIELD(AVTP_CAN_FIELD_ESI, 1);
+    } else {
+        SET_FIELD(AVTP_CAN_FIELD_ESI, 0);
+    }
 }
 
 void Avtp_Can_SetCanBusId(Avtp_Can_t* pdu, uint8_t value)
