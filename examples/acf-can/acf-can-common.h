@@ -62,6 +62,7 @@ typedef union {
     canfd_frame_t fd;
 } frame_t;
 
+#ifdef __linux__
 /**
  * Creates a CAN socket.
  *
@@ -70,6 +71,7 @@ typedef union {
  * @returns CAN socket on success else the error
  */
 int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
+#endif
 
 /**
  * Function that converts AVTP Frames to CAN

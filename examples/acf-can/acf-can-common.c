@@ -60,13 +60,14 @@ LOG_MODULE_REGISTER(acf_can_common, LOG_LEVEL_DBG);
 typedef uint32_t canid_t;
 #endif
 
+#ifdef __linux__
 int setup_can_socket(const char* can_ifname,
                      Avtp_CanVariant_t can_variant) {
 
     int can_socket, res;
     struct sockaddr_can can_addr;
 
-    can_socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    can_socket = socket(AF_CAN, SOCK_RAW, CAN_RAW);
     if (can_socket < 0) {
         perror("Failed to create CAN socket");
         return can_socket;
@@ -74,7 +75,7 @@ int setup_can_socket(const char* can_ifname,
 
     // Get the CAN address to bind the socket to.
     memset(&can_addr, 0, sizeof(can_addr));
-#ifdef __linux__
+
     struct ifreq ifr;
     strcpy(ifr.ifr_name, can_ifname);
     ioctl(can_socket, SIOCGIFINDEX, &ifr);
@@ -86,10 +87,6 @@ int setup_can_socket(const char* can_ifname,
         setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
                     &enable_canfx, sizeof(enable_canfx));
     }
-#elif defined(__ZEPHYR__)
-    can_addr.can_ifindex = net_if_get_by_name(can_ifname);
-    can_addr.can_family = AF_CAN;
-#endif
 
     res = bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr));
     if (res < 0) {
@@ -100,6 +97,7 @@ int setup_can_socket(const char* can_ifname,
 
     return can_socket;
 }
+#endif
 
 static int is_valid_acf_packet(uint8_t* acf_pdu)
 {

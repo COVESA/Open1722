@@ -1,5 +1,5 @@
 # Generated directories
-/build
+/build*
 /bin
 /lib
 /release
