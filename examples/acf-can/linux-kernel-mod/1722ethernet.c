@@ -39,14 +39,11 @@ int send_canfd_frame(struct net_device *can_dev, struct canfd_frame *cfd)
 
     ACFCANPdu_t pdu;
     // Init TSCF header
-    Avtp_Tscf_Init(&pdu.tscf);
-    Avtp_Tscf_SetVersion(&pdu.tscf, 0);
-    Avtp_Tscf_SetSequenceNum(&pdu.tscf, cfg->sequenceNum++); //This can't be right. Increase?
-    Avtp_Tscf_SetStreamId(&pdu.tscf, cfg->streamid);
-    Avtp_Tscf_SetTv(&pdu.tscf, 1);
-    // add a ns avtp-ish timestamp. Note: this will roll over often (as designed)
-    Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, (uint32_t) (ktime_get_real_ns()&0xFFFFFFFF) ); //This can't be good. Better find a timestamp from somehwere
-
+    Avtp_Ntscf_Init(&pdu.ntscf);
+    Avtp_Ntscf_SetVersion(&pdu.ntscf, 0);
+    Avtp_Ntscf_SetSequenceNum(&pdu.ntscf, cfg->sequenceNum++); //This can't be right. Increase?
+    Avtp_Ntscf_SetStreamId(&pdu.ntscf, cfg->streamid);
+ 
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);
     Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); 
@@ -137,17 +134,14 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
 
     ACFCANPdu_t pdu;
     // Init TSCF header
-    Avtp_Tscf_Init(&pdu.tscf);
-    Avtp_Tscf_SetVersion(&pdu.tscf, 0);
-    Avtp_Tscf_SetSequenceNum(&pdu.tscf, cfg->sequenceNum++); //This can't be right. Increase?
-    Avtp_Tscf_SetStreamId(&pdu.tscf, cfg->streamid);
-    Avtp_Tscf_SetTv(&pdu.tscf, 1);
-    // add a ns avtp-ish timestamp. Note: this will roll over often (as designed)
-    Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, (uint32_t) (ktime_get_real_ns()&0xFFFFFFFF) ); //This can't be good. Better find a timestamp from somehwere
-
+    Avtp_Ntscf_Init(&pdu.ntscf);
+    Avtp_Ntscf_SetVersion(&pdu.ntscf, 0);
+    Avtp_Ntscf_SetSequenceNum(&pdu.ntscf, cfg->sequenceNum++); //This can't be right. Increase?
+    Avtp_Ntscf_SetStreamId(&pdu.ntscf, cfg->streamid);
+    
     //1722 is a mess 
     uint8_t padSize = ( AVTP_QUADLET_SIZE - ( (AVTP_CAN_HEADER_LEN+cf->len) % AVTP_QUADLET_SIZE) )  % AVTP_QUADLET_SIZE;
-    Avtp_Tscf_SetStreamDataLength(&pdu.tscf, (AVTP_CAN_HEADER_LEN+cf->len+padSize));
+    Avtp_Ntscf_SetNtscfDataLength(&pdu.ntscf, (AVTP_CAN_HEADER_LEN+cf->len+padSize));
 
     // Init CAN ACF message
     Avtp_Can_Init(&pdu.can);

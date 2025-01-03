@@ -4,14 +4,14 @@
 
 
 
-#include "avtp/acf/Tscf.h"
+#include "avtp/acf/Ntscf.h"
 #include "avtp/acf/Can.h"
 
 
 #define CAN_PAYLOAD_LEN 64
 typedef struct {
     // IEEE 1722 TSCF header
-    Avtp_Tscf_t tscf;
+    Avtp_Ntscf_t ntscf;
     // IEEE 1722 ACF message #1
     Avtp_Can_t can;
 } ACFCANPdu_t;
