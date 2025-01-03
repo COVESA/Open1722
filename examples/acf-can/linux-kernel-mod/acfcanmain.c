@@ -138,11 +138,11 @@ static netdev_tx_t acfcan_tx(struct sk_buff *skb, struct net_device *dev)
 
 	if (can_is_can_skb(skb))
 	{
-		send_can_frame(dev,  (struct can_frame *)skb->data);
+		send_can_frame(dev,  skb, (struct can_frame *)skb->data);
 	}
 	else if (can_is_canfd_skb(skb))
 	{
-		send_canfd_frame(dev, (struct canfd_frame *)skb->data);
+		send_canfd_frame(dev, skb, (struct canfd_frame *)skb->data);
 	}
 	else
 	{

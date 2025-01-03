@@ -7,9 +7,58 @@
 #include <linux/if_ether.h>
 #include <linux/timekeeping.h>
 
-#include "acfcandev.h"
 
-int send_canfd_frame(struct net_device *can_dev, struct canfd_frame *cfd)
+void prepare_ntscf_header(Avtp_Ntscf_t *ntscf_header, struct acfcan_cfg *cfg) {
+    Avtp_Ntscf_Init(ntscf_header);
+    Avtp_Ntscf_SetVersion(ntscf_header, 0);
+    Avtp_Ntscf_SetSequenceNum(ntscf_header, cfg->sequenceNum++); //This can't be right. Increase?
+    Avtp_Ntscf_SetStreamId(ntscf_header, cfg->streamid);
+}
+
+void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const struct sk_buff *skb) {
+    struct canfd_frame *cfd = (struct canfd_frame *)skb->data; //this also works work can_frame struct, as the beginning is similar
+
+    Avtp_Can_Init(can_header);
+    Avtp_Can_SetCanBusId(can_header, cfg->canbusId); 
+    if (cfd->can_id & CAN_RTR_FLAG) {
+        Avtp_Can_SetRtr(can_header, 1);
+    } 
+    if (cfd->can_id & CAN_EFF_FLAG) {
+        Avtp_Can_SetEff(can_header, 1);
+    }
+
+    if ( cfd->can_id & CAN_EFF_FLAG) {
+        Avtp_Can_SetCanIdentifier(can_header, cfd->can_id & CAN_EFF_MASK );
+    }
+    else {
+        Avtp_Can_SetCanIdentifier(can_header, cfd->can_id & CAN_SFF_MASK );
+    }
+
+    if ( can_is_canfd_skb(skb) ) {
+        if ( cfd->flags & CANFD_BRS ) {
+            Avtp_Can_SetBrs(can_header, 1);
+        }
+        if ( cfd->flags & CANFD_FDF ) {
+            Avtp_Can_SetFdf(can_header, 1);
+        }
+        if ( cfd->flags & CANFD_ESI ) {
+            Avtp_Can_SetEsi(can_header, 1);
+        }
+    } 
+
+    //1722 is a mess. Here we need to pad to quadlets
+    uint8_t padSize = ( AVTP_QUADLET_SIZE - ( (AVTP_CAN_HEADER_LEN+cfd->len) % AVTP_QUADLET_SIZE) )  % AVTP_QUADLET_SIZE;
+    Avtp_Can_SetAcfMsgLength(can_header, (AVTP_CAN_HEADER_LEN+cfd->len+padSize)/AVTP_QUADLET_SIZE);
+    Avtp_Can_SetPad(can_header, padSize);
+}
+
+void calculate_and_set_ntscf_size(ACFCANPdu_t *pdu) {
+    //1722 is a mess. Bytes, lukicly we have padded quadlets in can already....
+    uint16_t canandpadinbytes = Avtp_Can_GetAcfMsgLength(&pdu->can)*AVTP_QUADLET_SIZE;
+    Avtp_Ntscf_SetNtscfDataLength(&pdu->ntscf, canandpadinbytes);
+}
+
+int send_canfd_frame(struct net_device *can_dev, const struct sk_buff *skb_can, struct canfd_frame *cfd)
 {
     struct acfcan_cfg *cfg = get_acfcan_cfg(can_dev);
     if (cfg->netdev == NULL)
@@ -39,31 +88,9 @@ int send_canfd_frame(struct net_device *can_dev, struct canfd_frame *cfd)
 
     ACFCANPdu_t pdu;
     // Init TSCF header
-    Avtp_Ntscf_Init(&pdu.ntscf);
-    Avtp_Ntscf_SetVersion(&pdu.ntscf, 0);
-    Avtp_Ntscf_SetSequenceNum(&pdu.ntscf, cfg->sequenceNum++); //This can't be right. Increase?
-    Avtp_Ntscf_SetStreamId(&pdu.ntscf, cfg->streamid);
- 
-    // Init CAN ACF message
-    Avtp_Can_Init(&pdu.can);
-    Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); 
-    Avtp_Can_SetRtr(&pdu.can, cfd->can_id & CAN_RTR_FLAG);
-    Avtp_Can_SetEff(&pdu.can, cfd->can_id & CAN_EFF_FLAG);
-    
-
-    //FD stuff
-    Avtp_Can_SetBrs(&pdu.can, cfd->flags & CANFD_BRS);
-    Avtp_Can_SetFdf(&pdu.can, cfd->flags & CANFD_FDF );
-    Avtp_Can_SetEsi(&pdu.can, cfd->flags & CANFD_ESI);
-    
-
-    if ( cfd->can_id & CAN_EFF_FLAG) {
-        Avtp_Can_SetCanIdentifier(&pdu.can, cfd->can_id & CAN_EFF_MASK );
-    }
-    else {
-        Avtp_Can_SetCanIdentifier(&pdu.can, cfd->can_id & CAN_SFF_MASK );
-    }
-    
+    prepare_ntscf_header(&pdu.ntscf, cfg);
+    prepare_can_header(&pdu.can, cfg, skb_can);      
+    calculate_and_set_ntscf_size(&pdu);
 
     // Prepare ethernet
     struct sk_buff *skb;
@@ -104,7 +131,7 @@ int send_canfd_frame(struct net_device *can_dev, struct canfd_frame *cfd)
     return 0;
 }
 
-int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
+int send_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can, struct can_frame *cf)
 {
     struct acfcan_cfg *cfg = get_acfcan_cfg(can_dev);
     if (cfg->netdev == NULL)
@@ -134,53 +161,29 @@ int send_can_frame(struct net_device *can_dev, struct can_frame *cf)
 
     ACFCANPdu_t pdu;
     // Init TSCF header
-    Avtp_Ntscf_Init(&pdu.ntscf);
-    Avtp_Ntscf_SetVersion(&pdu.ntscf, 0);
-    Avtp_Ntscf_SetSequenceNum(&pdu.ntscf, cfg->sequenceNum++); //This can't be right. Increase?
-    Avtp_Ntscf_SetStreamId(&pdu.ntscf, cfg->streamid);
-    
+    prepare_ntscf_header(&pdu.ntscf, cfg);
+    prepare_can_header(&pdu.can, cfg, skb_can);
+    calculate_and_set_ntscf_size(&pdu);
+
+/*
     //1722 is a mess 
     uint8_t padSize = ( AVTP_QUADLET_SIZE - ( (AVTP_CAN_HEADER_LEN+cf->len) % AVTP_QUADLET_SIZE) )  % AVTP_QUADLET_SIZE;
     Avtp_Ntscf_SetNtscfDataLength(&pdu.ntscf, (AVTP_CAN_HEADER_LEN+cf->len+padSize));
-
-    // Init CAN ACF message
-    Avtp_Can_Init(&pdu.can);
-    Avtp_Can_SetCanBusId(&pdu.can, cfg->canbusId); 
-    Avtp_Can_SetRtr(&pdu.can, cf->can_id & CAN_RTR_FLAG);
-    Avtp_Can_SetEff(&pdu.can, cf->can_id & CAN_EFF_FLAG);
-    printk(KERN_INFO "can id is 0x%x, with mask is 0x%x",cf->can_id, cf->can_id & CAN_EFF_FLAG);
-    printk(KERN_INFO "ACF CAN EFF is 0x%x", Avtp_Can_GetEff(&pdu.can));
-
-    Avtp_Can_SetEff(&pdu.can, 1);
-    
-    
 
     //now then INSUDE Tscf we have ACF CAN, that does count in quadlets INCLUDING header
     //Also quadlets... so we need ANOTHER field to tell it the pad length
     Avtp_Can_SetAcfMsgLength(&pdu.can, (AVTP_CAN_HEADER_LEN+cf->len+padSize)/AVTP_QUADLET_SIZE);
     printk(KERN_INFO "ACF CAN length: %d\n", Avtp_Can_GetAcfMsgLength(&pdu.can));
     Avtp_Can_SetPad(&pdu.can, padSize);
-
-    //FD stuff
-    /*
-    Avtp_Can_SetBrs(&pdu, cf->flags & CANFD_BRS);
-    Avtp_Can_SetFdf(&pdu.can, cf->flags & CANFD_FDF );
-    Avtp_Can_SetEsi(&pdu.can, cf->flags & CANFD_ESI);
-    */
-
-    if ( cf->can_id & CAN_EFF_FLAG) {
-        Avtp_Can_SetCanIdentifier(&pdu.can, cf->can_id & CAN_EFF_MASK );
-    }
-    else {
-        Avtp_Can_SetCanIdentifier(&pdu.can, cf->can_id & CAN_SFF_MASK );
-    }
+*/
     
-
     // Prepare ethernet
     struct sk_buff *skb;
 
     // Allocate a socket buffer
-    skb = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cf->len+padSize, GFP_KERNEL);
+    uint8_t padSize = Avtp_Can_GetPad(&pdu.can);
+    uint16_t acfcansize=Avtp_Can_GetCanPayloadLength(&pdu.can)*AVTP_QUADLET_SIZE+padSize;
+    skb = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + acfcansize, GFP_KERNEL);
     if (!skb)
     {
         printk(KERN_ERR "Failed to allocate skb\n");
