@@ -28,7 +28,29 @@
 #
 
 cmake_minimum_required(VERSION 3.20)
+
+# Check first if we are building for Zephyr and include its dependencies accordingly.
+if (DEFINED ENV{ZEPHYR_BASE})
+    set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/examples/acf-can/zephyr/Kconfig)
+    find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+
+    zephyr_get_include_directories_for_lang_as_string(       C includes)
+    zephyr_get_system_include_directories_for_lang_as_string(C system_includes)
+    zephyr_get_compile_definitions_for_lang_as_string(       C definitions)
+    zephyr_get_compile_options_for_lang_as_string(           C options)
+
+    if(DEFINED CMAKE_C_COMPILER_TARGET)
+        set(target_flag "--target=${CMAKE_C_COMPILER_TARGET}")
+    endif()
+
+  set(external_project_cflags
+    "${target_flag} ${includes} ${definitions} ${options} ${system_includes}"
+    )
+endif()
+
 project(open1722 VERSION 0.1.0 LANGUAGES C DESCRIPTION "Library implementing IEEE 1722")
+
+# Set the compiler options and flags
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
@@ -39,56 +61,60 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 add_compile_options(-Wfatal-errors)
 find_program(CCACHE_BIN ccache)
 if(CCACHE_BIN)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_BIN})
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_BIN})
-  message("Use ccache from ${CCACHE_BIN}")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_BIN})
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_BIN})
+    message("Use ccache from ${CCACHE_BIN}")
 endif()
 
 add_subdirectory(src)
 add_custom_target(examples)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-enable_testing()
-add_custom_target(unittests)
-add_subdirectory(unit EXCLUDE_FROM_ALL)
+# Build tests and install artefacts only for Linux systems
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    enable_testing()
+    add_custom_target(unittests)
+    add_subdirectory(unit EXCLUDE_FROM_ALL)
 
-install(DIRECTORY include/ DESTINATION include)
-install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)
+    install(DIRECTORY include/ DESTINATION include)
+    install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)
 
-#### Export Configuration #####################################################
+    #### Export Configuration #####################################################
 
-install(EXPORT Open1722Targets FILE Open1722Targets.cmake DESTINATION lib/cmake/Open1722)
+    install(EXPORT Open1722Targets FILE Open1722Targets.cmake DESTINATION lib/cmake/Open1722)
 
-include(CMakePackageConfigHelpers)
+    include(CMakePackageConfigHelpers)
 
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake"
-    INSTALL_DESTINATION "lib/cmake/Open1722")
+    configure_package_config_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake"
+        INSTALL_DESTINATION "lib/cmake/Open1722")
 
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
-    VERSION "${open1722_VERSION_MAJOR}.${open1722_VERSION_MINOR}"
-    COMPATIBILITY AnyNewerVersion)
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
+        VERSION "${open1722_VERSION_MAJOR}.${open1722_VERSION_MINOR}"
+        COMPATIBILITY AnyNewerVersion)
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
-    DESTINATION lib/cmake/Open1722)
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/Open1722ConfigVersion.cmake
+        DESTINATION lib/cmake/Open1722)
 
-export(EXPORT Open1722Targets FILE ${CMAKE_CURRENT_BINARY_DIR}/Open1722Targets.cmake)
+    export(EXPORT Open1722Targets FILE ${CMAKE_CURRENT_BINARY_DIR}/Open1722Targets.cmake)
 
-#### Packaging ################################################################
 
-include(InstallRequiredSystemLibraries)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_VERSION_MAJOR "${open1722_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${open1722_VERSION_MINOR}")
-set(CPACK_GENERATOR "TGZ" "DEB")
-set(CPACK_SOURCE_GENERATOR "TGZ" "DEB")
+    #### Packaging ################################################################
 
-# Debian package
-set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Adriaan Niess [Robert Bosch GmbH]")
+    include(InstallRequiredSystemLibraries)
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${open1722_VERSION_MAJOR}")
+    set(CPACK_PACKAGE_VERSION_MINOR "${open1722_VERSION_MINOR}")
+    set(CPACK_GENERATOR "TGZ" "DEB")
+    set(CPACK_SOURCE_GENERATOR "TGZ" "DEB")
 
-include(CPack)
+    # Debian package
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Adriaan Niess [Robert Bosch GmbH]")
+
+    include(CPack)
+endif()

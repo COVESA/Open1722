@@ -1,0 +1,39 @@
+mainmenu "ACF CAN Bridge Configuration"
+
+config ACF_CAN_BRIDGE_USE_UDP
+    int "Use UDP for transport"
+    default 0
+
+config ACF_CAN_BRIDGE_USE_TSCF
+    int "Use TSCF encapsulation"
+    default 0
+
+config ACF_CAN_BRIDGE_SEND_MAC_ADDR
+    string "MAC Address to which ACF CAN frames are sent"
+    default "aa:bb:cc:dd:ee:ff"
+
+config ACF_CAN_BRIDGE_SEND_IP_ADDR
+    string "IP Address to which ACF CAN frames are sent"
+    default "127.0.0.1"
+
+config ACF_CAN_BRIDGE_SEND_UDP_PORT
+    int "UDP port to which ACF CAN frames are sent"
+    default 17220
+
+config ACF_CAN_BRIDGE_RECV_UDP_PORT
+    int "UDP port at which ACF CAN frames are received"
+    default 17220
+
+config ACF_CAN_BRIDGE_TALKER_STREAM_ID
+    string "Stream ID for the ACF CAN Talker stream"
+    default "0xAABBCCDDEEFF0001"
+
+config ACF_CAN_BRIDGE_LISTENER_STREAM_ID
+    string "Stream ID for the ACF CAN Listener stream"
+    default "0xAABBCCDDEEFF0001"
+
+config ACF_CAN_BRIDGE_NUM_ACF_MSGS
+    int "Number of ACF CAN messages to send in a single frame"
+    default 1
+
+source "Kconfig.zephyr"

@@ -11,7 +11,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of Intel Corporation, COVESA nor the names of their
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -28,21 +28,27 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#ifdef __linux__
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/timerfd.h>
 #include <sys/types.h>
+#elif defined(__ZEPHYR__)
+#include <zephyr/net/socket.h>
+#endif
+
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "common/common.h"
+#include "common.h"
 
+#ifdef __linux__
 #define NSEC_PER_SEC		1000000000ULL
 #define NSEC_PER_MSEC		1000000ULL
 
@@ -98,12 +104,43 @@ int get_presentation_time(uint64_t avtp_time, struct timespec *tspec)
     return 0;
 }
 
+int arm_timer(int fd, struct timespec *tspec)
+{
+    int res;
+    struct itimerspec timer_spec = { 0 };
+
+    timer_spec.it_value.tv_sec = tspec->tv_sec;
+    timer_spec.it_value.tv_nsec = tspec->tv_nsec;
+
+    res = timerfd_settime(fd, TFD_TIMER_ABSTIME, &timer_spec, NULL);
+    if (res < 0) {
+        perror("Failed to set timer");
+        return -1;
+    }
+
+    return 0;
+}
+
+int present_data(uint8_t *data, size_t len)
+{
+    ssize_t n;
+
+    n = write(STDOUT_FILENO, data, len);
+    if (n < 0 || n != len) {
+        perror("Failed to write()");
+        return -1;
+    }
+
+    return 0;
+}
+#endif
+
 int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
                 int protocol, struct sockaddr_ll *sk_addr)
 {
+#ifdef __linux__
     int res;
     struct ifreq req;
-
     snprintf(req.ifr_name, sizeof(req.ifr_name), "%s", ifname);
     res = ioctl(fd, SIOCGIFINDEX, &req);
     if (res < 0) {
@@ -115,6 +152,12 @@ int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
     sk_addr->sll_protocol = htons(protocol);
     sk_addr->sll_halen = ETH_ALEN;
     sk_addr->sll_ifindex = req.ifr_ifindex;
+#elif defined(__ZEPHYR__)
+    sk_addr->sll_family = AF_PACKET;
+    sk_addr->sll_protocol = htons(protocol);
+    sk_addr->sll_halen = ETH_ALEN;
+    sk_addr->sll_ifindex = net_if_get_by_iface(net_if_get_default());
+#endif
     memcpy(sk_addr->sll_addr, macaddr, ETH_ALEN);
 
     return 0;
@@ -214,11 +257,9 @@ err:
     return -1;
 }
 
-int create_listener_socket(char *ifname, uint8_t macaddr[], int protocol)
+int create_listener_socket(char *ifname, uint8_t* macaddr, int protocol)
 {
     int fd, res;
-    struct packet_mreq mreq;
-
     struct sockaddr_ll sk_addr;
 
     fd = socket(AF_PACKET, SOCK_DGRAM, htons(protocol));
@@ -237,6 +278,8 @@ int create_listener_socket(char *ifname, uint8_t macaddr[], int protocol)
         goto err;
     }
 
+#ifdef __linux__
+    struct packet_mreq mreq;
     mreq.mr_ifindex = sk_addr.sll_ifindex;
     mreq.mr_type = PACKET_MR_MULTICAST;
     mreq.mr_alen = ETH_ALEN;
@@ -248,6 +291,7 @@ int create_listener_socket(char *ifname, uint8_t macaddr[], int protocol)
         perror("Couldn't set PACKET_ADD_MEMBERSHIP");
         goto err;
     }
+#endif
 
     return fd;
 
@@ -256,32 +300,4 @@ err:
     return -1;
 }
 
-int arm_timer(int fd, struct timespec *tspec)
-{
-    int res;
-    struct itimerspec timer_spec = { 0 };
 
-    timer_spec.it_value.tv_sec = tspec->tv_sec;
-    timer_spec.it_value.tv_nsec = tspec->tv_nsec;
-
-    res = timerfd_settime(fd, TFD_TIMER_ABSTIME, &timer_spec, NULL);
-    if (res < 0) {
-        perror("Failed to set timer");
-        return -1;
-    }
-
-    return 0;
-}
-
-int present_data(uint8_t *data, size_t len)
-{
-    ssize_t n;
-
-    n = write(STDOUT_FILENO, data, len);
-    if (n < 0 || n != len) {
-        perror("Failed to write()");
-        return -1;
-    }
-
-    return 0;
-}
