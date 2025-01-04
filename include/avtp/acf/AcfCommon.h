@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "avtp/IntTypes.h"
 #include "avtp/Defines.h"
 
 #ifdef __cplusplus
