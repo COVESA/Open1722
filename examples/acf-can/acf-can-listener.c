@@ -93,6 +93,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         break;
     case ARGPARSE_CAN_FD_OPTION:
         can_variant = AVTP_CAN_FD;
+        break;
     case ARGPARSE_CAN_IF_OPTION:
         strncpy(can_ifname, arg, sizeof(can_ifname) - 1);
         break;
