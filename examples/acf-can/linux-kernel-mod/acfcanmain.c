@@ -136,18 +136,7 @@ static netdev_tx_t acfcan_tx(struct sk_buff *skb, struct net_device *dev)
 
 	skb_tx_timestamp(skb);
 
-	if (can_is_can_skb(skb))
-	{
-		send_can_frame(dev,  skb, (struct can_frame *)skb->data);
-	}
-	else if (can_is_canfd_skb(skb))
-	{
-		send_canfd_frame(dev, skb, (struct canfd_frame *)skb->data);
-	}
-	else
-	{
-		printk(KERN_INFO "Packet is not a known CAN packet\n");
-	}
+	forward_can_frame(dev, skb);
 
 	if (!echo)
 	{
