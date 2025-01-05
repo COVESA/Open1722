@@ -31,7 +31,9 @@ cmake_minimum_required(VERSION 3.20)
 
 # Check first if we are building for Zephyr and include its dependencies accordingly.
 if (DEFINED ENV{ZEPHYR_BASE})
-    set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/examples/acf-can/zephyr/Kconfig)
+    if (${OPEN1722_ZEPHYR_APP} STREQUAL "acf-can-bridge")
+        set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/examples/acf-can/zephyr/Kconfig)
+    endif()
     find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
     zephyr_get_include_directories_for_lang_as_string(       C includes)

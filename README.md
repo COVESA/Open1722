@@ -45,7 +45,7 @@ Open1722 is under BSD License. For more information see LICENSE file.
 
 This repository is organized as follows:
 - The `src/` and `include/` folders contain the IEEE 1722 protocol implementation. We strive to make the implementation platform independant and avoid usage of platform specific headers or libraries. For now the implementation is tested only on Linux.
-- The `examples/` folder contains various applications that use our Open1722 library. The applications are targeted to Linux platforms.
+- The `examples/` folder contains various applications that use our Open1722 library. Most applications are targeted to Linux platforms. Few applications (e.g. [_acf-can-bridge_](./examples/acf-can/zephyr/)) are also ported for Zephyr RTOS. Compilation instructions for Zephyr is available in the corresponding folder of the application.
 
 Before building Open1722 make sure you have installed the following software :
 * CMake >= 3.20
@@ -118,7 +118,7 @@ The `examples/` directory provides sample applications which demonstrate the Ope
 
 To execute the IEEE 1722 CAN Talker application:
 ```
-$ ./build/acf-can-talker
+$ ./build/examples/acf-can/linux/acf-can-talker
 ```
 
 ### Programming Tutorial
