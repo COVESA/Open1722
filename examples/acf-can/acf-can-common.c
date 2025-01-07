@@ -230,13 +230,13 @@ int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu
 
 }
 
-int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
-                Avtp_CanVariant_t can_variant, int use_udp, uint64_t stream_id,
-                uint8_t* exp_cf_seqnum, uint32_t* exp_udp_seqnum) {
+int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant,
+                int use_udp, uint64_t stream_id, uint8_t* exp_cf_seqnum,
+                uint32_t* exp_udp_seqnum) {
 
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, seq_num, i = 0;
     uint32_t udp_seq_num;
-    uint16_t proc_bytes = 0, msg_length;
+    uint16_t proc_bytes = 0, msg_length = 0;
     uint64_t s_id;
 
     // Check for UDP encapsulation
@@ -245,6 +245,7 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
         udp_seq_num = Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)udp_pdu);
         cf_pdu = pdu + AVTP_UDP_HEADER_LEN;
         proc_bytes += AVTP_UDP_HEADER_LEN;
+        msg_length += AVTP_UDP_HEADER_LEN;
         if (udp_seq_num != *exp_udp_seqnum) {
             printf("Incorrect UDP sequence num. Expected: %d Recd.: %d\n",
                                                 *exp_udp_seqnum, udp_seq_num);
@@ -258,12 +259,12 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
     uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
     if (subtype == AVTP_SUBTYPE_TSCF) {
         proc_bytes += AVTP_TSCF_HEADER_LEN;
-        msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
+        msg_length += Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu) + AVTP_TSCF_HEADER_LEN;
         s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t*)cf_pdu);
         seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t*)cf_pdu);
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
-        msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
+        msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
         s_id = Avtp_Ntscf_GetStreamId((Avtp_Ntscf_t*)cf_pdu);
         seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t*)cf_pdu);
     } else {
@@ -282,7 +283,7 @@ int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
         return -1;
     }
 
-    while (proc_bytes < pdu_length) {
+    while (proc_bytes < msg_length) {
 
         acf_pdu = &pdu[proc_bytes];
 

@@ -311,7 +311,7 @@ void* avtp_to_can_runnable(void* p1, void* p2, void* p3) {
             continue;
         }
 
-        num_can_msgs = avtp_to_can(pdu, pdu_length, can_frames, can_variant, use_udp,
+        num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp,
                              listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
         exp_cf_seqnum++;
         exp_udp_seqnum++;

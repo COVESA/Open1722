@@ -77,7 +77,6 @@ int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
  * Function that converts AVTP Frames to CAN
  *
  * @param pdu: Start of the AVTP Frame
- * @param pdu_length: Length of the read PDU
  * @param can_frames: Array of CAM Frames to be recovered from AVTP Frames
  * @param can_variant: AVTP_CAN_CLASSIC or AVTP_CAN_FD
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
@@ -86,9 +85,9 @@ int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
  * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
  * @return Number of CAN messages received
  */
-int avtp_to_can(uint8_t* pdu, uint16_t pdu_length, frame_t* can_frames,
-                Avtp_CanVariant_t can_variant, int use_udp, uint64_t stream_id,
-                uint8_t* exp_cf_seqnum, uint32_t* exp_udp_seqnum);
+int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant,
+                int use_udp, uint64_t stream_id, uint8_t* exp_cf_seqnum,
+                uint32_t* exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
