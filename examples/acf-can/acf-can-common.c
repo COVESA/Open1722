@@ -271,16 +271,16 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         return -1;
     }
 
+    // Check for stream id
+    if (s_id != stream_id) {
+        return -1;
+    }
+
     // Check sequence numbers.
     if (seq_num != *exp_cf_seqnum) {
         printf("Incorrect sequence num. Expected: %d Recd.: %d\n",
                                             *exp_cf_seqnum, seq_num);
         *exp_cf_seqnum = seq_num;
-    }
-
-    // Check for stream id
-    if (s_id != stream_id) {
-        return -1;
     }
 
     while (proc_bytes < msg_length) {
