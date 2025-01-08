@@ -131,7 +131,11 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         }
         break;
     case ARGPARSE_TALKER_ID_OPTION:
-        talker_stream_id = atoi(arg);
+        res = sscanf(arg, "%lx", &talker_stream_id);
+        if (res != 1) {
+            fprintf(stderr, "Invalid talker stream id\n");
+            exit(EXIT_FAILURE);
+        }
         break;
     }
 
@@ -169,7 +173,7 @@ int main(int argc, char *argv[])
     } else {
         printf("\tUsing Ethernet\n");
         printf("\tNetwork Interface: %s\n", ifname);
-        printf("\tDestination MAC Address: %x:%x:%x:%x:%x:%x\n", macaddr[0], macaddr[1], macaddr[2],
+        printf("\tDestination MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", macaddr[0], macaddr[1], macaddr[2],
                                                         macaddr[3], macaddr[4], macaddr[5]);
     }
     printf("\tTalker Stream ID: %lx\n", talker_stream_id);

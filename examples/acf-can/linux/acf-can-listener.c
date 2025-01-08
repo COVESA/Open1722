@@ -110,7 +110,11 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         }
         break;
     case ARGPARSE_LISTENER_ID_OPTION:
-        listener_stream_id = atoi(arg);
+        res = sscanf(arg, "%lx", &listener_stream_id);
+        if (res != 1) {
+            fprintf(stderr, "Invalid talker stream id\n");
+            exit(EXIT_FAILURE);
+        }
         break;
     }
 
