@@ -305,7 +305,7 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
 
         for (int8_t i = 0; i < num_can_msgs; i++) {
             int res;
-            res = can_send(can_dev, &(can_frames[i].cc), K_MSEC(1), NULL, NULL);
+            res = can_send(can_dev, &(can_frames[i].cc), K_NO_WAIT, NULL, NULL);
             if(res < 0)
             {
                 perror("Failed to write to CAN bus");
