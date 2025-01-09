@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         printf("\tDestination MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", macaddr[0], macaddr[1], macaddr[2],
                                                         macaddr[3], macaddr[4], macaddr[5]);
     }
-    printf("\tTalker Stream ID: %lx\n", talker_stream_id);
+    printf("\tTalker Stream ID: 0x%lx\n", talker_stream_id);
     printf("\tNumber of ACF messages per AVTP frame in talker stream: %d\n", num_acf_msgs);
 
     // Create an appropriate talker socket: UDP or Ethernet raw
