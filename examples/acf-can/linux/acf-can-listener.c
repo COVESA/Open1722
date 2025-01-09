@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
         printf("\tUsing Ethernet\n");
         printf("\tNetwork Interface: %s\n", ifname);
     }
-    printf("\tListener Stream ID: %lx\n", listener_stream_id);
+    printf("\tListener Stream ID: 0x%lx\n", listener_stream_id);
 
     // Configure an appropriate socket: UDP or Ethernet Raw
     if (use_udp) {
