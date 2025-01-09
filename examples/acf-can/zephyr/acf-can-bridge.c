@@ -352,7 +352,7 @@ int main(void)
         printf("\tDestination MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", macaddr[0], macaddr[1], macaddr[2],
                                                         macaddr[3], macaddr[4], macaddr[5]);
     }
-    printf("\tListener Stream ID: %llx, Talker Stream ID: %llx\n", listener_stream_id, talker_stream_id);
+    printf("\tListener Stream ID: 0x%llx, Talker Stream ID: 0x%llx\n", listener_stream_id, talker_stream_id);
     printf("\tNumber of ACF messages per AVTP frame in talker stream: %d\n", num_acf_msgs);
 
     // Open a CAN socket for reading frames
