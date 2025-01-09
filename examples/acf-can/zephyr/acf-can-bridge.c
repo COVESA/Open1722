@@ -56,8 +56,9 @@ LOG_MODULE_REGISTER(acf_can_bridge, LOG_LEVEL_DBG);
 #include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
-#define THREAD_STACK_SIZE 2500
-#define THREAD_PRIORITY 7
+#define THREAD_STACK_SIZE 3000
+#define THREAD_PRIORITY_CAN_TO_AVTP -1
+#define THREAD_PRIORITY_AVTP_TO_CAN -2
 
 static uint8_t macaddr[NET_ETH_ADDR_LEN];
 static struct in_addr ip_addr;
@@ -379,14 +380,17 @@ int main(void)
     }
     if (eth_socket < 0) return -1;
 
-    k_thread_create(&can_to_avtp_thread, can_to_avtp_stack,
-                    K_THREAD_STACK_SIZEOF(can_to_avtp_stack),
-                    can_to_avtp_runnable, NULL, NULL, NULL,
-                    THREAD_PRIORITY, 0, K_NO_WAIT);
-    k_thread_create(&avtp_to_can_thread, avtp_to_can_stack,
+    k_tid_t t_id;
+    t_id = k_thread_create(&avtp_to_can_thread, avtp_to_can_stack,
                     K_THREAD_STACK_SIZEOF(avtp_to_can_stack),
                     avtp_to_can_runnable, NULL, NULL, NULL,
-                    THREAD_PRIORITY, 0, K_NO_WAIT);
+                    THREAD_PRIORITY_AVTP_TO_CAN, 0, K_NO_WAIT);
+    k_thread_name_set(t_id, "avtp_to_can_thread");
+    t_id = k_thread_create(&can_to_avtp_thread, can_to_avtp_stack,
+                    K_THREAD_STACK_SIZEOF(can_to_avtp_stack),
+                    can_to_avtp_runnable, NULL, NULL, NULL,
+                    THREAD_PRIORITY_CAN_TO_AVTP, 0, K_NO_WAIT);
+    k_thread_name_set(t_id, "can_to_avtp_thread");
 
     printf("Main thread going to sleep\n");
     k_sleep(K_FOREVER);
