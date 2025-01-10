@@ -27,11 +27,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_executable(cvf-talker cvf-talker.c)
+add_executable(cvf-talker EXCLUDE_FROM_ALL cvf-talker.c)
 target_link_libraries(cvf-talker open1722 open1722examples)
 target_include_directories(cvf-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-add_executable(cvf-listener cvf-listener.c)
+add_executable(cvf-listener EXCLUDE_FROM_ALL cvf-listener.c)
 target_link_libraries(cvf-listener open1722 open1722examples)
 target_include_directories(cvf-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
@@ -40,4 +40,5 @@ add_dependencies(examples cvf-talker cvf-listener)
 install(TARGETS
     cvf-listener
     cvf-talker
-    RUNTIME DESTINATION bin)
+    RUNTIME DESTINATION bin
+    OPTIONAL)

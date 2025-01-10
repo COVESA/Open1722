@@ -27,11 +27,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_executable(crf-talker crf-talker.c)
+add_executable(crf-talker EXCLUDE_FROM_ALL crf-talker.c)
 target_link_libraries(crf-talker open1722 open1722examples m)
 target_include_directories(crf-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-add_executable(crf-listener crf-listener.c)
+add_executable(crf-listener EXCLUDE_FROM_ALL crf-listener.c)
 target_link_libraries(crf-listener open1722 open1722examples m)
 target_include_directories(crf-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
@@ -40,4 +40,5 @@ add_dependencies(examples crf-talker crf-listener)
 install(TARGETS
     crf-listener
     crf-talker
-    RUNTIME DESTINATION bin)
+    RUNTIME DESTINATION bin
+    OPTIONAL)

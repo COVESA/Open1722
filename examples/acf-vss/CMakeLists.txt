@@ -27,11 +27,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_executable(acf-vss-talker acf-vss-talker.c)
+add_executable(acf-vss-talker EXCLUDE_FROM_ALL acf-vss-talker.c)
 target_link_libraries(acf-vss-talker open1722 open1722custom open1722examples)
 target_include_directories(acf-vss-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-add_executable(acf-vss-listener acf-vss-listener.c)
+add_executable(acf-vss-listener EXCLUDE_FROM_ALL acf-vss-listener.c)
 target_link_libraries(acf-vss-listener open1722 open1722custom open1722examples)
 target_include_directories(acf-vss-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
@@ -40,4 +40,5 @@ add_dependencies(examples acf-vss-talker acf-vss-listener)
 install(TARGETS
     acf-vss-listener
     acf-vss-talker
-    RUNTIME DESTINATION bin)
+    RUNTIME DESTINATION bin
+    OPTIONAL)

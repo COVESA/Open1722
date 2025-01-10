@@ -27,11 +27,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_executable(hello-world-talker hello-world-talker.c)
+add_executable(hello-world-talker EXCLUDE_FROM_ALL hello-world-talker.c)
 target_link_libraries(hello-world-talker open1722 open1722examples)
 target_include_directories(hello-world-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-add_executable(hello-world-listener hello-world-listener.c)
+add_executable(hello-world-listener EXCLUDE_FROM_ALL hello-world-listener.c)
 target_link_libraries(hello-world-listener open1722 open1722examples)
 target_include_directories(hello-world-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
@@ -40,4 +40,5 @@ add_dependencies(examples hello-world-talker hello-world-listener)
 install(TARGETS
     hello-world-listener
     hello-world-talker
-    RUNTIME DESTINATION bin)
+    RUNTIME DESTINATION bin
+    OPTIONAL)

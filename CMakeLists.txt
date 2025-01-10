@@ -70,7 +70,7 @@ endif()
 
 add_subdirectory(src)
 add_custom_target(examples)
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+add_subdirectory(examples)
 
 # Build tests and install artefacts only for Linux systems
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
