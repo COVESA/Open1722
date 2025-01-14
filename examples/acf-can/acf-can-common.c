@@ -159,9 +159,8 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     // Prepare ACF PDU for CAN
     Avtp_Can_Init(pdu);
     clock_gettime(CLOCK_REALTIME, &now);
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MESSAGE_TIMESTAMP,
-                      (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_MTV, 1U);
+    Avtp_Can_SetMessageTimestamp(pdu, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
+    Avtp_Can_EnableMtv(pdu);
 
     // Set required CAN Flags
 #ifdef __linux__
@@ -171,13 +170,23 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.id : (*frame).cc.id;
     can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.dlc : (*frame).cc.dlc;
 #endif
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_RTR, can_id & CAN_RTR_FLAG);
-    Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_EFF, can_id & CAN_EFF_FLAG);
+    if (can_id & CAN_EFF_FLAG) {
+        Avtp_Can_EnableEff(pdu);
+    }
+    if (can_id & CAN_RTR_FLAG) {
+        Avtp_Can_EnableRtr(pdu);
+    }
 
     if (can_variant == AVTP_CAN_FD) {
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_BRS, frame->fd.flags & CANFD_BRS);
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_FDF, frame->fd.flags & CANFD_FDF);
-        Avtp_Can_SetField(pdu, AVTP_CAN_FIELD_ESI, frame->fd.flags & CANFD_ESI);
+        if (frame->fd.flags & CANFD_BRS) {
+            Avtp_Can_EnableBrs(pdu);
+        }
+        if (frame->fd.flags & CANFD_FDF) {
+            Avtp_Can_EnableFdf(pdu);
+        }
+        if (frame->fd.flags & CANFD_ESI) {
+            Avtp_Can_EnableEsi(pdu);
+        }
     }
 
     // Copy payload to ACF CAN PDU
