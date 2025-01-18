@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -51,13 +51,13 @@ typedef struct {
 } Avtp_Tscf_t;
 
 typedef enum {
-    
+
     /* Common AVTP header */
     AVTP_TSCF_FIELD_SUBTYPE,
     AVTP_TSCF_FIELD_SV,
     AVTP_TSCF_FIELD_VERSION,
 
-    /* TSCF header fields */    
+    /* TSCF header fields */
     AVTP_TSCF_FIELD_MR,
     AVTP_TSCF_FIELD_TV,
     AVTP_TSCF_FIELD_SEQUENCE_NUM,
@@ -109,12 +109,16 @@ uint16_t Avtp_Tscf_GetStreamDataLength(Avtp_Tscf_t* pdu);
 void Avtp_Tscf_SetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field, uint64_t value);
 
 void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value);
-void Avtp_Tscf_SetSv(Avtp_Tscf_t* pdu, uint8_t value);
+void Avtp_Tscf_EnableSv(Avtp_Tscf_t* pdu);
+void Avtp_Tscf_DisableSv(Avtp_Tscf_t* pdu);
 void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value);
-void Avtp_Tscf_SetMr(Avtp_Tscf_t* pdu, uint8_t value);
-void Avtp_Tscf_SetTv(Avtp_Tscf_t* pdu, uint8_t value);
+void Avtp_Tscf_EnableMr(Avtp_Tscf_t* pdu);
+void Avtp_Tscf_DisableMr(Avtp_Tscf_t* pdu);
+void Avtp_Tscf_EnableTv(Avtp_Tscf_t* pdu);
+void Avtp_Tscf_DisableTv(Avtp_Tscf_t* pdu);
 void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value);
-void Avtp_Tscf_SetTu(Avtp_Tscf_t* pdu, uint8_t value);
+void Avtp_Tscf_EnableTu(Avtp_Tscf_t* pdu);
+void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu);
 void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value);
 void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t* pdu, uint32_t value);
 void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value);

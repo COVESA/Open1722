@@ -11,7 +11,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of Intel Corporation, COVESA nor the names of their
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -101,11 +101,15 @@ uint16_t Avtp_Crf_GetTimestampInterval(Avtp_Crf_t* pdu);
 void Avtp_Crf_SetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field, uint64_t value);
 
 void Avtp_Crf_SetSubtype(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetSv(Avtp_Crf_t* pdu, uint8_t value);
+void Avtp_Crf_EnableSv(Avtp_Crf_t* pdu);
+void Avtp_Crf_DisableSv(Avtp_Crf_t* pdu);
 void Avtp_Crf_SetVersion(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetMr(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetFs(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetTu(Avtp_Crf_t* pdu, uint8_t value);
+void Avtp_Crf_EnableMr(Avtp_Crf_t* pdu);
+void Avtp_Crf_DisableMr(Avtp_Crf_t* pdu);
+void Avtp_Crf_EnableFs(Avtp_Crf_t* pdu);
+void Avtp_Crf_DisableFs(Avtp_Crf_t* pdu);
+void Avtp_Crf_EnableTu(Avtp_Crf_t* pdu);
+void Avtp_Crf_DisableTu(Avtp_Crf_t* pdu);
 void Avtp_Crf_SetSequenceNum(Avtp_Crf_t* pdu, uint8_t value);
 void Avtp_Crf_SetType(Avtp_Crf_t* pdu, uint8_t value);
 void Avtp_Crf_SetStreamId(Avtp_Crf_t* pdu, uint64_t value);

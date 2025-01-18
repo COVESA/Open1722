@@ -103,19 +103,26 @@ uint8_t Avtp_Cvf_GetEvt(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetField(Avtp_Cvf_t* pdu, Avtp_CvfField_t field, uint64_t value);
 
 void Avtp_Cvf_SetSubtype(Avtp_Cvf_t* pdu, uint8_t value);
-void Avtp_Cvf_SetSv(Avtp_Cvf_t* pdu, uint8_t value);
+void Avtp_Cvf_EnableSv(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisableSv(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetVersion(Avtp_Cvf_t* pdu, uint8_t value);
-void Avtp_Cvf_SetMr(Avtp_Cvf_t* pdu, uint8_t value);
-void Avtp_Cvf_SetTv(Avtp_Cvf_t* pdu, uint8_t value);
+void Avtp_Cvf_EnableMr(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisableMr(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_EnableTv(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisableTv(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetSequenceNum(Avtp_Cvf_t* pdu, uint8_t value);
-void Avtp_Cvf_SetTu(Avtp_Cvf_t* pdu, uint8_t value);
+void Avtp_Cvf_EnableTu(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisableTu(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetStreamId(Avtp_Cvf_t* pdu, uint64_t value);
 void Avtp_Cvf_SetAvtpTimestamp(Avtp_Cvf_t* pdu, uint32_t value);
 void Avtp_Cvf_SetFormat(Avtp_Cvf_t* pdu, Avtp_CvfFormat_t value);
 void Avtp_Cvf_SetFormatSubtype(Avtp_Cvf_t* pdu, Avtp_CvfFormatSubtype_t value);
 void Avtp_Cvf_SetStreamDataLength(Avtp_Cvf_t* pdu, uint16_t value);
-void Avtp_Cvf_SetPtv(Avtp_Cvf_t* pdu, uint8_t value);
+void Avtp_Cvf_EnablePtv(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisablePtv(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetM(Avtp_Cvf_t* pdu, uint8_t value);
+void Avtp_Cvf_EnableM(Avtp_Cvf_t* pdu);
+void Avtp_Cvf_DisableM(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetEvt(Avtp_Cvf_t* pdu, uint8_t value);
 
 /******************************************************************************

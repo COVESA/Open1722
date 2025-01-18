@@ -114,9 +114,14 @@ void Avtp_SensorBrief_SetAcfMsgLength(Avtp_SensorBrief_t* pdu, uint16_t value)
     SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH, value);
 }
 
-void Avtp_SensorBrief_SetMtv(Avtp_SensorBrief_t* pdu, uint8_t value)
+void Avtp_SensorBrief_EnableMtv(Avtp_SensorBrief_t* pdu)
 {
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV, value);
+    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV, 1);
+}
+
+void Avtp_SensorBrief_DisableMtv(Avtp_SensorBrief_t* pdu)
+{
+    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV, 0);
 }
 
 void Avtp_SensorBrief_SetNumSensor(Avtp_SensorBrief_t* pdu, uint8_t value)

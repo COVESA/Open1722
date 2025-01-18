@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -55,11 +55,11 @@ typedef enum {
     /* ACF common header fields */
     AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE = 0,
     AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH,
-    /* ACF Abbreviated Sensor header fields */    
+    /* ACF Abbreviated Sensor header fields */
     AVTP_SENSOR_BRIEF_FIELD_MTV,
     AVTP_SENSOR_BRIEF_FIELD_NUM_SENSOR,
     AVTP_SENSOR_BRIEF_FIELD_SZ,
-    AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP,        
+    AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP,
     /* Count number of fields for bound checks */
     AVTP_SENSOR_FIELD_MAX
 } Avtp_SensorBriefFields_t;
@@ -98,7 +98,8 @@ void Avtp_SensorBrief_SetField(Avtp_SensorBrief_t* pdu, Avtp_SensorBriefFields_t
 
 void Avtp_SensorBrief_SetAcfMsgType(Avtp_SensorBrief_t* pdu, uint8_t value);
 void Avtp_SensorBrief_SetAcfMsgLength(Avtp_SensorBrief_t* pdu, uint16_t value);
-void Avtp_SensorBrief_SetMtv(Avtp_SensorBrief_t* pdu, uint8_t value);
+void Avtp_SensorBrief_EnableMtv(Avtp_SensorBrief_t* pdu);
+void Avtp_SensorBrief_DisableMtv(Avtp_SensorBrief_t* pdu);
 void Avtp_SensorBrief_SetNumSensor(Avtp_SensorBrief_t* pdu, uint8_t value);
 void Avtp_SensorBrief_SetSz(Avtp_SensorBrief_t* pdu, uint8_t value);
 void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value);

@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -66,8 +66,8 @@ typedef enum {
     AVTP_CAN_BRIEF_FIELD_BRS,
     AVTP_CAN_BRIEF_FIELD_FDF,
     AVTP_CAN_BRIEF_FIELD_ESI,
-    AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID,    
-    AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER,    
+    AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID,
+    AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER,
 
     /* Count number of fields for bound checks */
     AVTP_CAN_BRIEF_FIELD_MAX
@@ -113,18 +113,24 @@ void Avtp_CanBrief_SetField(Avtp_CanBrief_t* can_pdu, Avtp_CanBriefFields_t fiel
 void Avtp_CanBrief_SetAcfMsgType(Avtp_CanBrief_t* pdu, uint8_t value);
 void Avtp_CanBrief_SetAcfMsgLength(Avtp_CanBrief_t* pdu, uint16_t value);
 void Avtp_CanBrief_SetPad(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetMtv(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetRtr(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetEff(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetBrs(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetFdf(Avtp_CanBrief_t* pdu, uint8_t value);
-void Avtp_CanBrief_SetEsi(Avtp_CanBrief_t* pdu, uint8_t value);
+void Avtp_CanBrief_EnableMtv(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableMtv(Avtp_Can_t* pdu);
+void Avtp_CanBrief_EnableRtr(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableRtr(Avtp_Can_t* pdu);
+void Avtp_CanBrief_EnableEff(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableEff(Avtp_Can_t* pdu);
+void Avtp_CanBrief_EnableBrs(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableBrs(Avtp_Can_t* pdu);
+void Avtp_CanBrief_EnableFdf(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableFdf(Avtp_Can_t* pdu);
+void Avtp_CanBrief_EnableEsi(Avtp_Can_t* pdu);
+void Avtp_CanBrief_DisableEsi(Avtp_Can_t* pdu);
 void Avtp_CanBrief_SetCanBusId(Avtp_CanBrief_t* pdu, uint8_t value);
 void Avtp_CanBrief_SetCanIdentifier(Avtp_CanBrief_t* pdu, uint32_t value);
 
 /**
  * Copies the payload data into the ACF CAN Brief frame. This function will also set the
- * length and pad fields while inserting the padded bytes. 
+ * length and pad fields while inserting the padded bytes.
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
  * @param frame_id ID of the CAN frame
@@ -133,12 +139,12 @@ void Avtp_CanBrief_SetCanIdentifier(Avtp_CanBrief_t* pdu, uint32_t value);
  * @param can_variant Classic CAN or CAN-FD
  * @returns Returns number of processed bytes (header + payload + padding)
  */
-int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8_t* payload, 
+int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8_t* payload,
                         uint16_t payload_length, Avtp_CanVariant_t can_variant);
 
 /**
  * Finalizes the ACF CAN Brief frame. This function will set the
- * length and pad fields while inserting the padded bytes. 
+ * length and pad fields while inserting the padded bytes.
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param payload Pointer to the payload byte array

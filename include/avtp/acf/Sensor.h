@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -57,12 +57,12 @@ typedef enum {
     AVTP_SENSOR_FIELD_ACF_MSG_TYPE = 0,
     AVTP_SENSOR_FIELD_ACF_MSG_LENGTH,
 
-    /* ACF Sensor header fields */    
+    /* ACF Sensor header fields */
     AVTP_SENSOR_FIELD_MTV,
     AVTP_SENSOR_FIELD_NUM_SENSOR,
     AVTP_SENSOR_FIELD_SZ,
     AVTP_SENSOR_FIELD_SENSOR_GROUP,
-    AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP,        
+    AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP,
 
     /* Count number of fields for bound checks */
     AVTP_SENSOR_FIELD_MAX
@@ -103,7 +103,8 @@ void Avtp_Sensor_SetField(Avtp_Sensor_t* pdu, Avtp_SensorFields_t field, uint64_
 
 void Avtp_Sensor_SetAcfMsgType(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetAcfMsgLength(Avtp_Sensor_t* pdu, uint16_t value);
-void Avtp_Sensor_SetMtv(Avtp_Sensor_t* pdu, uint8_t value);
+void Avtp_Sensor_EnableMtv(Avtp_Sensor_t* pdu);
+void Avtp_Sensor_DisableMtv(Avtp_Sensor_t* pdu);
 void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value);

@@ -142,12 +142,16 @@ uint8_t Avtp_Pcm_GetEvt(Avtp_Pcm_t* pdu);
 void Avtp_Pcm_SetField(Avtp_Pcm_t* pdu, Avtp_PcmFields_t field, uint64_t value);
 
 void Avtp_Pcm_SetSubtype(Avtp_Pcm_t* pdu, uint8_t value);
-void Avtp_Pcm_SetSv(Avtp_Pcm_t* pdu, uint8_t value);
+void Avtp_Pcm_EnableSv(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_DisableSv(Avtp_Pcm_t* pdu);
 void Avtp_Pcm_SetVersion(Avtp_Pcm_t* pdu, uint8_t value);
-void Avtp_Pcm_SetMr(Avtp_Pcm_t* pdu, uint8_t value);
-void Avtp_Pcm_SetTv(Avtp_Pcm_t* pdu, uint8_t value);
+void Avtp_Pcm_EnableMr(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_DisableMr(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_EnableTv(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_DisableTv(Avtp_Pcm_t* pdu);
 void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t* pdu, uint8_t value);
-void Avtp_Pcm_SetTu(Avtp_Pcm_t* pdu, uint8_t value);
+void Avtp_Pcm_EnableTu(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_DisableTu(Avtp_Pcm_t* pdu);
 void Avtp_Pcm_SetStreamId(Avtp_Pcm_t* pdu, uint64_t value);
 void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t* pdu, uint32_t value);
 void Avtp_Pcm_SetFormat(Avtp_Pcm_t* pdu, Avtp_AafFormat_t value);
@@ -155,7 +159,8 @@ void Avtp_Pcm_SetNsr(Avtp_Pcm_t* pdu, Avtp_AafNsr_t value);
 void Avtp_Pcm_SetChannelsPerFrame(Avtp_Pcm_t* pdu, uint16_t value);
 void Avtp_Pcm_SetBitDepth(Avtp_Pcm_t* pdu, uint8_t value);
 void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t* pdu, uint16_t value);
-void Avtp_Pcm_SetSp(Avtp_Pcm_t* pdu, Avtp_AafSp_t value);
+void Avtp_Pcm_EnableSp(Avtp_Pcm_t* pdu);
+void Avtp_Pcm_DisableSp(Avtp_Pcm_t* pdu);
 void Avtp_Pcm_SetEvt(Avtp_Pcm_t* pdu, uint8_t value);
 
 /******************************************************************************

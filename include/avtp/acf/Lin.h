@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -104,7 +104,8 @@ void Avtp_Lin_SetField(Avtp_Lin_t* pdu, Avtp_LinFields_t field, uint64_t value);
 void Avtp_Lin_SetAcfMsgType(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetAcfMsgLength(Avtp_Lin_t* pdu, uint16_t value);
 void Avtp_Lin_SetPad(Avtp_Lin_t* pdu, uint8_t value);
-void Avtp_Lin_SetMtv(Avtp_Lin_t* pdu, uint8_t value);
+void Avtp_Lin_EnableMtv(Avtp_Lin_t* pdu);
+void Avtp_Lin_DisableMtv(Avtp_Lin_t* pdu);
 void Avtp_Lin_SetLinBusId(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetLinIdentifier(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value);

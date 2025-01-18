@@ -11,7 +11,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of Intel Corporation, COVESA nor the names of their
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -72,7 +72,7 @@ void Avtp_Crf_Init(Avtp_Crf_t* pdu)
 }
 
 uint64_t Avtp_Crf_GetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field)
-{ 
+{
     return GET_FIELD(field);
 }
 
@@ -151,9 +151,14 @@ void Avtp_Crf_SetSubtype(Avtp_Crf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CRF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Crf_SetSv(Avtp_Crf_t* pdu, uint8_t value)
+void Avtp_Crf_EnableSv(Avtp_Crf_t* pdu)
 {
-    SET_FIELD(AVTP_CRF_FIELD_SV, value);
+    SET_FIELD(AVTP_CRF_FIELD_SV, 1);
+}
+
+void Avtp_Crf_DisableSv(Avtp_Crf_t* pdu)
+{
+    SET_FIELD(AVTP_CRF_FIELD_SV, 0);
 }
 
 void Avtp_Crf_SetVersion(Avtp_Crf_t* pdu, uint8_t value)
@@ -161,19 +166,34 @@ void Avtp_Crf_SetVersion(Avtp_Crf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CRF_FIELD_VERSION, value);
 }
 
-void Avtp_Crf_SetMr(Avtp_Crf_t* pdu, uint8_t value)
+void Avtp_Crf_EnableMr(Avtp_Crf_t* pdu)
 {
-    SET_FIELD(AVTP_CRF_FIELD_MR, value);
+    SET_FIELD(AVTP_CRF_FIELD_MR, 1);
 }
 
-void Avtp_Crf_SetFs(Avtp_Crf_t* pdu, uint8_t value)
+void Avtp_Crf_DisableMr(Avtp_Crf_t* pdu)
 {
-    SET_FIELD(AVTP_CRF_FIELD_FS, value);
+    SET_FIELD(AVTP_CRF_FIELD_MR, 0);
 }
 
-void Avtp_Crf_SetTu(Avtp_Crf_t* pdu, uint8_t value)
+void Avtp_Crf_EnableFs(Avtp_Crf_t* pdu)
 {
-    SET_FIELD(AVTP_CRF_FIELD_TU, value);
+    SET_FIELD(AVTP_CRF_FIELD_FS, 1);
+}
+
+void Avtp_Crf_DisableFs(Avtp_Crf_t* pdu)
+{
+    SET_FIELD(AVTP_CRF_FIELD_FS, 0);
+}
+
+void Avtp_Crf_EnableTu(Avtp_Crf_t* pdu)
+{
+    SET_FIELD(AVTP_CRF_FIELD_TU, 1);
+}
+
+void Avtp_Crf_DisableTu(Avtp_Crf_t* pdu)
+{
+    SET_FIELD(AVTP_CRF_FIELD_TU, 0);
 }
 
 void Avtp_Crf_SetSequenceNum(Avtp_Crf_t* pdu, uint8_t value)

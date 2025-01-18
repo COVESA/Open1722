@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -45,8 +45,8 @@ static const Avtp_FieldDescriptor_t Avtp_FlexRayFieldDesc[AVTP_FLEXRAY_FIELD_MAX
 {
     /* ACF common header fields */
     [AVTP_FLEXRAY_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset = 0, .bits = 7 },
-    [AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset = 7, .bits = 9 },  
-    /* ACF CAN header fields */
+    [AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset = 7, .bits = 9 },
+    /* ACF Flexray header fields */
     [AVTP_FLEXRAY_FIELD_PAD]                = { .quadlet = 0, .offset = 16, .bits = 2 },
     [AVTP_FLEXRAY_FIELD_MTV]                = { .quadlet = 0, .offset = 18, .bits = 1 },
     [AVTP_FLEXRAY_FIELD_FR_BUS_ID]          = { .quadlet = 0, .offset = 19, .bits = 5 },
@@ -65,7 +65,7 @@ static const Avtp_FieldDescriptor_t Avtp_FlexRayFieldDesc[AVTP_FLEXRAY_FIELD_MAX
 void Avtp_FlexRay_Init(Avtp_FlexRay_t* pdu)
 {
     if(pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_FlexRay_t));  
+        memset(pdu, 0, sizeof(Avtp_FlexRay_t));
         Avtp_FlexRay_SetField(pdu, AVTP_FLEXRAY_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_FLEXRAY);
     }
 }
@@ -160,9 +160,14 @@ void Avtp_FlexRay_SetPad(Avtp_FlexRay_t* pdu, uint8_t value)
     SET_FIELD(AVTP_FLEXRAY_FIELD_PAD, value);
 }
 
-void Avtp_FlexRay_SetMtv(Avtp_FlexRay_t* pdu, uint8_t value)
+void Avtp_FlexRay_EnableMtv(Avtp_FlexRay_t* pdu)
 {
-    SET_FIELD(AVTP_FLEXRAY_FIELD_MTV, value);
+    SET_FIELD(AVTP_FLEXRAY_FIELD_MTV, 1);
+}
+
+void Avtp_FlexRay_DisableMtv(Avtp_FlexRay_t* pdu)
+{
+    SET_FIELD(AVTP_FLEXRAY_FIELD_MTV, 0);
 }
 
 void Avtp_FlexRay_SetFrBusId(Avtp_FlexRay_t* pdu, uint8_t value)
@@ -175,24 +180,44 @@ void Avtp_FlexRay_SetChan(Avtp_FlexRay_t* pdu, uint8_t value)
     SET_FIELD(AVTP_FLEXRAY_FIELD_CHAN, value);
 }
 
-void Avtp_FlexRay_SetStr(Avtp_FlexRay_t* pdu, uint8_t value)
+void Avtp_FlexRay_EnableStr(Avtp_FlexRay_t* pdu)
 {
-    SET_FIELD(AVTP_FLEXRAY_FIELD_STR, value);
+    SET_FIELD(AVTP_FLEXRAY_FIELD_STR, 1);
 }
 
-void Avtp_FlexRay_SetSyn(Avtp_FlexRay_t* pdu, uint8_t value)
+void Avtp_FlexRay_DisableStr(Avtp_FlexRay_t* pdu)
 {
-    SET_FIELD(AVTP_FLEXRAY_FIELD_SYN, value);
+    SET_FIELD(AVTP_FLEXRAY_FIELD_STR, 0);
 }
 
-void Avtp_FlexRay_SetPre(Avtp_FlexRay_t* pdu, uint8_t value)
+void Avtp_FlexRay_EnableSyn(Avtp_FlexRay_t* pdu)
 {
-    SET_FIELD(AVTP_FLEXRAY_FIELD_PRE, value);
+    SET_FIELD(AVTP_FLEXRAY_FIELD_SYN, 1);
 }
 
-void Avtp_FlexRay_SetNfi(Avtp_FlexRay_t* pdu, uint8_t value)
+void Avtp_FlexRay_DisableSyn(Avtp_FlexRay_t* pdu)
 {
-    SET_FIELD(AVTP_FLEXRAY_FIELD_NFI, value);
+    SET_FIELD(AVTP_FLEXRAY_FIELD_SYN, 0);
+}
+
+void Avtp_FlexRay_EnablePre(Avtp_FlexRay_t* pdu)
+{
+    SET_FIELD(AVTP_FLEXRAY_FIELD_PRE, 1);
+}
+
+void Avtp_FlexRay_DisablePre(Avtp_FlexRay_t* pdu)
+{
+    SET_FIELD(AVTP_FLEXRAY_FIELD_PRE, 0);
+}
+
+void Avtp_FlexRay_EnableNfi(Avtp_FlexRay_t* pdu)
+{
+    SET_FIELD(AVTP_FLEXRAY_FIELD_NFI, 1);
+}
+
+void Avtp_FlexRay_DisableNfi(Avtp_FlexRay_t* pdu)
+{
+    SET_FIELD(AVTP_FLEXRAY_FIELD_NFI, 0);
 }
 
 void Avtp_FlexRay_SetMessageTimestamp(Avtp_FlexRay_t* pdu, uint64_t value)

@@ -266,7 +266,8 @@ void Avtp_Vss_DeserializeStringArray(VssDataStringArray_t* vss_data_string_array
 void Avtp_Vss_SetAcfMsgType(Avtp_Vss_t* pdu, Avtp_AcfMsgType_t val);
 void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t* pdu, uint8_t val);
 void Avtp_Vss_SetPad(Avtp_Vss_t* pdu, uint8_t val);
-void Avtp_Vss_SetMtv(Avtp_Vss_t* pdu, uint8_t val);
+void Avtp_Pcm_EnableMtv(Avtp_Vss_t* pdu);
+void Avtp_Pcm_DisableMtv(Avtp_Vss_t* pdu);
 void Avtp_Vss_SetAddrMode(Avtp_Vss_t* pdu, Vss_AddrMode_t val);
 void Avtp_Vss_SetOpCode(Avtp_Vss_t* pdu, Vss_OpCode_t val);
 void Avtp_Vss_SetDatatype(Avtp_Vss_t* pdu, Vss_Datatype_t val);

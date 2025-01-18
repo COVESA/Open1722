@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -31,7 +31,7 @@
 #include <string.h>
 
 #include "avtp/acf/Tscf.h"
-#include "avtp/Utils.h" 
+#include "avtp/Utils.h"
 #include "avtp/CommonHeader.h"
 
 #define GET_FIELD(field) \
@@ -48,7 +48,7 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] =
     [AVTP_TSCF_FIELD_SUBTYPE]                  = { .quadlet = 0, .offset = 0, .bits = 8 },
     [AVTP_TSCF_FIELD_SV]                       = { .quadlet = 0, .offset = 8, .bits = 1 },
     [AVTP_TSCF_FIELD_VERSION]                  = { .quadlet = 0, .offset = 9, .bits = 3 },
-    /* TSCF header*/    
+    /* TSCF header*/
     [AVTP_TSCF_FIELD_MR]                       = { .quadlet = 0, .offset = 12, .bits = 1 },
     [AVTP_TSCF_FIELD_TV]                       = { .quadlet = 0, .offset = 15, .bits = 1 },
     [AVTP_TSCF_FIELD_SEQUENCE_NUM]             = { .quadlet = 0, .offset = 16, .bits = 8 },
@@ -124,7 +124,7 @@ uint16_t Avtp_Tscf_GetStreamDataLength(Avtp_Tscf_t* pdu)
 
 void Avtp_Tscf_SetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field, uint64_t value)
 {
-    SET_FIELD(field, value); 
+    SET_FIELD(field, value);
 }
 
 void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value)
@@ -132,9 +132,14 @@ void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_TSCF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Tscf_SetSv(Avtp_Tscf_t* pdu, uint8_t value)
+void Avtp_Tscf_EnableSv(Avtp_Tscf_t* pdu)
 {
-    SET_FIELD(AVTP_TSCF_FIELD_SV, value);
+    SET_FIELD(AVTP_TSCF_FIELD_SV, 1);
+}
+
+void Avtp_Tscf_DisableSv(Avtp_Tscf_t* pdu)
+{
+    SET_FIELD(AVTP_TSCF_FIELD_SV, 0);
 }
 
 void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value)
@@ -142,14 +147,24 @@ void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_TSCF_FIELD_VERSION, value);
 }
 
-void Avtp_Tscf_SetMr(Avtp_Tscf_t* pdu, uint8_t value)
+void Avtp_Tscf_EnableMr(Avtp_Tscf_t* pdu)
 {
-    SET_FIELD(AVTP_TSCF_FIELD_MR, value);
+    SET_FIELD(AVTP_TSCF_FIELD_MR, 1);
 }
 
-void Avtp_Tscf_SetTv(Avtp_Tscf_t* pdu, uint8_t value)
+void Avtp_Tscf_DisableMr(Avtp_Tscf_t* pdu)
 {
-    SET_FIELD(AVTP_TSCF_FIELD_TV, value);
+    SET_FIELD(AVTP_TSCF_FIELD_MR, 0);
+}
+
+void Avtp_Tscf_EnableTv(Avtp_Tscf_t* pdu)
+{
+    SET_FIELD(AVTP_TSCF_FIELD_TV, 1);
+}
+
+void Avtp_Tscf_DisableTv(Avtp_Tscf_t* pdu)
+{
+    SET_FIELD(AVTP_TSCF_FIELD_TV, 0);
 }
 
 void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value)
@@ -157,9 +172,14 @@ void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Tscf_SetTu(Avtp_Tscf_t* pdu, uint8_t value)
+void Avtp_Tscf_EnableTu(Avtp_Tscf_t* pdu)
 {
-    SET_FIELD(AVTP_TSCF_FIELD_TU, value);
+    SET_FIELD(AVTP_TSCF_FIELD_TU, 1);
+}
+
+void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu)
+{
+    SET_FIELD(AVTP_TSCF_FIELD_TU, 0);
 }
 
 void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value)

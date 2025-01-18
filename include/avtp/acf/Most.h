@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -113,7 +113,8 @@ void Avtp_Most_SetField(Avtp_Most_t* pdu, Avtp_MostFields_t field, uint64_t valu
 void Avtp_Most_SetAcfMsgType(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetAcfMsgLength(Avtp_Most_t* pdu, uint16_t value);
 void Avtp_Most_SetPad(Avtp_Most_t* pdu, uint8_t value);
-void Avtp_Most_SetMtv(Avtp_Most_t* pdu, uint8_t value);
+void Avtp_Most_EnableMtv(Avtp_Most_t* pdu);
+void Avtp_Most_DisableMtv(Avtp_Most_t* pdu);
 void Avtp_Most_SetMostNetId(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetMessageTimestamp(Avtp_Most_t* pdu, uint64_t value);
 void Avtp_Most_SetDeviceId(Avtp_Most_t* pdu, uint16_t value);

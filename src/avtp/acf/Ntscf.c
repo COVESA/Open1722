@@ -109,9 +109,14 @@ void Avtp_Ntscf_SetSubtype(Avtp_Ntscf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_NTSCF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Ntscf_SetSv(Avtp_Ntscf_t* pdu, uint8_t value)
+void Avtp_Ntscf_EnableSv(Avtp_Ntscf_t* pdu)
 {
-    SET_FIELD(AVTP_NTSCF_FIELD_SV, value);
+    SET_FIELD(AVTP_NTSCF_FIELD_SV, 1);
+}
+
+void Avtp_Ntscf_DisableSv(Avtp_Ntscf_t* pdu)
+{
+    SET_FIELD(AVTP_NTSCF_FIELD_SV, 0);
 }
 
 void Avtp_Ntscf_SetVersion(Avtp_Ntscf_t* pdu, uint8_t value)

@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -45,8 +45,8 @@ static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] =
 {
     /* ACF common header fields */
     [AVTP_LIN_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset = 0, .bits = 7 },
-    [AVTP_LIN_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset = 7, .bits = 9 },  
-    /* ACF CAN header fields */
+    [AVTP_LIN_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset = 7, .bits = 9 },
+    /* ACF LIN header fields */
     [AVTP_LIN_FIELD_PAD]                = { .quadlet = 0, .offset = 16, .bits = 2 },
     [AVTP_LIN_FIELD_MTV]                = { .quadlet = 0, .offset = 18, .bits = 1 },
     [AVTP_LIN_FIELD_LIN_BUS_ID]         = { .quadlet = 0, .offset = 19, .bits = 5 },
@@ -57,7 +57,7 @@ static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] =
 void Avtp_Lin_Init(Avtp_Lin_t* pdu)
 {
     if(pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Lin_t));  
+        memset(pdu, 0, sizeof(Avtp_Lin_t));
         Avtp_Lin_SetField(pdu, AVTP_LIN_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_LIN);
     }
 }
@@ -122,9 +122,14 @@ void Avtp_Lin_SetPad(Avtp_Lin_t* pdu, uint8_t value)
     SET_FIELD(AVTP_LIN_FIELD_PAD, value);
 }
 
-void Avtp_Lin_SetMtv(Avtp_Lin_t* pdu, uint8_t value)
+void Avtp_Lin_EnableMtv(Avtp_Lin_t* pdu)
 {
-    SET_FIELD(AVTP_LIN_FIELD_MTV, value);
+    SET_FIELD(AVTP_LIN_FIELD_MTV, 1);
+}
+
+void Avtp_Lin_DisableMtv(Avtp_Lin_t* pdu)
+{
+    SET_FIELD(AVTP_LIN_FIELD_MTV, 0);
 }
 
 void Avtp_Lin_SetLinBusId(Avtp_Lin_t* pdu, uint8_t value)

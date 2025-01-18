@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -119,13 +119,18 @@ void Avtp_FlexRay_SetField(Avtp_FlexRay_t* pdu, Avtp_FlexRayFields_t field, uint
 void Avtp_FlexRay_SetAcfMsgType(Avtp_FlexRay_t* pdu, uint8_t value);
 void Avtp_FlexRay_SetAcfMsgLength(Avtp_FlexRay_t* pdu, uint16_t value);
 void Avtp_FlexRay_SetPad(Avtp_FlexRay_t* pdu, uint8_t value);
-void Avtp_FlexRay_SetMtv(Avtp_FlexRay_t* pdu, uint8_t value);
+void Avtp_FlexRay_EnableMtv(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_DisableMtv(Avtp_FlexRay_t* pdu);
 void Avtp_FlexRay_SetFrBusId(Avtp_FlexRay_t* pdu, uint8_t value);
 void Avtp_FlexRay_SetChan(Avtp_FlexRay_t* pdu, uint8_t value);
-void Avtp_FlexRay_SetStr(Avtp_FlexRay_t* pdu, uint8_t value);
-void Avtp_FlexRay_SetSyn(Avtp_FlexRay_t* pdu, uint8_t value);
-void Avtp_FlexRay_SetPre(Avtp_FlexRay_t* pdu, uint8_t value);
-void Avtp_FlexRay_SetNfi(Avtp_FlexRay_t* pdu, uint8_t value);
+void Avtp_FlexRay_EnableStr(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_DisableStr(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_EnableSyn(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_DisableSyn(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_EnablePre(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_DisablePre(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_EnableNfi(Avtp_FlexRay_t* pdu);
+void Avtp_FlexRay_DisableNfi(Avtp_FlexRay_t* pdu);
 void Avtp_FlexRay_SetMessageTimestamp(Avtp_FlexRay_t* pdu, uint64_t value);
 void Avtp_FlexRay_SetFrFrameId(Avtp_FlexRay_t* pdu, uint16_t value);
 void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t* pdu, uint8_t value);

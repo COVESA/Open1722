@@ -10,7 +10,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of COVESA, Intel Corporation nor the names of its
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -118,9 +118,14 @@ void Avtp_Jpeg2000_SetMhId(Avtp_Jpeg2000_t* pdu, uint8_t value)
     SET_FIELD(AVTP_JPEG2000_FIELD_MH_ID, value);
 }
 
-void Avtp_Jpeg2000_SetT(Avtp_Jpeg2000_t* pdu, uint8_t value)
+void Avtp_Cvf_EnableT(Avtp_Jpeg2000_t* pdu)
 {
-    SET_FIELD(AVTP_JPEG2000_FIELD_T, value);
+    SET_FIELD(AVTP_JPEG2000_FIELD_T, 1);
+}
+
+void Avtp_Cvf_DisableT(Avtp_Jpeg2000_t* pdu)
+{
+    SET_FIELD(AVTP_JPEG2000_FIELD_T, 0);
 }
 
 void Avtp_Jpeg2000_SetPriority(Avtp_Jpeg2000_t* pdu, uint8_t value)

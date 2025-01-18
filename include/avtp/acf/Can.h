@@ -128,7 +128,7 @@ void Avtp_Can_SetCanIdentifier(Avtp_Can_t* pdu, uint32_t value);
 void Avtp_Can_EnableMtv(Avtp_Can_t* pdu);
 void Avtp_Can_DisableMtv(Avtp_Can_t* pdu);
 void Avtp_Can_EnableRtr(Avtp_Can_t* pdu);
-void Avtp_Can_DisaleRtr(Avtp_Can_t* pdu);
+void Avtp_Can_DisableRtr(Avtp_Can_t* pdu);
 void Avtp_Can_EnableEff(Avtp_Can_t* pdu);
 void Avtp_Can_DisableEff(Avtp_Can_t* pdu);
 void Avtp_Can_EnableBrs(Avtp_Can_t* pdu);
@@ -137,9 +137,6 @@ void Avtp_Can_EnableFdf(Avtp_Can_t* pdu);
 void Avtp_Can_DisableFdf(Avtp_Can_t* pdu);
 void Avtp_Can_EnableEsi(Avtp_Can_t* pdu);
 void Avtp_Can_DisableEsi(Avtp_Can_t* pdu);
-
-
-
 
 
 /**

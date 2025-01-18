@@ -69,7 +69,7 @@ void Avtp_Cvf_Init(Avtp_Cvf_t* pdu)
         memset(pdu, 0, sizeof(Avtp_Cvf_t));
         Avtp_Cvf_SetField(pdu, AVTP_CVF_FIELD_SUBTYPE, AVTP_SUBTYPE_CVF);
         Avtp_Cvf_SetField(pdu, AVTP_CVF_FIELD_FORMAT, AVTP_CVF_FORMAT_RFC);
-        Avtp_Cvf_SetSv(pdu, 1);
+        Avtp_Cvf_EnableSv(pdu);
     }
 }
 
@@ -163,9 +163,14 @@ void Avtp_Cvf_SetSubtype(Avtp_Cvf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CVF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Cvf_SetSv(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_EnableSv(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_SV, value);
+    SET_FIELD(AVTP_CVF_FIELD_SV, 1);
+}
+
+void Avtp_Cvf_DisableSv(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_SV, 0);
 }
 
 void Avtp_Cvf_SetVersion(Avtp_Cvf_t* pdu, uint8_t value)
@@ -173,14 +178,24 @@ void Avtp_Cvf_SetVersion(Avtp_Cvf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CVF_FIELD_VERSION, value);
 }
 
-void Avtp_Cvf_SetMr(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_EnableMr(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_MR, value);
+    SET_FIELD(AVTP_CVF_FIELD_MR, 1);
 }
 
-void Avtp_Cvf_SetTv(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_DisableMr(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_TV, value);
+    SET_FIELD(AVTP_CVF_FIELD_MR, 0);
+}
+
+void Avtp_Cvf_EnableTv(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_TV, 1);
+}
+
+void Avtp_Cvf_DisableTv(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_TV, 0);
 }
 
 void Avtp_Cvf_SetSequenceNum(Avtp_Cvf_t* pdu, uint8_t value)
@@ -188,9 +203,14 @@ void Avtp_Cvf_SetSequenceNum(Avtp_Cvf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CVF_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Cvf_SetTu(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_EnableTu(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_TU, value);
+    SET_FIELD(AVTP_CVF_FIELD_TU, 1);
+}
+
+void Avtp_Cvf_DisableTu(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_TU, 0);
 }
 
 void Avtp_Cvf_SetStreamId(Avtp_Cvf_t* pdu, uint64_t value)
@@ -218,14 +238,24 @@ void Avtp_Cvf_SetStreamDataLength(Avtp_Cvf_t* pdu, uint16_t value)
     SET_FIELD(AVTP_CVF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
-void Avtp_Cvf_SetPtv(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_EnablePtv(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_PTV, value);
+    SET_FIELD(AVTP_CVF_FIELD_PTV, 1);
 }
 
-void Avtp_Cvf_SetM(Avtp_Cvf_t* pdu, uint8_t value)
+void Avtp_Cvf_DisablePtv(Avtp_Cvf_t* pdu)
 {
-    SET_FIELD(AVTP_CVF_FIELD_M, value);
+    SET_FIELD(AVTP_CVF_FIELD_PTV, 0);
+}
+
+void Avtp_Cvf_EnableM(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_M, 1);
+}
+
+void Avtp_Cvf_DisableM(Avtp_Cvf_t* pdu)
+{
+    SET_FIELD(AVTP_CVF_FIELD_M, 0);
 }
 
 void Avtp_Cvf_SetEvt(Avtp_Cvf_t* pdu, uint8_t value)

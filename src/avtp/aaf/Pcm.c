@@ -164,9 +164,14 @@ void Avtp_Pcm_SetSubtype(Avtp_Pcm_t* pdu, uint8_t value)
     SET_FIELD(AVTP_PCM_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Pcm_SetSv(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_EnableSv(Avtp_Pcm_t* pdu)
 {
-    SET_FIELD(AVTP_PCM_FIELD_SV, value);
+    SET_FIELD(AVTP_PCM_FIELD_SV, 1);
+}
+
+void Avtp_Pcm_DisableSv(Avtp_Pcm_t* pdu)
+{
+    SET_FIELD(AVTP_PCM_FIELD_SV, 0);
 }
 
 void Avtp_Pcm_SetVersion(Avtp_Pcm_t* pdu, uint8_t value)
@@ -174,14 +179,24 @@ void Avtp_Pcm_SetVersion(Avtp_Pcm_t* pdu, uint8_t value)
     SET_FIELD(AVTP_PCM_FIELD_VERSION, value);
 }
 
-void Avtp_Pcm_SetMr(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_EnableMr(Avtp_Pcm_t* pdu)
 {
-    SET_FIELD(AVTP_PCM_FIELD_MR, value);
+    SET_FIELD(AVTP_PCM_FIELD_MR, 1);
 }
 
-void Avtp_Pcm_SetTv(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_DisableMr(Avtp_Pcm_t* pdu)
 {
-    SET_FIELD(AVTP_PCM_FIELD_TV, value);
+    SET_FIELD(AVTP_PCM_FIELD_MR, 0);
+}
+
+void Avtp_Pcm_EnableTv(Avtp_Pcm_t* pdu)
+{
+    SET_FIELD(AVTP_PCM_FIELD_TV, 1);
+}
+
+void Avtp_Pcm_DisableTv(Avtp_Pcm_t* pdu)
+{
+    SET_FIELD(AVTP_PCM_FIELD_TV, 0);
 }
 
 void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t* pdu, uint8_t value)
@@ -189,9 +204,14 @@ void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t* pdu, uint8_t value)
     SET_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Pcm_SetTu(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_EnableTu(Avtp_Pcm_t* pdu)
 {
-    SET_FIELD(AVTP_PCM_FIELD_TU, value);
+    SET_FIELD(AVTP_PCM_FIELD_TU, 1);
+}
+
+void Avtp_Pcm_DisableTu(Avtp_Pcm_t* pdu)
+{
+    SET_FIELD(AVTP_PCM_FIELD_TU, 0);
 }
 
 void Avtp_Pcm_SetStreamId(Avtp_Pcm_t* pdu, uint64_t value)
@@ -229,9 +249,14 @@ void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t* pdu, uint16_t value)
     SET_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH, value);
 }
 
-void Avtp_Pcm_SetSp(Avtp_Pcm_t* pdu, Avtp_AafSp_t value)
+void Avtp_Pcm_EnableSp(Avtp_Pcm_t* pdu)
 {
-    SET_FIELD(AVTP_PCM_FIELD_SP, value);
+    SET_FIELD(AVTP_PCM_FIELD_SP, 1);
+}
+
+void Avtp_Pcm_DisableSp(Avtp_Pcm_t* pdu)
+{
+    SET_FIELD(AVTP_PCM_FIELD_SP, 0);
 }
 
 void Avtp_Pcm_SetEvt(Avtp_Pcm_t* pdu, uint8_t value)

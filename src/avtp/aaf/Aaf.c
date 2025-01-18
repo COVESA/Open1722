@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -41,10 +41,10 @@
 static const Avtp_FieldDescriptor_t Avtp_AafFieldDesc[AVTP_AAF_FIELD_MAX] =
 {
     [AVTP_AAF_FIELD_SUBTYPE]                    = { .quadlet = 0, .offset =  0, .bits =  8 },
-    [AVTP_AAF_FIELD_SV]                         = { .quadlet = 0, .offset =  8, .bits =  1 }, 
-    [AVTP_AAF_FIELD_VERSION]                    = { .quadlet = 0, .offset =  9, .bits =  3 }, 
+    [AVTP_AAF_FIELD_SV]                         = { .quadlet = 0, .offset =  8, .bits =  1 },
+    [AVTP_AAF_FIELD_VERSION]                    = { .quadlet = 0, .offset =  9, .bits =  3 },
     [AVTP_AAF_FIELD_MR]                         = { .quadlet = 0, .offset = 12, .bits =  1 },
-    [AVTP_AAF_FIELD_TV]                         = { .quadlet = 0, .offset = 15, .bits =  1 }, 
+    [AVTP_AAF_FIELD_TV]                         = { .quadlet = 0, .offset = 15, .bits =  1 },
     [AVTP_AAF_FIELD_SEQUENCE_NUM]               = { .quadlet = 0, .offset = 16, .bits =  8 },
     [AVTP_AAF_FIELD_TU]                         = { .quadlet = 0, .offset = 31, .bits =  1 },
     [AVTP_AAF_FIELD_STREAM_ID]                  = { .quadlet = 1, .offset =  0, .bits = 64 },
@@ -53,9 +53,9 @@ static const Avtp_FieldDescriptor_t Avtp_AafFieldDesc[AVTP_AAF_FIELD_MAX] =
     [AVTP_AAF_FIELD_AAF_FORMAT_SPECIFIC_DATA_1] = { .quadlet = 4, .offset =  8, .bits = 24 },
     [AVTP_AAF_FIELD_STREAM_DATA_LENGTH]         = { .quadlet = 5, .offset =  0, .bits = 16 },
     [AVTP_AAF_FIELD_AFSD]                       = { .quadlet = 5, .offset = 16, .bits =  3 },
-    [AVTP_AAF_FIELD_SP]                         = { .quadlet = 5, .offset = 19, .bits =  1 }, 
-    [AVTP_AAF_FIELD_EVT]                        = { .quadlet = 5, .offset = 20, .bits =  4 }, 
-    [AVTP_AAF_FIELD_AAF_FORMAT_SPECIFIC_DATA_2] = { .quadlet = 5, .offset = 24, .bits =  8 },    
+    [AVTP_AAF_FIELD_SP]                         = { .quadlet = 5, .offset = 19, .bits =  1 },
+    [AVTP_AAF_FIELD_EVT]                        = { .quadlet = 5, .offset = 20, .bits =  4 },
+    [AVTP_AAF_FIELD_AAF_FORMAT_SPECIFIC_DATA_2] = { .quadlet = 5, .offset = 24, .bits =  8 },
 };
 
 uint64_t Avtp_Aaf_GetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field)
@@ -135,7 +135,7 @@ uint8_t Avtp_Aaf_GetEvt(Avtp_Aaf_t* pdu)
 
 void Avtp_Aaf_SetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field, uint64_t value)
 {
-    Avtp_SetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, (uint8_t) field, value); 
+    Avtp_SetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, (uint8_t) field, value);
 }
 
 void Avtp_Aaf_SetSubtype(Avtp_Aaf_t* pdu, uint8_t value)
@@ -143,9 +143,14 @@ void Avtp_Aaf_SetSubtype(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Aaf_SetSv(Avtp_Aaf_t* pdu, uint8_t value)
+void Avtp_Can_EnableSv(Avtp_Aaf_t* pdu)
 {
-    SET_FIELD(AVTP_AAF_FIELD_SV, value);
+    SET_FIELD(AVTP_AAF_FIELD_SV, 1);
+}
+
+void Avtp_Can_DisableSv(Avtp_Aaf_t* pdu)
+{
+    SET_FIELD(AVTP_AAF_FIELD_SV, 0);
 }
 
 void Avtp_Aaf_SetVersion(Avtp_Aaf_t* pdu, uint8_t value)
@@ -153,14 +158,24 @@ void Avtp_Aaf_SetVersion(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_VERSION, value);
 }
 
-void Avtp_Aaf_SetMr(Avtp_Aaf_t* pdu, uint8_t value)
+void Avtp_Can_EnableMr(Avtp_Aaf_t* pdu)
 {
-    SET_FIELD(AVTP_AAF_FIELD_MR, value);
+    SET_FIELD(AVTP_AAF_FIELD_MR, 1);
 }
 
-void Avtp_Aaf_SetTv(Avtp_Aaf_t* pdu, uint8_t value)
+void Avtp_Can_DisableMr(Avtp_Aaf_t* pdu)
 {
-    SET_FIELD(AVTP_AAF_FIELD_TV, value);
+    SET_FIELD(AVTP_AAF_FIELD_MR, 0);
+}
+
+void Avtp_Can_EnableTv(Avtp_Aaf_t* pdu)
+{
+    SET_FIELD(AVTP_AAF_FIELD_TV, 1);
+}
+
+void Avtp_Can_DisableTv(Avtp_Aaf_t* pdu)
+{
+    SET_FIELD(AVTP_AAF_FIELD_TV, 0);
 }
 
 void Avtp_Aaf_SetSequenceNum(Avtp_Aaf_t* pdu, uint8_t value)
@@ -168,9 +183,14 @@ void Avtp_Aaf_SetSequenceNum(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Aaf_SetTu(Avtp_Aaf_t* pdu, uint8_t value)
+void Avtp_Can_EnableTu(Avtp_Aaf_t* pdu)
 {
-    SET_FIELD(AVTP_AAF_FIELD_TU, value);
+    SET_FIELD(AVTP_AAF_FIELD_TU, 1);
+}
+
+void Avtp_Can_DisableTu(Avtp_Aaf_t* pdu)
+{
+    SET_FIELD(AVTP_AAF_FIELD_TU, 0);
 }
 
 void Avtp_Aaf_SetStreamId(Avtp_Aaf_t* pdu, uint64_t value)
@@ -198,9 +218,14 @@ void Avtp_Aaf_SetAfsd(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_AFSD, value);
 }
 
-void Avtp_Aaf_SetSp(Avtp_Aaf_t* pdu, uint8_t value)
+void Avtp_Can_EnableSp(Avtp_Aaf_t* pdu)
 {
-    SET_FIELD(AVTP_AAF_FIELD_SP, value);
+    SET_FIELD(AVTP_AAF_FIELD_SP, 1);
+}
+
+void Avtp_Can_DisableSp(Avtp_Aaf_t* pdu)
+{
+    SET_FIELD(AVTP_AAF_FIELD_SP, 0);
 }
 
 void Avtp_Aaf_SetEvt(Avtp_Aaf_t* pdu, uint8_t value)

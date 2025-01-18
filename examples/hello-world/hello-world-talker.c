@@ -129,7 +129,7 @@ static int init_cf_pdu(uint8_t* pdu)
         Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetTu(tscf_pdu, 0U);
+        Avtp_Tscf_DisableTu(tscf_pdu);
         Avtp_Tscf_SetSequenceNum(tscf_pdu, seq_num++);
         Avtp_Tscf_SetStreamId(tscf_pdu, STREAM_ID);
         res = AVTP_TSCF_HEADER_LEN;

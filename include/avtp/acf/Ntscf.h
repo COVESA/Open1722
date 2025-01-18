@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -96,7 +96,8 @@ uint64_t Avtp_Ntscf_GetStreamId(Avtp_Ntscf_t* pdu);
 void Avtp_Ntscf_SetField(Avtp_Ntscf_t* pdu, Avtp_NtscfFields_t field, uint64_t value);
 
 void Avtp_Ntscf_SetSubtype(Avtp_Ntscf_t* pdu, uint8_t value);
-void Avtp_Ntscf_SetSv(Avtp_Ntscf_t* pdu, uint8_t value);
+void Avtp_Ntscf_EnableSv(Avtp_Ntscf_t* pdu);
+void Avtp_Ntscf_DisableSv(Avtp_Ntscf_t* pdu);
 void Avtp_Ntscf_SetVersion(Avtp_Ntscf_t* pdu, uint8_t value);
 void Avtp_Ntscf_SetNtscfDataLength(Avtp_Ntscf_t* pdu, uint16_t value);
 void Avtp_Ntscf_SetSequenceNum(Avtp_Ntscf_t* pdu, uint8_t value);
