@@ -120,7 +120,6 @@ void Avtp_Cvf_SetFormatSubtype(Avtp_Cvf_t* pdu, Avtp_CvfFormatSubtype_t value);
 void Avtp_Cvf_SetStreamDataLength(Avtp_Cvf_t* pdu, uint16_t value);
 void Avtp_Cvf_EnablePtv(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_DisablePtv(Avtp_Cvf_t* pdu);
-void Avtp_Cvf_SetM(Avtp_Cvf_t* pdu, uint8_t value);
 void Avtp_Cvf_EnableM(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_DisableM(Avtp_Cvf_t* pdu);
 void Avtp_Cvf_SetEvt(Avtp_Cvf_t* pdu, uint8_t value);

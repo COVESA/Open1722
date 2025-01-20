@@ -383,12 +383,12 @@ void Avtp_Vss_SetPad(Avtp_Vss_t* pdu, uint8_t val) {
     SET_FIELD(AVTP_VSS_FIELD_PAD, val);
 }
 
-void Avtp_Pcm_EnableMtv(Avtp_Vss_t* pdu)
+void Avtp_Vss_EnableMtv(Avtp_Vss_t* pdu)
 {
     SET_FIELD(AVTP_VSS_FIELD_MTV, 1);
 }
 
-void Avtp_Pcm_DisableMtv(Avtp_Vss_t* pdu)
+void Avtp_Vss_DisableMtv(Avtp_Vss_t* pdu)
 {
     SET_FIELD(AVTP_VSS_FIELD_MTV, 0);
 }

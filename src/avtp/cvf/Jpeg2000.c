@@ -118,12 +118,12 @@ void Avtp_Jpeg2000_SetMhId(Avtp_Jpeg2000_t* pdu, uint8_t value)
     SET_FIELD(AVTP_JPEG2000_FIELD_MH_ID, value);
 }
 
-void Avtp_Cvf_EnableT(Avtp_Jpeg2000_t* pdu)
+void Avtp_Jpeg2000_EnableT(Avtp_Jpeg2000_t* pdu)
 {
     SET_FIELD(AVTP_JPEG2000_FIELD_T, 1);
 }
 
-void Avtp_Cvf_DisableT(Avtp_Jpeg2000_t* pdu)
+void Avtp_Jpeg2000_DisableT(Avtp_Jpeg2000_t* pdu)
 {
     SET_FIELD(AVTP_JPEG2000_FIELD_T, 0);
 }

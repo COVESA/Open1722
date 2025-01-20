@@ -105,23 +105,23 @@ uint8_t Avtp_Aaf_GetEvt(Avtp_Aaf_t* pdu);
 void Avtp_Aaf_SetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field, uint64_t value);
 
 void Avtp_Aaf_SetSubtype(Avtp_Aaf_t* pdu, uint8_t value);
-void Avtp_Can_EnableSv(Avtp_Aaf_t* pdu);
-void Avtp_Can_DisableSv(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_EnableSv(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_DisableSv(Avtp_Aaf_t* pdu);
 void Avtp_Aaf_SetVersion(Avtp_Aaf_t* pdu, uint8_t value);
-void Avtp_Can_EnableMr(Avtp_Aaf_t* pdu);
-void Avtp_Can_DisableMr(Avtp_Aaf_t* pdu);
-void Avtp_Can_EnableTv(Avtp_Aaf_t* pdu);
-void Avtp_Can_DisableTv(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_EnableMr(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_DisableMr(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_EnableTv(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_DisableTv(Avtp_Aaf_t* pdu);
 void Avtp_Aaf_SetSequenceNum(Avtp_Aaf_t* pdu, uint8_t value);
-void Avtp_Can_EnableTu(Avtp_Aaf_t* pdu);
-void Avtp_Can_DisableTu(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_EnableTu(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_DisableTu(Avtp_Aaf_t* pdu);
 void Avtp_Aaf_SetStreamId(Avtp_Aaf_t* pdu, uint64_t value);
 void Avtp_Aaf_SetAvtpTimestamp(Avtp_Aaf_t* pdu, uint32_t value);
 void Avtp_Aaf_SetFormat(Avtp_Aaf_t* pdu, uint8_t value);
 void Avtp_Aaf_SetStreamDataLength(Avtp_Aaf_t* pdu, uint16_t value);
 void Avtp_Aaf_SetAfsd(Avtp_Aaf_t* pdu, uint8_t value);
-void Avtp_Can_EnableSp(Avtp_Aaf_t* pdu);
-void Avtp_Can_DisableSp(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_EnableSp(Avtp_Aaf_t* pdu);
+void Avtp_Aaf_DisableSp(Avtp_Aaf_t* pdu);
 void Avtp_Aaf_SetEvt(Avtp_Aaf_t* pdu, uint8_t value);
 
 #ifdef __cplusplus

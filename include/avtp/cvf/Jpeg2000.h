@@ -75,8 +75,8 @@ void Avtp_Jpeg2000_SetField(Avtp_Jpeg2000_t* pdu, Avtp_Jpeg2000Field_t field, ui
 void Avtp_Jpeg2000_SetTp(Avtp_Jpeg2000_t* pdu, uint8_t value);
 void Avtp_Jpeg2000_SetMhf(Avtp_Jpeg2000_t* pdu, uint8_t value);
 void Avtp_Jpeg2000_SetMhId(Avtp_Jpeg2000_t* pdu, uint8_t value);
-void Avtp_Cvf_EnableT(Avtp_Jpeg2000_t* pdu);
-void Avtp_Cvf_DisableT(Avtp_Jpeg2000_t* pdu);
+void Avtp_Jpeg2000_EnableT(Avtp_Jpeg2000_t* pdu);
+void Avtp_Jpeg2000_DisableT(Avtp_Jpeg2000_t* pdu);
 void Avtp_Jpeg2000_SetPriority(Avtp_Jpeg2000_t* pdu, uint8_t value);
 void Avtp_Jpeg2000_SetTileNumber(Avtp_Jpeg2000_t* pdu, uint16_t value);
 void Avtp_Jpeg2000_SetFragmentOffset(Avtp_Jpeg2000_t* pdu, uint32_t value);

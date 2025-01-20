@@ -143,12 +143,12 @@ void Avtp_Aaf_SetSubtype(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Can_EnableSv(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_EnableSv(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_SV, 1);
 }
 
-void Avtp_Can_DisableSv(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_DisableSv(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_SV, 0);
 }
@@ -158,22 +158,22 @@ void Avtp_Aaf_SetVersion(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_VERSION, value);
 }
 
-void Avtp_Can_EnableMr(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_EnableMr(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_MR, 1);
 }
 
-void Avtp_Can_DisableMr(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_DisableMr(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_MR, 0);
 }
 
-void Avtp_Can_EnableTv(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_EnableTv(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_TV, 1);
 }
 
-void Avtp_Can_DisableTv(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_DisableTv(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_TV, 0);
 }
@@ -183,12 +183,12 @@ void Avtp_Aaf_SetSequenceNum(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Can_EnableTu(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_EnableTu(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_TU, 1);
 }
 
-void Avtp_Can_DisableTu(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_DisableTu(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_TU, 0);
 }
@@ -218,12 +218,12 @@ void Avtp_Aaf_SetAfsd(Avtp_Aaf_t* pdu, uint8_t value)
     SET_FIELD(AVTP_AAF_FIELD_AFSD, value);
 }
 
-void Avtp_Can_EnableSp(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_EnableSp(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_SP, 1);
 }
 
-void Avtp_Can_DisableSp(Avtp_Aaf_t* pdu)
+void Avtp_Aaf_DisableSp(Avtp_Aaf_t* pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_SP, 0);
 }
