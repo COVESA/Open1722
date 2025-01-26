@@ -1,0 +1,30 @@
+name: Check SPDX identifiers
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-spdx-headers:
+    name: Check SPDX headers
+
+    runs-on: ubuntu-latest
+    env:
+      licenses: "BSD-3-Clause"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # required to grab the history of the PR
+        fetch-depth: 0
+
+    - name: Get files changed in PR
+      run: |
+        echo "files=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | tr '\n' ',')" >> $GITHUB_ENV
+
+    - name: Check added or modified files for correct SPDX identifiers
+      uses: eclipse-kuksa/kuksa-actions/spdx@4
+      with:
+        files: "${{ env.files }}"
+        licenses: "${{ env.licenses }}"
