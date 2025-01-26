@@ -1,0 +1,24 @@
+name: Build ACF-CAN kernel module
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CONFIG_ACF_CAN: m
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y meson libcmocka0 libcmocka-dev lcov
+    - name: Patching license
+      run: sed -i 's#MODULE_LICENSE("BSD3")#MODULE_LICENSE("Dual BSD/GPL")#g' examples/acf-can/linux-kernel-mod/acfcanmodulemetadata.h
+    - name: Building module
+      working-directory: examples/acf-can/linux-kernel-mod/
+      run: make
