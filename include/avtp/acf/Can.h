@@ -38,6 +38,7 @@
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -187,6 +188,18 @@ void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
  * @return  Length of CAN payload in bytes
  */
 uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu);
+
+
+/**
+ * Checks if the ACF CAN frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
+ * @param bufferSize Size of the buffer containing the ACF CAN frame.
+ * @return true if the ACF CAN frame is valid, false otherwise.
+ */
+bool Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize);
+
 
 #ifdef __cplusplus
 }
