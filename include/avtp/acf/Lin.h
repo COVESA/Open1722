@@ -35,6 +35,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -109,6 +110,17 @@ void Avtp_Lin_DisableMtv(Avtp_Lin_t* pdu);
 void Avtp_Lin_SetLinBusId(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetLinIdentifier(Avtp_Lin_t* pdu, uint8_t value);
 void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value);
+
+
+/**
+ * Checks if the ACF Lin frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param bufferSize Size of the buffer containing the ACF Lin frame.
+ * @return true if the ACF Lin frame is valid, false otherwise.
+ */
+bool Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

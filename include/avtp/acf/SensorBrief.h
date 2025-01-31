@@ -36,6 +36,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -103,6 +104,17 @@ void Avtp_SensorBrief_DisableMtv(Avtp_SensorBrief_t* pdu);
 void Avtp_SensorBrief_SetNumSensor(Avtp_SensorBrief_t* pdu, uint8_t value);
 void Avtp_SensorBrief_SetSz(Avtp_SensorBrief_t* pdu, uint8_t value);
 void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value);
+
+/**
+ * Checks if the ACF SensorBrief frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF SensorBrief PDU.
+ * @param bufferSize Size of the buffer containing the ACF SensorBrief frame.
+ * @return true if the ACF SensorBrief frame is valid, false otherwise.
+ */
+bool Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize);
+
 
 #ifdef __cplusplus
 }

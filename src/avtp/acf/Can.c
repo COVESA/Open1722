@@ -297,7 +297,7 @@ bool Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize)
         return false;
     }
 
-    if (Avtp_Can_GetAcfMsgLength(pdu) * 4 > bufferSize) {
+    if (Avtp_Can_GetAcfMsgLength(pdu) > bufferSize) {
         return false;
     }
 

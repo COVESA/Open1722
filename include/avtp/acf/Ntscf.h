@@ -42,6 +42,7 @@
 #endif
 
 #include "avtp/Defines.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,6 +107,17 @@ void Avtp_Ntscf_SetVersion(Avtp_Ntscf_t* pdu, uint8_t value);
 void Avtp_Ntscf_SetNtscfDataLength(Avtp_Ntscf_t* pdu, uint16_t value);
 void Avtp_Ntscf_SetSequenceNum(Avtp_Ntscf_t* pdu, uint8_t value);
 void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value);
+
+/**
+ * Checks if the ACF Ntscf frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
+ * @param bufferSize Size of the buffer containing the ACF Ntscf frame.
+ * @return true if the ACF Ntscf frame is valid, false otherwise.
+ */
+bool Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize);
+
 
 #ifdef __cplusplus
 }

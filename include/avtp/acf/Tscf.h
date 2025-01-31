@@ -35,8 +35,8 @@
 
 #pragma once
 
-
 #include "avtp/Defines.h"
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -121,6 +121,16 @@ void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu);
 void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value);
 void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t* pdu, uint32_t value);
 void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value);
+
+/**
+ * Checks if the ACF Tscf frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Tscf PDU.
+ * @param bufferSize Size of the buffer containing the ACF Tscf frame.
+ * @return true if the ACF Tscf frame is valid, false otherwise.
+ */
+bool Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

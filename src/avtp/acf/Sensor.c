@@ -148,3 +148,24 @@ void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value)
 {
     SET_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP, value);
 }
+
+bool Avtp_Sensor_IsValid(Avtp_Sensor_t* pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_SENSOR_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Sensor_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_SENSOR) {
+        return false;
+    }
+
+    if (Avtp_Sensor_GetAcfMsgLength(pdu) > bufferSize) {
+        return false;
+    }
+
+    return true;
+}

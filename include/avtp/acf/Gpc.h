@@ -35,6 +35,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -97,6 +98,16 @@ void Avtp_Gpc_SetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field, uint64_t value);
 void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value);
 void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value);
 void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
+
+/**
+ * Checks if the ACF Gpc frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Gpc PDU.
+ * @param bufferSize Size of the buffer containing the ACF Gpc frame.
+ * @return true if the ACF Gpc frame is valid, false otherwise.
+ */
+bool Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

@@ -254,7 +254,7 @@ bool Avtp_FlexRay_IsValid(Avtp_FlexRay_t *pdu, size_t bufferSize)
         return false;
     }
 
-    if (Avtp_FlexRay_GetAcfMsgLength(pdu) * 4 > bufferSize)
+    if (Avtp_FlexRay_GetAcfMsgLength(pdu) > bufferSize)
     {
         return false;
     }

@@ -36,6 +36,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -109,6 +110,16 @@ void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value);
 void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value);
+
+/**
+ * Checks if the ACF Sensor frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
+ * @param bufferSize Size of the buffer containing the ACF Sensor frame.
+ * @return true if the ACF Sensor frame is valid, false otherwise.
+ */
+bool Avtp_Sensor_IsValid(Avtp_Sensor_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

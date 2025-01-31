@@ -146,3 +146,23 @@ void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value)
 {
     SET_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP, value);
 }
+
+bool Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize){
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_LIN_HEADER_LEN) {
+        return false;
+    }
+
+     if (Avtp_Lin_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_LIN) {
+        return false;
+    }
+
+    if (Avtp_Lin_GetAcfMsgLength(pdu) > bufferSize) {
+        return false;
+    }
+
+    return true;
+}

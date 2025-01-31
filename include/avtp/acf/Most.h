@@ -35,6 +35,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -122,6 +123,17 @@ void Avtp_Most_SetFblockId(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetInstId(Avtp_Most_t* pdu, uint8_t value);
 void Avtp_Most_SetFuncId(Avtp_Most_t* pdu, uint16_t value);
 void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value);
+
+/**
+ * Checks if the ACF Most frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param bufferSize Size of the buffer containing the ACF Most frame.
+ * @return true if the ACF Most frame is valid, false otherwise.
+ */
+bool Avtp_Most_IsValid(Avtp_Most_t* pdu, size_t bufferSize);
+
 
 #ifdef __cplusplus
 }

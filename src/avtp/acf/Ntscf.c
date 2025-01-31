@@ -143,3 +143,24 @@ void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value)
 {
     SET_FIELD(AVTP_NTSCF_FIELD_STREAM_ID, value);
 }
+
+bool Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_NTSCF_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Ntscf_GetSubtype(pdu) != AVTP_SUBTYPE_NTSCF) {
+        return false;
+    }
+
+    if (Avtp_Ntscf_GetNtscfDataLength(pdu) > bufferSize) {
+        return false;
+    }
+
+    return true;
+}

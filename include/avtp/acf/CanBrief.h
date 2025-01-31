@@ -36,6 +36,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -152,6 +153,18 @@ int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8
  * @returns Returns number of processed bytes (header + payload + padding)
  */
 int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
+
+/**
+ * Checks if the ACF CAN Brief frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+ * @param bufferSize Size of the buffer containing the ACF CAN Brief frame.
+ * @return true if the ACF CAN Brief frame is valid, false otherwise.
+ */
+bool Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize);
+
+
 
 #ifdef __cplusplus
 }
