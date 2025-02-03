@@ -297,7 +297,8 @@ uint8_t Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if (Avtp_Can_GetAcfMsgLength(pdu) > bufferSize) {
+    // Avtp_Can_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if (Avtp_Can_GetAcfMsgLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
     return TRUE;

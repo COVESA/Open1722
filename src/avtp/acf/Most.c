@@ -211,7 +211,8 @@ uint8_t Avtp_Most_IsValid(Avtp_Most_t *pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if (Avtp_Most_GetAcfMsgLength(pdu) > bufferSize)
+    // Avtp_Most_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if (Avtp_Most_GetAcfMsgLength(pdu) * 4 > bufferSize)
     {
         return FALSE;
     }
