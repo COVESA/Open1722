@@ -283,24 +283,22 @@ uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu)
     return acf_msg_length - AVTP_CAN_HEADER_LEN - acf_pad_length;
 }
 
-bool Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize)
+uint8_t Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_CAN_HEADER_LEN) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Can_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Can_GetAcfMsgLength(pdu) > bufferSize) {
-        return false;
+        return FALSE;
     }
-
-    return true;
-
+    return TRUE;
 }

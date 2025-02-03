@@ -253,23 +253,23 @@ int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* pdu, uint16_t payload_length)
     return avtpCanLength;
 }
 
-bool Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize)
+uint8_t Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_CAN_BRIEF_HEADER_LEN) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_CanBrief_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN_BRIEF) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_CanBrief_GetAcfMsgLength(pdu) > bufferSize) {
-        return false;
+        return FALSE;
     }
     
-    return true;
+    return TRUE;
 }

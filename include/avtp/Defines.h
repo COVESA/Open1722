@@ -62,6 +62,9 @@ typedef struct Avtp_FieldDescriptor {
     uint8_t bits;
 } Avtp_FieldDescriptor_t;
 
+#define TRUE 1
+#define FALSE 0
+
 #ifdef __cplusplus
 }
 #endif

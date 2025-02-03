@@ -139,23 +139,23 @@ void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value)
     SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP, value);
 }
 
-bool Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize)
+uint8_t Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize)
 {
     if(pdu == NULL) {
-        return false;
+        return FALSE;
     }
 
     if(bufferSize < AVTP_SENSOR_HEADER_LEN) {
-        return false;
+        return FALSE;
     }
 
     if(Avtp_SensorBrief_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_SENSOR_BRIEF) {
-        return false;
+        return FALSE;
     }
 
     if(Avtp_SensorBrief_GetAcfMsgLength(pdu) > bufferSize) {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }

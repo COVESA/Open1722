@@ -35,7 +35,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -107,7 +106,7 @@ void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Gpc frame.
  * @return true if the ACF Gpc frame is valid, false otherwise.
  */
-bool Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize);
+uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

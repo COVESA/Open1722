@@ -99,23 +99,23 @@ void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value)
     SET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
 }
 
-bool Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize)
+uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_GPC_HEADER_LEN) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Gpc_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_GPC) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Gpc_GetAcfMsgLength(pdu) > bufferSize) {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }

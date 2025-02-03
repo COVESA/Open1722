@@ -36,7 +36,6 @@
 #pragma once
 
 #include "avtp/Defines.h"
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -130,7 +129,7 @@ void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value);
  * @param bufferSize Size of the buffer containing the ACF Tscf frame.
  * @return true if the ACF Tscf frame is valid, false otherwise.
  */
-bool Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize);
+uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

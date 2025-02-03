@@ -203,23 +203,23 @@ void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value)
     SET_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
-bool Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize)
+uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_TSCF_HEADER_LEN) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Tscf_GetSubtype(pdu) != AVTP_SUBTYPE_TSCF) {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Tscf_GetStreamDataLength(pdu) > bufferSize) {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
