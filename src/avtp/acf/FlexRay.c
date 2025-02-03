@@ -254,7 +254,8 @@ uint8_t Avtp_FlexRay_IsValid(Avtp_FlexRay_t *pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if (Avtp_FlexRay_GetAcfMsgLength(pdu) > bufferSize)
+    // Avtp_FlexRay_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if (Avtp_FlexRay_GetAcfMsgLength(pdu) * 4 > bufferSize)
     {
         return FALSE;
     }

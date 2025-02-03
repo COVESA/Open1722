@@ -217,7 +217,8 @@ uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if (Avtp_Tscf_GetStreamDataLength(pdu) > bufferSize) {
+    // Avtp_Tscf_GetStreamDataLength returns quadlets. Convert the length field to octets
+    if (Avtp_Tscf_GetStreamDataLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
 

@@ -160,7 +160,8 @@ uint8_t Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize){
         return FALSE;
     }
 
-    if (Avtp_Lin_GetAcfMsgLength(pdu) > bufferSize) {
+    // Avtp_Lin_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if (Avtp_Lin_GetAcfMsgLength(pdu) *4 > bufferSize) {
         return FALSE;
     }
 

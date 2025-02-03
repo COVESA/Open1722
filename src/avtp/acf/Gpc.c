@@ -113,7 +113,8 @@ uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if (Avtp_Gpc_GetAcfMsgLength(pdu) > bufferSize) {
+    // Avtp_Gpc_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if (Avtp_Gpc_GetAcfMsgLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
 

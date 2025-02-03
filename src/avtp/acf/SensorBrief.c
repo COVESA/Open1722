@@ -153,7 +153,8 @@ uint8_t Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize)
         return FALSE;
     }
 
-    if(Avtp_SensorBrief_GetAcfMsgLength(pdu) > bufferSize) {
+    // Avtp_SensorBrief_GetAcfMsgLength returns quadlets. Convert the length field to octets
+    if(Avtp_SensorBrief_GetAcfMsgLength(pdu) *4 > bufferSize) {
         return FALSE;
     }
 
