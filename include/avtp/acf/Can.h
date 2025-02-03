@@ -38,11 +38,13 @@
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define TRUE 1
+#define FALSE 0
 
 #define AVTP_CAN_HEADER_LEN         (4 * AVTP_QUADLET_SIZE)
 
@@ -198,7 +200,7 @@ uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu);
  * @param bufferSize Size of the buffer containing the ACF CAN frame.
  * @return true if the ACF CAN frame is valid, false otherwise.
  */
-bool Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize);
+uint8_t Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

@@ -36,7 +36,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -113,7 +112,7 @@ void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value);
  * @param bufferSize Size of the buffer containing the ACF SensorBrief frame.
  * @return true if the ACF SensorBrief frame is valid, false otherwise.
  */
-bool Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize);
+uint8_t Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

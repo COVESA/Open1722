@@ -194,27 +194,27 @@ void Avtp_Most_SetOpType(Avtp_Most_t *pdu, uint8_t value)
     SET_FIELD(AVTP_MOST_FIELD_OP_TYPE, value);
 }
 
-bool Avtp_Most_IsValid(Avtp_Most_t *pdu, size_t bufferSize)
+uint8_t Avtp_Most_IsValid(Avtp_Most_t *pdu, size_t bufferSize)
 {
     if (pdu == NULL)
     {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_MOST_HEADER_LEN)
     {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Most_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_MOST)
     {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_Most_GetAcfMsgLength(pdu) > bufferSize)
     {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }

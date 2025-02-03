@@ -36,7 +36,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -162,7 +161,7 @@ int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
  * @param bufferSize Size of the buffer containing the ACF CAN Brief frame.
  * @return true if the ACF CAN Brief frame is valid, false otherwise.
  */
-bool Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize);
+uint8_t Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize);
 
 
 

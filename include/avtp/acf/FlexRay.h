@@ -35,7 +35,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -144,7 +143,7 @@ void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t* pdu, uint8_t value);
  * @param bufferSize Size of the buffer containing the ACF FlexRay frame.
  * @return true if the ACF FlexRay frame is valid, false otherwise.
  */
-bool Avtp_FlexRay_IsValid(Avtp_FlexRay_t* pdu, size_t bufferSize);
+uint8_t Avtp_FlexRay_IsValid(Avtp_FlexRay_t* pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

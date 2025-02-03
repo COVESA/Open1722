@@ -42,7 +42,6 @@
 #endif
 
 #include "avtp/Defines.h"
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,7 +115,7 @@ void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Ntscf frame.
  * @return true if the ACF Ntscf frame is valid, false otherwise.
  */
-bool Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize);
+uint8_t Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

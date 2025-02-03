@@ -35,7 +35,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -132,7 +131,7 @@ void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value);
  * @param bufferSize Size of the buffer containing the ACF Most frame.
  * @return true if the ACF Most frame is valid, false otherwise.
  */
-bool Avtp_Most_IsValid(Avtp_Most_t* pdu, size_t bufferSize);
+uint8_t Avtp_Most_IsValid(Avtp_Most_t* pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

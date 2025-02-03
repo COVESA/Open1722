@@ -236,28 +236,28 @@ void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t *pdu, uint8_t value)
     SET_FIELD(AVTP_FLEXRAY_FIELD_CYCLE, value);
 }
 
-bool Avtp_FlexRay_IsValid(Avtp_FlexRay_t *pdu, size_t bufferSize)
+uint8_t Avtp_FlexRay_IsValid(Avtp_FlexRay_t *pdu, size_t bufferSize)
 {
 
     if (pdu == NULL)
     {
-        return false;
+        return FALSE;
     }
 
     if (bufferSize < AVTP_FLEXRAY_HEADER_LEN)
     {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_FlexRay_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_FLEXRAY)
     {
-        return false;
+        return FALSE;
     }
 
     if (Avtp_FlexRay_GetAcfMsgLength(pdu) > bufferSize)
     {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
