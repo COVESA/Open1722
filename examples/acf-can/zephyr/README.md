@@ -18,15 +18,15 @@ $ source ~/zephyrproject/zephyr/zephyr-env.sh
 
 Subsequently, you can build the application using _west_. We have integrated the build dependencies of the acf-can-bridge application into the main CMake of the project. Hence build commands are executed from the main folder of the repository.
 ```
-$ west build --pristine -b <board_name> . -- -DCONF_FILE=./examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge
+$ west build --pristine -b <board_name> . -- -DCONF_FILE=./examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=<overlay file if reqd.>
 $ west build -t run # OR west build -t flash
 ```
 
 The parameters of the application (e.g. use UDP or the TSCF format) can be set from the [prj.conf.](prj.conf)
 
 In theory, this should work with any supported Zephyr boards having a CAN and an Ethernet interface. You may need to adjust the name of the interface in the corresponding device tree or code. We have tested the application with following Zephyr boards.
-- native_sim
-- arduino_portenta_h7
+- native_sim (Use overlay file: [native_sim.overlay](./boards/native_sim.overlay))
+- arduino_portenta_h7 (Use overlay file: [arduino_portenta_ht.overlay](./boards/arduino_portenta_h7.overlay)
 
 ## Testing on native_sim
 To test on native sim, we first create an Ethernet interface and a CAN inzterface for the sim.
