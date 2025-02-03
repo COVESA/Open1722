@@ -43,8 +43,6 @@
 extern "C" {
 #endif
 
-#define TRUE 1
-#define FALSE 0
 
 #define AVTP_CAN_HEADER_LEN         (4 * AVTP_QUADLET_SIZE)
 
