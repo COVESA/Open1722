@@ -25,6 +25,7 @@ jobs:
           base-path: west-ws
           toolchains: arm-zephyr-eabi
 
-      - name: Build
+      - name: Build Zephyr Apps - acf-can-bridge
         run: |
-          west build -b native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay
+          west build -b native_sim -d build_native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay
+          west build -b arduino_portenta_h7/stm32h747xx/m7 -d build_arduino . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/arduino_portenta_h7.overlay
