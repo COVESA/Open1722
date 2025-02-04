@@ -1,0 +1,30 @@
+name: Build Open1722 Apps for Zephyr
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  acf-can-bridge:
+    runs-on: ubuntu-latest
+    name: Build acf-can-bridge for Zephyr
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create West Workspace Directory
+        run: mkdir west-ws && cp examples/acf-can/zephyr/west.yml west-ws/
+
+      - name: Setup Zephyr project
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: .
+          base-path: west-ws
+          toolchains: arm-zephyr-eabi
+
+      - name: Build
+        run: |
+          west build -b native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay
