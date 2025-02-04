@@ -70,6 +70,16 @@ target_link_libraries(test-rvf open1722 cmocka)
 target_include_directories(test-rvf PUBLIC ../include)
 add_test(NAME test-rvf COMMAND test-rvf)
 
+add_executable(test-tscf test-tscf.c)
+target_link_libraries(test-tscf open1722 cmocka)
+target_include_directories(test-tscf PUBLIC ../include)
+add_test(NAME test-tscf COMMAND test-tscf)
+
+add_executable(test-ntscf test-ntscf.c)
+target_link_libraries(test-ntscf open1722 cmocka)
+target_include_directories(test-ntscf PUBLIC ../include)
+add_test(NAME test-ntscf COMMAND test-ntscf)
+
 add_executable(test-vss test-vss.c)
 target_link_libraries(test-vss open1722 open1722custom cmocka)
 target_include_directories(test-vss PUBLIC ../include)
@@ -77,4 +87,4 @@ add_test(NAME test-vss COMMAND test-vss)
 
 add_dependencies(unittests test-can test-aaf
                 test-avtp test-crf test-cvf
-                test-rvf test-vss)
+                test-rvf test-vss test-tscf test-ntscf)

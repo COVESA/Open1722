@@ -30,8 +30,8 @@
 #ifdef LINUX_KERNEL1722
 #include <linux/errno.h>
 #include <linux/string.h>
-#else  
-#include <errno.h> 
+#else
+#include <errno.h>
 #include <string.h>
 #endif
 
@@ -218,7 +218,7 @@ uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize)
     }
 
     // Avtp_Tscf_GetStreamDataLength returns quadlets. Convert the length field to octets
-    if (Avtp_Tscf_GetStreamDataLength(pdu) * 4 > bufferSize) {
+    if (Avtp_Tscf_GetStreamDataLength(pdu) > bufferSize) {
         return FALSE;
     }
 

@@ -116,12 +116,37 @@ static void can_set_payload(void **state) {
     }
 }
 
+static void can_is_valid(void **state) {
+
+    uint8_t pdu[MAX_PDU_SIZE], result;
+
+    // Valid IEEE 1722 CAN Frame
+    Avtp_Can_Init((Avtp_Can_t*)pdu);
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 1);
+
+    // Not a IEEE 1722 CAN Frame
+    memset(pdu, 0, MAX_PDU_SIZE);
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 0);
+
+    // Valid IEEE 1722 CAN Frame (Length 24, Buffer 25)
+    Avtp_Can_Init((Avtp_Can_t*)pdu);
+    Avtp_Can_SetAcfMsgLength((Avtp_Can_t*)pdu, 6);
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, 25), 1);
+
+    // Invalid IEEE 1722 CAN Frame (Length 24 but buffer only 9!)
+    Avtp_Can_Init((Avtp_Can_t*)pdu);
+    Avtp_Can_SetAcfMsgLength((Avtp_Can_t*)pdu, 6);
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, 9), 0);
+
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(can_init),
         cmocka_unit_test(can_brief_init),
-        cmocka_unit_test(can_set_payload)
+        cmocka_unit_test(can_set_payload),
+        cmocka_unit_test(can_is_valid)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

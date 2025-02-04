@@ -159,7 +159,7 @@ uint8_t Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize)
     }
 
     // Avtp_Ntscf_GetNtscfDataLength returns quadlets. Convert the length field to octets
-    if (Avtp_Ntscf_GetNtscfDataLength(pdu) * 4> bufferSize) {
+    if (Avtp_Ntscf_GetNtscfDataLength(pdu) > bufferSize) {
         return FALSE;
     }
 
