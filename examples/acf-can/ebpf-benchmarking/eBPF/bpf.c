@@ -45,12 +45,10 @@ SEC("tracepoint/raw_syscalls/sys_enter_sendto")
 int tp_enter_sendto(struct trace_event_raw_sys_enter *ctx)
 {   
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    /*if (cfg->pid != 0 && pid != cfg->pid)
-        return 0;*/
     u64 ts = bpf_ktime_get_ns();
     bpf_map_update_elem(&start_time, &pid, &ts, BPF_ANY);
 
-    bpf_printk("sendto syscall called\n");
+    //bpf_printk("sendto syscall called\n");
     return 0;
 }
 
@@ -60,13 +58,16 @@ int tp_exit_sendto(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_sender != 0 && bpf_get_current_pid_tgid() >> 32 != cfg->pid_sender)
         return 0;
 
-    bpf_printk("sendto syscall exited\n");
+    //bpf_printk("sendto syscall exited\n");
     return 0;
 }
 
 SEC("tracepoint/raw_syscalls/sys_enter_recvfrom")
 int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
 {   
+    if (cfg->pid_receiver != 0 && bpf_get_current_pid_tgid() >> 32 != cfg->pid_receiver)
+        return 0;
+
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     u64 *tsp, delta;
     
@@ -88,23 +89,16 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
                 return -1;
             }
         }
-
+        // TODO: Float operations not permitted in the eBPF program. Move jitter calulation to user space
         //jitter += (diff - jitter) / 16.0;
-  
-        bpf_printk("recvfrom syscall called\n");
-
+        //bpf_printk("recvfrom syscall called\n");
     }
 
     last_recv_ts = bpf_ktime_get_ns();
-
-    /*if (cfg->pid != 0 && pid != cfg->pid)
-        return 0;*/
     tsp = bpf_map_lookup_elem(&start_time, &pid);
     if (tsp) {
         delta = bpf_ktime_get_ns() - *tsp;
-        bpf_printk("PID: %d, Time: %lld\n", pid, delta);
-
-        //bpf_perf_event_output(ctx, &time_diff, BPF_F_CURRENT_CPU, &delta, sizeof(delta));
+        //bpf_printk("PID: %d, Time: %lld\n", pid, delta);
         bpf_map_delete_elem(&start_time, &pid);
     }
     return 0;
@@ -116,7 +110,7 @@ int tp_exit_recvfrom(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_receiver!= 0 && bpf_get_current_pid_tgid() >> 32 != cfg->pid_receiver)
         return 0;
 
-    bpf_printk("recvfrom syscall exited\n");
+    //bpf_printk("recvfrom syscall exited\n");
     return 0;
 }
 
