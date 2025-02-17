@@ -2,7 +2,7 @@
 #include <linux/version.h>
 
 // Calculate log base 2 of a integer
-static unsigned int log2(unsigned int v)
+static __always_inline unsigned int log2_(unsigned int v)
 {
 	unsigned int r;
 	unsigned int shift;
@@ -16,11 +16,11 @@ static unsigned int log2(unsigned int v)
 }
 
 // Extend log2 function for compute 64bits
-static unsigned int log2l(unsigned long v)
+static __always_inline unsigned int log2l_(unsigned long v)
 {
 	unsigned int hi = v >> 32;
 	if (hi)
-		return log2(hi) + 32;
+		return log2_(hi) + 32;
 	else
-		return log2(v);
+		return log2_(v);
 }

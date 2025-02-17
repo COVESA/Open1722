@@ -13,7 +13,8 @@ func ParseFlags() (*Flags, error) {
 	flag.UintVar(&f.SrcPort, "src-port", 0, "Source Port")
 	flag.UintVar(&f.DstPort, "dst-port", 0, "Destination Port")
 
-	flag.UintVar(&f.Pid, "pid", 0, "pid to filter")
+	flag.UintVar(&f.PidSender, "pid-sender", 0, "pid to filter")
+	flag.UintVar(&f.PidReceiver, "pid-receiver", 0, "pid to filter")
 
 	flag.Parse()
 
@@ -37,8 +38,8 @@ func ParseFlags() (*Flags, error) {
 
 func (f *Flags) GetConfig() *Config {
 	var c Config
-
-	c.Pid = uint32(f.Pid)
+	c.PidSender = uint32(f.PidSender)
+	c.PidReceiver = uint32(f.PidReceiver)
 	c.SrcIP = f.SrcIP.As4()
 	c.DstIP = f.DstIP.As4()
 	c.SrcPort = uint32(f.SrcPort)

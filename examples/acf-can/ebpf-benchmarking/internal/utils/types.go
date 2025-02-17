@@ -4,11 +4,12 @@ import "net/netip"
 
 // Config type that needs to be passed to the ebpf program
 type Config struct {
-	Pid                     uint32
-	SrcIP                   [4]byte
-	DstIP                   [4]byte
-	SrcPort                 uint32
-	DstPort                 uint32
+	PidSender   uint32
+	PidReceiver uint32
+	SrcIP       [4]byte
+	DstIP       [4]byte
+	SrcPort     uint32
+	DstPort     uint32
 }
 
 type TraceData struct {
@@ -26,15 +27,14 @@ type TraceDelays struct {
 }
 
 type Flags struct {
-	Pid uint
-
-	_SrcIP string
-	SrcIP  netip.Addr
-	_DstIP string
-	DstIP  netip.Addr
-
-	SrcPort uint
-	DstPort uint
+	PidSender   uint
+	PidReceiver uint
+	_SrcIP      string
+	SrcIP       netip.Addr
+	_DstIP      string
+	DstIP       netip.Addr
+	SrcPort     uint
+	DstPort     uint
 
 	//TODO: Add more filters like protocol, check, etc
 }
