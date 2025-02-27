@@ -80,66 +80,91 @@ func main() {
 		fmt.Println("Error loading eBPF object: ", err)
 	}
 
-	fmt.Println("Loaded eBPF object")
+	/*
 
-	sysSendtoEnter, err := link.Tracepoint("syscalls", "sys_enter_sendto", objs.TpEnterSendto, nil)
-	if err != nil {
-		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
-	}
-	defer sysSendtoEnter.Close()
-
+		sysReadEnter, err := link.Tracepoint("syscalls", "sys_enter_read", objs.TpEnterRead, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
+		}
+		defer sysReadEnter.Close()
+	*/
 	/*sysSendtoExit, err := link.Tracepoint("syscalls", "sys_exit_sendto", objs.TpExitSendto, nil)
 	if err != nil {
 		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 	}
 	defer sysSendtoExit.Close()
 	*/
-	sysRecvfromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
+	/*sysRecvfromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
 	if err != nil {
 		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 	}
-	defer sysRecvfromEnter.Close()
+	defer sysRecvfromEnter.Close()*/
 
 	/*sysRecvfromExit, err := link.Tracepoint("syscalls", "sys_exit_recvfrom", objs.TpExitRecvfrom, nil)
 	if err != nil {
 		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 	}
 	defer sysRecvfromExit.Close()
-	*/
+
 	fmt.Println("Attached eBPF program to tracepoints")
 
+	kProbeVCanRx, err := link.Kprobe("netif_rx", objs.KprobeNetifRx, nil)
+	if err != nil {
+		fmt.Println("Error attaching eBPF program to kprobe: ", err)
+	}
+	defer kProbeVCanRx.Close()
+	*/
+
+	if flags.IsKernel {
+		fmt.Println("Loaded eBPF objects to trace the kernel version of acf-can")
+
+		kProbeACFCanTx, err := link.Kprobe("acfcan_tx", objs.KprobeAcfcanTx, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to kprobe: ", err)
+		}
+		defer kProbeACFCanTx.Close()
+
+		kProbeFrowardCANFrame, err := link.Kprobe("forward_can_frame", objs.KprobeForwardCanFrame, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to kprobe: ", err)
+		}
+		defer kProbeFrowardCANFrame.Close()
+
+		kProbeIeee1722PacketHanddler, err := link.Kprobe("ieee1722_packet_handdler", objs.KprobeIeee1722PacketHanddler, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to kprobe: ", err)
+		}
+		defer kProbeIeee1722PacketHanddler.Close()
+	} else {
+
+		// Tracepoint hook to capture the end of read syscall
+		sysReadExit, err := link.Tracepoint("syscalls", "sys_exit_read", objs.TpExitRead, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
+		}
+		defer sysReadExit.Close()
+
+		// Tracepoint hook to capture the begining of sendto syscall
+		sysSendtoEnter, err := link.Tracepoint("syscalls", "sys_enter_sendto", objs.TpEnterSendto, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
+		}
+		defer sysSendtoEnter.Close()
+
+	}
 	var (
 		histKey   uint32
 		histValue uint64
 	)
-	hist := objs.Hist
-	/*
-		histData := map[string]uint64{
-			"0 -> 1":            0,
-			"2 -> 3":            0,
-			"4 -> 7":            0,
-			"8 -> 15":           0,
-			"16 -> 31":          0,
-			"32 -> 63":          0,
-			"64 -> 127":         0,
-			"128 -> 255":        0,
-			"256 -> 511":        0,
-			"512 -> 1023":       0,
-			"1024 -> 2047":      0,
-			"2048 -> 4095":      0,
-			"4096 -> 8191":      0,
-			"8192 -> 16383":     0,
-			"16384 -> 32767":    0,
-			"32768 -> 65535":    0,
-			"65536 -> 131071":   0,
-			"131072 -> 262143":  0,
-			"262144 -> 524287":  0,
-			"524288 -> 1048575": 0,
-		}
-	*/
-	var histData [21]uint64
+	histSendTo := objs.HistSend
+	histRead := objs.HistRead
+	histe2e := objs.HistEtoe
 
-	ticker := time.NewTicker(2 * time.Second)
+	var histDataSento [35]uint64
+	var histDataRead [35]uint64
+	var histDataE2e [35]uint64
+
+	ticker := time.NewTicker(20 * time.Second)
 	for {
 		select {
 		case <-sig:
@@ -147,11 +172,27 @@ func main() {
 			fmt.Println("Received termination signal")
 			return
 		case <-ticker.C:
-			iter := hist.Iterate()
+			iter := histSendTo.Iterate()
 			for iter.Next(&histKey, &histValue) {
-				histData[histKey] = histValue
+				//fmt.Println("Key: ", histKey, "Value: ", histValue)
+				histDataSento[histKey] = histValue
 			}
-			utils.PrintHistogram(histData[:])
+			//fmt.Println("SendTo Histogram")
+			//utils.PrintHistogram(histDataSento[:])
+
+			iter = histRead.Iterate()
+			for iter.Next(&histKey, &histValue) {
+				histDataRead[histKey] = histValue
+			}
+			fmt.Println("Reading delay (from vcan) histogram")
+			utils.PrintHistogram(histDataRead[:])
+
+			iter = histe2e.Iterate()
+			for iter.Next(&histKey, &histValue) {
+				histDataE2e[histKey] = histValue
+			}
+			fmt.Println("E2E delay histogram")
+			utils.PrintHistogram(histDataE2e[:])
 		}
 	}
 }

@@ -15,9 +15,12 @@ func sumArray(arr []uint64) uint64 {
 }
 
 func PrintHistogram(data []uint64) {
-	fmt.Printf("%19s : %-10s %25s\n", "usecs:", "count", "distribution")
+	fmt.Printf("%26s : %-10s %25s\n", "nsecs:", "count", "distribution")
 	maxCount := sumArray(data)
-
+	if maxCount == 0 {
+		fmt.Printf("No data\n")
+		return
+	}
 	maxStars := 50
 	for index, range_str := range []string{
 		"0 -> 1",
@@ -39,10 +42,25 @@ func PrintHistogram(data []uint64) {
 		"65536 -> 131071",
 		"131072 -> 262143",
 		"262144 -> 524287",
+		"524288 -> 1048575",
+		"1048576 -> 2097151",
+		"2097152 -> 4194303",
+		"4194304 -> 8388607",
+		"8388608 -> 16777215",
+		"16777216 -> 33554431",
+		"33554432 -> 67108863",
+		"67108864 -> 134217727",
+		"134217728 -> 268435455",
+		"268435456 -> 536870911",
+		"536870912 -> 1073741823",
+		"1073741824 -> 2147483647",
+		"2147483648 -> 4294967295",
+		"4294967296 -> 8589934591",
+		"8589934592 -> 17179869183",
 	} {
 		count := data[index]
 		stars := int(math.Round(float64(count) / float64(maxCount) * float64(maxStars)))
-		fmt.Printf("%19s : %-10d |%-50s|\n", range_str, count, strings.Repeat("*", stars))
+		fmt.Printf("%26s : %-10d |%-50s|\n", range_str, count, strings.Repeat("*", stars))
 	}
 	fmt.Printf("\n\n\n")
 

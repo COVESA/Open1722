@@ -6,10 +6,12 @@ import "net/netip"
 type Config struct {
 	PidSender   uint32
 	PidReceiver uint32
+	PidCangen   uint32
 	SrcIP       [4]byte
 	DstIP       [4]byte
 	SrcPort     uint32
 	DstPort     uint32
+	IsKernel    bool
 }
 
 type TraceData struct {
@@ -29,12 +31,12 @@ type TraceDelays struct {
 type Flags struct {
 	PidSender   uint
 	PidReceiver uint
+	PidCangen   uint
 	_SrcIP      string
 	SrcIP       netip.Addr
 	_DstIP      string
 	DstIP       netip.Addr
 	SrcPort     uint
 	DstPort     uint
-
-	//TODO: Add more filters like protocol, check, etc
+	IsKernel    bool	//TODO: Add more filters like protocol, check, etc
 }
