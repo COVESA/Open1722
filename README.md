@@ -190,3 +190,7 @@ int main()
     // sendto(socket, data, dataLen, 0);
 }
 ```
+
+## Contribute to Open1722
+
+For detailed information see our [contribution guide](./CONTRIBUTING.md)!
