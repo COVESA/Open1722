@@ -147,62 +147,62 @@ void Avtp_CanBrief_SetPad(Avtp_CanBrief_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CAN_BRIEF_FIELD_PAD, value);
 }
 
-void Avtp_CanBrief_EnableMtv(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableMtv(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_MTV, 1);
 }
 
-void Avtp_CanBrief_DisableMtv(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableMtv(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_MTV, 0);
 }
 
-void Avtp_CanBrief_EnableRtr(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableRtr(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_RTR, 1);
 }
 
-void Avtp_CanBrief_DisableRtr(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableRtr(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_RTR, 0);
 }
 
-void Avtp_CanBrief_EnableEff(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableEff(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_EFF, 1);
 }
 
-void Avtp_CanBrief_DisableEff(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableEff(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_EFF, 0);
 }
 
-void Avtp_CanBrief_EnableBrs(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableBrs(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_BRS, 1);
 }
 
-void Avtp_CanBrief_DisableBrs(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableBrs(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_BRS, 0);
 }
 
-void Avtp_CanBrief_EnableFdf(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableFdf(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_FDF, 1);
 }
 
-void Avtp_CanBrief_DisableFdf(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableFdf(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_FDF, 0);
 }
 
-void Avtp_CanBrief_EnableEsi(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableEsi(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_ESI, 1);
 }
 
-void Avtp_CanBrief_DisableEsi(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableEsi(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_ESI, 0);
 }
