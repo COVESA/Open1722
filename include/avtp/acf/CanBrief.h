@@ -129,29 +129,54 @@ void Avtp_CanBrief_SetCanBusId(Avtp_CanBrief_t* pdu, uint8_t value);
 void Avtp_CanBrief_SetCanIdentifier(Avtp_CanBrief_t* pdu, uint32_t value);
 
 /**
- * Copies the payload data into the ACF CAN Brief frame. This function will also set the
- * length and pad fields while inserting the padded bytes.
+ * Copies the payload data and CAN frame ID into the ACF CAN Brief frame. This function will
+ * also set the length and pad fields while inserting the padded bytes.
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
  * @param frame_id ID of the CAN frame
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload.
  * @param can_variant Classic CAN or CAN-FD
- * @returns Returns number of processed bytes (header + payload + padding)
  */
-int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint32_t frame_id , uint8_t* payload,
-                        uint16_t payload_length, Avtp_CanVariant_t can_variant);
+void Avtp_CanBrief_CreateAcfMessage(Avtp_CanBrief_t* can_pdu, uint32_t frame_id, uint8_t* payload,
+    uint16_t payload_length, Avtp_CanVariant_t can_variant);
 
 /**
- * Finalizes the ACF CAN Brief frame. This function will set the
- * length and pad fields while inserting the padded bytes.
- *
- * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- * @returns Returns number of processed bytes (header + payload + padding)
- */
-int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
+* Returns pointer to payload of an ACF CAN Brief frame.
+*
+* @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+* @return Pointer to ACF CAN frame payload
+*/
+uint8_t* Avtp_CanBrief_GetPayload(Avtp_CanBrief_t* can_pdu);
+
+/**
+* Sets the CAN payload in an ACF CAN Brief frame.
+*
+* @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+* @param payload Pointer to the payload byte array
+* @param payload_length Length of the payload
+*/
+void Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint8_t* payload,
+            uint16_t payload_length);
+
+/**
+* Finalizes the ACF CAN Brief frame. This function will set the
+* length and pad fields while inserting the padded bytes.
+*
+* @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+* @param payload Pointer to the payload byte array
+* @param payload_length Length of the CAN frame payload.
+*/
+void Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
+
+/**
+* Returns the length of the CAN payload without the padding bytes and the
+* header length of the encapsulating ACF Frame.
+*
+* @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+* @return  Length of CAN payload in bytes
+*/
+uint8_t Avtp_CanBrief_GetCanPayloadLength(Avtp_CanBrief_t* pdu);
 
 /**
  * Checks if the ACF CAN Brief frame is valid by checking:
