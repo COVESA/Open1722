@@ -35,12 +35,6 @@
 
 #pragma once
 
-#ifdef LINUX_KERNEL1722
-#include <linux/types.h>
-#else
-#include <stdint.h>
-#endif
-
 #include "avtp/Defines.h"
 
 #ifdef __cplusplus
