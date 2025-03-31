@@ -24,3 +24,5 @@ static __always_inline unsigned int log2l_(unsigned long v)
 	else
 		return log2_(v);
 }
+
+

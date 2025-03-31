@@ -21,6 +21,11 @@ type EventTrace struct {
 	Function  [32]byte // char[32] -> fixed-size array of 32 bytes
 }
 
+type EventTraceRxKernel struct {
+	Timestamp uint64
+	Dev       [32]byte
+}
+
 type EventLog struct {
 	Pid                  uint32
 	TimestampEnterRead   uint64

@@ -13,3 +13,12 @@ func ParseEvents(data []byte) EventTrace {
 
 	return event
 }
+
+func ParseEventsRxKernel(data []byte) EventTraceRxKernel {
+	var event EventTraceRxKernel
+
+	event.Timestamp = binary.LittleEndian.Uint64(data[0:8])
+	copy(event.Dev[:], data[8:40])
+
+	return event
+}

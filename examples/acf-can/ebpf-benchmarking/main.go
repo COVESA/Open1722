@@ -94,26 +94,13 @@ func main() {
 	}
 	defer sysSendtoExit.Close()
 	*/
-	/*sysRecvfromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
+	/*sysSendEnter, err := link.Tracepoint("syscalls", "sys_enter_sendmsg", objs.TpEnterSendto, nil)
 	if err != nil {
 		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 	}
-	defer sysRecvfromEnter.Close()*/
-
-	/*sysRecvfromExit, err := link.Tracepoint("syscalls", "sys_exit_recvfrom", objs.TpExitRecvfrom, nil)
-	if err != nil {
-		fmt.Println("Error attaching eBPF program to tracepoint: ", err)
-	}
-	defer sysRecvfromExit.Close()
+	defer sysSendEnter.Close()*/
 
 	fmt.Println("Attached eBPF program to tracepoints")
-
-	kProbeVCanRx, err := link.Kprobe("netif_rx", objs.KprobeNetifRx, nil)
-	if err != nil {
-		fmt.Println("Error attaching eBPF program to kprobe: ", err)
-	}
-	defer kProbeVCanRx.Close()
-	*/
 
 	if flags.IsKernel {
 		fmt.Println("Loaded eBPF objects to trace the kernel version of acf-can")
@@ -150,6 +137,19 @@ func main() {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysSendtoEnter.Close()
+
+		// Tracepoint hook to capture the begining of recvmsg syscall
+		/*sysSendEnter, err := link.Tracepoint("syscalls", "sys_enter_sendmsg", objs.TpEnterSendto, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
+		}
+		defer sysSendEnter.Close()*/
+
+		sysRecvfromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
+		}
+		defer sysRecvfromEnter.Close()
 
 	}
 	var (

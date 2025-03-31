@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -62,7 +63,7 @@ func main() {
 	fmt.Println("Attached eBPF program to tracepoints")
 
 	if flags.IsKernel {
-		/*fmt.Println("Loaded eBPF objects to trace the kernel version of acf-can")
+		fmt.Println("Loaded eBPF objects to trace the kernel version of acf-can")
 
 		kProbeACFCanTx, err := link.Kprobe("acfcan_tx", objs.KprobeAcfcanTx, nil)
 		if err != nil {
@@ -70,17 +71,23 @@ func main() {
 		}
 		defer kProbeACFCanTx.Close()
 
-		kProbeFrowardCANFrame, err := link.Kprobe("forward_can_frame", objs.KprobeForwardCanFrame, nil)
+		kProbeEntryFrowardCANFrame, err := link.Kprobe("forward_can_frame", objs.KprobeEntryForwardCanFrame, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to kprobe: ", err)
 		}
-		defer kProbeFrowardCANFrame.Close()
+		defer kProbeEntryFrowardCANFrame.Close()
+
+		kProbeExitFrowardCANFrame, err := link.Kretprobe("forward_can_frame", objs.KprobeExitForwardCanFrame, nil)
+		if err != nil {
+			fmt.Println("Error attaching eBPF program to kretprobe: ", err)
+		}
+		defer kProbeExitFrowardCANFrame.Close()
 
 		kProbeIeee1722PacketHanddler, err := link.Kprobe("ieee1722_packet_handdler", objs.KprobeIeee1722PacketHanddler, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to kprobe: ", err)
 		}
-		defer kProbeIeee1722PacketHanddler.Close()*/
+		defer kProbeIeee1722PacketHanddler.Close()
 	} else {
 
 		// Tracepoint hook to capture the start of read syscall
@@ -112,11 +119,11 @@ func main() {
 		defer sysSendtoExit.Close()
 
 		// Tracepoint hook to capture the begining of recvmsg syscall
-		/*sysSendEnter, err := link.Tracepoint("syscalls", "sys_enter_sendmsg", objs.TpEnterSendto, nil)
+		sysRecFromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
-		defer sysSendEnter.Close()*/
+		defer sysRecFromEnter.Close()
 	}
 
 	// Setting up the ring buffer
@@ -128,11 +135,24 @@ func main() {
 	defer rBufReader.Close()
 	cRingBuf := make(chan []byte)
 
+	rBufRx := objs.EventsRecvTs
+	rBufReaderRx, err := ringbuf.NewReader(rBufRx)
+	if err != nil {
+		fmt.Println("Error creating ring buffer reader: ", err)
+	}
+	defer rBufReaderRx.Close()
+	cRingBufRx := make(chan []byte)
+
 	traceData := make(map[uint64]utils.EventLog)
+	//traceDataMap := make(map[string]map[uint64]utils.EventLog)
 	histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 12, true)
 	histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 12, true)
+	histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "fixed", 10, true)
 	histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
 	histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
+
+	var rxTimestamps []uint64
+	rxTimestampsKernel := make(map[string][]uint64)
 
 	/*go func() {
 		for {
@@ -156,7 +176,20 @@ func main() {
 				utils.LogData(&traceData, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr)
 				//utils.PrintStats(&traceData)
 
+			case data := <-cRingBufRx:
+				//fmt.Println("Received event from ring buffer")
+				if flags.IsKernel {
+					rxData := utils.ParseEventsRxKernel(data).Dev
+					dev := string(rxData[:])
+					dev = strings.TrimRight(dev, "\x00")
+					//fmt.Println("Dev: ", dev, " Timestamp: ", utils.ParseEventsRxKernel(data).Timestamp)
+					rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
+				}
+				if flags.PidReceiver != 0 {
+					rxTimestamps = append(rxTimestamps, uint64(binary.LittleEndian.Uint64(data)))
+				}
 			}
+
 		}
 
 	}()
@@ -173,6 +206,37 @@ func main() {
 			}
 			fmt.Println(histReadingTime.Draw())
 			fmt.Println(histSendingTime.Draw())
+
+			var jitter float64
+			var interarrivalTime []uint64
+			if flags.IsKernel {
+				for key, value := range rxTimestampsKernel {
+					interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(value)
+					if err != nil {
+						fmt.Println("Error calculating interarrival time and jitter: ", err)
+					}
+					//fmt.Println("Interarrival time: ", interarrivalTime)
+					for _, value := range interarrivalTime {
+						histInterarrivalTime.Update(float64(value))
+					}
+					histInterarrivalTime.Title = "Interarrival time (in nanoseconds) for " + key
+					fmt.Println(histInterarrivalTime.Draw())
+					fmt.Println("Jitter at ", key, " : ", jitter)
+
+				}
+			}
+			if flags.PidReceiver != 0 && !flags.IsKernel {
+				interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(rxTimestamps)
+				if err != nil {
+					fmt.Println("Error calculating interarrival time and jitter: ", err)
+				}
+				//fmt.Println("Interarrival time: ", interarrivalTime)
+				for _, value := range interarrivalTime {
+					histInterarrivalTime.Update(float64(value))
+				}
+				fmt.Println(histInterarrivalTime.Draw())
+				fmt.Println("Jitter: ", jitter)
+			}
 			os.Exit(0)
 			fmt.Println("Received termination signal")
 			return
@@ -186,7 +250,14 @@ func main() {
 				}
 				cRingBuf <- event.RawSample
 			}
+
+			for rBufReaderRx.AvailableBytes() > 0 {
+				event, err := rBufReaderRx.Read()
+				if err != nil {
+					log.Fatalf("Error reading ringbuf: %v", err)
+				}
+				cRingBufRx <- event.RawSample
+			}
 		}
 	}
-
 }

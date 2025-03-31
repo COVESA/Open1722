@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -70,22 +71,25 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 	if _, ok := (*logVariable)[uid]; ok {
 		//fmt.Println("Uid  found in map")
 
-		if strings.Contains(funcName, "sys_enter_read") {
+		if strings.Contains(funcName, "sys_enter_read") || strings.Contains(funcName, "acfcan_tx") {
 			eventLog := (*logVariable)[uid]
 			eventLog.TimestampEnterRead = ts
 			(*logVariable)[uid] = eventLog
-		} else if strings.Contains(funcName, "sys_exit_read") {
+		}
+		if strings.Contains(funcName, "sys_exit_read") || strings.Contains(funcName, "enter_forward_can_frame") {
 			eventLog := (*logVariable)[uid]
 			eventLog.TimestampExitRead = ts
 			if eventLog.TimestampEnterRead != 0 {
 				eventLog.TimeReadingCANBus = ts - eventLog.TimestampEnterRead
 			}
 			(*logVariable)[uid] = eventLog
-		} else if strings.Contains(funcName, "sys_enter_sendto") {
+		}
+		if strings.Contains(funcName, "sys_enter_sendto") || strings.Contains(funcName, "enter_forward_can_frame") {
 			eventLog := (*logVariable)[uid]
 			eventLog.TimestampEnterSendto = ts
 			(*logVariable)[uid] = eventLog
-		} else if strings.Contains(funcName, "sys_exit_sendto") {
+		}
+		if strings.Contains(funcName, "sys_exit_sendto") || strings.Contains(funcName, "exit_forward_can_frame") {
 			eventLog := (*logVariable)[uid]
 			eventLog.TimestampExitSendto = ts
 			if eventLog.TimestampEnterSendto != 0 {
@@ -94,7 +98,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 			(*logVariable)[uid] = eventLog
 		}
 	} else {
-		if strings.Contains(funcName, "sys_enter_read") {
+		if strings.Contains(funcName, "sys_enter_read") || strings.Contains(funcName, "acfcan_tx") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
 				TimestampEnterRead:   ts,
@@ -103,7 +107,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 				TimestampExitSendto:  0,
 			}
 		}
-		if strings.Contains(funcName, "sys_exit_read") {
+		if strings.Contains(funcName, "sys_exit_read") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
 				TimestampEnterRead:   0,
@@ -112,7 +116,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 				TimestampExitSendto:  0,
 			}
 		}
-		if strings.Contains(funcName, "sys_enter_sendto") {
+		if strings.Contains(funcName, "sys_enter_sendto") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
 				TimestampEnterRead:   0,
@@ -121,7 +125,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 				TimestampExitSendto:  0,
 			}
 		}
-		if strings.Contains(funcName, "sys_exit_sendto") {
+		if strings.Contains(funcName, "sys_exit_sendto") || strings.Contains(funcName, "exit_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
 				TimestampEnterRead:   0,
@@ -142,4 +146,44 @@ func PrintStats(logVariable *map[uint64]EventLog) {
 	}
 	fmt.Println("Read Time", readTime)
 	fmt.Println("Write Time", writeTime)
+}
+
+func CalculateInterarrivalAndJitter(timestamps []uint64) ([]uint64, float64, error) {
+	// Check for minimum required timestamps
+	if len(timestamps) < 2 {
+		return nil, 0, errors.New("at least two timestamps required")
+	}
+
+	// Calculate interarrival times
+	interarrivals := make([]uint64, len(timestamps)-1)
+	for i := 1; i < len(timestamps); i++ {
+		prev := timestamps[i-1]
+		current := timestamps[i]
+
+		if current < prev {
+			return nil, 0, errors.New("timestamps must be in non-decreasing order")
+		}
+
+		interarrivals[i-1] = current - prev
+	}
+
+	// Calculate jitter (average of absolute differences between consecutive interarrivals)
+	jitter := 0.0
+	if len(interarrivals) >= 2 {
+		var sum float64
+		for j := 1; j < len(interarrivals); j++ {
+			prev := interarrivals[j-1]
+			current := interarrivals[j]
+
+			// Calculate absolute difference
+			if current > prev {
+				sum += float64(current - prev)
+			} else {
+				sum += float64(prev - current)
+			}
+		}
+		jitter = sum / float64(len(interarrivals)-1)
+	}
+
+	return interarrivals, jitter, nil
 }
