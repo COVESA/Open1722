@@ -67,7 +67,7 @@ func PrintHistogram(data []uint64) {
 
 }
 
-func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64, funcName string) {
+func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64, funcName string, dev string) {
 	if _, ok := (*logVariable)[uid]; ok {
 		//fmt.Println("Uid  found in map")
 
@@ -101,6 +101,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 		if strings.Contains(funcName, "sys_enter_read") || strings.Contains(funcName, "acfcan_tx") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
+				Dev:                  dev,
 				TimestampEnterRead:   ts,
 				TimestampExitRead:    0,
 				TimestampEnterSendto: 0,
@@ -110,6 +111,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 		if strings.Contains(funcName, "sys_exit_read") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
+				Dev:                  dev,
 				TimestampEnterRead:   0,
 				TimestampExitRead:    ts,
 				TimestampEnterSendto: 0,
@@ -119,6 +121,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 		if strings.Contains(funcName, "sys_enter_sendto") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
+				Dev:                  dev,
 				TimestampEnterRead:   0,
 				TimestampExitRead:    0,
 				TimestampEnterSendto: ts,
@@ -128,6 +131,7 @@ func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64
 		if strings.Contains(funcName, "sys_exit_sendto") || strings.Contains(funcName, "exit_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
 				Pid:                  pid,
+				Dev:                  dev,
 				TimestampEnterRead:   0,
 				TimestampExitRead:    0,
 				TimestampEnterSendto: 0,

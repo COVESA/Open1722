@@ -4,8 +4,8 @@ import "net/netip"
 
 // Config type that needs to be passed to the ebpf program
 type Config struct {
-	PidSender   uint32
-	PidReceiver uint32
+	PidTalker   uint32
+	PidListener uint32
 	PidCangen   uint32
 	SrcIP       [4]byte
 	DstIP       [4]byte
@@ -19,6 +19,7 @@ type EventTrace struct {
 	Pid       uint32
 	Uid       uint64
 	Function  [32]byte // char[32] -> fixed-size array of 32 bytes
+	Dev       [32]byte
 }
 
 type EventTraceRxKernel struct {
@@ -28,6 +29,7 @@ type EventTraceRxKernel struct {
 
 type EventLog struct {
 	Pid                  uint32
+	Dev                  string
 	TimestampEnterRead   uint64
 	TimestampExitRead    uint64
 	TimestampEnterSendto uint64
@@ -38,8 +40,8 @@ type EventLog struct {
 }
 
 type Flags struct {
-	PidSender   uint
-	PidReceiver uint
+	PidListener uint
+	PidTalker   uint
 	PidCangen   uint
 	_SrcIP      string
 	SrcIP       netip.Addr

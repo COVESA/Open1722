@@ -13,8 +13,8 @@ func ParseFlags() (*Flags, error) {
 	flag.UintVar(&f.SrcPort, "src-port", 0, "Source Port")
 	flag.UintVar(&f.DstPort, "dst-port", 0, "Destination Port")
 
-	flag.UintVar(&f.PidSender, "pid-sender", 0, "pid to filter")
-	flag.UintVar(&f.PidReceiver, "pid-receiver", 0, "pid to filter")
+	flag.UintVar(&f.PidListener, "pid-listener", 0, "pid to filter")
+	flag.UintVar(&f.PidTalker, "pid-talker", 0, "pid to filter")
 	flag.UintVar(&f.PidCangen, "pid-cangen", 0, "pid to filter")
 	flag.BoolVar(&f.IsKernel, "is-kernel", false, "Filter kernel packets")
 
@@ -40,8 +40,8 @@ func ParseFlags() (*Flags, error) {
 
 func (f *Flags) GetConfig() *Config {
 	var c Config
-	c.PidSender = uint32(f.PidSender)
-	c.PidReceiver = uint32(f.PidReceiver)
+	c.PidTalker = uint32(f.PidListener)
+	c.PidListener = uint32(f.PidTalker)
 	c.PidCangen = uint32(f.PidCangen)
 	c.SrcIP = f.SrcIP.As4()
 	c.DstIP = f.DstIP.As4()
