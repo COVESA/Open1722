@@ -15,7 +15,6 @@ import (
 	"github.com/cilium/ebpf/ringbuf"
 
 	"open1722-can-tracing-extensive/internal/utils"
-	//"github.com/spf13/viper"
 	hdrhistogram "github.com/HdrHistogram/hdrhistogram-go"
 	"github.com/bsipos/thist"
 )
@@ -148,33 +147,17 @@ func main() {
 	defer rBufReaderRx.Close()
 	cRingBufRx := make(chan []byte)
 
-	//traceData := make(map[uint64]utils.EventLog)
 	traceDataMap := make(map[string]map[uint32]utils.EventLog)
-	//histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 12, true)
-	//histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 12, true)
-
-	//var rxTimestamps []uint64
 	rxTimestampsKernel := make(map[string][]uint64)
-
-	/*go func() {
-		for {
-			event, err := rBufReader.Read()
-			if err != nil {
-				log.Fatalf("Error reading ringbuf: %v", err)
-			}
-			cRingBuf <- event.RawSample
-		}
-	}()*/
 
 	go func() {
 		for {
 			select {
 			case data := <-cRingBuf:
-				//fmt.Println("Received event from ring buffer")
 				function := utils.ParseEvents(data).Function
 				functionStr := string(function[:])
 				functionStr = strings.TrimRight(functionStr, "\x00")
-				//fmt.Println("Uid: ", utils.ParseEvents(data).Uid, " Pid: ", utils.ParseEvents(data).Pid, " Timestamp: ", utils.ParseEvents(data).Timestamp, " Function: ", functionStr)
+
 				dev := utils.ParseEvents(data).Dev
 				devStr := string(dev[:])
 				devStr = strings.TrimRight(devStr, "\x00")
@@ -189,23 +172,14 @@ func main() {
 					utils.LogData(&tempMap, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = tempMap
 				}
-				// 	tempMap := traceDataMap[devStr]
-				// 	utils.LogData(&tempMap, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr)
-				// 	traceDataMap[devStr] = tempMap
-				//	utils.PrintStats(&traceData)
 
 			case data := <-cRingBufRx:
-				//fmt.Println("Received event from ring buffer")
-				//if flags.IsKernel {
 				rxData := utils.ParseEventsRxKernel(data).Dev
 				dev := string(rxData[:])
 				dev = strings.TrimRight(dev, "\x00")
-				//fmt.Println("Dev: ", dev, " Timestamp: ", utils.ParseEventsRxKernel(data).Timestamp)
+
 				rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
-				//}
-				//if flags.PidTalker != 0 {
-				//	rxTimestamps = append(rxTimestamps, uint64(binary.LittleEndian.Uint64(data)))
-				//}
+
 			}
 
 		}
@@ -216,23 +190,14 @@ func main() {
 	for {
 		select {
 		case <-sig:
-			/*
-				for _, value := range traceData {
-					histReadingTime.Update(float64(value.TimeReadingCANBus))
-					histSendingTime.Update(float64(value.TimeWriting))
-					histToExportReadingTime.RecordValue(int64(value.TimeReadingCANBus))
-					histToExporSendingTime.RecordValue(int64(value.TimeWriting))
-				}
-				fmt.Println(histReadingTime.Draw())
-				fmt.Println(histSendingTime.Draw())*/
 			counter := 0
 			for _, tData := range traceDataMap {
 				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
 				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 20, true)
 				histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
 				histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
+
 				for _, value := range tData {
-					//fmt.Println("key:",key, "- Device: ", value)
 					histReadingTime.Title = "CAN bus reading time histogram (in nanoseconds) for" + string(value.Dev[:])
 					histSendingTime.Title = "Sending time (in nanoseconds) for" + string(value.Dev[:])
 					if value.TimestampEnterRead != 0 && value.TimestampExitRead != 0 {
@@ -244,6 +209,7 @@ func main() {
 						histToExporSendingTime.RecordValue(int64(value.TimeWriting))
 					}
 				}
+
 				fmt.Println(histReadingTime.Draw())
 				fmt.Println(histSendingTime.Draw())
 
@@ -258,14 +224,12 @@ func main() {
 
 			var jitter float64
 			var interarrivalTime []uint64
-			//if flags.IsKernel {
 			for key, value := range rxTimestampsKernel {
 				histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "fixed", 20, true)
 				interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(value)
 				if err != nil {
 					fmt.Println("Error calculating interarrival time and jitter: ", err)
 				}
-				//fmt.Println("Interarrival time: ", interarrivalTime)
 				for _, value := range interarrivalTime {
 					histInterarrivalTime.Update(float64(value))
 				}
@@ -277,27 +241,13 @@ func main() {
 				filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histInterarrivalTime.SaveImage(filename)
 			}
-			//}
-			/*if flags.PidTalker != 0 && !flags.IsKernel {
-				histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "fixed", 10, true)
-				interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(rxTimestamps)
-				if err != nil {
-					fmt.Println("Error calculating interarrival time and jitter: ", err)
-				}
-				//fmt.Println("Interarrival time: ", interarrivalTime)
-				for _, value := range interarrivalTime {
-					histInterarrivalTime.Update(float64(value))
-				}
-				fmt.Println(histInterarrivalTime.Draw())
-				fmt.Println("Jitter: ", jitter)
-			}*/
+
 			os.Exit(0)
 			fmt.Println("Received termination signal")
 			return
 		case <-ticker.C:
 			fmt.Println("Ticker triggered")
 			for rBufReader.AvailableBytes() > 0 {
-				//fmt.Println("Available bytes in ring buffer: ", rBufReader.AvailableBytes())
 				event, err := rBufReader.Read()
 				if err != nil {
 					log.Fatalf("Error reading ringbuf: %v", err)
