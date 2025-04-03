@@ -254,8 +254,18 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
     // bpf_printk("sys_enter_recvfrom called\n");
    
     __u64 rx_time = bpf_ktime_get_ns();
+    char devname[32];
 
-    __u64 *e;
+    if (pid == cfg->pid_talker)
+    {
+        strncpy(devname, "talker", sizeof(devname));
+    }
+    if (pid == cfg->pid_listener)
+    {
+        uid2++;
+        strncpy(devname, "listener", sizeof(devname));
+    }
+    struct event_recv *e;
     e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event), 0);
     if (!e)
     {
@@ -263,7 +273,9 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
         return 0;
     }
     memset(e, 0, sizeof(*e));
-    *e = rx_time;
+    e->timestamp = rx_time;
+    memset(e->devname, 0, sizeof(e->devname));
+    bpf_probe_read_str(e->devname, sizeof(e->devname), devname);
     bpf_ringbuf_submit(e, 0);
     return 0;
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -154,7 +153,7 @@ func main() {
 	//histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 12, true)
 	//histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 12, true)
 
-	var rxTimestamps []uint64
+	//var rxTimestamps []uint64
 	rxTimestampsKernel := make(map[string][]uint64)
 
 	/*go func() {
@@ -197,16 +196,16 @@ func main() {
 
 			case data := <-cRingBufRx:
 				//fmt.Println("Received event from ring buffer")
-				if flags.IsKernel {
-					rxData := utils.ParseEventsRxKernel(data).Dev
-					dev := string(rxData[:])
-					dev = strings.TrimRight(dev, "\x00")
-					//fmt.Println("Dev: ", dev, " Timestamp: ", utils.ParseEventsRxKernel(data).Timestamp)
-					rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
-				}
-				if flags.PidTalker != 0 {
-					rxTimestamps = append(rxTimestamps, uint64(binary.LittleEndian.Uint64(data)))
-				}
+				//if flags.IsKernel {
+				rxData := utils.ParseEventsRxKernel(data).Dev
+				dev := string(rxData[:])
+				dev = strings.TrimRight(dev, "\x00")
+				//fmt.Println("Dev: ", dev, " Timestamp: ", utils.ParseEventsRxKernel(data).Timestamp)
+				rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
+				//}
+				//if flags.PidTalker != 0 {
+				//	rxTimestamps = append(rxTimestamps, uint64(binary.LittleEndian.Uint64(data)))
+				//}
 			}
 
 		}
@@ -228,15 +227,15 @@ func main() {
 				fmt.Println(histSendingTime.Draw())*/
 			counter := 0
 			for _, tData := range traceDataMap {
-				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "auto", 12, true)
-				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "auto", 12, true)
+				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
+				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 20, true)
 				histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
 				histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
 				for _, value := range tData {
 					//fmt.Println("key:",key, "- Device: ", value)
 					histReadingTime.Title = "CAN bus reading time histogram (in nanoseconds) for" + string(value.Dev[:])
 					histSendingTime.Title = "Sending time (in nanoseconds) for" + string(value.Dev[:])
-					if value.TimestampExitRead != 0 {
+					if value.TimestampEnterRead != 0 && value.TimestampExitRead != 0 {
 						histReadingTime.Update(float64(value.TimeReadingCANBus))
 						histToExportReadingTime.RecordValue(int64(value.TimeReadingCANBus))
 					}
@@ -259,27 +258,27 @@ func main() {
 
 			var jitter float64
 			var interarrivalTime []uint64
-			if flags.IsKernel {
-				for key, value := range rxTimestampsKernel {
-					histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "auto", 10, true)
-					interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(value)
-					if err != nil {
-						fmt.Println("Error calculating interarrival time and jitter: ", err)
-					}
-					//fmt.Println("Interarrival time: ", interarrivalTime)
-					for _, value := range interarrivalTime {
-						histInterarrivalTime.Update(float64(value))
-					}
-					histInterarrivalTime.Title = "Interarrival time (in nanoseconds) for " + key
-					fmt.Println(histInterarrivalTime.Draw())
-					fmt.Println("Jitter at ", key, " : ", jitter)
-
-					counter++
-					filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
-					histInterarrivalTime.SaveImage(filename)
+			//if flags.IsKernel {
+			for key, value := range rxTimestampsKernel {
+				histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "fixed", 20, true)
+				interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(value)
+				if err != nil {
+					fmt.Println("Error calculating interarrival time and jitter: ", err)
 				}
+				//fmt.Println("Interarrival time: ", interarrivalTime)
+				for _, value := range interarrivalTime {
+					histInterarrivalTime.Update(float64(value))
+				}
+				histInterarrivalTime.Title = "Interarrival time (in nanoseconds) for " + key
+				fmt.Println(histInterarrivalTime.Draw())
+				fmt.Println("Jitter at ", key, " : ", jitter)
+
+				counter++
+				filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				histInterarrivalTime.SaveImage(filename)
 			}
-			if flags.PidTalker != 0 && !flags.IsKernel {
+			//}
+			/*if flags.PidTalker != 0 && !flags.IsKernel {
 				histInterarrivalTime := thist.NewHist(nil, "Interarrival time (in nanoseconds)", "fixed", 10, true)
 				interarrivalTime, jitter, err = utils.CalculateInterarrivalAndJitter(rxTimestamps)
 				if err != nil {
@@ -291,7 +290,7 @@ func main() {
 				}
 				fmt.Println(histInterarrivalTime.Draw())
 				fmt.Println("Jitter: ", jitter)
-			}
+			}*/
 			os.Exit(0)
 			fmt.Println("Received termination signal")
 			return
