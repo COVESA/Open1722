@@ -67,7 +67,7 @@ func PrintHistogram(data []uint64) {
 
 }
 
-func LogData(logVariable *map[uint64]EventLog, uid uint64, pid uint32, ts uint64, funcName string, dev string) {
+func LogData(logVariable *map[uint32]EventLog, uid uint32, pid uint32, ts uint64, funcName string, dev string) {
 	if _, ok := (*logVariable)[uid]; ok {
 		//fmt.Println("Uid  found in map")
 

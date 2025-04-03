@@ -7,9 +7,9 @@ func ParseEvents(data []byte) EventTrace {
 
 	event.Timestamp = binary.LittleEndian.Uint64(data[0:8])
 	event.Pid = binary.LittleEndian.Uint32(data[8:12])
-	event.Uid = binary.LittleEndian.Uint64(data[12:20])
-	copy(event.Function[:], data[20:52])
-	copy(event.Dev[:], data[52:84])
+	event.Uid = binary.LittleEndian.Uint32(data[12:16])
+	copy(event.Function[:], data[16:48])
+	copy(event.Dev[:], data[48:80])
 	return event
 }
 

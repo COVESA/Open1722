@@ -150,7 +150,7 @@ func main() {
 	cRingBufRx := make(chan []byte)
 
 	//traceData := make(map[uint64]utils.EventLog)
-	traceDataMap := make(map[string]map[uint64]utils.EventLog)
+	traceDataMap := make(map[string]map[uint32]utils.EventLog)
 	//histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 12, true)
 	//histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 12, true)
 
@@ -180,13 +180,13 @@ func main() {
 				devStr := string(dev[:])
 				devStr = strings.TrimRight(devStr, "\x00")
 				if traceDataMap[devStr] == nil {
-					traceDataMap[devStr] = make(map[uint64]utils.EventLog)
+					traceDataMap[devStr] = make(map[uint32]utils.EventLog)
 				}
 				if value, ok := traceDataMap[devStr]; ok {
 					utils.LogData(&value, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = value
 				} else {
-					tempMap := make(map[uint64]utils.EventLog)
+					tempMap := make(map[uint32]utils.EventLog)
 					utils.LogData(&tempMap, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = tempMap
 				}
@@ -233,7 +233,7 @@ func main() {
 				histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
 				histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
 				for _, value := range tData {
-					//fmt.Println("Device: ", value)
+					//fmt.Println("key:",key, "- Device: ", value)
 					histReadingTime.Title = "CAN bus reading time histogram (in nanoseconds) for" + string(value.Dev[:])
 					histSendingTime.Title = "Sending time (in nanoseconds) for" + string(value.Dev[:])
 					if value.TimestampExitRead != 0 {

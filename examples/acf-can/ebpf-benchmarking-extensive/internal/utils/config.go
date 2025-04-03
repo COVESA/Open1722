@@ -40,8 +40,8 @@ func ParseFlags() (*Flags, error) {
 
 func (f *Flags) GetConfig() *Config {
 	var c Config
-	c.PidTalker = uint32(f.PidListener)
-	c.PidListener = uint32(f.PidTalker)
+	c.PidTalker = uint32(f.PidTalker)
+	c.PidListener = uint32(f.PidListener)
 	c.PidCangen = uint32(f.PidCangen)
 	c.SrcIP = f.SrcIP.As4()
 	c.DstIP = f.DstIP.As4()

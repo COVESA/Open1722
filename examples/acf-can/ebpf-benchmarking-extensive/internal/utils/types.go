@@ -17,7 +17,7 @@ type Config struct {
 type EventTrace struct {
 	Timestamp uint64
 	Pid       uint32
-	Uid       uint64
+	Uid       uint32
 	Function  [32]byte // char[32] -> fixed-size array of 32 bytes
 	Dev       [32]byte
 }
