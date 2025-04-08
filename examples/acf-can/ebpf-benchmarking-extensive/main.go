@@ -15,7 +15,8 @@ import (
 	"github.com/cilium/ebpf/ringbuf"
 
 	"open1722-can-tracing-extensive/internal/utils"
-	hdrhistogram "github.com/HdrHistogram/hdrhistogram-go"
+
+	//hdrhistogram "github.com/HdrHistogram/hdrhistogram-go"
 	"github.com/bsipos/thist"
 )
 
@@ -128,6 +129,48 @@ func main() {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysRecFromEnter.Close()
+
+		if flags.TalkerFile != "" || flags.ListenerFile != "" {
+			if flags.TalkerFile != "" {
+				fmt.Println("Loading eBPF objects to trace the user space version of acf-can-talker")
+
+				exTalker, err := link.OpenExecutable(flags.TalkerFile)
+				if err != nil {
+					fmt.Println("Error opening executable: ", err)
+				}
+				uprobeCantoAvtp, err := exTalker.Uprobe("can_to_avtp", objs.UprobeCanToAvtp, &link.UprobeOptions{})
+				if err != nil {
+					fmt.Println("Error attaching eBPF program to UprobeCanToAvtp: ", err)
+				}
+				defer uprobeCantoAvtp.Close()
+
+				uprobeRetCantoAvtp, err := exTalker.Uretprobe("can_to_avtp", objs.UprobeRetCanToAvtp, &link.UprobeOptions{})
+				if err != nil {
+					fmt.Println("Error attaching eBPF program to UprobeRetAvtpToCan: ", err)
+				}
+				defer uprobeRetCantoAvtp.Close()
+
+				if flags.ListenerFile != "" {
+					fmt.Println("Loading eBPF objects to trace the user space version of acf-can-listener")
+
+					exListener, err := link.OpenExecutable(flags.ListenerFile)
+					if err != nil {
+						fmt.Println("Error opening executable: ", err)
+					}
+					uprobeAvtpToCanListener, err := exListener.Uprobe("avtp_to_can", objs.UprobeAvtpToCan, &link.UprobeOptions{})
+					if err != nil {
+						fmt.Println("Error attaching eBPF program to UprobeCanToAvtp: ", err)
+					}
+					defer uprobeAvtpToCanListener.Close()
+
+					uprobeRetAvtpToCanListener, err := exListener.Uretprobe("avtp_to_can", objs.UprobeRetAvtpToCan, &link.UprobeOptions{})
+					if err != nil {
+						fmt.Println("Error attaching eBPF program to UprobeRetAvtpToCan: ", err)
+					}
+					defer uprobeRetAvtpToCanListener.Close()
+				}
+			}
+		}
 	}
 
 	// Setting up the ring buffer
@@ -194,24 +237,37 @@ func main() {
 			for _, tData := range traceDataMap {
 				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
 				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 20, true)
-				histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
-				histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
+				histCanToAvtp := thist.NewHist(nil, "CAN to AVTP time histogram (in nanoseconds)", "fixed", 20, true)
+				histAvtpToCan := thist.NewHist(nil, "AVTP to CAN time histogram (in nanoseconds)", "fixed", 20, true)
+				//histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
+				//histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
 
 				for _, value := range tData {
-					histReadingTime.Title = "CAN bus reading time histogram (in nanoseconds) for" + string(value.Dev[:])
-					histSendingTime.Title = "Sending time (in nanoseconds) for" + string(value.Dev[:])
+					//fmt.Println("Value: ", value)
+					histReadingTime.Title = "CAN bus reading time histogram (in nanoseconds) for " + string(value.Dev[:])
+					histSendingTime.Title = "Sending time (in nanoseconds) for " + string(value.Dev[:])
+					histCanToAvtp.Title = "CAN to AVTP time histogram (in nanoseconds) for " + string(value.Dev[:])
+					histAvtpToCan.Title = "AVTP to CAN time histogram (in nanoseconds) for " + string(value.Dev[:])
 					if value.TimestampEnterRead != 0 && value.TimestampExitRead != 0 {
 						histReadingTime.Update(float64(value.TimeReadingCANBus))
-						histToExportReadingTime.RecordValue(int64(value.TimeReadingCANBus))
+						//histToExportReadingTime.RecordValue(int64(value.TimeReadingCANBus))
 					}
 					if value.TimestampEnterSendto != 0 && value.TimestampExitSendto != 0 {
 						histSendingTime.Update(float64(value.TimeWriting))
-						histToExporSendingTime.RecordValue(int64(value.TimeWriting))
+						//histToExporSendingTime.RecordValue(int64(value.TimeWriting))
+					}
+					if value.TimestampEnterCanToAvtp != 0 && value.TimestampExitCanToAvtp != 0 {
+						histCanToAvtp.Update(float64(value.TimeCanToAvtp))
+					}
+					if value.TimestampEnterAvtpToCan != 0 && value.TimestampExitAvtpToCan != 0 {
+						histAvtpToCan.Update(float64(value.TimeAvtpToCan))
 					}
 				}
 
 				fmt.Println(histReadingTime.Draw())
 				fmt.Println(histSendingTime.Draw())
+				fmt.Println(histCanToAvtp.Draw())
+				fmt.Println(histAvtpToCan.Draw())
 
 				counter++
 				filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
@@ -220,6 +276,14 @@ func main() {
 				counter++
 				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histSendingTime.SaveImage(filename)
+
+				counter++
+				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				histCanToAvtp.SaveImage(filename)
+
+				counter++
+				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				histAvtpToCan.SaveImage(filename)
 			}
 
 			var jitter float64

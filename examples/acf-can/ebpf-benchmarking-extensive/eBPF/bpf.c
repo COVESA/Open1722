@@ -280,6 +280,67 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
     return 0;
 }
 
+SEC("uprobe/can_to_avtp")
+int uprobe_can_to_avtp(struct pt_regs *ctx)
+{
+
+    u32 pid = bpf_get_current_pid_tgid() >> 32;
+     if (cfg->pid_talker != 0 && pid != cfg->pid_talker)
+        return 0;
+
+    char devname[32];
+    strncpy(devname, "talker", sizeof(devname));
+    //bpf_printk("UUID: %d, can_to_avtp called %d \n",uid, pid);
+
+    SUBMIT_EVENT("can_to_avtp_enter", pid, uid, bpf_ktime_get_ns(), devname);
+    return 0;
+}
+
+SEC("uretprobe/can_to_avtp")
+int uprobe_ret_can_to_avtp(struct pt_regs *ctx)
+{  
+
+    u32 pid = bpf_get_current_pid_tgid() >> 32;
+    if (cfg->pid_talker != 0 && pid != cfg->pid_talker)
+        return 0;
+
+    char devname[32];
+    strncpy(devname, "talker", sizeof(devname));
+    //bpf_printk("UUID: %d, can_to_avtp exited %d\n",uid, pid);    
+
+    SUBMIT_EVENT("can_to_avtp_exit", pid, uid, bpf_ktime_get_ns(), devname);
+    return 0;
+}
+
+SEC("uprobe/avtp_to_can")
+int uprobe_avtp_to_can(struct pt_regs *ctx){
+    u32 pid = bpf_get_current_pid_tgid() >> 32;
+    if (cfg->pid_listener != 0 && pid != cfg->pid_listener)
+        return 0;
+
+    char devname[32];
+    strncpy(devname, "listener", sizeof(devname));
+    //bpf_printk("UUID: %d, avtp_to_can called %d \n",uid2, pid);
+
+    SUBMIT_EVENT("avtp_to_can_enter", pid, uid2, bpf_ktime_get_ns(), devname);
+    return 0;
+}
+
+SEC("uretprobe/avtp_to_can")
+int uprobe_ret_avtp_to_can(struct pt_regs *ctx)
+{
+    u32 pid = bpf_get_current_pid_tgid() >> 32;
+    if (cfg->pid_listener != 0 && pid != cfg->pid_listener)
+        return 0;
+
+    char devname[32];
+    strncpy(devname, "listener", sizeof(devname));
+    //bpf_printk("UUID: %d, avtp_to_can exited %d\n",uid2, pid);
+
+    SUBMIT_EVENT("avtp_to_can_exit", pid, uid2, bpf_ktime_get_ns(), devname);
+    return 0;
+}
+
 /**
  * The kprobe to monitor the kernel version of acf-can function
  */

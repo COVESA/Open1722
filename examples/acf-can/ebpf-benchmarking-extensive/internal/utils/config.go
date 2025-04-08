@@ -18,6 +18,8 @@ func ParseFlags() (*Flags, error) {
 	flag.UintVar(&f.PidCangen, "pid-cangen", 0, "pid to filter")
 	flag.BoolVar(&f.IsKernel, "is-kernel", false, "Filter kernel packets")
 
+	flag.StringVar(&f.TalkerFile, "talker-file", "", "File to write talker events")
+	flag.StringVar(&f.ListenerFile, "listener-file", "", "File to write listener events")
 	flag.Parse()
 
 	if f._DstIP != "" {

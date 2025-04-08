@@ -97,45 +97,143 @@ func LogData(logVariable *map[uint32]EventLog, uid uint32, pid uint32, ts uint64
 			}
 			(*logVariable)[uid] = eventLog
 		}
+		if strings.Contains(funcName, "can_to_avtp_enter") {
+			eventlog := (*logVariable)[uid]
+			eventlog.TimestampEnterCanToAvtp = ts
+			(*logVariable)[uid] = eventlog
+		}
+		if strings.Contains(funcName, "can_to_avtp_exit") {
+			eventlog := (*logVariable)[uid]
+			eventlog.TimestampExitCanToAvtp = ts
+			if eventlog.TimestampEnterCanToAvtp != 0 {
+				eventlog.TimeCanToAvtp = ts - eventlog.TimestampEnterCanToAvtp
+			}
+			(*logVariable)[uid] = eventlog
+		}
+		if strings.Contains(funcName, "avtp_to_can_enter") {
+			eventlog := (*logVariable)[uid]
+			eventlog.TimestampEnterAvtpToCan = ts
+			(*logVariable)[uid] = eventlog
+		}
+		if strings.Contains(funcName, "avtp_to_can_exit") {
+			eventlog := (*logVariable)[uid]
+			eventlog.TimestampExitAvtpToCan = ts
+			if eventlog.TimestampEnterAvtpToCan != 0 {
+				eventlog.TimeAvtpToCan = ts - eventlog.TimestampEnterAvtpToCan
+			}
+			(*logVariable)[uid] = eventlog
+		}
 	} else {
+		if strings.Contains(funcName, "can_to_avtp_enter") {
+			(*logVariable)[uid] = EventLog{
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: ts,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
+			}
+		}
+		if strings.Contains(funcName, "can_to_avtp_exit") {
+			(*logVariable)[uid] = EventLog{
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  ts,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
+			}
+		}
+		if strings.Contains(funcName, "avtp_to_can_enter") {
+			(*logVariable)[uid] = EventLog{
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: ts,
+				TimestampExitAvtpToCan:  0,
+			}
+		}
+		if strings.Contains(funcName, "avtp_to_can_exit") {
+			(*logVariable)[uid] = EventLog{
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  ts,
+			}
+		}
 		if strings.Contains(funcName, "sys_enter_read") || strings.Contains(funcName, "acfcan_tx") {
 			(*logVariable)[uid] = EventLog{
-				Pid:                  pid,
-				Dev:                  dev,
-				TimestampEnterRead:   ts,
-				TimestampExitRead:    0,
-				TimestampEnterSendto: 0,
-				TimestampExitSendto:  0,
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      ts,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
 			}
 		}
 		if strings.Contains(funcName, "sys_exit_read") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
-				Pid:                  pid,
-				Dev:                  dev,
-				TimestampEnterRead:   0,
-				TimestampExitRead:    ts,
-				TimestampEnterSendto: 0,
-				TimestampExitSendto:  0,
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       ts,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
 			}
 		}
 		if strings.Contains(funcName, "sys_enter_sendto") || strings.Contains(funcName, "enter_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
-				Pid:                  pid,
-				Dev:                  dev,
-				TimestampEnterRead:   0,
-				TimestampExitRead:    0,
-				TimestampEnterSendto: ts,
-				TimestampExitSendto:  0,
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    ts,
+				TimestampExitSendto:     0,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
 			}
 		}
 		if strings.Contains(funcName, "sys_exit_sendto") || strings.Contains(funcName, "exit_forward_can_frame") {
 			(*logVariable)[uid] = EventLog{
-				Pid:                  pid,
-				Dev:                  dev,
-				TimestampEnterRead:   0,
-				TimestampExitRead:    0,
-				TimestampEnterSendto: 0,
-				TimestampExitSendto:  ts,
+				Pid:                     pid,
+				Dev:                     dev,
+				TimestampEnterRead:      0,
+				TimestampExitRead:       0,
+				TimestampEnterSendto:    0,
+				TimestampExitSendto:     ts,
+				TimestampEnterCanToAvtp: 0,
+				TimestampExitCanToAvtp:  0,
+				TimestampEnterAvtpToCan: 0,
+				TimestampExitAvtpToCan:  0,
 			}
 		}
 	}

@@ -28,15 +28,21 @@ type EventTraceRxKernel struct {
 }
 
 type EventLog struct {
-	Pid                  uint32
-	Dev                  string
-	TimestampEnterRead   uint64
-	TimestampExitRead    uint64
-	TimestampEnterSendto uint64
-	TimestampExitSendto  uint64
+	Pid                     uint32
+	Dev                     string
+	TimestampEnterRead      uint64
+	TimestampExitRead       uint64
+	TimestampEnterSendto    uint64
+	TimestampExitSendto     uint64
+	TimestampEnterCanToAvtp uint64
+	TimestampExitCanToAvtp  uint64
+	TimestampEnterAvtpToCan uint64
+	TimestampExitAvtpToCan  uint64
 
 	TimeReadingCANBus uint64
 	TimeWriting       uint64
+	TimeCanToAvtp     uint64
+	TimeAvtpToCan     uint64
 }
 
 type Flags struct {
@@ -50,4 +56,7 @@ type Flags struct {
 	SrcPort     uint
 	DstPort     uint
 	IsKernel    bool //TODO: Add more filters like protocol, check, etc
+
+	TalkerFile   string
+	ListenerFile string
 }
