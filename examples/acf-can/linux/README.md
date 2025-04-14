@@ -31,7 +31,7 @@ Ethernet using Open1722.
       --usage                Give a short usage message
 ```
 
-## acf-can-talker
+## acf-can-listener 
 _acf-can-listener_ receives IEEE 1722 ACF messages and puts out the corresponding CAN frames on a (virtual) CAN interface. The parameters for its usage are as follows:
 
 ```
