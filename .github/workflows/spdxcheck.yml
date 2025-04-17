@@ -10,7 +10,7 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      licenses: "BSD-3-Clause"
+      licenses: "BSD-3-Clause, BSD-3-Clause or GPL-2.0-only"
 
     steps:
     - name: Checkout code
