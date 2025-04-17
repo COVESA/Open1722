@@ -45,14 +45,6 @@ export CONFIG_ACF_CAN=m
 make
 ```
 
-### Building failed
-Likely building fails for you with a message like
-
-```
-ERROR: modpost: GPL-incompatible module acfcan.ko uses GPL-only symbol 'skb_tstamp_tx'
-```
-The reason is, currently we are only able to release BSD licensed ode in this repo, however in the kernel we need to use interfaces that are only allowed to be used from GPL-licensed code. Luckily _YOU_ are free to use BSD code in GPL context on your computer. So take a look at `MODULE_LICENSE` in  [./acfcanmodulemetadata.h]()./acfcanmodulemetadata.h). Hint: `Dual BSD/GPL`
-
 ## Using the module
 
 ### Loading the module
