@@ -42,6 +42,23 @@ add_subdirectory(acf-can)
 
 # These examples are currently exclusively for Linux
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+execute_process(
+  COMMAND ldd --version
+  OUTPUT_VARIABLE LDD_OUT
+  ERROR_VARIABLE LDD_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+message(STATUS "LDD version err: ${LDD_ERROR}")
+message(STATUS "LDD version out: ${LDD_OUT}")
+
+## MUSL ldd will output to stderr, while glibc ldd will output to stdout
+if ("${LDD_ERROR}" MATCHES "musl")
+    message(STATUS "musl detected via ldd — linking argp")
+    target_link_libraries(open1722examples /usr/lib/libargp.a)
+else()
+    message(STATUS "musl not detected via ldd — not linking argp")
+endif()
     add_subdirectory(aaf)
     add_subdirectory(crf)
     add_subdirectory(cvf)
