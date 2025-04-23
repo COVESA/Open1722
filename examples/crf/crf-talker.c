@@ -61,6 +61,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <math.h>
+#include <endian.h>
 
 #include "avtp/Crf.h"
 #include "common/common.h"
