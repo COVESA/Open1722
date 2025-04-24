@@ -72,62 +72,62 @@ void Avtp_Can_Init(Avtp_Can_t* pdu)
     }
 }
 
-uint8_t Avtp_Can_GetAcfMsgType(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Can_GetAcfMsgLength(Avtp_Can_t* pdu)
+uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_Can_GetPad(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetPad(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_PAD);
 }
 
-uint8_t Avtp_Can_GetMtv(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetMtv(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_MTV);
 }
 
-uint8_t Avtp_Can_GetRtr(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetRtr(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_RTR);
 }
 
-uint8_t Avtp_Can_GetEff(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetEff(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_EFF);
 }
 
-uint8_t Avtp_Can_GetBrs(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetBrs(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_BRS);
 }
 
-uint8_t Avtp_Can_GetFdf(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_FDF);
 }
 
-uint8_t Avtp_Can_GetEsi(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetEsi(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_ESI);
 }
 
-uint8_t Avtp_Can_GetCanBusId(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID);
 }
 
-uint64_t Avtp_Can_GetMessageTimestamp(Avtp_Can_t* pdu)
+uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_MESSAGE_TIMESTAMP);
 }
 
-uint32_t Avtp_Can_GetCanIdentifier(Avtp_Can_t* pdu)
+uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER);
 }
@@ -271,19 +271,19 @@ void Avtp_Can_SetPayload(Avtp_Can_t* pdu, uint8_t* payload,
     memcpy(pdu->payload, payload, payload_length);
 }
 
-uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* pdu)
+uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* const pdu)
 {
     return pdu->payload;
 }
 
-uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu)
+uint8_t Avtp_Can_GetCanPayloadLength(const Avtp_Can_t* const pdu)
 {
     uint8_t acf_msg_length = Avtp_Can_GetAcfMsgLength(pdu) * 4;
     uint8_t acf_pad_length = Avtp_Can_GetPad(pdu);
     return acf_msg_length - AVTP_CAN_HEADER_LEN - acf_pad_length;
 }
 
-uint8_t Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize)
+uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

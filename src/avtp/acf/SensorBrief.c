@@ -64,37 +64,37 @@ void Avtp_SensorBrief_Init(Avtp_SensorBrief_t* pdu)
     }
 }
 
-uint64_t Avtp_SensorBrief_GetField(Avtp_SensorBrief_t* pdu, Avtp_SensorBriefFields_t field)
+uint64_t Avtp_SensorBrief_GetField(const Avtp_SensorBrief_t* const pdu, Avtp_SensorBriefFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_SensorBrief_GetAcfMsgType(Avtp_SensorBrief_t* pdu)
+uint8_t Avtp_SensorBrief_GetAcfMsgType(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_SensorBrief_GetAcfMsgLength(Avtp_SensorBrief_t* pdu)
+uint16_t Avtp_SensorBrief_GetAcfMsgLength(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_SensorBrief_GetMtv(Avtp_SensorBrief_t* pdu)
+uint8_t Avtp_SensorBrief_GetMtv(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV);
 }
 
-uint8_t Avtp_SensorBrief_GetNumSensor(Avtp_SensorBrief_t* pdu)
+uint8_t Avtp_SensorBrief_GetNumSensor(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_NUM_SENSOR);
 }
 
-uint8_t Avtp_SensorBrief_GetSz(Avtp_SensorBrief_t* pdu)
+uint8_t Avtp_SensorBrief_GetSz(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SZ);
 }
 
-uint8_t Avtp_SensorBrief_GetSensorGroup(Avtp_SensorBrief_t* pdu)
+uint8_t Avtp_SensorBrief_GetSensorGroup(const Avtp_SensorBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP);
 }
@@ -139,7 +139,7 @@ void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value)
     SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP, value);
 }
 
-uint8_t Avtp_SensorBrief_IsValid(Avtp_SensorBrief_t* pdu, size_t bufferSize)
+uint8_t Avtp_SensorBrief_IsValid(const Avtp_SensorBrief_t* const pdu, size_t bufferSize)
 {
     if(pdu == NULL) {
         return FALSE;

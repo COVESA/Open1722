@@ -73,57 +73,57 @@ void Avtp_Tscf_Init(Avtp_Tscf_t* pdu)
     }
 }
 
-uint64_t Avtp_Tscf_GetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field)
+uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Tscf_GetSubtype(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Tscf_GetSv(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_SV);
 }
 
-uint8_t Avtp_Tscf_GetVersion(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_VERSION);
 }
 
-uint8_t Avtp_Tscf_GetMr(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_MR);
 }
 
-uint8_t Avtp_Tscf_GetTv(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_TV);
 }
 
-uint8_t Avtp_Tscf_GetSequenceNum(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM);
 }
 
-uint8_t Avtp_Tscf_GetTu(Avtp_Tscf_t* pdu)
+uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_TU);
 }
 
-uint64_t Avtp_Tscf_GetStreamId(Avtp_Tscf_t* pdu)
+uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_STREAM_ID);
 }
 
-uint32_t Avtp_Tscf_GetAvtpTimestamp(Avtp_Tscf_t* pdu)
+uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_AVTP_TIMESTAMP);
 }
 
-uint16_t Avtp_Tscf_GetStreamDataLength(Avtp_Tscf_t* pdu)
+uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pdu)
 {
     return GET_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
 }
@@ -203,7 +203,7 @@ void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value)
     SET_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
-uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize)
+uint8_t Avtp_Tscf_IsValid(const Avtp_Tscf_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

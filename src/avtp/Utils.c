@@ -42,13 +42,13 @@
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-static int IsFieldDescriptorValid(const Avtp_FieldDescriptor_t* fieldDescriptor)
+static int IsFieldDescriptorValid(const Avtp_FieldDescriptor_t* const fieldDescriptor)
 {
     return fieldDescriptor->bits <= 64 && fieldDescriptor->offset <= 31;
 }
 
 uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
-        uint8_t numFields, uint8_t* pdu, uint8_t field)
+        uint8_t numFields, const uint8_t* const pdu, uint8_t field)
 {
     uint64_t result = 0;
     if (fieldDescriptors != NULL && pdu != NULL && field < numFields) {
@@ -67,7 +67,7 @@ uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
                 quadletShift = 32 - quadletBits;
             }
             uint32_t quadletMask = ((1ULL << quadletBits) - 1ULL) << quadletShift;
-            uint32_t* quadletPtr = (uint32_t*)(pdu + quadletId * 4);
+            const uint32_t* quadletPtr = (const uint32_t*)(pdu + quadletId * 4);
             uint32_t quadletHostOrder = Avtp_BeToCpu32(*quadletPtr);
             uint32_t partialValue = (quadletHostOrder & quadletMask) >> quadletShift;
             result |= (uint64_t)(partialValue) << (fieldDescriptor->bits - processedBits - quadletBits);

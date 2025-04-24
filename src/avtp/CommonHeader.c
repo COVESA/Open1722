@@ -54,23 +54,23 @@ static const Avtp_FieldDescriptor_t Avtp_CommonHeaderFieldDesc[AVTP_COMMON_HEADE
     [AVTP_COMMON_HEADER_FIELD_VERSION]            = { .quadlet = 0, .offset = 9, .bits = 3 },
 };
 
-uint64_t Avtp_CommonHeader_GetField(Avtp_CommonHeader_t* pdu,
+uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t* const pdu,
         Avtp_CommonHeaderField_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_CommonHeader_GetSubtype(Avtp_CommonHeader_t* pdu)
+uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t* const pdu)
 {
     return GET_FIELD(AVTP_COMMON_HEADER_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_CommonHeader_GetH(Avtp_CommonHeader_t* pdu)
+uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t* const pdu)
 {
     return GET_FIELD(AVTP_COMMON_HEADER_FIELD_H);
 }
 
-uint8_t Avtp_CommonHeader_GetVersion(Avtp_CommonHeader_t* pdu)
+uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t* const pdu)
 {
     return GET_FIELD(AVTP_COMMON_HEADER_FIELD_VERSION);
 }
@@ -99,13 +99,13 @@ void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t* pdu, uint8_t value)
 /******************************************************************************
  * Legacy API
  *****************************************************************************/
-int avtp_pdu_get(const struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field,
+int avtp_pdu_get(const struct avtp_common_pdu * const pdu, Avtp_CommonHeaderField_t field,
                                 uint32_t *val)
 {
     if (pdu == NULL || val == NULL || field >= AVTP_COMMON_HEADER_FIELD_MAX) {
         return -EINVAL;
     } else {
-        uint64_t temp = Avtp_CommonHeader_GetField((Avtp_CommonHeader_t*) pdu, field);
+        uint64_t temp = Avtp_CommonHeader_GetField((const Avtp_CommonHeader_t* const) pdu, field);
         *val = (uint32_t)temp;
         return 0;
     }

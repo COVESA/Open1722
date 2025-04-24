@@ -53,8 +53,8 @@ typedef enum Avtp_H264Field {
 
 void Avtp_H264_Init(Avtp_H264_t* pdu);
 
-uint64_t Avtp_H264_GetField(Avtp_H264_t* pdu, Avtp_H264Field_t field);
-uint32_t Avtp_H264_GetTimestamp(Avtp_H264_t* pdu);
+uint64_t Avtp_H264_GetField(const Avtp_H264_t* const pdu, Avtp_H264Field_t field);
+uint32_t Avtp_H264_GetTimestamp(const Avtp_H264_t* const pdu);
 
 void Avtp_H264_SetField(Avtp_H264_t* pdu, Avtp_H264Field_t field, uint64_t value);
 void Avtp_H264_SetTimestamp(Avtp_H264_t* pdu, uint32_t value);

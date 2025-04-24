@@ -69,37 +69,37 @@ void Avtp_Ntscf_Init(Avtp_Ntscf_t* pdu)
     }
 }
 
-uint64_t Avtp_Ntscf_GetField(Avtp_Ntscf_t* pdu, Avtp_NtscfFields_t field)
+uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t* const pdu, Avtp_NtscfFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Ntscf_GetSubtype(Avtp_Ntscf_t* pdu)
+uint8_t Avtp_Ntscf_GetSubtype(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Ntscf_GetSv(Avtp_Ntscf_t* pdu)
+uint8_t Avtp_Ntscf_GetSv(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_SV);
 }
 
-uint8_t Avtp_Ntscf_GetVersion(Avtp_Ntscf_t* pdu)
+uint8_t Avtp_Ntscf_GetVersion(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_VERSION);
 }
 
-uint16_t Avtp_Ntscf_GetNtscfDataLength(Avtp_Ntscf_t* pdu)
+uint16_t Avtp_Ntscf_GetNtscfDataLength(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH);
 }
 
-uint8_t Avtp_Ntscf_GetSequenceNum(Avtp_Ntscf_t* pdu)
+uint8_t Avtp_Ntscf_GetSequenceNum(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_SEQUENCE_NUM);
 }
 
-uint64_t Avtp_Ntscf_GetStreamId(Avtp_Ntscf_t* pdu)
+uint64_t Avtp_Ntscf_GetStreamId(const Avtp_Ntscf_t* const pdu)
 {
     return GET_FIELD(AVTP_NTSCF_FIELD_STREAM_ID);
 }
@@ -144,7 +144,7 @@ void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value)
     SET_FIELD(AVTP_NTSCF_FIELD_STREAM_ID, value);
 }
 
-uint8_t Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize)
+uint8_t Avtp_Ntscf_IsValid(const Avtp_Ntscf_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

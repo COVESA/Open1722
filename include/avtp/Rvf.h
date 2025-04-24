@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2024, COVESA
  * Copyright (c) 2021, Fastree3D
  * Adrian Fiergolski <Adrian.Fiergolski@fastree3d.com>
@@ -146,33 +146,33 @@ typedef enum Avtp_RvfColorspace {
 
 void Avtp_Rvf_Init(Avtp_Rvf_t* pdu);
 
-uint64_t Avtp_Rvf_GetField(Avtp_Rvf_t* pdu, Avtp_RvfField_t field);
+uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t* const pdu, Avtp_RvfField_t field);
 
-uint8_t Avtp_Rvf_GetSubtype(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetSv(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetVersion(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetMr(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetTv(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetSequenceNum(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetTu(Avtp_Rvf_t* pdu);
-uint64_t Avtp_Rvf_GetStreamId(Avtp_Rvf_t* pdu);
-uint32_t Avtp_Rvf_GetAvtpTimestamp(Avtp_Rvf_t* pdu);
-uint16_t Avtp_Rvf_GetActivePixels(Avtp_Rvf_t* pdu);
-uint16_t Avtp_Rvf_GetTotalLines(Avtp_Rvf_t* pdu);
-uint16_t Avtp_Rvf_GetStreamDataLength(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetAp(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetF(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetEf(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetEvt(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetPd(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetI(Avtp_Rvf_t* pdu);
-Avtp_RvfPixelDepth_t Avtp_Rvf_GetPixelDepth(Avtp_Rvf_t* pdu);
-Avtp_RvfPixelFormat_t Avtp_Rvf_GetPixelFormat(Avtp_Rvf_t* pdu);
-Avtp_RvfFrameRate_t Avtp_Rvf_GetFrameRate(Avtp_Rvf_t* pdu);
-Avtp_RvfColorspace_t Avtp_Rvf_GetColorspace(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetNumLines(Avtp_Rvf_t* pdu);
-uint8_t Avtp_Rvf_GetISeqNum(Avtp_Rvf_t* pdu);
-uint16_t Avtp_Rvf_GetLineNumber(Avtp_Rvf_t* pdu);
+uint8_t Avtp_Rvf_GetSubtype(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetTv(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetTu(const Avtp_Rvf_t* const pdu);
+uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t* const pdu);
+uint32_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t* const pdu);
+uint16_t Avtp_Rvf_GetActivePixels(const Avtp_Rvf_t* const pdu);
+uint16_t Avtp_Rvf_GetTotalLines(const Avtp_Rvf_t* const pdu);
+uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetAp(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetF(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetEf(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetPd(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetI(const Avtp_Rvf_t* const pdu);
+Avtp_RvfPixelDepth_t Avtp_Rvf_GetPixelDepth(const Avtp_Rvf_t* const pdu);
+Avtp_RvfPixelFormat_t Avtp_Rvf_GetPixelFormat(const Avtp_Rvf_t* const pdu);
+Avtp_RvfFrameRate_t Avtp_Rvf_GetFrameRate(const Avtp_Rvf_t* const pdu);
+Avtp_RvfColorspace_t Avtp_Rvf_GetColorspace(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetNumLines(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetISeqNum(const Avtp_Rvf_t* const pdu);
+uint16_t Avtp_Rvf_GetLineNumber(const Avtp_Rvf_t* const pdu);
 
 void Avtp_Rvf_SetField(Avtp_Rvf_t* pdu, Avtp_RvfField_t field, uint64_t value);
 
@@ -242,7 +242,7 @@ struct avtp_rvf_payload {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_rvf_pdu_get(const void* pdu, Avtp_RvfField_t field, uint64_t* val);
+int avtp_rvf_pdu_get(const void* const pdu, Avtp_RvfField_t field, uint64_t* val);
 
 /**
  * @deprecated

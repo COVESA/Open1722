@@ -75,14 +75,14 @@ void Avtp_Ntscf_Init(Avtp_Ntscf_t* pdu);
  * @param field Specifies the position of the data field to be read
  * @returns The value of the PDU field.
  */
-uint64_t Avtp_Ntscf_GetField(Avtp_Ntscf_t* pdu, Avtp_NtscfFields_t field);
+uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t* const pdu, Avtp_NtscfFields_t field);
 
-uint8_t Avtp_Ntscf_GetSubtype(Avtp_Ntscf_t* pdu);
-uint8_t Avtp_Ntscf_GetSv(Avtp_Ntscf_t* pdu);
-uint8_t Avtp_Ntscf_GetVersion(Avtp_Ntscf_t* pdu);
-uint16_t Avtp_Ntscf_GetNtscfDataLength(Avtp_Ntscf_t* pdu);
-uint8_t Avtp_Ntscf_GetSequenceNum(Avtp_Ntscf_t* pdu);
-uint64_t Avtp_Ntscf_GetStreamId(Avtp_Ntscf_t* pdu);
+uint8_t Avtp_Ntscf_GetSubtype(const Avtp_Ntscf_t* const pdu);
+uint8_t Avtp_Ntscf_GetSv(const Avtp_Ntscf_t* const pdu);
+uint8_t Avtp_Ntscf_GetVersion(const Avtp_Ntscf_t* const pdu);
+uint16_t Avtp_Ntscf_GetNtscfDataLength(const Avtp_Ntscf_t* const pdu);
+uint8_t Avtp_Ntscf_GetSequenceNum(const Avtp_Ntscf_t* const pdu);
+uint64_t Avtp_Ntscf_GetStreamId(const Avtp_Ntscf_t* const pdu);
 
 /**
  * Sets the value of an an AVTP NTSCF field as specified in the IEEE 1722 Specification.
@@ -109,7 +109,7 @@ void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Ntscf frame.
  * @return true if the ACF Ntscf frame is valid, false otherwise.
  */
-uint8_t Avtp_Ntscf_IsValid(Avtp_Ntscf_t* pdu, size_t bufferSize);
+uint8_t Avtp_Ntscf_IsValid(const Avtp_Ntscf_t* const pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus
