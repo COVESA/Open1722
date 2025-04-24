@@ -60,15 +60,15 @@ typedef enum Avtp_Jpeg2000Field {
 
 void Avtp_Jpeg2000_Init(Avtp_Jpeg2000_t* pdu);
 
-uint64_t Avtp_Jpeg2000_GetField(Avtp_Jpeg2000_t* pdu, Avtp_Jpeg2000Field_t field);
+uint64_t Avtp_Jpeg2000_GetField(const Avtp_Jpeg2000_t* const pdu, Avtp_Jpeg2000Field_t field);
 
-uint8_t Avtp_Jpeg2000_GetTp(Avtp_Jpeg2000_t* pdu);
-uint8_t Avtp_Jpeg2000_GetMhf(Avtp_Jpeg2000_t* pdu);
-uint8_t Avtp_Jpeg2000_GetMhId(Avtp_Jpeg2000_t* pdu);
-uint8_t Avtp_Jpeg2000_GetT(Avtp_Jpeg2000_t* pdu);
-uint8_t Avtp_Jpeg2000_GetPriority(Avtp_Jpeg2000_t* pdu);
-uint16_t Avtp_Jpeg2000_GetTileNumber(Avtp_Jpeg2000_t* pdu);
-uint32_t Avtp_Jpeg2000_GetFragmentOffset(Avtp_Jpeg2000_t* pdu);
+uint8_t Avtp_Jpeg2000_GetTp(const Avtp_Jpeg2000_t* const pdu);
+uint8_t Avtp_Jpeg2000_GetMhf(const Avtp_Jpeg2000_t* const pdu);
+uint8_t Avtp_Jpeg2000_GetMhId(const Avtp_Jpeg2000_t* const pdu);
+uint8_t Avtp_Jpeg2000_GetT(const Avtp_Jpeg2000_t* const pdu);
+uint8_t Avtp_Jpeg2000_GetPriority(const Avtp_Jpeg2000_t* const pdu);
+uint16_t Avtp_Jpeg2000_GetTileNumber(const Avtp_Jpeg2000_t* const pdu);
+uint32_t Avtp_Jpeg2000_GetFragmentOffset(const Avtp_Jpeg2000_t* const pdu);
 
 void Avtp_Jpeg2000_SetField(Avtp_Jpeg2000_t* pdu, Avtp_Jpeg2000Field_t field, uint64_t value);
 

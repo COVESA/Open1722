@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c) 2024, COVESA
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,21 +90,21 @@ void Avtp_FlexRay_Init(Avtp_FlexRay_t* pdu);
  * @param value Pointer to location to store the value.
  * @returns Value of the specified PDU field
  */
-uint64_t Avtp_FlexRay_GetField(Avtp_FlexRay_t* pdu, Avtp_FlexRayFields_t field);
+uint64_t Avtp_FlexRay_GetField(const Avtp_FlexRay_t* const pdu, Avtp_FlexRayFields_t field);
 
-uint8_t Avtp_FlexRay_GetAcfMsgType(Avtp_FlexRay_t* pdu);
-uint16_t Avtp_FlexRay_GetAcfMsgLength(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetPad(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetMtv(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetFrBusId(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetChan(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetStr(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetSyn(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetPre(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetNfi(Avtp_FlexRay_t* pdu);
-uint64_t Avtp_FlexRay_GetMessageTimestamp(Avtp_FlexRay_t* pdu);
-uint16_t Avtp_FlexRay_GetFrFrameId(Avtp_FlexRay_t* pdu);
-uint8_t Avtp_FlexRay_GetCycle(Avtp_FlexRay_t* pdu);
+uint8_t Avtp_FlexRay_GetAcfMsgType(const Avtp_FlexRay_t* const pdu);
+uint16_t Avtp_FlexRay_GetAcfMsgLength(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetPad(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetMtv(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetFrBusId(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetChan(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetStr(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetSyn(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetPre(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetNfi(const Avtp_FlexRay_t* const pdu);
+uint64_t Avtp_FlexRay_GetMessageTimestamp(const Avtp_FlexRay_t* const pdu);
+uint16_t Avtp_FlexRay_GetFrFrameId(const Avtp_FlexRay_t* const pdu);
+uint8_t Avtp_FlexRay_GetCycle(const Avtp_FlexRay_t* const pdu);
 
 /**
  * Sets the value of an ACF FlexRay PDU field.
@@ -143,7 +143,7 @@ void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t* pdu, uint8_t value);
  * @param bufferSize Size of the buffer containing the ACF FlexRay frame.
  * @return true if the ACF FlexRay frame is valid, false otherwise.
  */
-uint8_t Avtp_FlexRay_IsValid(Avtp_FlexRay_t* pdu, size_t bufferSize);
+uint8_t Avtp_FlexRay_IsValid(const Avtp_FlexRay_t* const pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

@@ -62,42 +62,42 @@ void Avtp_Lin_Init(Avtp_Lin_t* pdu)
     }
 }
 
-uint64_t Avtp_Lin_GetField(Avtp_Lin_t* pdu, Avtp_LinFields_t field)
+uint64_t Avtp_Lin_GetField(const Avtp_Lin_t* const pdu, Avtp_LinFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Lin_GetAcfMsgType(Avtp_Lin_t* pdu)
+uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Lin_GetAcfMsgLength(Avtp_Lin_t* pdu)
+uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_Lin_GetPad(Avtp_Lin_t* pdu)
+uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_PAD);
 }
 
-uint8_t Avtp_Lin_GetMtv(Avtp_Lin_t* pdu)
+uint8_t Avtp_Lin_GetMtv(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_MTV);
 }
 
-uint8_t Avtp_Lin_GetLinBusId(Avtp_Lin_t* pdu)
+uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID);
 }
 
-uint8_t Avtp_Lin_GetLinIdentifier(Avtp_Lin_t* pdu)
+uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER);
 }
 
-uint64_t Avtp_Lin_GetMessageTimestamp(Avtp_Lin_t* pdu)
+uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t* const pdu)
 {
     return GET_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
 }
@@ -147,7 +147,8 @@ void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value)
     SET_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
-uint8_t Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize){
+uint8_t Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize)
+{
     if (pdu == NULL) {
         return FALSE;
     }
@@ -156,12 +157,12 @@ uint8_t Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize){
         return FALSE;
     }
 
-     if (Avtp_Lin_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_LIN) {
+    if (Avtp_Lin_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_LIN) {
         return FALSE;
     }
 
     // Avtp_Lin_GetAcfMsgLength returns quadlets. Convert the length field to octets
-    if (Avtp_Lin_GetAcfMsgLength(pdu) *4 > bufferSize) {
+    if (Avtp_Lin_GetAcfMsgLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
 

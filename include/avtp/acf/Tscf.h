@@ -84,18 +84,18 @@ void Avtp_Tscf_Init(Avtp_Tscf_t* pdu);
  * @param field Specifies the position of the data field to be read
  * @returns The value of the field.
  */
-uint64_t Avtp_Tscf_GetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field);
+uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field);
 
-uint8_t Avtp_Tscf_GetSubtype(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetSv(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetVersion(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetMr(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetTv(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetSequenceNum(Avtp_Tscf_t* pdu);
-uint8_t Avtp_Tscf_GetTu(Avtp_Tscf_t* pdu);
-uint64_t Avtp_Tscf_GetStreamId(Avtp_Tscf_t* pdu);
-uint32_t Avtp_Tscf_GetAvtpTimestamp(Avtp_Tscf_t* pdu);
-uint16_t Avtp_Tscf_GetStreamDataLength(Avtp_Tscf_t* pdu);
+uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu);
+uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu);
+uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu);
+uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu);
+uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pdu);
 
 /**
  * Sets the value of an an AVTP TSCF field as specified in the IEEE 1722 Specification.
@@ -129,7 +129,7 @@ void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value);
  * @param bufferSize Size of the buffer containing the ACF Tscf frame.
  * @return true if the ACF Tscf frame is valid, false otherwise.
  */
-uint8_t Avtp_Tscf_IsValid(Avtp_Tscf_t* pdu, size_t bufferSize);
+uint8_t Avtp_Tscf_IsValid(const Avtp_Tscf_t* const pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

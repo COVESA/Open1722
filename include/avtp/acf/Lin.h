@@ -80,15 +80,15 @@ void Avtp_Lin_Init(Avtp_Lin_t* pdu);
  * @param field Data field to be read
  * @returns Value of PDU field.
  */
-uint64_t Avtp_Lin_GetField(Avtp_Lin_t* pdu, Avtp_LinFields_t field);
+uint64_t Avtp_Lin_GetField(const Avtp_Lin_t* const pdu, Avtp_LinFields_t field);
 
-uint8_t Avtp_Lin_GetAcfMsgType(Avtp_Lin_t* pdu);
-uint16_t Avtp_Lin_GetAcfMsgLength(Avtp_Lin_t* pdu);
-uint8_t Avtp_Lin_GetPad(Avtp_Lin_t* pdu);
-uint8_t Avtp_Lin_GetMtv(Avtp_Lin_t* pdu);
-uint8_t Avtp_Lin_GetLinBusId(Avtp_Lin_t* pdu);
-uint8_t Avtp_Lin_GetLinIdentifier(Avtp_Lin_t* pdu);
-uint64_t Avtp_Lin_GetMessageTimestamp(Avtp_Lin_t* pdu);
+uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t* const pdu);
+uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t* const pdu);
+uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu);
+uint8_t Avtp_Lin_GetMtv(const Avtp_Lin_t* const pdu);
+uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t* const pdu);
+uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t* const pdu);
+uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t* const pdu);
 
 /**
  * Sets the value of an ACF Lin PDU field.
@@ -117,7 +117,7 @@ void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Lin frame.
  * @return true if the ACF Lin frame is valid, false otherwise.
  */
-uint8_t Avtp_Lin_IsValid(Avtp_Lin_t* pdu, size_t bufferSize);
+uint8_t Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

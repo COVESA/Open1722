@@ -54,12 +54,12 @@ void Avtp_Udp_Init(Avtp_Udp_t* pdu)
     }
 }
 
-uint64_t Avtp_Udp_GetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field)
+uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint32_t Avtp_Udp_GetEncapsulationSeqNo(Avtp_Udp_t* pdu)
+uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu)
 {
     return GET_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
 }

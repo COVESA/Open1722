@@ -85,19 +85,19 @@ void Avtp_Most_Init(Avtp_Most_t* pdu);
  * @param field Data field to be read
  * @returns Value of the PDU field.
  */
-uint64_t Avtp_Most_GetField(Avtp_Most_t* pdu, Avtp_MostFields_t field);
+uint64_t Avtp_Most_GetField(const Avtp_Most_t* const pdu, Avtp_MostFields_t field);
 
-uint8_t Avtp_Most_GetAcfMsgType(Avtp_Most_t* pdu);
-uint16_t Avtp_Most_GetAcfMsgLength(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetPad(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetMtv(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetMostNetId(Avtp_Most_t* pdu);
-uint64_t Avtp_Most_GetMessageTimestamp(Avtp_Most_t* pdu);
-uint16_t Avtp_Most_GetDeviceId(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetFblockId(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetInstId(Avtp_Most_t* pdu);
-uint16_t Avtp_Most_GetFuncId(Avtp_Most_t* pdu);
-uint8_t Avtp_Most_GetOpType(Avtp_Most_t* pdu);
+uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t* const pdu);
+uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetPad(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetMtv(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t* const pdu);
+uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t* const pdu);
+uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetInstId(const Avtp_Most_t* const pdu);
+uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t* const pdu);
+uint8_t Avtp_Most_GetOpType(const Avtp_Most_t* const pdu);
 
 /**
  * Sets the value of an ACF Most PDU field.
@@ -129,7 +129,7 @@ void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value);
  * @param bufferSize Size of the buffer containing the ACF Most frame.
  * @return true if the ACF Most frame is valid, false otherwise.
  */
-uint8_t Avtp_Most_IsValid(Avtp_Most_t* pdu, size_t bufferSize);
+uint8_t Avtp_Most_IsValid(const Avtp_Most_t* const pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

@@ -58,77 +58,77 @@ static const Avtp_FieldDescriptor_t Avtp_AafFieldDesc[AVTP_AAF_FIELD_MAX] =
     [AVTP_AAF_FIELD_AAF_FORMAT_SPECIFIC_DATA_2] = { .quadlet = 5, .offset = 24, .bits =  8 },
 };
 
-uint64_t Avtp_Aaf_GetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field)
+uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t* const pdu, Avtp_AafFields_t field)
 {
     return Avtp_GetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, (uint8_t) field);
 }
 
-uint8_t Avtp_Aaf_GetSubtype(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetSubtype(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Aaf_GetSv(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_SV);
 }
 
-uint8_t Avtp_Aaf_GetVersion(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetVersion(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_VERSION);
 }
 
-uint8_t Avtp_Aaf_GetMr(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetMr(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_MR);
 }
 
-uint8_t Avtp_Aaf_GetTv(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetTv(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_TV);
 }
 
-uint8_t Avtp_Aaf_GetSequenceNum(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetSequenceNum(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_SEQUENCE_NUM);
 }
 
-uint8_t Avtp_Aaf_GetTu(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetTu(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_TU);
 }
 
-uint64_t Avtp_Aaf_GetStreamId(Avtp_Aaf_t* pdu)
+uint64_t Avtp_Aaf_GetStreamId(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_STREAM_ID);
 }
 
-uint32_t Avtp_Aaf_GetAvtpTimestamp(Avtp_Aaf_t* pdu)
+uint32_t Avtp_Aaf_GetAvtpTimestamp(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_AVTP_TIMESTAMP);
 }
 
-uint8_t Avtp_Aaf_GetFormat(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetFormat(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_FORMAT);
 }
 
-uint16_t Avtp_Aaf_GetStreamDataLength(Avtp_Aaf_t* pdu)
+uint16_t Avtp_Aaf_GetStreamDataLength(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_STREAM_DATA_LENGTH);
 }
 
-uint8_t Avtp_Aaf_GetAfsd(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetAfsd(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_AFSD);
 }
 
-uint8_t Avtp_Aaf_GetSp(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetSp(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_SP);
 }
 
-uint8_t Avtp_Aaf_GetEvt(Avtp_Aaf_t* pdu)
+uint8_t Avtp_Aaf_GetEvt(const Avtp_Aaf_t* const pdu)
 {
     return GET_FIELD(AVTP_AAF_FIELD_EVT);
 }

@@ -82,21 +82,21 @@ typedef enum Avtp_CrfField {
 
 void Avtp_Crf_Init(Avtp_Crf_t* pdu);
 
-uint64_t Avtp_Crf_GetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field);
+uint64_t Avtp_Crf_GetField(const Avtp_Crf_t* const pdu, Avtp_CrfField_t field);
 
-uint8_t Avtp_Crf_GetSubtype(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetSv(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetVersion(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetMr(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetFs(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetTu(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetSequenceNum(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetType(Avtp_Crf_t* pdu);
-uint64_t Avtp_Crf_GetStreamId(Avtp_Crf_t* pdu);
-uint8_t Avtp_Crf_GetPull(Avtp_Crf_t* pdu);
-uint32_t Avtp_Crf_GetBaseFrequency(Avtp_Crf_t* pdu);
-uint16_t Avtp_Crf_GetCrfDataLength(Avtp_Crf_t* pdu);
-uint16_t Avtp_Crf_GetTimestampInterval(Avtp_Crf_t* pdu);
+uint8_t Avtp_Crf_GetSubtype(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetVersion(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetType(const Avtp_Crf_t* const pdu);
+uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetPull(const Avtp_Crf_t* const pdu);
+uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t* const pdu);
+uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t* const pdu);
+uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t* const pdu);
 
 void Avtp_Crf_SetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field, uint64_t value);
 
@@ -144,7 +144,7 @@ struct avtp_crf_pdu {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_crf_pdu_get(const void *pdu, Avtp_CrfField_t field, uint64_t *val);
+int avtp_crf_pdu_get(const void * const pdu, Avtp_CrfField_t field, uint64_t *val);
 
 /**
  * @deprecated
