@@ -59,7 +59,7 @@ void Avtp_VssBrief_Init(Avtp_VssBrief_t* vss_pdu) {
     }
 }
 
-uint64_t Avtp_VssBrief_GetField(Avtp_VssBrief_t* vss_pdu,
+uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t* const vss_pdu,
                             Avtp_VssBriefFields_t field)
 {
     return Avtp_GetField(Avtp_VssBriefFieldDesc, AVTP_VSS_BRIEF_FIELD_MAX,

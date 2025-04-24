@@ -56,37 +56,37 @@ void Avtp_Mjpeg_Init(Avtp_Mjpeg_t* pdu)
     }
 }
 
-uint64_t Avtp_Mjpeg_GetField(Avtp_Mjpeg_t* pdu, Avtp_MjpegField_t field)
+uint64_t Avtp_Mjpeg_GetField(const Avtp_Mjpeg_t* const pdu, Avtp_MjpegField_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Mjpeg_GetTypeSpecific(Avtp_Mjpeg_t* pdu)
+uint8_t Avtp_Mjpeg_GetTypeSpecific(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_TYPE_SPECIFIC);
 }
 
-uint32_t Avtp_Mjpeg_GetFragmentOffset(Avtp_Mjpeg_t* pdu)
+uint32_t Avtp_Mjpeg_GetFragmentOffset(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_FRAGMENT_OFFSET);
 }
 
-uint8_t Avtp_Mjpeg_GetType(Avtp_Mjpeg_t* pdu)
+uint8_t Avtp_Mjpeg_GetType(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_TYPE);
 }
 
-uint8_t Avtp_Mjpeg_GetQ(Avtp_Mjpeg_t* pdu)
+uint8_t Avtp_Mjpeg_GetQ(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_Q);
 }
 
-uint8_t Avtp_Mjpeg_GetWidth(Avtp_Mjpeg_t* pdu)
+uint8_t Avtp_Mjpeg_GetWidth(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_WIDTH);
 }
 
-uint8_t Avtp_Mjpeg_GetHeight(Avtp_Mjpeg_t* pdu)
+uint8_t Avtp_Mjpeg_GetHeight(const Avtp_Mjpeg_t* const pdu)
 {
     return GET_FIELD(AVTP_MJPEG_FIELD_HEIGHT);
 }

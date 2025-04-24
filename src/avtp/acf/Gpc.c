@@ -59,22 +59,22 @@ void Avtp_Gpc_Init(Avtp_Gpc_t* pdu)
     }
 }
 
-uint64_t Avtp_Gpc_GetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field)
+uint64_t Avtp_Gpc_GetField(const Avtp_Gpc_t* const pdu, Avtp_GpcFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Gpc_GetAcfMsgType(Avtp_Gpc_t* pdu)
+uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Gpc_GetAcfMsgLength(Avtp_Gpc_t* pdu)
+uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
 }
 
-uint64_t Avtp_Gpc_GetGpcMsgId(Avtp_Gpc_t* pdu)
+uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
 }
@@ -99,7 +99,7 @@ void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value)
     SET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
 }
 
-uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize)
+uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

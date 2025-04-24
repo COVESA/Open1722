@@ -82,23 +82,23 @@ typedef enum Avtp_CvfFormatSubtype {
 
 void Avtp_Cvf_Init(Avtp_Cvf_t* pdu);
 
-uint64_t Avtp_Cvf_GetField(Avtp_Cvf_t* pdu, Avtp_CvfField_t field);
+uint64_t Avtp_Cvf_GetField(const Avtp_Cvf_t* const pdu, Avtp_CvfField_t field);
 
-uint8_t Avtp_Cvf_GetSubtype(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetSv(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetVersion(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetMr(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetTv(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetSequenceNum(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetTu(Avtp_Cvf_t* pdu);
-uint64_t Avtp_Cvf_GetStreamId(Avtp_Cvf_t* pdu);
-uint32_t Avtp_Cvf_GetAvtpTimestamp(Avtp_Cvf_t* pdu);
-Avtp_CvfFormat_t Avtp_Cvf_GetFormat(Avtp_Cvf_t* pdu);
-Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype(Avtp_Cvf_t* pdu);
-uint16_t Avtp_Cvf_GetStreamDataLength(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetPtv(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetM(Avtp_Cvf_t* pdu);
-uint8_t Avtp_Cvf_GetEvt(Avtp_Cvf_t* pdu);
+uint8_t Avtp_Cvf_GetSubtype(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetSv(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetVersion(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetMr(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetTv(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetSequenceNum(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetTu(const Avtp_Cvf_t* const pdu);
+uint64_t Avtp_Cvf_GetStreamId(const Avtp_Cvf_t* const pdu);
+uint32_t Avtp_Cvf_GetAvtpTimestamp(const Avtp_Cvf_t* const pdu);
+Avtp_CvfFormat_t Avtp_Cvf_GetFormat(const Avtp_Cvf_t* const pdu);
+Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype(const Avtp_Cvf_t* const pdu);
+uint16_t Avtp_Cvf_GetStreamDataLength(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetPtv(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetM(const Avtp_Cvf_t* const pdu);
+uint8_t Avtp_Cvf_GetEvt(const Avtp_Cvf_t* const pdu);
 
 void Avtp_Cvf_SetField(Avtp_Cvf_t* pdu, Avtp_CvfField_t field, uint64_t value);
 
@@ -131,7 +131,7 @@ void Avtp_Cvf_SetEvt(Avtp_Cvf_t* pdu, uint8_t value);
 /**
  * @deprecated
  */
-int avtp_cvf_pdu_get(void* pdu, Avtp_CvfField_t field, uint64_t *val);
+int avtp_cvf_pdu_get(const void* const pdu, Avtp_CvfField_t field, uint64_t *val);
 
 /**
  * @deprecated

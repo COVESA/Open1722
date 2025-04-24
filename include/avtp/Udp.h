@@ -74,9 +74,9 @@ void Avtp_Udp_Init(Avtp_Udp_t* pdu);
  * @param value Pointer to location to store the value.
  * @returns This function returns the value of the field.
  */
-uint64_t Avtp_Udp_GetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field);
+uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field);
 
-uint32_t Avtp_Udp_GetEncapsulationSeqNo(Avtp_Udp_t* pdu);
+uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu);
 
 /**
  * Sets the value of an an AVTP UDP field as specified in the IEEE 1722 Specification.

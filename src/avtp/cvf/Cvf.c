@@ -73,82 +73,82 @@ void Avtp_Cvf_Init(Avtp_Cvf_t* pdu)
     }
 }
 
-uint64_t Avtp_Cvf_GetField(Avtp_Cvf_t* pdu, Avtp_CvfField_t field)
+uint64_t Avtp_Cvf_GetField(const Avtp_Cvf_t* const pdu, Avtp_CvfField_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Cvf_GetSubtype(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetSubtype(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Cvf_GetSv(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetSv(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_SV);
 }
 
-uint8_t Avtp_Cvf_GetVersion(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetVersion(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_VERSION);
 }
 
-uint8_t Avtp_Cvf_GetMr(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetMr(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_MR);
 }
 
-uint8_t Avtp_Cvf_GetTv(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetTv(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_TV);
 }
 
-uint8_t Avtp_Cvf_GetSequenceNum(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetSequenceNum(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_SEQUENCE_NUM);
 }
 
-uint8_t Avtp_Cvf_GetTu(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetTu(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_TU);
 }
 
-uint64_t Avtp_Cvf_GetStreamId(Avtp_Cvf_t* pdu)
+uint64_t Avtp_Cvf_GetStreamId(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_STREAM_ID);
 }
 
-uint32_t Avtp_Cvf_GetAvtpTimestamp(Avtp_Cvf_t* pdu)
+uint32_t Avtp_Cvf_GetAvtpTimestamp(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_AVTP_TIMESTAMP);
 }
 
-Avtp_CvfFormat_t Avtp_Cvf_GetFormat(Avtp_Cvf_t* pdu)
+Avtp_CvfFormat_t Avtp_Cvf_GetFormat(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_FORMAT);
 }
 
-Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype(Avtp_Cvf_t* pdu)
+Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_FORMAT_SUBTYPE);
 }
 
-uint16_t Avtp_Cvf_GetStreamDataLength(Avtp_Cvf_t* pdu)
+uint16_t Avtp_Cvf_GetStreamDataLength(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_STREAM_DATA_LENGTH);
 }
 
-uint8_t Avtp_Cvf_GetPtv(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetPtv(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_PTV);
 }
 
-uint8_t Avtp_Cvf_GetM(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetM(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_M);
 }
 
-uint8_t Avtp_Cvf_GetEvt(Avtp_Cvf_t* pdu)
+uint8_t Avtp_Cvf_GetEvt(const Avtp_Cvf_t* const pdu)
 {
     return GET_FIELD(AVTP_CVF_FIELD_EVT);
 }
@@ -267,12 +267,12 @@ void Avtp_Cvf_SetEvt(Avtp_Cvf_t* pdu, uint8_t value)
  * Legacy API (deprecated)
  *****************************************************************************/
 
-int avtp_cvf_pdu_get(void* pdu, Avtp_CvfField_t field, uint64_t *val)
+int avtp_cvf_pdu_get(const void* const pdu, Avtp_CvfField_t field, uint64_t *val)
 {
     if (pdu == NULL || val == NULL || field >= AVTP_CVF_FIELD_MAX) {
         return -EINVAL;
     } else {
-        *val = Avtp_Cvf_GetField((Avtp_Cvf_t*)pdu, field);
+        *val = Avtp_Cvf_GetField((const Avtp_Cvf_t* const)pdu, field);
         return 0;
     }
 }

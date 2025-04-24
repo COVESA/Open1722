@@ -85,19 +85,19 @@ void Avtp_CanBrief_Init(Avtp_CanBrief_t* pdu);
  * @param field Specifies the position of the data field to be read
  * @returns Field of CAN Brief PDU.
  */
-uint64_t Avtp_CanBrief_GetField(Avtp_CanBrief_t* pdu, Avtp_CanBriefFields_t field);
+uint64_t Avtp_CanBrief_GetField(const Avtp_CanBrief_t* const pdu, Avtp_CanBriefFields_t field);
 
-uint8_t Avtp_CanBrief_GetAcfMsgType(Avtp_CanBrief_t* pdu);
-uint16_t Avtp_CanBrief_GetAcfMsgLength(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetPad(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetMtv(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetRtr(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetEff(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetBrs(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetFdf(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetEsi(Avtp_CanBrief_t* pdu);
-uint8_t Avtp_CanBrief_GetCanBusId(Avtp_CanBrief_t* pdu);
-uint32_t Avtp_CanBrief_GetCanIdentifier(Avtp_CanBrief_t* pdu);
+uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t* const pdu);
+uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetPad(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetMtv(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetRtr(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetEff(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetBrs(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetFdf(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetEsi(const Avtp_CanBrief_t* const pdu);
+uint8_t Avtp_CanBrief_GetCanBusId(const Avtp_CanBrief_t* const pdu);
+uint32_t Avtp_CanBrief_GetCanIdentifier(const Avtp_CanBrief_t* const pdu);
 
 /**
  * Sets the value of an an ACF Abbreviated CAN PDU field as specified in the IEEE 1722 Specification.
@@ -145,7 +145,7 @@ void Avtp_CanBrief_CreateAcfMessage(Avtp_CanBrief_t* can_pdu, uint32_t frame_id,
 * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
 * @return Pointer to ACF CAN frame payload
 */
-uint8_t* Avtp_CanBrief_GetPayload(Avtp_CanBrief_t* can_pdu);
+uint8_t* Avtp_CanBrief_GetPayload(Avtp_CanBrief_t* const can_pdu);
 
 /**
 * Sets the CAN payload in an ACF CAN Brief frame.
@@ -174,7 +174,7 @@ void Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length);
 * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
 * @return  Length of CAN payload in bytes
 */
-uint8_t Avtp_CanBrief_GetCanPayloadLength(Avtp_CanBrief_t* pdu);
+uint8_t Avtp_CanBrief_GetCanPayloadLength(const Avtp_CanBrief_t* const pdu);
 
 /**
  * Checks if the ACF CAN Brief frame is valid by checking:
@@ -184,7 +184,7 @@ uint8_t Avtp_CanBrief_GetCanPayloadLength(Avtp_CanBrief_t* pdu);
  * @param bufferSize Size of the buffer containing the ACF CAN Brief frame.
  * @return true if the ACF CAN Brief frame is valid, false otherwise.
  */
-uint8_t Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize);
+uint8_t Avtp_CanBrief_IsValid(const Avtp_CanBrief_t* const pdu, size_t bufferSize);
 
 
 
