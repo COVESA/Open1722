@@ -271,7 +271,7 @@ void Avtp_Can_SetPayload(Avtp_Can_t* pdu, uint8_t* payload,
     memcpy(pdu->payload, payload, payload_length);
 }
 
-uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* const pdu)
+const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const pdu)
 {
     return pdu->payload;
 }
