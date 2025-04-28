@@ -157,7 +157,7 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* can_pdu, uint32_t frame_id, uint8_t* 
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return Pointer to ACF CAN frame payload
  */
-uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* const can_pdu);
+const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const can_pdu);
 
 /**
  * Sets the CAN payload in an ACF CAN frame.

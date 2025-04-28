@@ -301,7 +301,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         }
 
         canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
-        uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
+        const uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
         uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;
         uint16_t can_payload_length = Avtp_Can_GetCanPayloadLength((Avtp_Can_t*)acf_pdu);
         proc_bytes += acf_msg_length;
