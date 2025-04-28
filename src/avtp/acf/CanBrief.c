@@ -260,7 +260,7 @@ void Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length)
     Avtp_CanBrief_SetPad(can_pdu, padSize);
 }
 
-uint8_t* Avtp_CanBrief_GetPayload(const Avtp_CanBrief_t* const can_pdu) {
+const uint8_t* Avtp_CanBrief_GetPayload(const Avtp_CanBrief_t* const can_pdu) {
     return can_pdu->payload;
 }
 
