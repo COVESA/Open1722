@@ -37,6 +37,7 @@ extern "C" {
 #include <linux/types.h>
 #else
 #include <stdint.h>
+#include <stddef.h>
 #endif
 
 /**
