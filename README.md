@@ -91,6 +91,8 @@ $ cmake .. -DCMAKE_TOOLCHAIN_FILE=../aarch64.toolchain
 $ make
 ```
 
+You can also find a toolchain file for ARM-Cortex-M [here](./arm-cortex-m.toolchain).
+
 ## AVTP Formats Support
 
 AVTP protocol defines several AVTPDU type formats (see Table 6 from IEEE 1722-2016 spec).

@@ -36,6 +36,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" OR ${CMAKE_SYSTEM_NAME} STREQUAL "QNX"
 elseif(DEFINED ENV{ZEPHYR_BASE})
     add_library(${LIB_NAME} STATIC ${LIB_SOURCES})
     target_link_libraries(${LIB_NAME} PRIVATE zephyr_interface)
+else()
+    add_library(${LIB_NAME} STATIC ${LIB_SOURCES})
 endif()
 target_compile_options(${LIB_NAME} PRIVATE -Wall -Wextra)
 target_include_directories(${LIB_NAME} PRIVATE
@@ -48,6 +50,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux" OR ${CMAKE_SYSTEM_NAME} STREQUAL "QNX"
 elseif(DEFINED ENV{ZEPHYR_BASE})
     add_library(${LIB_NAME}custom STATIC ${LIB_SOURCES})
     target_link_libraries(${LIB_NAME}custom PRIVATE zephyr_interface)
+else()
+    add_library(${LIB_NAME}custom STATIC ${LIB_SOURCES})
 endif()
 target_compile_options(${LIB_NAME}custom PRIVATE -Wall -Wextra)
 target_include_directories(${LIB_NAME}custom PRIVATE
