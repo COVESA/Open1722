@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"encoding/csv"
+
 	"github.com/cilium/ebpf"
 	link "github.com/cilium/ebpf/link"
 
@@ -234,6 +236,29 @@ func main() {
 		select {
 		case <-sig:
 			counter := 0
+
+			now := time.Now()
+    		fileNameEventsCanAvtp := fmt.Sprintf("EventsCanAvtp_%s.csv", now.Format("20060102_150405"))
+			fileNameEventsRecvTs := fmt.Sprintf("EventsRecvTs_%s.csv", now.Format("20060102_150405"))
+
+			fileEventsCanAvtp, err := os.Create(fileNameEventsCanAvtp)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			defer fileEventsCanAvtp.Close()
+
+			fileEventsRecvTs, err := os.Create(fileNameEventsRecvTs)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			defer fileEventsRecvTs.Close()
+
+			writerfileEventsCanAvtp := csv.NewWriter(fileEventsCanAvtp)
+			defer writerfileEventsCanAvtp.Flush()
+			writerfileEventsCanAvtp.Write([]string{"PID", "Dev", "TimestampEnterRead", "TimestampExitRead", "TimeReadingCANBus", "TimestampEnterSendto", "TimestampExitSendto", "TimeWriting", "TimestampEnterCanToAvtp", "TimestampExitCanToAvtp", "TimeCanToAvtp", "TimestampEnterAvtpToCan", "TimestampExitAvtpToCan", "TimeAvtpToCan"})
+
 			for _, tData := range traceDataMap {
 				fmt.Println("Results")
 				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
@@ -263,6 +288,21 @@ func main() {
 					if value.TimestampEnterAvtpToCan != 0 && value.TimestampExitAvtpToCan != 0 {
 						histAvtpToCan.Update(float64(value.TimeAvtpToCan))
 					}
+					writerfileEventsCanAvtp.Write([]string{fmt.Sprintf("%d", value.Pid),
+						value.Dev,
+						fmt.Sprintf("%d", value.TimestampEnterRead),
+						fmt.Sprintf("%d", value.TimestampExitRead),
+						fmt.Sprintf("%d", value.TimeReadingCANBus),
+						fmt.Sprintf("%d", value.TimestampEnterSendto),
+						fmt.Sprintf("%d", value.TimestampExitSendto),
+						fmt.Sprintf("%d", value.TimeWriting),
+						fmt.Sprintf("%d", value.TimestampEnterCanToAvtp),
+						fmt.Sprintf("%d", value.TimestampExitCanToAvtp),
+						fmt.Sprintf("%d", value.TimeCanToAvtp),
+						fmt.Sprintf("%d", value.TimestampEnterAvtpToCan),
+						fmt.Sprintf("%d", value.TimestampExitAvtpToCan),
+						fmt.Sprintf("%d", value.TimeAvtpToCan)})
+
 				}
 
 				fmt.Println(histReadingTime.Draw())
@@ -287,6 +327,10 @@ func main() {
 				histAvtpToCan.SaveImage(filename)
 			}
 
+			writerfileEventsRecvTs := csv.NewWriter(fileEventsRecvTs)
+			defer writerfileEventsRecvTs.Flush()
+			writerfileEventsRecvTs.Write([]string{"Key", "InterarrivalTime (in nanoseconds)", "Jitter"})
+
 			var jitter float64
 			var interarrivalTime []uint64
 			for key, value := range rxTimestampsKernel {
@@ -297,6 +341,7 @@ func main() {
 				}
 				for _, value := range interarrivalTime {
 					histInterarrivalTime.Update(float64(value))
+					writerfileEventsRecvTs.Write([]string{key, fmt.Sprintf("%d", value), fmt.Sprintf("%f", jitter)})
 				}
 				histInterarrivalTime.Title = "Interarrival time (in nanoseconds) for " + key
 				fmt.Println(histInterarrivalTime.Draw())
@@ -306,7 +351,6 @@ func main() {
 				filename := fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histInterarrivalTime.SaveImage(filename)
 			}
-
 			os.Exit(0)
 			fmt.Println("Received termination signal")
 			return
