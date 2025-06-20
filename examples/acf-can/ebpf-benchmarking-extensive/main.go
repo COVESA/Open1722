@@ -20,7 +20,7 @@ import (
 	"github.com/bsipos/thist"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target amd64 CANTrace eBPF/bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target arm64 -cflags "-I/usr/include/aarch64-linux-gnu -I/usr/include/" CANTrace eBPF/bpf.c
 
 func main() {
 	// Termination signal
@@ -149,27 +149,27 @@ func main() {
 					fmt.Println("Error attaching eBPF program to UprobeRetAvtpToCan: ", err)
 				}
 				defer uprobeRetCantoAvtp.Close()
-
-				if flags.ListenerFile != "" {
-					fmt.Println("Loading eBPF objects to trace the user space version of acf-can-listener")
-
-					exListener, err := link.OpenExecutable(flags.ListenerFile)
-					if err != nil {
-						fmt.Println("Error opening executable: ", err)
-					}
-					uprobeAvtpToCanListener, err := exListener.Uprobe("avtp_to_can", objs.UprobeAvtpToCan, &link.UprobeOptions{})
-					if err != nil {
-						fmt.Println("Error attaching eBPF program to UprobeCanToAvtp: ", err)
-					}
-					defer uprobeAvtpToCanListener.Close()
-
-					uprobeRetAvtpToCanListener, err := exListener.Uretprobe("avtp_to_can", objs.UprobeRetAvtpToCan, &link.UprobeOptions{})
-					if err != nil {
-						fmt.Println("Error attaching eBPF program to UprobeRetAvtpToCan: ", err)
-					}
-					defer uprobeRetAvtpToCanListener.Close()
-				}
 			}
+			if flags.ListenerFile != "" {
+				fmt.Println("Loading eBPF objects to trace the user space version of acf-can-listener")
+
+				exListener, err := link.OpenExecutable(flags.ListenerFile)
+				if err != nil {
+					fmt.Println("Error opening executable: ", err)
+				}
+				uprobeAvtpToCanListener, err := exListener.Uprobe("avtp_to_can", objs.UprobeAvtpToCan, &link.UprobeOptions{})
+				if err != nil {
+					fmt.Println("Error attaching eBPF program to UprobeCanToAvtp: ", err)
+				}
+				defer uprobeAvtpToCanListener.Close()
+
+				uprobeRetAvtpToCanListener, err := exListener.Uretprobe("avtp_to_can", objs.UprobeRetAvtpToCan, &link.UprobeOptions{})
+				if err != nil {
+					fmt.Println("Error attaching eBPF program to UprobeRetAvtpToCan: ", err)
+				}
+				defer uprobeRetAvtpToCanListener.Close()
+			}
+
 		}
 	}
 
@@ -235,6 +235,7 @@ func main() {
 		case <-sig:
 			counter := 0
 			for _, tData := range traceDataMap {
+				fmt.Println("Results")
 				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
 				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 20, true)
 				histCanToAvtp := thist.NewHist(nil, "CAN to AVTP time histogram (in nanoseconds)", "fixed", 20, true)
@@ -270,19 +271,19 @@ func main() {
 				fmt.Println(histAvtpToCan.Draw())
 
 				counter++
-				filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename := fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histReadingTime.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histSendingTime.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histCanToAvtp.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histAvtpToCan.SaveImage(filename)
 			}
 
@@ -302,7 +303,7 @@ func main() {
 				fmt.Println("Jitter at ", key, " : ", jitter)
 
 				counter++
-				filename := fmt.Sprintf("/home/rng-c-002/ieee1722_open_avtp/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename := fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
 				histInterarrivalTime.SaveImage(filename)
 			}
 
@@ -310,7 +311,7 @@ func main() {
 			fmt.Println("Received termination signal")
 			return
 		case <-ticker.C:
-			fmt.Println("Ticker triggered")
+			fmt.Println("Ticker triggered...")
 			for rBufReader.AvailableBytes() > 0 {
 				event, err := rBufReader.Read()
 				if err != nil {
