@@ -197,7 +197,7 @@ func main() {
 				}
 				uprobeAvtpToCanListener, err := exListener.Uprobe("avtp_to_can", objs.UprobeAvtpToCan, &link.UprobeOptions{})
 				if err != nil {
-					fmt.Println("Error attaching eBPF program to UprobeCanToAvtp: ", err)
+					fmt.Println("Error attaching eBPF program to UprobeAvtpToCan: ", err)
 				}
 				defer uprobeAvtpToCanListener.Close()
 
@@ -233,36 +233,30 @@ func main() {
 		for {
 			select {
 			case data := <-cRingBuf:
-				function := utils.ParseEvents(data).Function
-				functionStr := string(function[:])
+				parsedEvent := utils.ParseEvents(data)
+				functionStr := string(parsedEvent.Function[:])
 				functionStr = strings.TrimRight(functionStr, "\x00")
 
-				dev := utils.ParseEvents(data).Dev
-				devStr := string(dev[:])
+				devStr := string(parsedEvent.Dev[:])
 				devStr = strings.TrimRight(devStr, "\x00")
 				if traceDataMap[devStr] == nil {
 					traceDataMap[devStr] = make(map[uint32]utils.EventLog)
 				}
 				if value, ok := traceDataMap[devStr]; ok {
-					utils.LogData(&value, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr, devStr)
+					utils.LogData(&value, parsedEvent.Uid, parsedEvent.Pid, parsedEvent.Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = value
 				} else {
 					tempMap := make(map[uint32]utils.EventLog)
-					utils.LogData(&tempMap, utils.ParseEvents(data).Uid, utils.ParseEvents(data).Pid, utils.ParseEvents(data).Timestamp, functionStr, devStr)
+					utils.LogData(&tempMap, parsedEvent.Uid, parsedEvent.Pid, parsedEvent.Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = tempMap
 				}
-
 			case data := <-cRingBufRx:
 				rxData := utils.ParseEventsRxKernel(data).Dev
 				dev := string(rxData[:])
 				dev = strings.TrimRight(dev, "\x00")
-
 				rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
-
 			}
-
 		}
-
 	}()
 
 	ticker := time.NewTicker(5 * time.Second)
@@ -406,7 +400,6 @@ func main() {
 				}
 				cRingBuf <- event.RawSample
 			}
-
 			for rBufReaderRx.AvailableBytes() > 0 {
 				event, err := rBufReaderRx.Read()
 				if err != nil {
