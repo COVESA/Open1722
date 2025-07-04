@@ -100,6 +100,22 @@ static __always_inline void submit_event(__u32 pid, const char *msg)
         bpf_ringbuf_submit(e, 0);                                       \
     } while (0)
 
+// Helper function for safe string comparison
+static __always_inline bool is_ecu(const char *devname, const char *ecu_name, unsigned int size) 
+{
+    #pragma unroll  // Required for eBPF verifier
+    for (int i = 0; i < size; i++) {
+        if (devname[i] != ecu_name[i]) {
+            return false;
+        }
+        if (devname[i] == '\0') {
+            return true;  // Strings match up to null terminator
+        }
+    }
+    return (devname[size-1] == '\0' && ecu_name[size-1] == '\0');
+}
+
+
 static __always_inline int printStatsSK(struct sk_buff *skb)
 {
     struct sk_buff skb_local = {};
@@ -132,9 +148,9 @@ static __always_inline int getDevName(char *devname, struct sk_buff *skb)
 
 SEC("tracepoint/raw_syscalls/sys_enter_read")
 int tp_enter_read(struct trace_event_raw_sys_enter *ctx)
-{
+{   
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    if (cfg->pid_talker == 0 || cfg->pid_listener == 0)
+    if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
     if (cfg->pid_listener != pid && cfg->pid_talker != pid)
@@ -162,7 +178,7 @@ SEC("tracepoint/raw_syscalls/sys_exit_read")
 int tp_exit_read(struct trace_event_raw_sys_enter *ctx)
 {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    if (cfg->pid_talker == 0 || cfg->pid_listener == 0)
+    if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
     if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
@@ -192,7 +208,7 @@ int tp_enter_sendto(struct trace_event_raw_sys_enter *ctx)
 {
 
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    if (cfg->pid_talker == 0 || cfg->pid_listener == 0)
+    if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
     if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
@@ -220,7 +236,7 @@ SEC("tracepoint/raw_syscalls/sys_exit_sendto")
 int tp_exit_sendto(struct trace_event_raw_sys_enter *ctx)
 {
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-    if (cfg->pid_talker == 0 || cfg->pid_listener == 0)
+    if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
     if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
@@ -354,7 +370,7 @@ int kprobe_acfcan_tx(struct pt_regs *ctx)
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM1(ctx));
     last_read_start_from_can_ts = bpf_ktime_get_ns();
 
-    if (strcmp(devname, "ecu1") == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding))
+    if (is_ecu(devname, "ecu1", 4)  == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding))
     {
         uid++;
         strncpy(devname, "ecu1", sizeof(devname));
@@ -362,12 +378,13 @@ int kprobe_acfcan_tx(struct pt_regs *ctx)
         ecu1_acf_can_tx_called = true;
         bpf_printk("ecu1 acfcan_tx called\n");
     }
-    else if (strcmp(devname, "ecu2") == 0)
+    else if (is_ecu(devname, "ecu2", 4) == 0)
     {
         uid2++;
         strncpy(devname, "ecu2", sizeof(devname));
         SUBMIT_EVENT("acfcan_tx", 0, uid2, last_read_start_from_can_ts, devname);
         ecu2_acf_can_tx_called = true;
+        bpf_printk("ecu2 acfcan_tx called\n");
     }
     return 0;
 }
@@ -390,7 +407,7 @@ int kprobe_entry_forward_can_frame(struct pt_regs *ctx)
 
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM2(ctx));
     // bpf_printk("devname (entry_tx_side): %s", devname);
-    if (strcmp(devname, "ecu1") == 0)
+    if (is_ecu(devname, "ecu1", 4)== 0)
     {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu1 start time: %llu", last_send_start_talker_ts);
@@ -398,7 +415,7 @@ int kprobe_entry_forward_can_frame(struct pt_regs *ctx)
         SUBMIT_EVENT("enter_forward_can_frame", 0, uid, last_send_start_talker_ts, devname);
         bpf_printk("ecu1 enter_forward_can_frame called\n");
     }
-    else if (strcmp(devname, "ecu2") == 0)
+    else if (is_ecu(devname, "ecu2", 4)  == 0)
     {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu2 start time: %llu", last_send_start_talker_ts);
