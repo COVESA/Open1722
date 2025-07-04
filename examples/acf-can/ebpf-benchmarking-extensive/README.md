@@ -11,12 +11,9 @@ Before you begin, ensure your system meets the following requirements.
 eBPF relies heavily on specific Linux kernel features. The capabilities for kprobes, tracepoints, and uprobes are generally available in modern kernel versions.
 
 - General eBPF Support: Linux kernel 4.4 or newer is required for basic eBPF functionality.
-
 - kprobes: Kernel-level dynamic tracing is available in Linux kernel 4.1 and later. For optimal performance and feature support, a kernel version of 4.14 or newer is recommended.
-
 - tracepoints: Kernel-level static tracing is available in Linux kernel 4.7 and later.
-
-- uprobes: User-space dynamic tracing is available in Linux kernel 4.3 and later
+- uprobes: User-space dynamic tracing is available in Linux kernel 4.3 and later.
 
 You'll need a recent version of Go installed on your system. This project is developed and tested with Go 1.18 or newer.
 
@@ -48,6 +45,7 @@ export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
 export PATH=$PATH:/usr/local/go/bin:$GOBIN
 ```
+
 After editing the file, reload your shell configuration:
 
 ```bash
@@ -59,13 +57,14 @@ Verify your installation: Open a new terminal session and run the following comm
 ```bash
 go version
 ```
+
 ## Build the Project
 
 This project uses a Makefile to simplify the build process.
 
-1) Need to make some modification in the main.go file as per your hardware architecture 
+1) You need to make some modifications in the main.go file as per your hardware architecture:
 
-```bash
+```go
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target arm64 -cflags "-I/usr/include/aarch64-linux-gnu -I/usr/include/" CANTrace eBPF/bpf.c
 ```
 
@@ -108,26 +107,24 @@ For help, run `sudo open1722-can-tracing-extensive --help`
 
 ### Examples
 
-1) Montioring the userspace talker application, where 
- - the binary located at `/home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-talker`
- - PID of the acf-can-talker 37357
+1) Monitoring the userspace talker application, where:
+ - The binary is located at `/home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-talker`
+ - PID of the acf-can-talker is 37357
 
 ```bash
 sudo ./open1722-can-tracing-extensive --pid-talker 37357 --talker-file /home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-talker
 ```
 
-2) Montioring the userspace listener application, where 
- - the binary located at `/home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-listener`
- - PID of the acf-can-talker 37390
+2) Monitoring the userspace listener application, where:
+ - The binary is located at `/home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-listener`
+ - PID of the acf-can-listener is 37390
 
 ```bash
 sudo ./open1722-can-tracing-extensive --pid-listener 37390 --listener-file /home/pi/open1722-rs/Open1722-c/examples/build/acf-can/linux/acf-can-listener
 ```
 
-3) Monitoring the kernel implementation
+3) Monitoring the kernel implementation:
 
 ```bash
 sudo ./open1722-can-tracing-extensive --is-kernel
 ```
-
-

@@ -503,7 +503,7 @@ int kprobe_ieee1722_packet_handdler(struct pt_regs *ctx)
     // bpf_printk("devname (rx_side): %s", devname);
 
     struct event_recv *e;
-    e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event), 0);
+    e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event_recv), 0);
     if (!e)
     {
         bpf_printk("Failed to reserve ringbuf space\n");
