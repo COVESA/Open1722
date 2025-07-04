@@ -58,6 +58,12 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
+	baseDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current directory:", err)
+		baseDir = "."
+	}
+
 	flags, err := utils.ParseFlags()
 	if err != nil {
 		fmt.Println("Flag parsing failed: ", err)
@@ -201,10 +207,8 @@ func main() {
 				}
 				defer uprobeRetAvtpToCanListener.Close()
 			}
-
 		}
 	}
-
 	// Setting up the ring buffer
 	rBuf := objs.EventsCanAvtp
 	rBufReader, err := ringbuf.NewReader(rBuf)
@@ -268,7 +272,7 @@ func main() {
 			counter := 0
 
 			now := time.Now()
-    		fileNameEventsCanAvtp := fmt.Sprintf("EventsCanAvtp_%s.csv", now.Format("20060102_150405"))
+			fileNameEventsCanAvtp := fmt.Sprintf("EventsCanAvtp_%s.csv", now.Format("20060102_150405"))
 			fileNameEventsRecvTs := fmt.Sprintf("EventsRecvTs_%s.csv", now.Format("20060102_150405"))
 
 			fileEventsCanAvtp, err := os.Create(fileNameEventsCanAvtp)
@@ -332,7 +336,6 @@ func main() {
 						fmt.Sprintf("%d", value.TimestampEnterAvtpToCan),
 						fmt.Sprintf("%d", value.TimestampExitAvtpToCan),
 						fmt.Sprintf("%d", value.TimeAvtpToCan)})
-
 				}
 
 				fmt.Println(histReadingTime.Draw())
@@ -341,19 +344,19 @@ func main() {
 				fmt.Println(histAvtpToCan.Draw())
 
 				counter++
-				filename := fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename := fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histReadingTime.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histSendingTime.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histCanToAvtp.SaveImage(filename)
 
 				counter++
-				filename = fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename = fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histAvtpToCan.SaveImage(filename)
 			}
 
@@ -378,11 +381,11 @@ func main() {
 				fmt.Println("Jitter at ", key, " : ", jitter)
 
 				counter++
-				filename := fmt.Sprintf("/home/pi/Open1722/examples/acf-can/ebpf-benchmarking-extensive/histograms/histogram_%d.png", counter)
+				filename := fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histInterarrivalTime.SaveImage(filename)
 			}
-			os.Exit(0)
 			fmt.Println("Received termination signal")
+			os.Exit(0)
 			return
 		case <-ticker.C:
 			fmt.Println("Ticker triggered...")

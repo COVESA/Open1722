@@ -311,7 +311,7 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
         strncpy(devname, "listener", sizeof(devname));
     }
     struct event_recv *e;
-    e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event), 0);
+    e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event_recv), 0);
     if (!e)
     {
         bpf_printk("Failed to reserve ringbuf space\n");
