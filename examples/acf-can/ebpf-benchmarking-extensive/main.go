@@ -93,8 +93,7 @@ func main() {
 	}
 	err = spec.LoadAndAssign(&objs, &opts)
 	if err != nil {
-		fmt.Println("Error loading eBPF object: ", err)
-		os.Exit(1)
+		log.Fatalf("Error loading eBPF object: %v", err)
 	}
 
 	fmt.Println("Attached eBPF program to tracepoints")
