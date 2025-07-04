@@ -212,7 +212,7 @@ func main() {
 	rBuf := objs.EventsCanAvtp
 	rBufReader, err := ringbuf.NewReader(rBuf)
 	if err != nil {
-		fmt.Println("Error creating ring buffer reader: ", err)
+		log.Fatalf("Error creating ring buffer reader: %v", err)
 	}
 	defer rBufReader.Close()
 	cRingBuf := make(chan []byte)
@@ -220,7 +220,7 @@ func main() {
 	rBufRx := objs.EventsRecvTs
 	rBufReaderRx, err := ringbuf.NewReader(rBufRx)
 	if err != nil {
-		fmt.Println("Error creating ring buffer reader: ", err)
+		log.Fatalf("Error creating ring buffer reader: %v", err)
 	}
 	defer rBufReaderRx.Close()
 	cRingBufRx := make(chan []byte)
