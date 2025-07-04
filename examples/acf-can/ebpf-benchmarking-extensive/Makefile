@@ -4,8 +4,8 @@ build_ebpf:
 	cd eBPF && bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h
 
 build_go: 
-	go generate ./... && go build
-
+	go generate ./... && mkdir -p bin && go build -o bin/open1722-can-tracing-extensive
+	
 clean:
 	go clean
 

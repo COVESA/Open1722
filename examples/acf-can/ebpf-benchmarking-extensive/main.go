@@ -66,13 +66,13 @@ func main() {
 
 	flags, err := utils.ParseFlags()
 	if err != nil {
-		fmt.Println("Flag parsing failed: ", err)
+		log.Fatalf("Flag parsing failed: %v", err)
 	}
 
 	var objs CANTraceObjects
 	spec, err := LoadCANTrace()
 	if err != nil {
-		fmt.Println("Error loading eBPF object: ", err)
+		log.Fatalf("Error loading eBPF object: %v", err)
 	}
 	defer objs.Close()
 
@@ -280,14 +280,24 @@ func main() {
 				fmt.Println("Error:", err)
 				return
 			}
-			defer fileEventsCanAvtp.Close()
+			// Explicitly close fileEventsCanAvtp before exiting
+			defer func() {
+				if err := fileEventsCanAvtp.Close(); err != nil {
+					fmt.Println("Error closing fileEventsCanAvtp:", err)
+				}
+			}()
 
 			fileEventsRecvTs, err := os.Create(fileNameEventsRecvTs)
 			if err != nil {
 				fmt.Println("Error:", err)
 				return
 			}
-			defer fileEventsRecvTs.Close()
+			// Explicitly close fileEventsRecvTs before exiting
+			defer func() {
+				if err := fileEventsRecvTs.Close(); err != nil {
+					fmt.Println("Error closing fileEventsRecvTs:", err)
+				}
+			}()
 
 			writerfileEventsCanAvtp := csv.NewWriter(fileEventsCanAvtp)
 			defer writerfileEventsCanAvtp.Flush()

@@ -97,7 +97,7 @@ In your specific command, you have correctly used `-target arm64`, which is a va
 make
 ```
 
-This command will produce the necessary binaries in the project's directory or a designated bin folder.
+This command will produce the necessary binaries in a designated bin folder.
 
 ## Running the Application
 
