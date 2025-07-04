@@ -100,21 +100,6 @@ static __always_inline void submit_event(__u32 pid, const char *msg)
         bpf_ringbuf_submit(e, 0);                                       \
     } while (0)
 
-#define COMPARE_STR(dest, src) ({ \
-    int __ret = 1; \
-    const char *__d = (dest); \
-    const char *__s = (src); \
-    for (int i = 0; i < sizeof(dest); i++) { \
-        if (__d[i] != __s[i]) { \
-            __ret = 0; \
-            break; \
-        } \
-        if (__d[i] == '\0') break; \
-    } \
-    __ret; \
-})
-
-
 static __always_inline int printStatsSK(struct sk_buff *skb)
 {
     struct sk_buff skb_local = {};
@@ -368,8 +353,8 @@ int kprobe_acfcan_tx(struct pt_regs *ctx)
     char devname[32];
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM1(ctx));
     last_read_start_from_can_ts = bpf_ktime_get_ns();
-    
-    if (COMPARE_STR(devname, "ecu1") == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding))
+
+    if (strcmp(devname, "ecu1") == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding))
     {
         uid++;
         strncpy(devname, "ecu1", sizeof(devname));
@@ -377,7 +362,7 @@ int kprobe_acfcan_tx(struct pt_regs *ctx)
         ecu1_acf_can_tx_called = true;
         bpf_printk("ecu1 acfcan_tx called\n");
     }
-    else if (COMPARE_STR(devname, "ecu2") == 0)
+    else if (strcmp(devname, "ecu2") == 0)
     {
         uid2++;
         strncpy(devname, "ecu2", sizeof(devname));
@@ -405,7 +390,7 @@ int kprobe_entry_forward_can_frame(struct pt_regs *ctx)
 
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM2(ctx));
     // bpf_printk("devname (entry_tx_side): %s", devname);
-    if (COMPARE_STR(devname, "ecu1") == 0)
+    if (strcmp(devname, "ecu1") == 0)
     {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu1 start time: %llu", last_send_start_talker_ts);
@@ -413,7 +398,7 @@ int kprobe_entry_forward_can_frame(struct pt_regs *ctx)
         SUBMIT_EVENT("enter_forward_can_frame", 0, uid, last_send_start_talker_ts, devname);
         bpf_printk("ecu1 enter_forward_can_frame called\n");
     }
-    else if (COMPARE_STR(devname, "ecu2") == 0)
+    else if (strcmp(devname, "ecu2") == 0)
     {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu2 start time: %llu", last_send_start_talker_ts);
