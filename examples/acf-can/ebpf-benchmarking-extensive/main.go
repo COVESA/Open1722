@@ -35,6 +35,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -58,17 +59,21 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
+	// Get the current working directory to save the histogram images
 	baseDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error getting current directory:", err)
 		baseDir = "."
 	}
 
+	// Parse command line flags
 	flags, err := utils.ParseFlags()
 	if err != nil {
 		log.Fatalf("Flag parsing failed: %v", err)
 	}
 
+	// Load the eBPF object files and assign them to the CANTraceObjects struct
+	// This will also rewrite the constants in the eBPF code based on the flags provided	
 	var objs CANTraceObjects
 	spec, err := LoadCANTrace()
 	if err != nil {
@@ -91,6 +96,8 @@ func main() {
 	}); err != nil {
 		panic(err)
 	}
+
+	// Load the eBPF objects into the kernel
 	err = spec.LoadAndAssign(&objs, &opts)
 	if err != nil {
 		log.Fatalf("Error loading eBPF object: %v", err)
@@ -98,9 +105,9 @@ func main() {
 
 	fmt.Println("Attached eBPF program to tracepoints")
 
+	// If the flag IsKernel is set, we will attach to kernel probes (kprobes) instead of tracepoints
 	if flags.IsKernel {
 		fmt.Println("Loaded eBPF objects to trace the kernel version of acf-can")
-
 		kProbeACFCanTx, err := link.Kprobe("acfcan_tx", objs.KprobeAcfcanTx, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to kprobe: ", err)
@@ -132,35 +139,30 @@ func main() {
 		defer kProbeIeee1722PacketHanddler.Close()
 	} else {
 
-		// Tracepoint hook to capture the start of read syscall
 		sysReadEnter, err := link.Tracepoint("syscalls", "sys_enter_read", objs.TpEnterRead, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysReadEnter.Close()
 
-		// Tracepoint hook to capture the end of read syscall
 		sysReadExit, err := link.Tracepoint("syscalls", "sys_exit_read", objs.TpExitRead, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysReadExit.Close()
 
-		// Tracepoint hook to capture the start of sendto syscall
 		sysSendtoEnter, err := link.Tracepoint("syscalls", "sys_enter_sendto", objs.TpEnterSendto, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysSendtoEnter.Close()
 
-		// Tracepoint hook to capture the end of sendto syscall
 		sysSendtoExit, err := link.Tracepoint("syscalls", "sys_exit_sendto", objs.TpExitSendto, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
 		}
 		defer sysSendtoExit.Close()
 
-		// Tracepoint hook to capture the begining of recvmsg syscall
 		sysRecFromEnter, err := link.Tracepoint("syscalls", "sys_enter_recvfrom", objs.TpEnterRecvfrom, nil)
 		if err != nil {
 			fmt.Println("Error attaching eBPF program to tracepoint: ", err)
@@ -225,6 +227,9 @@ func main() {
 	defer rBufReaderRx.Close()
 	cRingBufRx := make(chan []byte)
 
+	var traceDataMapMutex sync.Mutex
+	var rxTimestampsKernelMutex sync.Mutex
+
 	traceDataMap := make(map[string]map[uint32]utils.EventLog)
 	rxTimestampsKernel := make(map[string][]uint64)
 
@@ -238,6 +243,8 @@ func main() {
 
 				devStr := string(parsedEvent.Dev[:])
 				devStr = strings.TrimRight(devStr, "\x00")
+
+				traceDataMapMutex.Lock()
 				if traceDataMap[devStr] == nil {
 					traceDataMap[devStr] = make(map[uint32]utils.EventLog)
 				}
@@ -249,11 +256,15 @@ func main() {
 					utils.LogData(&tempMap, parsedEvent.Uid, parsedEvent.Pid, parsedEvent.Timestamp, functionStr, devStr)
 					traceDataMap[devStr] = tempMap
 				}
+				traceDataMapMutex.Unlock()
 			case data := <-cRingBufRx:
 				rxData := utils.ParseEventsRxKernel(data).Dev
 				dev := string(rxData[:])
 				dev = strings.TrimRight(dev, "\x00")
+
+				rxTimestampsKernelMutex.Lock() 
 				rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
+				rxTimestampsKernelMutex.Unlock()
 			}
 		}
 	}()
@@ -295,15 +306,14 @@ func main() {
 			writerfileEventsCanAvtp := csv.NewWriter(fileEventsCanAvtp)
 			defer writerfileEventsCanAvtp.Flush()
 			writerfileEventsCanAvtp.Write([]string{"PID", "Dev", "TimestampEnterRead", "TimestampExitRead", "TimeReadingCANBus", "TimestampEnterSendto", "TimestampExitSendto", "TimeWriting", "TimestampEnterCanToAvtp", "TimestampExitCanToAvtp", "TimeCanToAvtp", "TimestampEnterAvtpToCan", "TimestampExitAvtpToCan", "TimeAvtpToCan"})
-
+			
+			traceDataMapMutex.Lock()
 			for _, tData := range traceDataMap {
 				fmt.Println("Results")
 				histReadingTime := thist.NewHist(nil, "CAN bus reading time histogram (in nanoseconds)", "fixed", 20, true)
 				histSendingTime := thist.NewHist(nil, "Sending time (in nanoseconds)", "fixed", 20, true)
 				histCanToAvtp := thist.NewHist(nil, "CAN to AVTP time histogram (in nanoseconds)", "fixed", 20, true)
 				histAvtpToCan := thist.NewHist(nil, "AVTP to CAN time histogram (in nanoseconds)", "fixed", 20, true)
-				//histToExportReadingTime := hdrhistogram.New(1, 1000000, 3)
-				//histToExporSendingTime := hdrhistogram.New(1, 1000000, 3)
 
 				for _, value := range tData {
 					//fmt.Println("Value: ", value)
@@ -313,11 +323,9 @@ func main() {
 					histAvtpToCan.Title = "AVTP to CAN time histogram (in nanoseconds) for " + string(value.Dev[:])
 					if value.TimestampEnterRead != 0 && value.TimestampExitRead != 0 {
 						histReadingTime.Update(float64(value.TimeReadingCANBus))
-						//histToExportReadingTime.RecordValue(int64(value.TimeReadingCANBus))
 					}
 					if value.TimestampEnterSendto != 0 && value.TimestampExitSendto != 0 {
 						histSendingTime.Update(float64(value.TimeWriting))
-						//histToExporSendingTime.RecordValue(int64(value.TimeWriting))
 					}
 					if value.TimestampEnterCanToAvtp != 0 && value.TimestampExitCanToAvtp != 0 {
 						histCanToAvtp.Update(float64(value.TimeCanToAvtp))
@@ -362,7 +370,10 @@ func main() {
 				filename = fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histAvtpToCan.SaveImage(filename)
 			}
+			traceDataMapMutex.Unlock()
 
+			// Write the received timestamps to a CSV file
+			rxTimestampsKernelMutex.Lock()
 			writerfileEventsRecvTs := csv.NewWriter(fileEventsRecvTs)
 			defer writerfileEventsRecvTs.Flush()
 			writerfileEventsRecvTs.Write([]string{"Key", "InterarrivalTime (in nanoseconds)", "Jitter"})
@@ -387,6 +398,8 @@ func main() {
 				filename := fmt.Sprintf("%s/histogram_%d.png", baseDir, counter)
 				histInterarrivalTime.SaveImage(filename)
 			}
+			rxTimestampsKernelMutex.Unlock()
+			
 			fmt.Println("Received termination signal")
 			os.Exit(0)
 			return
