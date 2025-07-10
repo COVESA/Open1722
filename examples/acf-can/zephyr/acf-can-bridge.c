@@ -41,6 +41,7 @@
 #include <inttypes.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
+#include <poll.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/socket.h>
 #include <zephyr/net/net_if.h>
@@ -281,6 +282,8 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
     uint32_t exp_udp_seqnum = 0;
     uint8_t pdu[MAX_ETH_PDU_SIZE];
     static frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
+    struct pollfd fds[1];
+    int ret;
     printf("Starting AVTP-to-CAN thread.\n");
 
     if (!eth_socket) {
@@ -288,29 +291,52 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
         return;
     }
 
+    // Configure the poll fd structure
+    fds[0].fd = eth_socket;
+    fds[0].events = POLLIN;
+
     // Start an infinite loop to keep converting AVTP frames to CAN frames
     for(;;) {
-        pdu_length = recv(eth_socket, pdu, MAX_ETH_PDU_SIZE, 0);
-        if (pdu_length < 0 || pdu_length > MAX_ETH_PDU_SIZE) {
-            perror("Failed to receive data");
+        // Wait for data with a timeout (e.g., 500ms)
+        ret = poll(fds, 1, 500);
+
+        if (ret < 0) {
+            LOG_ERR("Poll failed: %d", errno);
+            k_yield();
+            continue;
+        } else if (ret == 0) {
+            // Poll timeout - no data available
+            k_yield();
             continue;
         }
 
-        num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp,
-                             listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
-        if (num_can_msgs <= 0) {
-            continue;
-        }
-        exp_cf_seqnum++;
-        exp_udp_seqnum++;
-
-        for (int8_t i = 0; i < num_can_msgs; i++) {
-            int res;
-            res = can_send(can_dev, &(can_frames[i].cc), K_NO_WAIT, NULL, NULL);
-            if(res < 0)
-            {
-                perror("Failed to write to CAN bus");
+        // Data is available to read
+        if (fds[0].revents & POLLIN) {
+            pdu_length = recv(eth_socket, pdu, MAX_ETH_PDU_SIZE, 0);
+            if (pdu_length < 0 || pdu_length > MAX_ETH_PDU_SIZE) {
+                perror("Failed to receive data");
+                continue;
             }
+
+            num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp,
+                                listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
+            if (num_can_msgs <= 0) {
+                continue;
+            }
+            exp_cf_seqnum++;
+            exp_udp_seqnum++;
+
+            for (int8_t i = 0; i < num_can_msgs; i++) {
+                int res;
+                res = can_send(can_dev, &(can_frames[i].cc), K_NO_WAIT, NULL, NULL);
+                if(res < 0)
+                {
+                    perror("Failed to write to CAN bus");
+                }
+            }
+        } else {
+            // No data available, continue polling
+            k_yield();
         }
     }
 }
