@@ -27,7 +27,7 @@ On a Debian-based system (like Ubuntu), you can install these dependencies with 
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential clang llvm libbpf-dev
+sudo apt-get install -y build-essential clang llvm libbpf-dev gcc-multilib g++-multilib
 ```
 
 ## Getting Started
