@@ -99,6 +99,9 @@ make
 
 This command will produce the necessary binaries in a designated bin folder.
 
+### Results
+After each run, the results are printed to the console and exported as CSV files with timestamps.
+
 ## Running the Application
 
 Run `open1722-can-tracing-extensive` in `sudo` mode with necessary inputs.
