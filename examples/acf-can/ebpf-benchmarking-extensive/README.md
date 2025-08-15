@@ -68,7 +68,7 @@ This project uses a Makefile to simplify the build process.
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target arm64 -cflags "-I/usr/include/aarch64-linux-gnu -I/usr/include/" CANTrace eBPF/bpf.c
 ```
 
-When using the go:generate command with bpf2go, the -target flag specifies the architecture for which the eBPF program will be compiled. The supported targets are categorized by their endianness.
+When using the go:generate command with bpf2go, the -target flag specifies the architecture for which the eBPF program will be compiled. The supported targets are categorized by their endianness. Also adjust the path to includes. For instance, for target amd64, the default include path is /usr/include/x86_64-linux-gnu.
 
 #### Possible Targets
 
