@@ -93,22 +93,22 @@ typedef enum {
  * @param field Specifies the position of the data field to be read
  * @returns This function the value of the specified PDU field
  */
-uint64_t Avtp_CommonHeader_GetField(Avtp_CommonHeader_t* pdu, Avtp_CommonHeaderField_t field);
+uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t* const pdu, Avtp_CommonHeaderField_t field);
 
 /**
  * Returns the subtype field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetSubtype(Avtp_CommonHeader_t* pdu);
+uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t* const pdu);
 
 /**
  * Returns the header specific field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetH(Avtp_CommonHeader_t* pdu);
+uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t* const pdu);
 
 /**
  * Returns the version field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetVersion(Avtp_CommonHeader_t* pdu);
+uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t* const pdu);
 
 /**
  * Sets the value of an an AVTP common header field as specified in the IEEE 1722 Specification.
@@ -165,7 +165,7 @@ struct avtp_stream_pdu {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_pdu_get(const struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field,
+int avtp_pdu_get(const struct avtp_common_pdu * const pdu, Avtp_CommonHeaderField_t field,
                                 uint32_t *val);
 
 /* Set value from Common AVTPDU field.

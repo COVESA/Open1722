@@ -69,87 +69,87 @@ void Avtp_Pcm_Init(Avtp_Pcm_t* pdu)
     }
 }
 
-uint64_t Avtp_Pcm_GetField(Avtp_Pcm_t* pdu, Avtp_PcmFields_t field)
+uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t* const pdu, Avtp_PcmFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Pcm_GetSubtype(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetSubtype(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Pcm_GetSv(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetSv(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_SV);
 }
 
-uint8_t Avtp_Pcm_GetVersion(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetVersion(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_VERSION);
 }
 
-uint8_t Avtp_Pcm_GetMr(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetMr(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_MR);
 }
 
-uint8_t Avtp_Pcm_GetTv(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetTv(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_TV);
 }
 
-uint8_t Avtp_Pcm_GetSequenceNum(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM);
 }
 
-uint8_t Avtp_Pcm_GetTu(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetTu(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_TU);
 }
 
-uint64_t Avtp_Pcm_GetStreamId(Avtp_Pcm_t* pdu)
+uint64_t Avtp_Pcm_GetStreamId(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_STREAM_ID);
 }
 
-uint32_t Avtp_Pcm_GetAvtpTimestamp(Avtp_Pcm_t* pdu)
+uint32_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_AVTP_TIMESTAMP);
 }
 
-Avtp_AafFormat_t Avtp_Pcm_GetFormat(Avtp_Pcm_t* pdu)
+Avtp_AafFormat_t Avtp_Pcm_GetFormat(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_FORMAT);
 }
 
-Avtp_AafNsr_t Avtp_Pcm_GetNsr(Avtp_Pcm_t* pdu)
+Avtp_AafNsr_t Avtp_Pcm_GetNsr(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_NSR);
 }
 
-uint16_t Avtp_Pcm_GetChannelsPerFrame(Avtp_Pcm_t* pdu)
+uint16_t Avtp_Pcm_GetChannelsPerFrame(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
 }
 
-uint8_t Avtp_Pcm_GetBitDepth(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetBitDepth(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_BIT_DEPTH);
 }
 
-uint16_t Avtp_Pcm_GetStreamDataLength(Avtp_Pcm_t* pdu)
+uint16_t Avtp_Pcm_GetStreamDataLength(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH);
 }
 
-Avtp_AafSp_t Avtp_Pcm_GetSp(Avtp_Pcm_t* pdu)
+Avtp_AafSp_t Avtp_Pcm_GetSp(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_SP);
 }
 
-uint8_t Avtp_Pcm_GetEvt(Avtp_Pcm_t* pdu)
+uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t* const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_EVT);
 }
@@ -268,12 +268,12 @@ void Avtp_Pcm_SetEvt(Avtp_Pcm_t* pdu, uint8_t value)
  * Legacy API (deprecated)
  *****************************************************************************/
 
-int avtp_aaf_pdu_get(void *pdu, Avtp_PcmFields_t field, uint64_t *val)
+int avtp_aaf_pdu_get(const void * const pdu, Avtp_PcmFields_t field, uint64_t *val)
 {
     if (pdu == NULL || val == NULL || field >= AVTP_PCM_FIELD_MAX) {
         return -EINVAL;
     } else {
-        *val = Avtp_Pcm_GetField((Avtp_Pcm_t*)pdu, field);
+        *val = Avtp_Pcm_GetField((const Avtp_Pcm_t* const)pdu, field);
         return 0;
     }
 }
@@ -307,4 +307,4 @@ int avtp_aaf_pdu_init(void *pdu)
         return res;
 
     return 0;
-};
+}

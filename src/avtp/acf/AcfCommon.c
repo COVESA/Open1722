@@ -49,17 +49,17 @@ static const Avtp_FieldDescriptor_t Avtp_AcfCommonFieldDesc[AVTP_ACF_COMMON_FIEL
     [AVTP_ACF_FIELD_ACF_MSG_LENGTH]          = { .quadlet = 0, .offset = 7, .bits = 9 },
 };
 
-uint64_t Avtp_AcfCommon_GetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field)
+uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu, Avtp_AcfCommonFields_t field)
 {
     return GET_FIELD(field);
 }
 
-Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(Avtp_AcfCommon_t* pdu)
+Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t* const pdu)
 {
     return GET_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_AcfCommon_GetAcfMsgLength(Avtp_AcfCommon_t* pdu)
+uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu)
 {
     return GET_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
 }

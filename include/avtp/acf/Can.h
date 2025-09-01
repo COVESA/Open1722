@@ -35,7 +35,6 @@
 
 #pragma once
 
-
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
@@ -92,18 +91,18 @@ void Avtp_Can_Init(Avtp_Can_t* can_pdu);
  * @returns Value of the ACF CAN PDU field.
  */
 
-uint8_t Avtp_Can_GetAcfMsgType(Avtp_Can_t* pdu);
-uint16_t Avtp_Can_GetAcfMsgLength(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetPad(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetMtv(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetRtr(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetEff(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetBrs(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetFdf(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetEsi(Avtp_Can_t* pdu);
-uint8_t Avtp_Can_GetCanBusId(Avtp_Can_t* pdu);
-uint64_t Avtp_Can_GetMessageTimestamp(Avtp_Can_t* pdu);
-uint32_t Avtp_Can_GetCanIdentifier(Avtp_Can_t* pdu);
+uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t* const pdu);
+uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetPad(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetMtv(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetRtr(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetEff(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetBrs(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetEsi(const Avtp_Can_t* const pdu);
+uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t* const pdu);
+uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t* const pdu);
+uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t* const pdu);
 
 /**
  * Set the values of an an ACF CAN PDU field as specified in the IEEE 1722 Specification.
@@ -158,7 +157,7 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* can_pdu, uint32_t frame_id, uint8_t* 
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return Pointer to ACF CAN frame payload
  */
-uint8_t* Avtp_Can_GetPayload(Avtp_Can_t* can_pdu);
+const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const can_pdu);
 
 /**
  * Sets the CAN payload in an ACF CAN frame.
@@ -187,7 +186,7 @@ void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return  Length of CAN payload in bytes
  */
-uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu);
+uint8_t Avtp_Can_GetCanPayloadLength(const Avtp_Can_t* const pdu);
 
 
 /**
@@ -198,7 +197,7 @@ uint8_t Avtp_Can_GetCanPayloadLength(Avtp_Can_t* pdu);
  * @param bufferSize Size of the buffer containing the ACF CAN frame.
  * @return true if the ACF CAN frame is valid, false otherwise.
  */
-uint8_t Avtp_Can_IsValid(Avtp_Can_t* pdu, size_t bufferSize);
+uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize);
 
 
 #ifdef __cplusplus

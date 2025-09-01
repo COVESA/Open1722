@@ -64,42 +64,42 @@ void Avtp_Sensor_Init(Avtp_Sensor_t* pdu)
     }
 }
 
-uint64_t Avtp_Sensor_GetField(Avtp_Sensor_t* pdu, Avtp_SensorFields_t field)
+uint64_t Avtp_Sensor_GetField(const Avtp_Sensor_t* const pdu, Avtp_SensorFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Sensor_GetAcfMsgType(Avtp_Sensor_t* pdu)
+uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Sensor_GetAcfMsgLength(Avtp_Sensor_t* pdu)
+uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_Sensor_GetMtv(Avtp_Sensor_t* pdu)
+uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_MTV);
 }
 
-uint8_t Avtp_Sensor_GetNumSensor(Avtp_Sensor_t* pdu)
+uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_NUM_SENSOR);
 }
 
-uint8_t Avtp_Sensor_GetSz(Avtp_Sensor_t* pdu)
+uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_SZ);
 }
 
-uint8_t Avtp_Sensor_GetSensorGroup(Avtp_Sensor_t* pdu)
+uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_SENSOR_GROUP);
 }
 
-uint64_t Avtp_Sensor_GetMessageTimestamp(Avtp_Sensor_t* pdu)
+uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* const pdu)
 {
     return GET_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP);
 }
@@ -149,7 +149,7 @@ void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value)
     SET_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
-uint8_t Avtp_Sensor_IsValid(Avtp_Sensor_t* pdu, size_t bufferSize)
+uint8_t Avtp_Sensor_IsValid(const Avtp_Sensor_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

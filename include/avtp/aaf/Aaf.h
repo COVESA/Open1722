@@ -78,22 +78,22 @@ typedef enum {
  * @param value Pointer to location to store the value.
  * @returns The PDU fieldvalue
  */
-uint64_t Avtp_Aaf_GetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field);
+uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t* const pdu, Avtp_AafFields_t field);
 
-uint8_t Avtp_Aaf_GetSubtype(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetSv(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetVersion(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetMr(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetTv(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetSequenceNum(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetTu(Avtp_Aaf_t* pdu);
-uint64_t Avtp_Aaf_GetStreamId(Avtp_Aaf_t* pdu);
-uint32_t Avtp_Aaf_GetAvtpTimestamp(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetFormat(Avtp_Aaf_t* pdu);
-uint16_t Avtp_Aaf_GetStreamDataLength(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetAfsd(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetSp(Avtp_Aaf_t* pdu);
-uint8_t Avtp_Aaf_GetEvt(Avtp_Aaf_t* pdu);
+uint8_t Avtp_Aaf_GetSubtype(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetVersion(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetMr(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetTv(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetSequenceNum(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetTu(const Avtp_Aaf_t* const pdu);
+uint64_t Avtp_Aaf_GetStreamId(const Avtp_Aaf_t* const pdu);
+uint32_t Avtp_Aaf_GetAvtpTimestamp(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetFormat(const Avtp_Aaf_t* const pdu);
+uint16_t Avtp_Aaf_GetStreamDataLength(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetAfsd(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetSp(const Avtp_Aaf_t* const pdu);
+uint8_t Avtp_Aaf_GetEvt(const Avtp_Aaf_t* const pdu);
 
 /**
  * Sets the value of an an AVTP AAF common stream field as specified in the IEEE 1722 Specification.

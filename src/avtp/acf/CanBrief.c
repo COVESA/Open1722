@@ -67,62 +67,62 @@ void Avtp_CanBrief_Init(Avtp_CanBrief_t* pdu)
     }
 }
 
-uint64_t Avtp_CanBrief_GetField(Avtp_CanBrief_t* pdu, Avtp_CanBriefFields_t field)
+uint64_t Avtp_CanBrief_GetField(const Avtp_CanBrief_t* const pdu, Avtp_CanBriefFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_CanBrief_GetAcfMsgType(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_CanBrief_GetAcfMsgLength(Avtp_CanBrief_t* pdu)
+uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_CanBrief_GetPad(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetPad(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
 }
 
-uint8_t Avtp_CanBrief_GetMtv(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetMtv(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_MTV);
 }
 
-uint8_t Avtp_CanBrief_GetRtr(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetRtr(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_RTR);
 }
 
-uint8_t Avtp_CanBrief_GetEff(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetEff(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_EFF);
 }
 
-uint8_t Avtp_CanBrief_GetBrs(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetBrs(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_BRS);
 }
 
-uint8_t Avtp_CanBrief_GetFdf(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetFdf(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_FDF);
 }
 
-uint8_t Avtp_CanBrief_GetEsi(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetEsi(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_ESI);
 }
 
-uint8_t Avtp_CanBrief_GetCanBusId(Avtp_CanBrief_t* pdu)
+uint8_t Avtp_CanBrief_GetCanBusId(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID);
 }
 
-uint32_t Avtp_CanBrief_GetCanIdentifier(Avtp_CanBrief_t* pdu)
+uint32_t Avtp_CanBrief_GetCanIdentifier(const Avtp_CanBrief_t* const pdu)
 {
     return GET_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER);
 }
@@ -147,62 +147,62 @@ void Avtp_CanBrief_SetPad(Avtp_CanBrief_t* pdu, uint8_t value)
     SET_FIELD(AVTP_CAN_BRIEF_FIELD_PAD, value);
 }
 
-void Avtp_CanBrief_EnableMtv(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableMtv(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_MTV, 1);
 }
 
-void Avtp_CanBrief_DisableMtv(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableMtv(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_MTV, 0);
 }
 
-void Avtp_CanBrief_EnableRtr(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableRtr(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_RTR, 1);
 }
 
-void Avtp_CanBrief_DisableRtr(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableRtr(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_RTR, 0);
 }
 
-void Avtp_CanBrief_EnableEff(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableEff(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_EFF, 1);
 }
 
-void Avtp_CanBrief_DisableEff(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableEff(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_EFF, 0);
 }
 
-void Avtp_CanBrief_EnableBrs(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableBrs(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_BRS, 1);
 }
 
-void Avtp_CanBrief_DisableBrs(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableBrs(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_BRS, 0);
 }
 
-void Avtp_CanBrief_EnableFdf(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableFdf(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_FDF, 1);
 }
 
-void Avtp_CanBrief_DisableFdf(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableFdf(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_FDF, 0);
 }
 
-void Avtp_CanBrief_EnableEsi(Avtp_Can_t* pdu)
+void Avtp_CanBrief_EnableEsi(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_ESI, 1);
 }
 
-void Avtp_CanBrief_DisableEsi(Avtp_Can_t* pdu)
+void Avtp_CanBrief_DisableEsi(Avtp_CanBrief_t* pdu)
 {
     SET_FIELD(AVTP_CAN_FIELD_ESI, 0);
 }
@@ -217,23 +217,33 @@ void Avtp_CanBrief_SetCanIdentifier(Avtp_CanBrief_t* pdu, uint32_t value)
     SET_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER, value);
 }
 
-int Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* pdu, uint32_t frame_id , uint8_t* payload,
-                        uint16_t payload_length, Avtp_CanVariant_t can_variant)
+void Avtp_CanBrief_CreateAcfMessage(Avtp_CanBrief_t* can_pdu, uint32_t frame_id, uint8_t* payload,
+    uint16_t payload_length, Avtp_CanVariant_t can_variant)
 {
     // Copy the payload into the CAN PDU
-    memcpy(pdu->payload, payload, payload_length);
+    Avtp_CanBrief_SetPayload(can_pdu, payload, payload_length);
 
     // Set the Frame ID and CAN variant
-    int eff = frame_id > 0x7ff? 1 : 0;
-    Avtp_CanBrief_SetField(pdu, AVTP_CAN_BRIEF_FIELD_EFF, eff);
-    Avtp_CanBrief_SetField(pdu, AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER, frame_id);
-    Avtp_CanBrief_SetField(pdu, AVTP_CAN_BRIEF_FIELD_FDF, (uint8_t) can_variant);
+    if (frame_id > 0x7ff) {
+        Avtp_CanBrief_EnableEff(can_pdu);
+    }
+
+    Avtp_CanBrief_SetCanIdentifier(can_pdu, frame_id);
+    if (can_variant == AVTP_CAN_FD) {
+        Avtp_CanBrief_EnableFdf(can_pdu);
+    }
 
     // Finalize the AVTP CAN Frame
-    return Avtp_CanBrief_Finalize(pdu, payload_length);
+    Avtp_CanBrief_Finalize(can_pdu, payload_length);
 }
 
-int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* pdu, uint16_t payload_length)
+void Avtp_CanBrief_SetPayload(Avtp_CanBrief_t* can_pdu, uint8_t* payload,
+    uint16_t payload_length)
+{
+    memcpy(can_pdu->payload, payload, payload_length);
+}
+
+void Avtp_CanBrief_Finalize(Avtp_CanBrief_t* can_pdu, uint16_t payload_length)
 {
     uint8_t padSize;
     uint32_t avtpCanLength = AVTP_CAN_BRIEF_HEADER_LEN + payload_length;
@@ -241,19 +251,26 @@ int Avtp_CanBrief_Finalize(Avtp_CanBrief_t* pdu, uint16_t payload_length)
     // Check if padding is required
     padSize = AVTP_QUADLET_SIZE - (payload_length % AVTP_QUADLET_SIZE);
     if (payload_length % AVTP_QUADLET_SIZE) {
-        memset(pdu->payload + payload_length, 0, padSize);
+        memset(can_pdu->payload + payload_length, 0, padSize);
         avtpCanLength += padSize;
     }
 
     // Set the length and padding fields
-    Avtp_CanBrief_SetField(pdu, AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH,
-            (uint64_t)avtpCanLength/AVTP_QUADLET_SIZE);
-    Avtp_CanBrief_SetField(pdu, AVTP_CAN_BRIEF_FIELD_PAD, padSize);
-
-    return avtpCanLength;
+    Avtp_CanBrief_SetAcfMsgLength(can_pdu, (uint16_t) avtpCanLength/AVTP_QUADLET_SIZE);
+    Avtp_CanBrief_SetPad(can_pdu, padSize);
 }
 
-uint8_t Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize)
+const uint8_t* Avtp_CanBrief_GetPayload(const Avtp_CanBrief_t* const can_pdu) {
+    return can_pdu->payload;
+}
+
+uint8_t Avtp_CanBrief_GetCanPayloadLength(const Avtp_CanBrief_t* const pdu) {
+    uint8_t acf_msg_length = Avtp_CanBrief_GetAcfMsgLength(pdu) * 4;
+    uint8_t acf_pad_length = Avtp_CanBrief_GetPad(pdu);
+    return acf_msg_length - AVTP_CAN_BRIEF_HEADER_LEN - acf_pad_length;
+}
+
+uint8_t Avtp_CanBrief_IsValid(const Avtp_CanBrief_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;
@@ -271,6 +288,6 @@ uint8_t Avtp_CanBrief_IsValid(Avtp_CanBrief_t* pdu, size_t bufferSize)
     if (Avtp_CanBrief_GetAcfMsgLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
-    
+
     return TRUE;
 }

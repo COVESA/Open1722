@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -34,8 +34,6 @@
  */
 #pragma once
 
-#include <stdint.h>
-
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
@@ -58,7 +56,7 @@ typedef enum  {
     AVTP_GPC_FIELD_ACF_MSG_LENGTH,
 
     /* ACF GPC header fields */
-    AVTP_GPC_FIELD_GPC_MSG_ID, 
+    AVTP_GPC_FIELD_GPC_MSG_ID,
 
     /* Count number of fields for bound checks */
     AVTP_GPC_FIELD_MAX
@@ -79,11 +77,11 @@ void Avtp_Gpc_Init(Avtp_Gpc_t* pdu);
  * @param value Pointer to location to store the value.
  * @returns The value of the GPC field.
  */
-uint64_t Avtp_Gpc_GetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field);
+uint64_t Avtp_Gpc_GetField(const Avtp_Gpc_t* const pdu, Avtp_GpcFields_t field);
 
-uint8_t Avtp_Gpc_GetAcfMsgType(Avtp_Gpc_t* pdu);
-uint16_t Avtp_Gpc_GetAcfMsgLength(Avtp_Gpc_t* pdu);
-uint64_t Avtp_Gpc_GetGpcMsgId(Avtp_Gpc_t* pdu);
+uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu);
+uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu);
+uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu);
 
 /**
  * Sets the value of an an ACF GPC PDU field as specified in the IEEE 1722 Specification.
@@ -106,7 +104,7 @@ void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Gpc frame.
  * @return true if the ACF Gpc frame is valid, false otherwise.
  */
-uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize);
+uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

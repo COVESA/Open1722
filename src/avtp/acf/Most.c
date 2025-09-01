@@ -69,62 +69,62 @@ void Avtp_Most_Init(Avtp_Most_t *pdu)
     }
 }
 
-uint64_t Avtp_Most_GetField(Avtp_Most_t *pdu, Avtp_MostFields_t field)
+uint64_t Avtp_Most_GetField(const Avtp_Most_t *const pdu, Avtp_MostFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Most_GetAcfMsgType(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Most_GetAcfMsgLength(Avtp_Most_t *pdu)
+uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_Most_GetPad(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetPad(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_PAD);
 }
 
-uint8_t Avtp_Most_GetMtv(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetMtv(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_MTV);
 }
 
-uint8_t Avtp_Most_GetMostNetId(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_MOST_NET_ID);
 }
 
-uint64_t Avtp_Most_GetMessageTimestamp(Avtp_Most_t *pdu)
+uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP);
 }
 
-uint16_t Avtp_Most_GetDeviceId(Avtp_Most_t *pdu)
+uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_DEVICE_ID);
 }
 
-uint8_t Avtp_Most_GetFblockId(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_FBLOCK_ID);
 }
 
-uint8_t Avtp_Most_GetInstId(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetInstId(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_INST_ID);
 }
 
-uint16_t Avtp_Most_GetFuncId(Avtp_Most_t *pdu)
+uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_FUNC_ID);
 }
 
-uint8_t Avtp_Most_GetOpType(Avtp_Most_t *pdu)
+uint8_t Avtp_Most_GetOpType(const Avtp_Most_t *const pdu)
 {
     return GET_FIELD(AVTP_MOST_FIELD_OP_TYPE);
 }
@@ -194,7 +194,7 @@ void Avtp_Most_SetOpType(Avtp_Most_t *pdu, uint8_t value)
     SET_FIELD(AVTP_MOST_FIELD_OP_TYPE, value);
 }
 
-uint8_t Avtp_Most_IsValid(Avtp_Most_t *pdu, size_t bufferSize)
+uint8_t Avtp_Most_IsValid(const Avtp_Most_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL)
     {

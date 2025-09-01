@@ -87,7 +87,7 @@ void Avtp_VssBrief_Init(Avtp_VssBrief_t* vss_pdu);
  * @param field Specifies the position of the data field to be read
  * @returns Value of the specified field of the IEEE 1722 ACF VSS PDU.
  */
-uint64_t Avtp_VssBrief_GetField(Avtp_VssBrief_t* vss_pdu, Avtp_VssBriefFields_t field);
+uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t* const vss_pdu, Avtp_VssBriefFields_t field);
 
 /**
  * Sets the value of an an ACF VSS PDU field as specified in the

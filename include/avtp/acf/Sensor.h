@@ -35,8 +35,6 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 
@@ -82,15 +80,15 @@ void Avtp_Sensor_Init(Avtp_Sensor_t* pdu);
  * @param field Specifies the position of the data field to be read
  * @returns Value of the PDU field.
  */
-uint64_t Avtp_Sensor_GetField(Avtp_Sensor_t* pdu, Avtp_SensorFields_t field);
+uint64_t Avtp_Sensor_GetField(const Avtp_Sensor_t* const pdu, Avtp_SensorFields_t field);
 
-uint8_t Avtp_Sensor_GetAcfMsgType(Avtp_Sensor_t* pdu);
-uint16_t Avtp_Sensor_GetAcfMsgLength(Avtp_Sensor_t* pdu);
-uint8_t Avtp_Sensor_GetMtv(Avtp_Sensor_t* pdu);
-uint8_t Avtp_Sensor_GetNumSensor(Avtp_Sensor_t* pdu);
-uint8_t Avtp_Sensor_GetSz(Avtp_Sensor_t* pdu);
-uint8_t Avtp_Sensor_GetSensorGroup(Avtp_Sensor_t* pdu);
-uint64_t Avtp_Sensor_GetMessageTimestamp(Avtp_Sensor_t* pdu);
+uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu);
+uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pdu);
+uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu);
+uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu);
+uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu);
+uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu);
+uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* const pdu);
 
 /**
  * Sets the value of an ACF Sensor PDU field as specified in the IEEE 1722 Specification.
@@ -118,7 +116,7 @@ void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value);
  * @param bufferSize Size of the buffer containing the ACF Sensor frame.
  * @return true if the ACF Sensor frame is valid, false otherwise.
  */
-uint8_t Avtp_Sensor_IsValid(Avtp_Sensor_t* pdu, size_t bufferSize);
+uint8_t Avtp_Sensor_IsValid(const Avtp_Sensor_t* const pdu, size_t bufferSize);
 
 #ifdef __cplusplus
 }

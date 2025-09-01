@@ -84,10 +84,10 @@ typedef enum {
  * @param field Specifies the position of the data field to be read.
  * @returns Returns the field of the PDU.
  */
-uint64_t Avtp_AcfCommon_GetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field);
+uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu, Avtp_AcfCommonFields_t field);
 
-Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(Avtp_AcfCommon_t* pdu);
-uint16_t Avtp_AcfCommon_GetAcfMsgLength(Avtp_AcfCommon_t* pdu);
+Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t* const pdu);
+uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu);
 
 /**
  * Sets the value of an an ACF common header field as specified in the IEEE 1722 Specification.

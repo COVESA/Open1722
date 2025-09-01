@@ -56,6 +56,22 @@ LOG_MODULE_REGISTER(acf_can_common, LOG_LEVEL_DBG);
 #include "avtp/acf/Tscf.h"
 #include "acf-can-common.h"
 
+#ifdef __linux__
+// Define LOG macros for Linux
+#ifndef LOG_ERR
+#define LOG_ERR(...) fprintf(stderr, "[ERROR]" __VA_ARGS__)
+#endif
+
+#ifndef LOG_DBG
+#define LOG_DBG(...) fprintf(stderr, "[DEBUG]" __VA_ARGS__)
+#endif
+
+#ifndef LOG_INF
+#define LOG_INF(...) fprintf(stderr, "[INFO]" __VA_ARGS__)
+#endif
+
+#endif
+
 #ifdef __ZEPHYR__
 typedef uint32_t canid_t;
 #endif
@@ -256,7 +272,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         proc_bytes += AVTP_UDP_HEADER_LEN;
         msg_length += AVTP_UDP_HEADER_LEN;
         if (udp_seq_num != *exp_udp_seqnum) {
-            printf("Incorrect UDP sequence num. Expected: %d Recd.: %d\n",
+            LOG_ERR("Incorrect UDP sequence num. Expected: %d Recd.: %d\n",
                                                 *exp_udp_seqnum, udp_seq_num);
             *exp_udp_seqnum = udp_seq_num;
         }
@@ -287,7 +303,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
 
     // Check sequence numbers.
     if (seq_num != *exp_cf_seqnum) {
-        printf("Incorrect sequence num. Expected: %d Recd.: %d\n",
+        LOG_ERR("Incorrect sequence num. Expected: %d Recd.: %d\n",
                                             *exp_cf_seqnum, seq_num);
         *exp_cf_seqnum = seq_num;
     }
@@ -301,7 +317,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         }
 
         canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
-        uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
+        const uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
         uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;
         uint16_t can_payload_length = Avtp_Can_GetCanPayloadLength((Avtp_Can_t*)acf_pdu);
         proc_bytes += acf_msg_length;
@@ -311,7 +327,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
             can_id |= CAN_EFF_FLAG;
         } else if (can_id > 0x7FF) {
-            printf("Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
+            LOG_ERR("Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
             return -1;
         }
 

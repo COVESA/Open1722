@@ -71,72 +71,72 @@ void Avtp_FlexRay_Init(Avtp_FlexRay_t *pdu)
     }
 }
 
-uint64_t Avtp_FlexRay_GetField(Avtp_FlexRay_t *pdu, Avtp_FlexRayFields_t field)
+uint64_t Avtp_FlexRay_GetField(const Avtp_FlexRay_t *const pdu, Avtp_FlexRayFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_FlexRay_GetAcfMsgType(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetAcfMsgType(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_FlexRay_GetAcfMsgLength(Avtp_FlexRay_t *pdu)
+uint16_t Avtp_FlexRay_GetAcfMsgLength(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH);
 }
 
-uint8_t Avtp_FlexRay_GetPad(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetPad(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_PAD);
 }
 
-uint8_t Avtp_FlexRay_GetMtv(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetMtv(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_MTV);
 }
 
-uint8_t Avtp_FlexRay_GetFrBusId(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetFrBusId(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_FR_BUS_ID);
 }
 
-uint8_t Avtp_FlexRay_GetChan(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetChan(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_CHAN);
 }
 
-uint8_t Avtp_FlexRay_GetStr(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetStr(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_STR);
 }
 
-uint8_t Avtp_FlexRay_GetSyn(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetSyn(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_SYN);
 }
 
-uint8_t Avtp_FlexRay_GetPre(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetPre(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_PRE);
 }
 
-uint8_t Avtp_FlexRay_GetNfi(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetNfi(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_NFI);
 }
 
-uint64_t Avtp_FlexRay_GetMessageTimestamp(Avtp_FlexRay_t *pdu)
+uint64_t Avtp_FlexRay_GetMessageTimestamp(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_MESSAGE_TIMESTAMP);
 }
 
-uint16_t Avtp_FlexRay_GetFrFrameId(Avtp_FlexRay_t *pdu)
+uint16_t Avtp_FlexRay_GetFrFrameId(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_FR_FRAME_ID);
 }
 
-uint8_t Avtp_FlexRay_GetCycle(Avtp_FlexRay_t *pdu)
+uint8_t Avtp_FlexRay_GetCycle(const Avtp_FlexRay_t *const pdu)
 {
     return GET_FIELD(AVTP_FLEXRAY_FIELD_CYCLE);
 }
@@ -236,7 +236,7 @@ void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t *pdu, uint8_t value)
     SET_FIELD(AVTP_FLEXRAY_FIELD_CYCLE, value);
 }
 
-uint8_t Avtp_FlexRay_IsValid(Avtp_FlexRay_t *pdu, size_t bufferSize)
+uint8_t Avtp_FlexRay_IsValid(const Avtp_FlexRay_t *const pdu, size_t bufferSize)
 {
 
     if (pdu == NULL)

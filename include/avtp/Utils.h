@@ -53,7 +53,7 @@ extern "C" {
  * @returns This function returns the field value from the PDU.
  */
 uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
-        uint8_t numFields, uint8_t* pdu, uint8_t field);
+        uint8_t numFields, const uint8_t* const pdu, uint8_t field);
 
 /**
  * Sets a data field in a 1722 frame to a specified value and handles necessary

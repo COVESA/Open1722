@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -31,7 +31,7 @@
 #include <string.h>
 
 #include "avtp/acf/Gpc.h"
-#include "avtp/Utils.h" 
+#include "avtp/Utils.h"
 #include "avtp/Defines.h"
 
 #define GET_FIELD(field) \
@@ -46,7 +46,7 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
 {
     /* ACF common header fields */
     [AVTP_GPC_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset =  0, .bits = 7 },
-    [AVTP_GPC_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },  
+    [AVTP_GPC_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },
     /* ACF GPC header fields */
     [AVTP_GPC_FIELD_GPC_MSG_ID]         = { .quadlet = 0, .offset =  16, .bits = 48 },
 };
@@ -54,52 +54,52 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
 void Avtp_Gpc_Init(Avtp_Gpc_t* pdu)
 {
     if(pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Gpc_t));  
+        memset(pdu, 0, sizeof(Avtp_Gpc_t));
         Avtp_Gpc_SetField(pdu, AVTP_GPC_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_GPC);
     }
 }
 
-uint64_t Avtp_Gpc_GetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field)
-{    
+uint64_t Avtp_Gpc_GetField(const Avtp_Gpc_t* const pdu, Avtp_GpcFields_t field)
+{
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Gpc_GetAcfMsgType(Avtp_Gpc_t* pdu)
+uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
 }
 
-uint16_t Avtp_Gpc_GetAcfMsgLength(Avtp_Gpc_t* pdu)
+uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
 }
 
-uint64_t Avtp_Gpc_GetGpcMsgId(Avtp_Gpc_t* pdu)
+uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu)
 {
     return GET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
 }
 
 void Avtp_Gpc_SetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field, uint64_t value)
-{    
+{
     SET_FIELD(field, value);
 }
 
 void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value)
-{    
+{
     SET_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE, value);
 }
 
 void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value)
-{    
+{
     SET_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH, value);
 }
 
 void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value)
-{    
+{
     SET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
 }
 
-uint8_t Avtp_Gpc_IsValid(Avtp_Gpc_t* pdu, size_t bufferSize)
+uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return FALSE;

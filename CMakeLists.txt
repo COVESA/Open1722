@@ -69,11 +69,13 @@ if(CCACHE_BIN)
 endif()
 
 add_subdirectory(src)
-add_custom_target(examples)
-add_subdirectory(examples)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    add_custom_target(examples)
+    add_subdirectory(examples)
+endif()
 
 # Build tests and install artefacts only for Linux systems
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (NOT (DEFINED ENV{ZEPHYR_BASE}))
     enable_testing()
     add_custom_target(unittests)
     add_subdirectory(unit EXCLUDE_FROM_ALL)
