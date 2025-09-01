@@ -1,4 +1,3 @@
-![Status - Incubating](https://img.shields.io/static/v1?label=Status&message=Incubating&color=FEFF3A&style=for-the-badge)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/COVESA/Open1722/build-all.yml?branch=main&style=for-the-badge)
 
 
