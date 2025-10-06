@@ -37,7 +37,6 @@
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
-#include "avtp/acf/Can.h"
 
 #ifdef __cplusplus
 extern "C" {

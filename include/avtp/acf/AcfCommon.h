@@ -66,7 +66,7 @@ typedef enum {
 } Avtp_AcfMsgType_t;
 
 /**
- * This table maps all IEEE 1722 ACF common header fields to a descriptor.
+ * This enum maps all IEEE 1722 ACF common header fields to a descriptor.
  */
 typedef enum {
     /* ACF common header fields */
@@ -76,6 +76,15 @@ typedef enum {
     /* Count number of fields for bound checks */
     AVTP_ACF_COMMON_FIELD_MAX
 } Avtp_AcfCommonFields_t;
+
+
+/**
+ * This enum defines the CAN variants supported by the ACF CAN PDU.
+ */
+typedef enum {
+    AVTP_CAN_CLASSIC = 0,
+    AVTP_CAN_FD
+} Avtp_CanVariant_t;
 
 /**
  * Returns the value of an an ACF common header field as specified in the IEEE 1722 Specification.
