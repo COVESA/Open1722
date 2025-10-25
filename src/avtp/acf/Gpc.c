@@ -27,77 +27,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <errno.h>
 #include <string.h>
 
 #include "avtp/acf/Gpc.h"
-#include "avtp/Utils.h"
-#include "avtp/Defines.h"
-
-#define GET_FIELD(field) \
-        (Avtp_GetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t*)pdu, field))
-#define SET_FIELD(field, value) \
-        (Avtp_SetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t*)pdu, field, value))
-
-/**
- * This table maps all IEEE 1722 ACF GPC header fields to a descriptor.
- */
-static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
-{
-    /* ACF common header fields */
-    [AVTP_GPC_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset =  0, .bits = 7 },
-    [AVTP_GPC_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },
-    /* ACF GPC header fields */
-    [AVTP_GPC_FIELD_GPC_MSG_ID]         = { .quadlet = 0, .offset =  16, .bits = 48 },
-};
-
-void Avtp_Gpc_Init(Avtp_Gpc_t* pdu)
-{
-    if(pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Gpc_t));
-        Avtp_Gpc_SetField(pdu, AVTP_GPC_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_GPC);
-    }
-}
-
-uint64_t Avtp_Gpc_GetField(const Avtp_Gpc_t* const pdu, Avtp_GpcFields_t field)
-{
-    return GET_FIELD(field);
-}
-
-uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu)
-{
-    return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
-}
-
-uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu)
-{
-    return GET_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
-}
-
-uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu)
-{
-    return GET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
-}
-
-void Avtp_Gpc_SetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field, uint64_t value)
-{
-    SET_FIELD(field, value);
-}
-
-void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE, value);
-}
-
-void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value)
-{
-    SET_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH, value);
-}
-
-void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value)
-{
-    SET_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
-}
 
 uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize)
 {

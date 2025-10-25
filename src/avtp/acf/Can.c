@@ -35,8 +35,6 @@
 #endif
 
 #include "avtp/acf/Can.h"
-#include "avtp/Utils.h"
-#include "avtp/Defines.h"
 
 void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payload,
                         uint16_t payload_length, Avtp_CanVariant_t can_variant)

@@ -36,6 +36,7 @@
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
+#include "avtp/Utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,12 +44,17 @@ extern "C" {
 
 #define AVTP_GPC_HEADER_LEN         (2 * AVTP_QUADLET_SIZE)
 
+#define GET_GPC_FIELD(field) \
+        (Avtp_GetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t*)pdu, field))
+#define SET_GPC_FIELD(field, value) \
+        (Avtp_SetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t*)pdu, field, value))
+
 typedef struct {
     uint8_t header[AVTP_GPC_HEADER_LEN];
     uint8_t payload[0];
 } Avtp_Gpc_t;
 
-
+/** Fields of ACF GPC PDU. */
 typedef enum  {
 
     /* ACF common header fields */
@@ -63,38 +69,76 @@ typedef enum  {
 } Avtp_GpcFields_t;
 
 /**
- * Initializes an ACF GPC PDU header as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF GPC PDU.
+ * This table maps all IEEE 1722 ACF GPC header fields to a descriptor.
  */
-void Avtp_Gpc_Init(Avtp_Gpc_t* pdu);
+static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
+{
+    /* ACF common header fields */
+    [AVTP_GPC_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset =  0, .bits = 7 },
+    [AVTP_GPC_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },
+    /* ACF GPC header fields */
+    [AVTP_GPC_FIELD_GPC_MSG_ID]         = { .quadlet = 0, .offset =  16, .bits = 48 },
+};
 
 /**
- * Returns the value of an an ACF GPC PDU field as specified in the IEEE 1722 Specification.
+ * Return the value of the ACF Message Type Field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @param field Specifies the position of the data field to be read
- * @param value Pointer to location to store the value.
- * @returns The value of the GPC field.
+ * @returns The value of the ACF Message Type Field.
  */
-uint64_t Avtp_Gpc_GetField(const Avtp_Gpc_t* const pdu, Avtp_GpcFields_t field);
-
-uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu);
-uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu);
-uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu);
+static inline uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu) {
+    return GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
+}
 
 /**
- * Sets the value of an an ACF GPC PDU field as specified in the IEEE 1722 Specification.
+ * Return the value of the ACF Message Length Field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @param field Specifies the position of the data field to be read
- * @param value Pointer to location to store the value.
+ * @returns The value of the ACF Message Length Field.
  */
-void Avtp_Gpc_SetField(Avtp_Gpc_t* pdu, Avtp_GpcFields_t field, uint64_t value);
+static inline uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu) {
+    return GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
+}
 
-void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value);
-void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value);
-void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
+/**
+ * Return the value of the GPC Message ID Field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
+ * @returns The value of the GPC Message ID Field.
+ */
+static inline uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu) {
+    return GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
+}
+
+/**
+ * Set the value of an ACF Message Type field as specified in the IEEE 1722 Specification.
+ * 
+ * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
+ * @param value Value to set the ACF Message Type field to.
+ */
+static inline void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value) {
+    SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE, value);
+}
+
+/**
+ * Set the value of an ACF Message Length field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
+ * @param value Value to set the ACF Message Length field to.
+ */
+static inline void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value) {
+    SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH, value);
+}
+
+/**
+ * Set the value of an GPC Message ID field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
+ * @param value Value to set the GPC Message ID field to.
+ */
+static inline void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value) {
+    SET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
+}
 
 /**
  * Checks if the ACF Gpc frame is valid by checking:
@@ -105,6 +149,18 @@ void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value);
  * @return true if the ACF Gpc frame is valid, false otherwise.
  */
 uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize);
+
+/**
+ * Initializes an ACF GPC PDU header as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of a 1722 ACF GPC PDU.
+ */
+static inline void Avtp_Gpc_Init(Avtp_Gpc_t* pdu) {
+    if(pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_Gpc_t));
+        Avtp_Gpc_SetAcfMsgType(pdu, AVTP_ACF_TYPE_GPC);
+    }
+}
 
 #ifdef __cplusplus
 }
