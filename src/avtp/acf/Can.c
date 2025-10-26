@@ -27,13 +27,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-
-#ifdef LINUX_KERNEL1722
-#include <linux/string.h>
-#else
-#include <string.h>
-#endif
-
 #include "avtp/acf/Can.h"
 
 void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payload,

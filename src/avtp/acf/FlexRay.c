@@ -27,8 +27,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <string.h>
-
 #include "avtp/acf/FlexRay.h"
 
 uint8_t Avtp_FlexRay_IsValid(const Avtp_FlexRay_t *const pdu, size_t bufferSize)

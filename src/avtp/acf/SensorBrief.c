@@ -27,117 +27,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <errno.h>
-#include <string.h>
-
 #include "avtp/acf/SensorBrief.h"
-#include "avtp/Utils.h"
-#include "avtp/Defines.h"
-
-#define GET_FIELD(field) \
-        (Avtp_GetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_FIELD_MAX, (uint8_t*)pdu, field))
-#define SET_FIELD(field, value) \
-        (Avtp_SetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_FIELD_MAX, (uint8_t*)pdu, field, value))
-
-/**
- * This table maps all IEEE 1722 ACF Abbreviated Sensor header fields to a descriptor.
- */
-static const Avtp_FieldDescriptor_t Avtp_SensorBriefFieldDesc[AVTP_SENSOR_FIELD_MAX] =
-{
-
-    /* ACF common header fields */
-    [AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE]      = { .quadlet = 0, .offset = 0, .bits = 7 },
-    [AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH]    = { .quadlet = 0, .offset = 7, .bits = 9 },
-
-    /* ACF Abbreviated Sensor header fields */
-    [AVTP_SENSOR_BRIEF_FIELD_MTV]               = { .quadlet = 0, .offset = 16, .bits = 1 },
-    [AVTP_SENSOR_BRIEF_FIELD_NUM_SENSOR]        = { .quadlet = 0, .offset = 17, .bits = 7 },
-    [AVTP_SENSOR_BRIEF_FIELD_SZ]                = { .quadlet = 0, .offset = 24, .bits = 2 },
-    [AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP]      = { .quadlet = 0, .offset = 26, .bits = 6 },
-};
-
-void Avtp_SensorBrief_Init(Avtp_SensorBrief_t* pdu)
-{
-    if(pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_SensorBrief_t));
-        Avtp_SensorBrief_SetField(pdu, AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_SENSOR_BRIEF);
-    }
-}
-
-uint64_t Avtp_SensorBrief_GetField(const Avtp_SensorBrief_t* const pdu, Avtp_SensorBriefFields_t field)
-{
-    return GET_FIELD(field);
-}
-
-uint8_t Avtp_SensorBrief_GetAcfMsgType(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE);
-}
-
-uint16_t Avtp_SensorBrief_GetAcfMsgLength(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH);
-}
-
-uint8_t Avtp_SensorBrief_GetMtv(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV);
-}
-
-uint8_t Avtp_SensorBrief_GetNumSensor(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_NUM_SENSOR);
-}
-
-uint8_t Avtp_SensorBrief_GetSz(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SZ);
-}
-
-uint8_t Avtp_SensorBrief_GetSensorGroup(const Avtp_SensorBrief_t* const pdu)
-{
-    return GET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP);
-}
-
-void Avtp_SensorBrief_SetField(Avtp_SensorBrief_t* pdu, Avtp_SensorBriefFields_t field, uint64_t value)
-{
-    SET_FIELD(field, value);
-}
-
-void Avtp_SensorBrief_SetAcfMsgType(Avtp_SensorBrief_t* pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_TYPE, value);
-}
-
-void Avtp_SensorBrief_SetAcfMsgLength(Avtp_SensorBrief_t* pdu, uint16_t value)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_ACF_MSG_LENGTH, value);
-}
-
-void Avtp_SensorBrief_EnableMtv(Avtp_SensorBrief_t* pdu)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV, 1);
-}
-
-void Avtp_SensorBrief_DisableMtv(Avtp_SensorBrief_t* pdu)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_MTV, 0);
-}
-
-void Avtp_SensorBrief_SetNumSensor(Avtp_SensorBrief_t* pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_NUM_SENSOR, value);
-}
-
-void Avtp_SensorBrief_SetSz(Avtp_SensorBrief_t* pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SZ, value);
-}
-
-void Avtp_SensorBrief_SetSensorGroup(Avtp_SensorBrief_t* pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP, value);
-}
 
 uint8_t Avtp_SensorBrief_IsValid(const Avtp_SensorBrief_t* const pdu, size_t bufferSize)
 {
@@ -154,7 +44,7 @@ uint8_t Avtp_SensorBrief_IsValid(const Avtp_SensorBrief_t* const pdu, size_t buf
     }
 
     // Avtp_SensorBrief_GetAcfMsgLength returns quadlets. Convert the length field to octets
-    if(Avtp_SensorBrief_GetAcfMsgLength(pdu) *4 > bufferSize) {
+    if(Avtp_SensorBrief_GetAcfMsgLength(pdu) * 4 > bufferSize) {
         return FALSE;
     }
 

@@ -28,7 +28,6 @@
  */
 
 #include <errno.h>
-#include <string.h>
 
 #include "avtp/acf/CanBrief.h"
 

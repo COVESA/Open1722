@@ -34,6 +34,8 @@
  */
 #pragma once
 
+#include <string.h>
+
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 #include "avtp/Utils.h"

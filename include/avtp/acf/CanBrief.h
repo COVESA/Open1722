@@ -35,6 +35,12 @@
 
 #pragma once
 
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
+#include <string.h>
+#endif
+
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"

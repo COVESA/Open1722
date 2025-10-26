@@ -27,8 +27,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <string.h>
-
 #include "avtp/acf/Gpc.h"
 
 uint8_t Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize)
