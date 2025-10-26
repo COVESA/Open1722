@@ -424,7 +424,7 @@ static inline const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const can_pdu
  * @param payload_length Length of the payload
  */
 static inline void Avtp_Can_SetPayload(Avtp_Can_t* can_pdu, uint8_t* payload,
-                                uint16_t payload_length){
+                                uint16_t payload_length) {
     memcpy(can_pdu->payload, payload, payload_length);
 }
 
@@ -468,7 +468,7 @@ static inline void Avtp_Can_Init(Avtp_Can_t* pdu) {
         memset(pdu, 0, sizeof(Avtp_Can_t));
         Avtp_Can_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN);
     }
-};
+}
 
 #ifdef __cplusplus
 }

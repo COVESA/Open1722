@@ -357,6 +357,29 @@ static inline void Avtp_Tscf_Init(Avtp_Tscf_t* pdu) {
     }
 }
 
+/**
+ * Returns the value of an an AVTP TSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @param value Pointer to location to store the value.
+ * @returns This function returns the value of the field.
+ */
+static inline uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field) {
+    return GET_TSCF_FIELD(field);
+}
+
+/**
+ * Sets the value of an an AVTP TSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @param value Pointer to location to store the value.
+ */
+static inline void Avtp_Tscf_SetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field, uint64_t value) {
+    SET_TSCF_FIELD(field, value);
+}
+
 #ifdef __cplusplus
 }
 #endif

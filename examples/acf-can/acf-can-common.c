@@ -133,16 +133,16 @@ static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_n
         Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_TU, 0U);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM, seq_num);
-        Avtp_Tscf_SetField(tscf_pdu, AVTP_TSCF_FIELD_STREAM_ID, stream_id);
+        Avtp_Tscf_DisableTu(tscf_pdu);
+        Avtp_Tscf_SetSequenceNum(tscf_pdu, seq_num);
+        Avtp_Tscf_SetStreamId(tscf_pdu, stream_id);
         res = AVTP_TSCF_HEADER_LEN;
     } else {
         Avtp_Ntscf_t* ntscf_pdu = (Avtp_Ntscf_t*) pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM, seq_num);
-        Avtp_Ntscf_SetField(ntscf_pdu, AVTP_NTSCF_FIELD_STREAM_ID, stream_id);
+        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num);
+        Avtp_Ntscf_SetStreamId(ntscf_pdu, stream_id);
         res = AVTP_NTSCF_HEADER_LEN;
     }
     return res;
@@ -152,10 +152,10 @@ static int update_cf_length(uint8_t* cf_pdu, uint64_t length, int use_tscf)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetField((Avtp_Tscf_t*)cf_pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)cf_pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetField((Avtp_Ntscf_t*)cf_pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu, payloadLen);
     }
     return 0;
 }
@@ -228,8 +228,7 @@ int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu
     // Usage of UDP means the PDU needs an encapsulation
     if (use_udp) {
         Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *) pdu;
-        Avtp_Udp_SetField(udp_pdu, AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO,
-                            udp_seq_num);
+        Avtp_Udp_SetEncapsulationSeqNo(udp_pdu, udp_seq_num);
         pdu_length +=  sizeof(Avtp_Udp_t);
     }
 

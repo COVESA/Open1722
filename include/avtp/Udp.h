@@ -36,7 +36,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h>
 
+#include "avtp/Utils.h"
 #include "avtp/Defines.h"
 
 #ifdef __cplusplus
@@ -44,6 +46,12 @@ extern "C" {
 #endif
 
 #define AVTP_UDP_HEADER_LEN               (1 * AVTP_QUADLET_SIZE)
+
+#define GET_UDP_FIELD(field) \
+        (Avtp_GetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t*)pdu, field))
+#define SET_UDP_FIELD(field, value) \
+        (Avtp_SetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t*)pdu, field, value))
+
 
 typedef struct {
     uint8_t header[AVTP_UDP_HEADER_LEN];
@@ -60,11 +68,44 @@ typedef enum {
 } Avtp_UdpFields_t;
 
 /**
+ * This table maps all IEEE 1722 UDP-specific header fields to a descriptor.
+ */
+static const Avtp_FieldDescriptor_t Avtp_UdpFieldDesc[AVTP_UDP_FIELD_MAX] = {
+
+    [AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO]       = { .quadlet = 0, .offset = 0, .bits = 32 },
+};
+
+/**
+ * Gets the value of an an AVTP UDP field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
+ * @param value Pointer to location to store the value.
+ */
+static inline uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu) {
+    return GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
+}
+
+/**
+ * Sets the value of an an AVTP UDP field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
+ * @param value Pointer to location to store the value.
+ */
+static inline void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value) {
+    SET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, value);
+}
+
+/**
  * Initializes a UDP PDU as specified in the IEEE 1722-2016 Specification.
  *
  * @param pdu Pointer to the first bit of an IEEE 1722 UDP PDU. 
  */
-void Avtp_Udp_Init(Avtp_Udp_t* pdu);
+static inline void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_Udp_t));
+        Avtp_Udp_SetEncapsulationSeqNo(pdu, 0);
+    }
+}
 
 /**
  * Returns the value of an an AVTP UDP field as specified in the IEEE 1722 Specification.
@@ -74,9 +115,9 @@ void Avtp_Udp_Init(Avtp_Udp_t* pdu);
  * @param value Pointer to location to store the value.
  * @returns This function returns the value of the field.
  */
-uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field);
-
-uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu);
+static inline uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field) {
+    return GET_UDP_FIELD(field);
+}
 
 /**
  * Sets the value of an an AVTP UDP field as specified in the IEEE 1722 Specification.
@@ -85,9 +126,9 @@ uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu);
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value);
-
-void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value);
+static inline void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value) {
+    SET_UDP_FIELD(field, value);
+}
 
 #ifdef __cplusplus
 }

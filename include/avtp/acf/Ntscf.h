@@ -241,6 +241,29 @@ static inline void Avtp_Ntscf_Init(Avtp_Ntscf_t* pdu) {
     }
 }
 
+/**
+ * Returns the value of an an AVTP NTSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP NTSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @param value Pointer to location to store the value.
+ * @returns This function returns the value of the field.
+ */
+static inline uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t* const pdu, Avtp_NtscfFields_t field) {
+    return GET_NTSCF_FIELD(field);
+}
+
+/**
+ * Sets the value of an an AVTP NTSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP NTSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @param value Pointer to location to store the value.
+ */
+static inline void Avtp_Ntscf_SetField(Avtp_Ntscf_t* pdu, Avtp_NtscfFields_t field, uint64_t value) {
+    SET_NTSCF_FIELD(field, value);
+}
+
 #ifdef __cplusplus
 }
 #endif
