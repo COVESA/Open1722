@@ -41,7 +41,6 @@
 #include <string.h>
 #endif
 
-#include "avtp/Defines.h"
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/CommonHeader.h"
