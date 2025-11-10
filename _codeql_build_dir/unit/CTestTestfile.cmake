@@ -1,0 +1,38 @@
+# CMake generated Testfile for 
+# Source directory: /home/runner/work/Open1722/Open1722/unit
+# Build directory: /home/runner/work/Open1722/Open1722/_codeql_build_dir/unit
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+add_test([=[test-can]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-can")
+set_tests_properties([=[test-can]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;46;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-aaf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-aaf")
+set_tests_properties([=[test-aaf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;51;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-avtp]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-avtp")
+set_tests_properties([=[test-avtp]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;56;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-crf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-crf")
+set_tests_properties([=[test-crf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;61;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-cvf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-cvf")
+set_tests_properties([=[test-cvf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;66;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-rvf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-rvf")
+set_tests_properties([=[test-rvf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;71;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-tscf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-tscf")
+set_tests_properties([=[test-tscf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;76;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-ntscf]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-ntscf")
+set_tests_properties([=[test-ntscf]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;81;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-vss]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-vss")
+set_tests_properties([=[test-vss]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;86;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-flexray]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-flexray")
+set_tests_properties([=[test-flexray]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;91;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-lin]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-lin")
+set_tests_properties([=[test-lin]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;96;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-most]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-most")
+set_tests_properties([=[test-most]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;101;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-gpc]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-gpc")
+set_tests_properties([=[test-gpc]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;106;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-sensor]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-sensor")
+set_tests_properties([=[test-sensor]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;111;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-udp]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-udp")
+set_tests_properties([=[test-udp]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;116;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")
+add_test([=[test-commonheader]=] "/home/runner/work/Open1722/Open1722/_codeql_build_dir/unit/test-commonheader")
+set_tests_properties([=[test-commonheader]=] PROPERTIES  _BACKTRACE_TRIPLES "/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;121;add_test;/home/runner/work/Open1722/Open1722/unit/CMakeLists.txt;0;")

@@ -1,0 +1,1 @@
+/home/runner/work/Open1722/.codeql-scratch/dbs/cpp/working/autobuild/bin/cc -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/crf-talker.dir/link.d "CMakeFiles/crf-talker.dir/crf-talker.c.o" -o crf-talker  -Wl,-rpath,/home/runner/work/Open1722/Open1722/_codeql_build_dir/src: ../../src/libopen1722.so.0.1.0 ../libopen1722examples.a -lm

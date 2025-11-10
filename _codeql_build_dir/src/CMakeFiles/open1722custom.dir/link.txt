@@ -1,0 +1,1 @@
+/home/runner/work/Open1722/.codeql-scratch/dbs/cpp/working/autobuild/bin/cc -fPIC -O3 -DNDEBUG -coverage -Wl,--dependency-file=CMakeFiles/open1722custom.dir/link.d -shared -Wl,-soname,libopen1722custom.so.0.1.0 -o libopen1722custom.so.0.1.0 CMakeFiles/open1722custom.dir/avtp/acf/custom/Vss.c.o CMakeFiles/open1722custom.dir/avtp/acf/custom/VssBrief.c.o
