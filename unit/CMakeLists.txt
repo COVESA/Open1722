@@ -85,6 +85,32 @@ target_link_libraries(test-vss open1722 open1722custom cmocka)
 target_include_directories(test-vss PUBLIC ../include)
 add_test(NAME test-vss COMMAND test-vss)
 
+add_executable(test-flexray test-flexray.c)
+target_link_libraries(test-flexray open1722 cmocka)
+target_include_directories(test-flexray PUBLIC ../include)
+add_test(NAME test-flexray COMMAND test-flexray)
+
+add_executable(test-lin test-lin.c)
+target_link_libraries(test-lin open1722 cmocka)
+target_include_directories(test-lin PUBLIC ../include)
+add_test(NAME test-lin COMMAND test-lin)
+
+add_executable(test-most test-most.c)
+target_link_libraries(test-most open1722 cmocka)
+target_include_directories(test-most PUBLIC ../include)
+add_test(NAME test-most COMMAND test-most)
+
+add_executable(test-gpc test-gpc.c)
+target_link_libraries(test-gpc open1722 cmocka)
+target_include_directories(test-gpc PUBLIC ../include)
+add_test(NAME test-gpc COMMAND test-gpc)
+
+add_executable(test-sensor test-sensor.c)
+target_link_libraries(test-sensor open1722 cmocka)
+target_include_directories(test-sensor PUBLIC ../include)
+add_test(NAME test-sensor COMMAND test-sensor)
+
 add_dependencies(unittests test-can test-aaf
                 test-avtp test-crf test-cvf
-                test-rvf test-vss test-tscf test-ntscf)
+                test-rvf test-vss test-tscf test-ntscf
+                test-flexray test-lin test-most test-gpc test-sensor)
