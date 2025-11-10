@@ -1,1 +1,0 @@
-/home/runner/work/Open1722/.codeql-scratch/dbs/cpp/working/autobuild/bin/cc -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/test-vss.dir/link.d "CMakeFiles/test-vss.dir/test-vss.c.o" -o test-vss  -Wl,-rpath,/home/runner/work/Open1722/Open1722/_codeql_build_dir/src ../src/libopen1722.so.0.1.0 ../src/libopen1722custom.so.0.1.0 -lcmocka

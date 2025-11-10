@@ -1,2 +1,0 @@
-/usr/bin/ar qc libopen1722examples.a CMakeFiles/open1722examples.dir/common/common.c.o
-/usr/bin/ranlib libopen1722examples.a

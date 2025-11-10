@@ -19,3 +19,4 @@
 *.o.cmd
 *~
 .vscode
+_codeql_build_dir/
