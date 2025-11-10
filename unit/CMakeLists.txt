@@ -110,7 +110,18 @@ target_link_libraries(test-sensor open1722 cmocka)
 target_include_directories(test-sensor PUBLIC ../include)
 add_test(NAME test-sensor COMMAND test-sensor)
 
+add_executable(test-udp test-udp.c)
+target_link_libraries(test-udp open1722 cmocka)
+target_include_directories(test-udp PUBLIC ../include)
+add_test(NAME test-udp COMMAND test-udp)
+
+add_executable(test-commonheader test-commonheader.c)
+target_link_libraries(test-commonheader open1722 cmocka)
+target_include_directories(test-commonheader PUBLIC ../include)
+add_test(NAME test-commonheader COMMAND test-commonheader)
+
 add_dependencies(unittests test-can test-aaf
                 test-avtp test-crf test-cvf
                 test-rvf test-vss test-tscf test-ntscf
-                test-flexray test-lin test-most test-gpc test-sensor)
+                test-flexray test-lin test-most test-gpc test-sensor
+                test-udp test-commonheader)
