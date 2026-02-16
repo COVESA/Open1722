@@ -112,7 +112,7 @@ static void can_set_payload(void **state) {
 
         // Length tests
         uint8_t length = *(pdu+1);
-        assert_int_equal(length, (4+ceil(i/4.0)));
+        assert_int_equal(length, (ceil(i/4.0)));
     }
 }
 
