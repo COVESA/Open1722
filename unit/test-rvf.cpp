@@ -31,7 +31,9 @@
 #include <stddef.h>
 #include <string.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <errno.h>
@@ -585,7 +587,7 @@ static void rvf_pdu_init(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
     res = avtp_rvf_pdu_init(pdu);
 
@@ -604,7 +606,7 @@ static void rvf_get_field_raw_pixel_depth(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -622,7 +624,7 @@ static void rvf_get_field_raw_pixel_format(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -640,7 +642,7 @@ static void rvf_get_field_raw_frame_rate(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -658,7 +660,7 @@ static void rvf_get_field_raw_colorspace(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -676,7 +678,7 @@ static void rvf_get_field_raw_num_lines(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -694,7 +696,7 @@ static void rvf_get_field_raw_i_seq_num(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -712,7 +714,7 @@ static void rvf_get_field_raw_line_number(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
 
@@ -729,7 +731,7 @@ static void rvf_set_field_raw_pixel_depth(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -750,7 +752,7 @@ static void rvf_set_field_raw_pixel_format(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -771,7 +773,7 @@ static void rvf_set_field_raw_frame_rate(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -792,7 +794,7 @@ static void rvf_set_field_raw_colorspace(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -813,7 +815,7 @@ static void rvf_set_field_raw_num_lines(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -833,7 +835,7 @@ static void rvf_set_field_raw_i_seq_num(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
@@ -853,7 +855,7 @@ static void rvf_set_field_raw_line_number(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
     struct avtp_rvf_payload *pay =
         (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));

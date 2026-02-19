@@ -30,66 +30,68 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
 
-#include "avtp/acf/Ntscf.h"
+#include "avtp/acf/Tscf.h"
 #include "avtp/CommonHeader.h"
 
 #define MAX_PDU_SIZE        1500
 
-static void ntscf_init(void **state) {
+static void tscf_init(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t init_pdu[AVTP_NTSCF_HEADER_LEN];
+    uint8_t init_pdu[AVTP_TSCF_HEADER_LEN];
 
     // Check the lengths
-    assert_int_equal(sizeof(Avtp_Ntscf_t), AVTP_NTSCF_HEADER_LEN);
+    assert_int_equal(sizeof(Avtp_Tscf_t), AVTP_TSCF_HEADER_LEN);
 
     // Check init function while passing in a null pointer
-    Avtp_Ntscf_Init(NULL);
+    Avtp_Tscf_Init(NULL);
 
     // Check if the function is initializing properly
-    Avtp_Ntscf_Init((Avtp_Ntscf_t*)pdu);
-    memset(init_pdu, 0, AVTP_NTSCF_HEADER_LEN);
-    init_pdu[0] = AVTP_SUBTYPE_NTSCF; // Setting AVTP Subtype as NTSCF
+    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
+    memset(init_pdu, 0, AVTP_TSCF_HEADER_LEN);
+    init_pdu[0] = AVTP_SUBTYPE_TSCF; // Setting AVTP Subtype as TSCF
     init_pdu[1] = 0x80; // Setting Stream as valid
-    assert_memory_equal(init_pdu, pdu, AVTP_NTSCF_HEADER_LEN);
+    assert_memory_equal(init_pdu, pdu, AVTP_TSCF_HEADER_LEN);
 }
 
-static void ntscf_is_valid(void **state) {
+static void tscf_is_valid(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE], result;
 
-    // Valid IEEE 1722 NTSCF Frame
-    Avtp_Ntscf_Init((Avtp_Ntscf_t*)pdu);
-    assert_int_equal(Avtp_Ntscf_IsValid((Avtp_Ntscf_t*)pdu, MAX_PDU_SIZE), 1);
+    // Valid IEEE 1722 TSCF Frame
+    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, MAX_PDU_SIZE), 1);
 
-    // Not a IEEE 1722 NTSCF Frame
+    // Not a IEEE 1722 TSCF Frame
     memset(pdu, 0, MAX_PDU_SIZE);
-    assert_int_equal(Avtp_Ntscf_IsValid((Avtp_Ntscf_t*)pdu, MAX_PDU_SIZE), 0);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, MAX_PDU_SIZE), 0);
 
-    // Valid IEEE 1722 NTSCF Frame (Length 28, Buffer 30)
-    Avtp_Ntscf_Init((Avtp_Ntscf_t*)pdu);
-    Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)pdu, 28);
-    assert_int_equal(Avtp_Ntscf_IsValid((Avtp_Ntscf_t*)pdu, 30), 1);
+    // Valid IEEE 1722 TSCF Frame (Length 28, Buffer 30)
+    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
+    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, 28);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, 30), 1);
 
-    // Invalid IEEE 1722 NTSCF Frame (Length 24 but buffer only 9!)
-    Avtp_Ntscf_Init((Avtp_Ntscf_t*)pdu);
-    Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)pdu, 24);
-    assert_int_equal(Avtp_Ntscf_IsValid((Avtp_Ntscf_t*)pdu, 9), 0);
+    // Invalid IEEE 1722 TSCF Frame (Length 24 but buffer only 9!)
+    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
+    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, 24);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, 9), 0);
 
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(ntscf_init),
-        cmocka_unit_test(ntscf_is_valid)
+        cmocka_unit_test(tscf_init),
+        cmocka_unit_test(tscf_is_valid),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

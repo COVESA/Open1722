@@ -30,7 +30,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>
@@ -106,10 +108,9 @@ static void vss_interop_path(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -134,10 +135,9 @@ static void vss_data_uint8(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -163,10 +163,9 @@ static void vss_data_int8(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -192,10 +191,9 @@ static void vss_data_uint16(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -221,10 +219,9 @@ static void vss_data_int16(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -250,10 +247,9 @@ static void vss_data_uint32(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -279,10 +275,9 @@ static void vss_data_int32(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -307,10 +302,9 @@ static void vss_data_uint64(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -337,10 +331,9 @@ static void vss_data_int64(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -367,10 +360,9 @@ static void vss_data_bool(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -396,10 +388,9 @@ static void vss_data_float(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -425,10 +416,9 @@ static void vss_data_double(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
@@ -454,24 +444,22 @@ static void vss_data_string(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     char str_value[] = "10m/s2";
-    VssDataString_t vss_data_string = {
-        .data = str_value,
-        .data_length = strlen(str_value)
-    };
-    VssData_t data = {
-        .data_string = &vss_data_string
-    };
+    VssDataString_t vss_data_string {};
+    vss_data_string.data = str_value;
+    vss_data_string.data_length = strlen(str_value);
+    VssData_t data = {};
+    data.data_string = &vss_data_string;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_STRING);
     Avtp_Vss_SetVssData(vss_pdu, &data);
-    uint8_t len_in_mem[] = {0, strlen(str_value)};
+    uint8_t len_in_mem[] = {0, (uint8_t)strlen(str_value)};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, str_value, strlen(str_value));
 
@@ -496,21 +484,19 @@ static void vss_data_uint8_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint8_t uint8_arr_value[] = {5, 4, 3, 2, 1};
-    VssDataUint8Array_t vss_data_uint8_arr = {
-        .data = uint8_arr_value,
-        .data_length = 5
-    };
-    VssData_t data = {
-        .data_uint8_array = &vss_data_uint8_arr
-    };
+    VssDataUint8Array_t vss_data_uint8_arr {};
+    vss_data_uint8_arr.data = uint8_arr_value;
+    vss_data_uint8_arr.data_length = 5;
+    VssData_t data {};
+    data.data_uint8_array = &vss_data_uint8_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT8_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 5};
@@ -538,21 +524,19 @@ static void vss_data_int8_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     int8_t int8_arr_value[] = {-5, -4, -3, -2, -1};
-    VssDataInt8Array_t vss_data_int8_arr = {
-        .data = int8_arr_value,
-        .data_length = 5
-    };
-    VssData_t data = {
-        .data_int8_array = &vss_data_int8_arr
-    };
+    VssDataInt8Array_t vss_data_int8_arr {};
+    vss_data_int8_arr.data = int8_arr_value;
+    vss_data_int8_arr.data_length = 5;
+    VssData_t data {};
+    data.data_int8_array = &vss_data_int8_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT8_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 5};
@@ -560,9 +544,8 @@ static void vss_data_int8_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, int8_arr_value, 5);
 
     VssData_t vss_data_get;
-    VssDataInt8Array_t vss_data_int8_arr_get = {
-        .data = 0
-    };
+    VssDataInt8Array_t vss_data_int8_arr_get {};
+    vss_data_int8_arr_get.data = 0;
     vss_data_get.data_int8_array = &vss_data_int8_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT8_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -580,21 +563,19 @@ static void vss_data_uint16_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint16_t uint16_arr_value[] = {0x100, 0x101, 0x102, 0x103, 0x104};
-    VssDataUint16Array_t vss_data_uint16_arr = {
-        .data = uint16_arr_value,
-        .data_length = 10
-    };
-    VssData_t data = {
-        .data_uint16_array = &vss_data_uint16_arr
-    };
+    VssDataUint16Array_t vss_data_uint16_arr {};
+    vss_data_uint16_arr.data = uint16_arr_value;
+    vss_data_uint16_arr.data_length = 10;
+    VssData_t data {};
+    data.data_uint16_array = &vss_data_uint16_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT16_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 10};
@@ -623,21 +604,19 @@ static void vss_data_int16_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     int16_t int16_arr_value[] = {-0x100, -0x101, -0x102, -0x103, -0x104};
-    VssDataInt16Array_t vss_data_int16_arr = {
-        .data = int16_arr_value,
-        .data_length = 10
-    };
-    VssData_t data = {
-        .data_int16_array = &vss_data_int16_arr
-    };
+    VssDataInt16Array_t vss_data_int16_arr {};
+    vss_data_int16_arr.data = int16_arr_value;
+    vss_data_int16_arr.data_length = 10;
+    VssData_t data {};
+    data.data_int16_array = &vss_data_int16_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT16_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 10};
@@ -666,21 +645,19 @@ static void vss_data_uint32_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint32_t uint32_arr_value[] = {0x10000, 0x10100, 0x10200, 0x10300, 0x10400};
-    VssDataUint32Array_t vss_data_uint32_arr = {
-        .data = uint32_arr_value,
-        .data_length = 20
-    };
-    VssData_t data = {
-        .data_uint32_array = &vss_data_uint32_arr
-    };
+    VssDataUint32Array_t vss_data_uint32_arr {};
+    vss_data_uint32_arr.data = uint32_arr_value;
+    vss_data_uint32_arr.data_length = 20;
+    VssData_t data {};
+    data.data_uint32_array = &vss_data_uint32_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT32_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 20};
@@ -709,21 +686,19 @@ static void vss_data_int32_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     int32_t int32_arr_value[] = {-0x10000, -0x10100, -0x10200, -0x10300, -0x10400};
-    VssDataInt32Array_t vss_data_int32_arr = {
-        .data = int32_arr_value,
-        .data_length = 20
-    };
-    VssData_t data = {
-        .data_int32_array = &vss_data_int32_arr
-    };
+    VssDataInt32Array_t vss_data_int32_arr {};
+    vss_data_int32_arr.data = int32_arr_value;
+    vss_data_int32_arr.data_length = 20;
+    VssData_t data {};
+    data.data_int32_array = &vss_data_int32_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT32_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 20};
@@ -756,21 +731,19 @@ static void vss_data_uint64_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint64_t uint64_arr_value[] = {0x10000, 0x10100, 0x10200, 0x10300, 0x10400};
-    VssDataUint64Array_t vss_data_uint64_arr = {
-        .data = uint64_arr_value,
-        .data_length = 40
-    };
-    VssData_t data = {
-        .data_uint64_array = &vss_data_uint64_arr
-    };
+    VssDataUint64Array_t vss_data_uint64_arr {};
+    vss_data_uint64_arr.data = uint64_arr_value;
+    vss_data_uint64_arr.data_length = 40;
+
+    VssData_t data {};
+    data.data_uint64_array = &vss_data_uint64_arr;
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT64_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
@@ -783,9 +756,7 @@ static void vss_data_uint64_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 40);
 
     VssData_t vss_data_get;
-    VssDataUint64Array_t vss_data_uint64_arr_get = {
-        .data = 0
-    };
+    VssDataUint64Array_t vss_data_uint64_arr_get {};
     vss_data_get.data_uint64_array = &vss_data_uint64_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT64_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -803,21 +774,19 @@ static void vss_data_int64_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     int64_t int64_arr_value[] = {-0x10000, -0x10100, -0x10200, -0x10300, -0x10400};
-    VssDataInt64Array_t vss_data_int64_arr = {
-        .data = int64_arr_value,
-        .data_length = 40
-    };
-    VssData_t data = {
-        .data_int64_array = &vss_data_int64_arr
-    };
+    VssDataInt64Array_t vss_data_int64_arr {};
+    vss_data_int64_arr.data = int64_arr_value;
+    vss_data_int64_arr.data_length = 40;
+    VssData_t data {};
+    data.data_int64_array = &vss_data_int64_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT64_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
@@ -830,9 +799,9 @@ static void vss_data_int64_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 40);
 
     VssData_t vss_data_get;
-    VssDataInt64Array_t vss_data_int64_arr_get = {
-        .data = 0
-    };
+    VssDataInt64Array_t vss_data_int64_arr_get {};
+    vss_data_int64_arr_get.data = 0;
+
     vss_data_get.data_int64_array = &vss_data_int64_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT64_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -850,21 +819,20 @@ static void vss_data_bool_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint8_t bool_arr_value[] = {1, 0, 0, 0, 1};
-    VssDataBoolArray_t vss_data_bool_arr = {
-        .data = bool_arr_value,
-        .data_length = 5
-    };
-    VssData_t data = {
-        .data_bool_array = &vss_data_bool_arr
-    };
+    VssDataBoolArray_t vss_data_bool_arr {};
+    vss_data_bool_arr.data = bool_arr_value;
+    vss_data_bool_arr.data_length = 5;
+
+    VssData_t data {};
+    data.data_bool_array = &vss_data_bool_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_BOOL_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 5};
@@ -872,9 +840,8 @@ static void vss_data_bool_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, bool_arr_value, 5);
 
     VssData_t vss_data_get;
-    VssDataBoolArray_t vss_data_bool_arr_get = {
-        .data = 0
-    };
+    VssDataBoolArray_t vss_data_bool_arr_get {};
+    vss_data_bool_arr_get.data = 0;
     vss_data_get.data_bool_array = &vss_data_bool_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_BOOL_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -892,21 +859,19 @@ static void vss_data_float_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     float float_arr_value[] = {1.2, -1.2, 1.3, -1.3, 1.5};
-    VssDataFloatArray_t vss_data_float_arr = {
-        .data = float_arr_value,
-        .data_length = 20
-    };
-    VssData_t data = {
-        .data_float_array = &vss_data_float_arr
-    };
+    VssDataFloatArray_t vss_data_float_arr {};
+    vss_data_float_arr.data = float_arr_value;
+    vss_data_float_arr.data_length = 20;
+    VssData_t data {};
+    data.data_float_array = &vss_data_float_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_FLOAT_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 20};
@@ -919,9 +884,9 @@ static void vss_data_float_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 20);
 
     VssData_t vss_data_get;
-    VssDataFloatArray_t vss_data_float_arr_get = {
-        .data = 0
-    };
+    VssDataFloatArray_t vss_data_float_arr_get {};
+    vss_data_float_arr_get.data = 0;
+
     vss_data_get.data_float_array = &vss_data_float_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_FLOAT_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -939,21 +904,19 @@ static void vss_data_double_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     double double_arr_value[] = {1.2, -1.2, 1.3, -1.3, 1.5};
-    VssDataDoubleArray_t vss_data_double_arr = {
-        .data = double_arr_value,
-        .data_length = 40
-    };
-    VssData_t data = {
-        .data_double_array = &vss_data_double_arr
-    };
+    VssDataDoubleArray_t vss_data_double_arr {};
+    vss_data_double_arr.data = double_arr_value;
+    vss_data_double_arr.data_length = 40;
+    VssData_t data {};
+    data.data_double_array = &vss_data_double_arr;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_DOUBLE_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
@@ -986,39 +949,34 @@ static void vss_data_string_array(void **state) {
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
-    VssPath_t path_id = {
-        .vss_interop_path.path = path,
-        .vss_interop_path.path_length = path_length
-    };
+    VssPath_t path_id {};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = path_length;
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     char str1[] = "Hello";
     char str2[] = "World";
     char str3[] = "Tschuss";
-    VssDataString_t vss_str1 = {
-        .data = str1,
-        .data_length = strlen(str1)
-    };
-    VssDataString_t vss_str2 = {
-        .data = str2,
-        .data_length = strlen(str2)
-    };
-    VssDataString_t vss_str3 = {
-        .data = str3,
-        .data_length = strlen(str3)
-    };
+    VssDataString_t vss_str1 {};
+    vss_str1.data = str1;
+    vss_str1.data_length = strlen(str1);
+    VssDataString_t vss_str2 {};
+    vss_str2.data = str2;
+    vss_str2.data_length = strlen(str2);
+    VssDataString_t vss_str3 {};
+    vss_str3.data = str3;
+    vss_str3.data_length = strlen(str3);
 
     VssDataString_t* arr[] = {&vss_str1, &vss_str2, &vss_str3};
     uint8_t buffer[strlen(str1) + strlen(str2) + strlen(str3)+2];
-    VssDataStringArray_t vss_str_array = {
-        .data = buffer
-    };
+    VssDataStringArray_t vss_str_array {};
+    vss_str_array.data = buffer;
     Avtp_Vss_SerializeStringArray(&vss_str_array, arr, 3);
 
-    VssData_t data = {
-        .data_string_array = &vss_str_array
-    };
+    VssData_t data {};
+    data.data_string_array = &vss_str_array;
+
     Avtp_Vss_SetDatatype(vss_pdu, VSS_STRING_ARRAY);
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 23};

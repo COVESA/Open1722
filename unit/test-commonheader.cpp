@@ -30,7 +30,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <string.h>
 
 #include "avtp/CommonHeader.h"

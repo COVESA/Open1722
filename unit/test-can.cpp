@@ -30,7 +30,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>

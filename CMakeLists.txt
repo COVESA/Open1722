@@ -50,11 +50,14 @@ if (DEFINED ENV{ZEPHYR_BASE})
     )
 endif()
 
-project(open1722 VERSION 0.1.0 LANGUAGES C DESCRIPTION "Library implementing IEEE 1722")
+project(open1722 VERSION 0.1.0 LANGUAGES C CXX DESCRIPTION "Library implementing IEEE 1722")
 
 # Set the compiler options and flags
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2019, Intel Corporation
- * Copyright (c) 2024, COVESA
+ * Copyright (c) 2017, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,51 +25,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <alloca.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <string.h>
 #include <setjmp.h>
+extern "C" {
 #include <cmocka.h>
+}
 #include <arpa/inet.h>
 #include <errno.h>
 
 #include "avtp/CommonHeader.h"
-#include "avtp/cvf/Cvf.h"
-#include "avtp/cvf/H264.h"
+#include "avtp/aaf/Pcm.h"
 
-static void cvf_get_field_null_pdu(void **state)
+static void aaf_get_field_null_pdu(void **state)
 {
     int res;
     uint64_t val = 1;
 
-    res = avtp_cvf_pdu_get(NULL, AVTP_CVF_FIELD_SV, &val);
+    res = avtp_aaf_pdu_get(NULL, AVTP_AAF_FIELD_SV, &val);
 
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_get_field_null_val(void **state)
+static void aaf_get_field_null_val(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SV, NULL);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_SV, NULL);
 
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_get_field_invalid_field(void **state)
+static void aaf_get_field_invalid_field(void **state)
 {
     int res;
     uint64_t val = 1;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_MAX, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_MAX, &val);
 
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_get_field_sv(void **state)
+static void aaf_get_field_sv(void **state)
 {
     int res;
     uint64_t val;
@@ -79,13 +77,13 @@ static void cvf_get_field_sv(void **state)
     /* Set 'sv' field to 1. */
     pdu.subtype_data = htonl(0x00800000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SV, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_SV, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 1);
 }
 
-static void cvf_get_field_mr(void **state)
+static void aaf_get_field_mr(void **state)
 {
     int res;
     uint64_t val;
@@ -94,13 +92,13 @@ static void cvf_get_field_mr(void **state)
     /* Set 'mr' field to 1. */
     pdu.subtype_data = htonl(0x00080000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_MR, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_MR, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 1);
 }
 
-static void cvf_get_field_tv(void **state)
+static void aaf_get_field_tv(void **state)
 {
     int res;
     uint64_t val;
@@ -109,13 +107,13 @@ static void cvf_get_field_tv(void **state)
     /* Set 'tv' field to 1. */
     pdu.subtype_data = htonl(0x00010000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_TV, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_TV, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 1);
 }
 
-static void cvf_get_field_seq_num(void **state)
+static void aaf_get_field_seq_num(void **state)
 {
     int res;
     uint64_t val;
@@ -124,13 +122,13 @@ static void cvf_get_field_seq_num(void **state)
     /* Set 'sequence_num' field to 0x55. */
     pdu.subtype_data = htonl(0x00005500);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SEQUENCE_NUM, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_SEQ_NUM, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 0x55);
 }
 
-static void cvf_get_field_tu(void **state)
+static void aaf_get_field_tu(void **state)
 {
     int res;
     uint64_t val;
@@ -139,13 +137,13 @@ static void cvf_get_field_tu(void **state)
     /* Set 'tu' field to 1. */
     pdu.subtype_data = htonl(0x00000001);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_TU, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_TU, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 1);
 }
 
-static void cvf_get_field_stream_id(void **state)
+static void aaf_get_field_stream_id(void **state)
 {
     int res;
     uint64_t val;
@@ -154,13 +152,13 @@ static void cvf_get_field_stream_id(void **state)
     /* Set 'stream_id' field to 0xAABBCCDDEEFF0001. */
     pdu.stream_id = htobe64(0xAABBCCDDEEFF0001);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_STREAM_ID, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_STREAM_ID, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 0xAABBCCDDEEFF0001);
 }
 
-static void cvf_get_field_timestamp(void **state)
+static void aaf_get_field_timestamp(void **state)
 {
     int res;
     uint64_t val;
@@ -169,43 +167,73 @@ static void cvf_get_field_timestamp(void **state)
     /* Set 'avtp_timestamp' field to 0x80C0FFEE. */
     pdu.avtp_time = htonl(0x80C0FFEE);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_AVTP_TIMESTAMP, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_TIMESTAMP, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 0x80C0FFEE);
 }
 
-static void cvf_get_field_format(void **state)
+static void aaf_get_field_format(void **state)
 {
     int res;
     uint64_t val;
     struct avtp_stream_pdu pdu = { 0 };
 
-    /* Set 'format' field to AVTP_CVF_FORMAT_RFC. */
-    pdu.format_specific = htonl(0x02000000);
+    /* Set 'format' field to AVTP_AAF_FORMAT_INT_16BIT. */
+    pdu.format_specific = htonl(0x04000000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_FORMAT, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_FORMAT, &val);
 
     assert_int_equal(res, 0);
-    assert_true(val == AVTP_CVF_FORMAT_RFC);
+    assert_true(val == AVTP_AAF_FORMAT_INT_16BIT);
 }
 
-static void cvf_get_field_format_subtype(void **state)
+static void aaf_get_field_nsr(void **state)
 {
     int res;
     uint64_t val;
     struct avtp_stream_pdu pdu = { 0 };
 
-    /* Set 'format_subtype' field to AVTP_CVF_FORMAT_SUBTYPE_H264. */
-    pdu.format_specific = htonl(0x00010000);
+    /* Set 'nsr' field to AVTP_AAF_PCM_NSR_48KHZ. */
+    pdu.format_specific = htonl(0x00500000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_NSR, &val);
 
     assert_int_equal(res, 0);
-    assert_true(val == AVTP_CVF_FORMAT_SUBTYPE_H264);
+    assert_true(val == AVTP_AAF_PCM_NSR_48KHZ);
 }
 
-static void cvf_get_field_data_len(void **state)
+static void aaf_get_field_chan(void **state)
+{
+    int res;
+    uint64_t val;
+    struct avtp_stream_pdu pdu = { 0 };
+
+    /* Set 'channels_per_frame' field to 0x2AA. */
+    pdu.format_specific = htonl(0x0002AA00);
+
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, &val);
+
+    assert_int_equal(res, 0);
+    assert_true(val == 0x2AA);
+}
+
+static void aaf_get_field_depth(void **state)
+{
+    int res;
+    uint64_t val;
+    struct avtp_stream_pdu pdu = { 0 };
+
+    /* Set 'bit_depth' field to 0xA5. */
+    pdu.format_specific = htonl(0x000000A5);
+
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_BIT_DEPTH, &val);
+
+    assert_int_equal(res, 0);
+    assert_true(val == 0xA5);
+}
+
+static void aaf_get_field_data_len(void **state)
 {
     int res;
     uint64_t val;
@@ -214,28 +242,28 @@ static void cvf_get_field_data_len(void **state)
     /* Set 'stream_data_length' field to 0xAAAA. */
     pdu.packet_info = htonl(0xAAAA0000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_STREAM_DATA_LENGTH, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 0xAAAA);
 }
 
-static void cvf_get_field_m(void **state)
+static void aaf_get_field_sp(void **state)
 {
     int res;
     uint64_t val;
     struct avtp_stream_pdu pdu = { 0 };
 
-    /* Set 'M' field to 0x1. */
+    /* Set 'sp' field to AVTP_AAF_PCM_SP_SPARSE. */
     pdu.packet_info = htonl(0x00001000);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_M, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_SP, &val);
 
     assert_int_equal(res, 0);
-    assert_true(val == 0x1);
+    assert_true(val == AVTP_AAF_PCM_SP_SPARSE);
 }
 
-static void cvf_get_field_evt(void **state)
+static void aaf_get_field_evt(void **state)
 {
     int res;
     uint64_t val;
@@ -244,37 +272,37 @@ static void cvf_get_field_evt(void **state)
     /* Set 'evt' field to 0xA. */
     pdu.packet_info = htonl(0x00000A00);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_EVT, &val);
+    res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_EVT, &val);
 
     assert_int_equal(res, 0);
     assert_true(val == 0xA);
 }
 
-static void cvf_set_field_null_pdu(void **state)
+static void aaf_set_field_null_pdu(void **state)
 {
     int res;
 
-    res = avtp_cvf_pdu_set(NULL, AVTP_CVF_FIELD_SV, 1);
+    res = avtp_aaf_pdu_set(NULL, AVTP_AAF_FIELD_SV, 1);
 
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_set_field_invalid_field(void **state)
+static void aaf_set_field_invalid_field(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_MAX, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_MAX, 1);
 
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_set_field_sv(void **state)
+static void aaf_set_field_sv(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_SV, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SV, 1);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00800000);
@@ -284,12 +312,12 @@ static void cvf_set_field_sv(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_mr(void **state)
+static void aaf_set_field_mr(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_MR, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_MR, 1);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00080000);
@@ -299,12 +327,12 @@ static void cvf_set_field_mr(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_tv(void **state)
+static void aaf_set_field_tv(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_TV, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TV, 1);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00010000);
@@ -314,12 +342,12 @@ static void cvf_set_field_tv(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_seq_num(void **state)
+static void aaf_set_field_seq_num(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_SEQUENCE_NUM, 0x55);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SEQ_NUM, 0x55);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00005500);
@@ -329,12 +357,12 @@ static void cvf_set_field_seq_num(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_tu(void **state)
+static void aaf_set_field_tu(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_TU, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TU, 1);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00000001);
@@ -344,12 +372,12 @@ static void cvf_set_field_tu(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_stream_id(void **state)
+static void aaf_set_field_stream_id(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_STREAM_ID,
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_STREAM_ID,
                             0xAABBCCDDEEFF0001);
 
     assert_int_equal(res, 0);
@@ -360,12 +388,12 @@ static void cvf_set_field_stream_id(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_timestamp(void **state)
+static void aaf_set_field_timestamp(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_AVTP_TIMESTAMP, 0x80C0FFEE);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TIMESTAMP, 0x80C0FFEE);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.avtp_time) == 0x80C0FFEE);
@@ -375,44 +403,74 @@ static void cvf_set_field_timestamp(void **state)
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_format(void **state)
+static void aaf_set_field_format(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_FORMAT,
-                        AVTP_CVF_FORMAT_RFC);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_FORMAT,
+                        AVTP_AAF_FORMAT_INT_16BIT);
 
     assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.format_specific) == 0x02000000);
+    assert_true(ntohl(pdu.format_specific) == 0x04000000);
     assert_true(pdu.subtype_data == 0);
     assert_true(pdu.stream_id == 0);
     assert_true(pdu.avtp_time == 0);
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_format_subtype(void **state)
+static void aaf_set_field_nsr(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE,
-                        AVTP_CVF_FORMAT_SUBTYPE_H264);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_NSR,
+                        AVTP_AAF_PCM_NSR_48KHZ);
 
     assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.format_specific) == 0x10000);
+    assert_true(ntohl(pdu.format_specific) == 0x00500000);
     assert_true(pdu.subtype_data == 0);
     assert_true(pdu.stream_id == 0);
     assert_true(pdu.avtp_time == 0);
     assert_true(pdu.packet_info == 0);
 }
 
-static void cvf_set_field_data_len(void **state)
+static void aaf_set_field_chan(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_STREAM_DATA_LENGTH, 0xAAAA);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, 0x2AA);
+
+    assert_int_equal(res, 0);
+    assert_true(ntohl(pdu.format_specific) == 0x0002AA00);
+    assert_true(pdu.subtype_data == 0);
+    assert_true(pdu.stream_id == 0);
+    assert_true(pdu.avtp_time == 0);
+    assert_true(pdu.packet_info == 0);
+}
+
+static void aaf_set_field_depth(void **state)
+{
+    int res;
+    struct avtp_stream_pdu pdu = { 0 };
+
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_BIT_DEPTH, 0xA5);
+
+    assert_int_equal(res, 0);
+    assert_true(ntohl(pdu.format_specific) == 0x000000A5);
+    assert_true(pdu.subtype_data == 0);
+    assert_true(pdu.stream_id == 0);
+    assert_true(pdu.avtp_time == 0);
+    assert_true(pdu.packet_info == 0);
+}
+
+static void aaf_set_field_data_len(void **state)
+{
+    int res;
+    struct avtp_stream_pdu pdu = { 0 };
+
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, 0xAAAA);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.packet_info) == 0xAAAA0000);
@@ -422,12 +480,12 @@ static void cvf_set_field_data_len(void **state)
     assert_true(pdu.format_specific == 0);
 }
 
-static void cvf_set_field_m(void **state)
+static void aaf_set_field_sp(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_M, 1);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SP, 1);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.packet_info) == 0x00001000);
@@ -437,12 +495,12 @@ static void cvf_set_field_m(void **state)
     assert_true(pdu.format_specific == 0);
 }
 
-static void cvf_set_field_evt(void **state)
+static void aaf_set_field_evt(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu = { 0 };
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_EVT, 0xA);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_EVT, 0xA);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.packet_info) == 0x00000A00);
@@ -452,120 +510,68 @@ static void cvf_set_field_evt(void **state)
     assert_true(pdu.format_specific == 0);
 }
 
-static void cvf_pdu_init_null_pdu(void **state)
+static void aaf_pdu_init_null_pdu(void **state)
 {
     int res;
 
-    res = avtp_cvf_pdu_init(NULL, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    res = avtp_aaf_pdu_init(NULL);
+
     assert_int_equal(res, -EINVAL);
 }
 
-static void cvf_pdu_init(void **state)
+static void aaf_pdu_init(void **state)
 {
     int res;
     struct avtp_stream_pdu pdu;
 
-    res = avtp_cvf_pdu_init(&pdu, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    res = avtp_aaf_pdu_init(&pdu);
 
     assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x03800000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(ntohl(pdu.format_specific) == 0x2010000);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void cvf_get_field_ptv(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
-
-    /* Set 'ptv' field to 1. */
-    pdu.packet_info = htonl(0x00002000);
-
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_PTV, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
-}
-
-static void cvf_set_field_ptv(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = { 0 };
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_PTV, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(pdu.subtype_data == 0);
+    assert_true(ntohl(pdu.subtype_data) == 0x02800000);
     assert_true(pdu.stream_id == 0);
     assert_true(pdu.avtp_time == 0);
     assert_true(pdu.format_specific == 0);
-    assert_true(ntohl(pdu.packet_info) == 0x00002000);
-}
-
-/**** Tests for H.264 fields ****/
-
-static void cvf_get_field_h264_timestamp(void **state)
-{
-    uint64_t val;
-    Avtp_H264_t pdu;
-
-    /* Set 'h264_timestamp' field (which lives in h264_header) to
-     * 0x80C0FFEE. */
-    uint32_t value = htonl(0x80C0FFEE);
-    memcpy(&pdu.header, &value, 4);
-
-    val = Avtp_H264_GetField(&pdu, AVTP_H264_FIELD_TIMESTAMP);
-    assert_true(val == 0x80C0FFEE);
-}
-
-static void cvf_set_field_h264_timestamp(void **state)
-{
-    Avtp_H264_t pdu;
-    Avtp_H264_SetField(&pdu, AVTP_H264_FIELD_TIMESTAMP, 0x80C0FFEE);
-    assert_true(ntohl(*(uint32_t*)(&pdu.header)) == 0x80C0FFEE);
+    assert_true(pdu.packet_info == 0);
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(cvf_get_field_null_pdu),
-        cmocka_unit_test(cvf_get_field_null_val),
-        cmocka_unit_test(cvf_get_field_invalid_field),
-        cmocka_unit_test(cvf_get_field_sv),
-        cmocka_unit_test(cvf_get_field_mr),
-        cmocka_unit_test(cvf_get_field_tv),
-        cmocka_unit_test(cvf_get_field_seq_num),
-        cmocka_unit_test(cvf_get_field_tu),
-        cmocka_unit_test(cvf_get_field_stream_id),
-        cmocka_unit_test(cvf_get_field_timestamp),
-        cmocka_unit_test(cvf_get_field_format),
-        cmocka_unit_test(cvf_get_field_format_subtype),
-        cmocka_unit_test(cvf_get_field_data_len),
-        cmocka_unit_test(cvf_get_field_m),
-        cmocka_unit_test(cvf_get_field_evt),
-        cmocka_unit_test(cvf_get_field_ptv),
-        cmocka_unit_test(cvf_get_field_h264_timestamp),
-        cmocka_unit_test(cvf_set_field_null_pdu),
-        cmocka_unit_test(cvf_set_field_invalid_field),
-        cmocka_unit_test(cvf_set_field_sv),
-        cmocka_unit_test(cvf_set_field_mr),
-        cmocka_unit_test(cvf_set_field_tv),
-        cmocka_unit_test(cvf_set_field_seq_num),
-        cmocka_unit_test(cvf_set_field_tu),
-        cmocka_unit_test(cvf_set_field_stream_id),
-        cmocka_unit_test(cvf_set_field_timestamp),
-        cmocka_unit_test(cvf_set_field_format),
-        cmocka_unit_test(cvf_set_field_format_subtype),
-        cmocka_unit_test(cvf_set_field_data_len),
-        cmocka_unit_test(cvf_set_field_m),
-        cmocka_unit_test(cvf_set_field_evt),
-        cmocka_unit_test(cvf_set_field_ptv),
-        cmocka_unit_test(cvf_set_field_h264_timestamp),
-        cmocka_unit_test(cvf_pdu_init_null_pdu),
-        cmocka_unit_test(cvf_pdu_init),
+        cmocka_unit_test(aaf_get_field_null_pdu),
+        cmocka_unit_test(aaf_get_field_null_val),
+        cmocka_unit_test(aaf_get_field_invalid_field),
+        cmocka_unit_test(aaf_get_field_sv),
+        cmocka_unit_test(aaf_get_field_mr),
+        cmocka_unit_test(aaf_get_field_tv),
+        cmocka_unit_test(aaf_get_field_seq_num),
+        cmocka_unit_test(aaf_get_field_tu),
+        cmocka_unit_test(aaf_get_field_stream_id),
+        cmocka_unit_test(aaf_get_field_timestamp),
+        cmocka_unit_test(aaf_get_field_format),
+        cmocka_unit_test(aaf_get_field_nsr),
+        cmocka_unit_test(aaf_get_field_chan),
+        cmocka_unit_test(aaf_get_field_depth),
+        cmocka_unit_test(aaf_get_field_data_len),
+        cmocka_unit_test(aaf_get_field_sp),
+        cmocka_unit_test(aaf_get_field_evt),
+        cmocka_unit_test(aaf_set_field_null_pdu),
+        cmocka_unit_test(aaf_set_field_invalid_field),
+        cmocka_unit_test(aaf_set_field_sv),
+        cmocka_unit_test(aaf_set_field_mr),
+        cmocka_unit_test(aaf_set_field_tv),
+        cmocka_unit_test(aaf_set_field_seq_num),
+        cmocka_unit_test(aaf_set_field_tu),
+        cmocka_unit_test(aaf_set_field_stream_id),
+        cmocka_unit_test(aaf_set_field_timestamp),
+        cmocka_unit_test(aaf_set_field_format),
+        cmocka_unit_test(aaf_set_field_nsr),
+        cmocka_unit_test(aaf_set_field_chan),
+        cmocka_unit_test(aaf_set_field_depth),
+        cmocka_unit_test(aaf_set_field_data_len),
+        cmocka_unit_test(aaf_set_field_sp),
+        cmocka_unit_test(aaf_set_field_evt),
+        cmocka_unit_test(aaf_pdu_init_null_pdu),
+        cmocka_unit_test(aaf_pdu_init),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
