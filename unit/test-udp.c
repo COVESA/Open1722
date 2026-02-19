@@ -30,9 +30,13 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+#if defined(__cplusplus)
 extern "C" {
 #include <cmocka.h>
 }
+#else
+#include <cmocka.h>
+#endif
 #include <string.h>
 
 #include "avtp/Udp.h"

@@ -33,9 +33,13 @@
 #include <stddef.h>
 #include <string.h>
 #include <setjmp.h>
+#if defined(__cplusplus)
 extern "C" {
 #include <cmocka.h>
 }
+#else
+#include <cmocka.h>
+#endif
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <errno.h>

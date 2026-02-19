@@ -30,59 +30,71 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
+#if defined(__cplusplus)
 extern "C" {
 #include <cmocka.h>
 }
+#else
+#include <cmocka.h>
+#endif
+#include <arpa/inet.h>
 #include <string.h>
 
-#include "avtp/CommonHeader.h"
+#include "avtp/acf/Gpc.h"
 
 #define MAX_PDU_SIZE 1500
 
-static void common_header_get_set_fields(void **state) {
+static void gpc_init(void **state) {
     uint8_t pdu[MAX_PDU_SIZE];
-    
-    memset(pdu, 0, MAX_PDU_SIZE);
+    uint8_t init_pdu[AVTP_GPC_HEADER_LEN];
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_AAF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_AAF);
+    Avtp_Gpc_Init(NULL);
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_CVF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_CVF);
-
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_TSCF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_TSCF);
-
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_NTSCF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_NTSCF);
-
-    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t*)pdu, 1);
-    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t*)pdu), 1);
-
-    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t*)pdu, 0);
-    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t*)pdu), 0);
-
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t*)pdu, 0);
-    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t*)pdu), 0);
-
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t*)pdu, 3);
-    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t*)pdu), 3);
+    Avtp_Gpc_Init((Avtp_Gpc_t*)pdu);
+    memset(init_pdu, 0, AVTP_GPC_HEADER_LEN);
+    init_pdu[0] = AVTP_ACF_TYPE_GPC << 1;
+    assert_memory_equal(init_pdu, pdu, AVTP_GPC_HEADER_LEN);
 }
 
-static void common_header_subtypes(void **state) {
-    assert_int_equal(AVTP_SUBTYPE_AAF, 0x2);
-    assert_int_equal(AVTP_SUBTYPE_CVF, 0x3);
-    assert_int_equal(AVTP_SUBTYPE_CRF, 0x4);
-    assert_int_equal(AVTP_SUBTYPE_TSCF, 0x5);
-    assert_int_equal(AVTP_SUBTYPE_RVF, 0x7);
-    assert_int_equal(AVTP_SUBTYPE_NTSCF, 0x82);
+static void gpc_get_set_fields(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    
+    Avtp_Gpc_Init((Avtp_Gpc_t*)pdu);
+
+    Avtp_Gpc_SetAcfMsgType((Avtp_Gpc_t*)pdu, AVTP_ACF_TYPE_GPC);
+    assert_int_equal(Avtp_Gpc_GetAcfMsgType((Avtp_Gpc_t*)pdu), AVTP_ACF_TYPE_GPC);
+
+    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t*)pdu, 200);
+    assert_int_equal(Avtp_Gpc_GetAcfMsgLength((Avtp_Gpc_t*)pdu), 200);
+
+    Avtp_Gpc_SetGpcMsgId((Avtp_Gpc_t*)pdu, 0x456789ABCDEFULL);
+    assert_int_equal(Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t*)pdu), 0x456789ABCDEFULL);
+}
+
+static void gpc_is_valid(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+
+    Avtp_Gpc_Init((Avtp_Gpc_t*)pdu);
+    assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t*)pdu, MAX_PDU_SIZE), 1);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+    assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t*)pdu, MAX_PDU_SIZE), 0);
+
+    Avtp_Gpc_Init((Avtp_Gpc_t*)pdu);
+    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t*)pdu, 4);
+    assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t*)pdu, 20), 1);
+
+    Avtp_Gpc_Init((Avtp_Gpc_t*)pdu);
+    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t*)pdu, 4);
+    assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t*)pdu, 5), 0);
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(common_header_get_set_fields),
-        cmocka_unit_test(common_header_subtypes),
+        cmocka_unit_test(gpc_init),
+        cmocka_unit_test(gpc_get_set_fields),
+        cmocka_unit_test(gpc_is_valid),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
