@@ -39,6 +39,7 @@
 
 #include <linux/init.h>
 #include <linux/uaccess.h>
+#include <linux/version.h>
 
 #include <linux/if_arp.h>
 
@@ -257,9 +258,15 @@ static void acfcan_remove(struct net_device *dev, struct list_head *head)
 	printk(KERN_INFO "ACFCAN interface %s unregistered\n", dev->name);
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
+static int acfcan_newlink(struct net_device *dev,
+						  struct rtnl_newlink_params *params,
+						  struct netlink_ext_ack *extack)
+#else
 static int acfcan_newlink(struct net *net, struct net_device *dev,
 						  struct nlattr *tb[], struct nlattr *data[],
 						  struct netlink_ext_ack *extack)
+#endif
 {
 	int err = register_netdevice(dev);
 
