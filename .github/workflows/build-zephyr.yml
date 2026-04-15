@@ -13,7 +13,7 @@ jobs:
     name: Build acf-can-bridge for Zephyr
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Create West Workspace Directory
         run: mkdir west-ws && cp examples/acf-can/zephyr/west.yml west-ws/
