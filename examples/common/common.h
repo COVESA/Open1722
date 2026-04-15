@@ -32,7 +32,7 @@
 #ifdef __linux__
 #include <netinet/in.h>
 #elif defined(__ZEPHYR__)
-#include <zephyr/net/socket.h>
+#include <zephyr/posix/sys/socket.h>
 #include <zephyr/net/ethernet.h>
 #define ETH_ALEN NET_ETH_ADDR_LEN
 #endif

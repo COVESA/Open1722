@@ -30,7 +30,7 @@
 #include <zephyr/net/ethernet.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
-#include <zephyr/net/socket.h>
+#include <zephyr/posix/sys/socket.h>
 #include <zephyr/net/socketcan.h>
 #include <zephyr/net/socketcan_utils.h>
 #include <stdio.h>
@@ -43,7 +43,6 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/net/socket.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_l2.h>
 
