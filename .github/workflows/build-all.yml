@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install dependencies
       run: sudo apt update && sudo apt install -y meson libcmocka0 libcmocka-dev lcov
     - name: Run build_all.sh script
