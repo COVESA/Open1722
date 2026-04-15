@@ -37,8 +37,6 @@
 #include <sys/socket.h>
 #include <sys/timerfd.h>
 #include <sys/types.h>
-#elif defined(__ZEPHYR__)
-#include <zephyr/net/socket.h>
 #endif
 
 #include <stdio.h>

@@ -36,7 +36,7 @@
 #include <sys/ioctl.h>
 #elif defined(__ZEPHYR__)
 #include <zephyr/kernel.h>
-#include <zephyr/net/socket.h>
+#include <zephyr/posix/sys/socket.h>
 #include <zephyr/net/socketcan.h>
 #include <zephyr/net/socketcan_utils.h>
 #include <zephyr/net/ethernet.h>
