@@ -26,7 +26,13 @@ The parameters of the application (e.g. use UDP or the TSCF format) can be set f
 
 In theory, this should work with any supported Zephyr boards having a CAN and an Ethernet interface. You may need to adjust the name of the interface in the corresponding device tree or code. We have tested the application with following Zephyr boards.
 - native_sim (Use overlay file: [native_sim.overlay](./boards/native_sim.overlay))
-- arduino_portenta_h7 (Use overlay file: [arduino_portenta_ht.overlay](./boards/arduino_portenta_h7.overlay)
+- arduino_portenta_h7 (Use overlay file: [arduino_portenta_ht.overlay](./boards/arduino_portenta_h7.overlay))
+
+```
+$ west build -b native_sim -d build_native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay # For native_sim
+
+$ west build -b arduino_portenta_h7/stm32h747xx/m7 -d build_arduino . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/arduino_portenta_h7.overlay # For arduino_portenta_h7
+```
 
 ## Testing on native_sim
 To test on native sim, we first create an Ethernet interface and a CAN inzterface for the sim.

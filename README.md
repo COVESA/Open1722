@@ -11,7 +11,7 @@
     <img src="./logo/open1722logo.png" alt="Open1722 logo" width="400px">
   </a>
 
-<h2 align="center">Covesa Open1722</h2>
+<h2 align="center">COVESA Open1722</h2>
 
   <p align="center">
     Open1722  is an implementation of the IEEE 1722 protocol, for streaming audio/video, tunneling CAN/LIN messages and enabling remote access to peripheral bus systems.
@@ -26,7 +26,7 @@
 
 ### Maintainers
 
-* [Naresh Nayak - Robert Bosch GmbH](https://github.com/nayakned)
+* [Naresh Nayak - Robert Bosch GmbH/Hochschule Furtwangen (HFU)](https://github.com/nayakned)
 * [Adriaan Niess - Robert Bosch GmbH](https://github.com/adriaan-niess)
 
 ## Introduction
