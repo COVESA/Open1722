@@ -1,6 +1,8 @@
 name: Build ACF-CAN kernel module
 
 on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight
   push:
     branches: [main]
   pull_request:

@@ -1,6 +1,8 @@
 name: Build Open1722 Apps for Zephyr
 
 on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight
   push:
     branches: [main]
   pull_request:
