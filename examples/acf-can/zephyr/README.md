@@ -35,7 +35,7 @@ $ west build -b arduino_portenta_h7/stm32h747xx/m7 -d build_arduino . -- -DCONF_
 ```
 
 ## Testing on native_sim
-To test on native sim, we first create an Ethernet interface and a CAN inzterface for the sim.
+To test on native sim, we first create an Ethernet interface and a CAN interface for the simulator.
 
 For creation of an Ethernet interface, have a look at the [net-tools repository from zephyrproject.](https://github.com/zephyrproject-rtos/net-tools) Clone this repository and execute the net-setup script in another terminal.
 ```
