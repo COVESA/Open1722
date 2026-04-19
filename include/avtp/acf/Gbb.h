@@ -47,8 +47,7 @@ extern "C" {
 #endif
 
 /**
- * Length of ACF_GBB message header. The ACF_GBB header is 16 bytes long
- * consisting of 4 quadlets.
+ * Length of ACF_GBB message header in bytes.
  */
 #define AVTP_GBB_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
 
@@ -71,11 +70,9 @@ typedef enum {
     /* ACF GBB header fields */
     AVTP_GBB_FIELD_PAD,
     AVTP_GBB_FIELD_MTV,
-    AVTP_GBB_FIELD_RESERVED,
     AVTP_GBB_FIELD_BYTE_BUS_ID,
     AVTP_GBB_FIELD_MESSAGE_TIMESTAMP,
     AVTP_GBB_FIELD_EVT,
-    AVTP_GBB_FIELD_RESERVED_2,
     AVTP_GBB_FIELD_HS,
     AVTP_GBB_FIELD_CS,
     AVTP_GBB_FIELD_TRANSACTION_NUM,
@@ -99,11 +96,9 @@ static const Avtp_FieldDescriptor_t __AVTP_GBB_FIELDS[AVTP_GBB_FIELD_MAX] =
     /* ACF GBB header fields */
     [AVTP_GBB_FIELD_PAD]                    = { .quadlet = 0, .offset = 16, .bits =   2 },
     [AVTP_GBB_FIELD_MTV]                    = { .quadlet = 0, .offset = 18, .bits =   1 },
-    [AVTP_GBB_FIELD_RESERVED]               = { .quadlet = 0, .offset = 19, .bits =   2 },
     [AVTP_GBB_FIELD_BYTE_BUS_ID]            = { .quadlet = 0, .offset = 21, .bits =  11 },
     [AVTP_GBB_FIELD_MESSAGE_TIMESTAMP]      = { .quadlet = 1, .offset =  0, .bits =  64 },
     [AVTP_GBB_FIELD_EVT]                    = { .quadlet = 3, .offset =  0, .bits =   4 },
-    [AVTP_GBB_FIELD_RESERVED_2]             = { .quadlet = 3, .offset =  4, .bits =   2 },
     [AVTP_GBB_FIELD_HS]                     = { .quadlet = 3, .offset =  6, .bits =   1 },
     [AVTP_GBB_FIELD_CS]                     = { .quadlet = 3, .offset =  7, .bits =   1 },
     [AVTP_GBB_FIELD_TRANSACTION_NUM]        = { .quadlet = 3, .offset =  8, .bits =   8 },
@@ -149,7 +144,7 @@ static inline uint8_t Avtp_Gbb_GetPad(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_Gbb_GetMtv(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsMtv(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MTV);
 }
 
@@ -190,7 +185,7 @@ static inline uint8_t Avtp_Gbb_GetEvt(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the hs field.
  */
-static inline bool Avtp_Gbb_GetHs(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsHs(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_HS);
 }
 
@@ -200,7 +195,7 @@ static inline bool Avtp_Gbb_GetHs(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the cs field.
  */
-static inline bool Avtp_Gbb_GetCs(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsCs(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_CS);
 }
 
@@ -221,7 +216,7 @@ static inline uint8_t Avtp_Gbb_GetTransactionNum(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the op flag.
  */
-static inline bool Avtp_Gbb_GetOp(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsOp(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_OP);
 }
 
@@ -231,7 +226,7 @@ static inline bool Avtp_Gbb_GetOp(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the rsp flag.
  */
-static inline bool Avtp_Gbb_GetRsp(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsRsp(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_RSP);
 }
 
@@ -241,7 +236,7 @@ static inline bool Avtp_Gbb_GetRsp(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the err flag.
  */
-static inline bool Avtp_Gbb_GetErr(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsErr(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ERR);
 }
 
@@ -251,7 +246,7 @@ static inline bool Avtp_Gbb_GetErr(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_Gbb_GetMs(Avtp_Gbb_t* msg) {
+static inline bool Avtp_Gbb_IsMs(Avtp_Gbb_t* msg) {
     return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MS);
 }
 

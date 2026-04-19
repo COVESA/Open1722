@@ -47,8 +47,7 @@ extern "C" {
 #endif
 
 /**
- * Length of ACF_ABB message header. The ACF_ABB header is 16 bytes long
- * consisting of 4 quadlets.
+ * Length of ACF_ABB message header in bytes.
  */
 #define AVTP_ABB_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
 
@@ -71,11 +70,9 @@ typedef enum {
     /* ACF ABB header fields */
     AVTP_ABB_FIELD_PAD,
     AVTP_ABB_FIELD_MTV,
-    AVTP_ABB_FIELD_RESERVED,
     AVTP_ABB_FIELD_BYTE_BUS_ID,
     AVTP_ABB_FIELD_MESSAGE_TIMESTAMP,
     AVTP_ABB_FIELD_EVT,
-    AVTP_ABB_FIELD_RESERVED_2,
     AVTP_ABB_FIELD_HS,
     AVTP_ABB_FIELD_CS,
     AVTP_ABB_FIELD_TRANSACTION_NUM,
@@ -99,10 +96,8 @@ static const Avtp_FieldDescriptor_t __AVTP_ABB_FIELDS[AVTP_ABB_FIELD_MAX] =
     /* ACF GBB header fields */
     [AVTP_ABB_FIELD_PAD]                    = { .quadlet = 0, .offset = 16, .bits =   2 },
     [AVTP_ABB_FIELD_MTV]                    = { .quadlet = 0, .offset = 18, .bits =   1 },
-    [AVTP_ABB_FIELD_RESERVED]               = { .quadlet = 0, .offset = 19, .bits =   2 },
     [AVTP_ABB_FIELD_BYTE_BUS_ID]            = { .quadlet = 0, .offset = 21, .bits =  11 },
     [AVTP_ABB_FIELD_EVT]                    = { .quadlet = 1, .offset =  0, .bits =   4 },
-    [AVTP_ABB_FIELD_RESERVED_2]             = { .quadlet = 1, .offset =  4, .bits =   2 },
     [AVTP_ABB_FIELD_HS]                     = { .quadlet = 1, .offset =  6, .bits =   1 },
     [AVTP_ABB_FIELD_CS]                     = { .quadlet = 1, .offset =  7, .bits =   1 },
     [AVTP_ABB_FIELD_TRANSACTION_NUM]        = { .quadlet = 1, .offset =  8, .bits =   8 },
@@ -148,7 +143,7 @@ static inline uint8_t Avtp_Abb_GetPad(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_Abb_GetMtv(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsMtv(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_MTV);
 }
 
@@ -189,7 +184,7 @@ static inline uint8_t Avtp_Abb_GetEvt(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the hs field.
  */
-static inline bool Avtp_Abb_GetHs(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsHs(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_HS);
 }
 
@@ -199,7 +194,7 @@ static inline bool Avtp_Abb_GetHs(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the cs field.
  */
-static inline bool Avtp_Abb_GetCs(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsCs(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_CS);
 }
 
@@ -220,7 +215,7 @@ static inline uint8_t Avtp_Abb_GetTransactionNum(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the op flag.
  */
-static inline bool Avtp_Abb_GetOp(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsOp(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_OP);
 }
 
@@ -230,7 +225,7 @@ static inline bool Avtp_Abb_GetOp(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the rsp flag.
  */
-static inline bool Avtp_Abb_GetRsp(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsRsp(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_RSP);
 }
 
@@ -240,7 +235,7 @@ static inline bool Avtp_Abb_GetRsp(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the err flag.
  */
-static inline bool Avtp_Abb_GetErr(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsErr(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_ERR);
 }
 
@@ -250,7 +245,7 @@ static inline bool Avtp_Abb_GetErr(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_Abb_GetMs(Avtp_Abb_t* msg) {
+static inline bool Avtp_Abb_IsMs(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_MS);
 }
 
@@ -457,7 +452,7 @@ static inline void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) 
  */
 void Avtp_Abb_Init(Avtp_Abb_t* msg) {
     memset(msg, 0, sizeof(Avtp_Abb_t));
-    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS);
+    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
 }
 
