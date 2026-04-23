@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -371,7 +372,7 @@ static inline void Avtp_Gisf_SetEf(Avtp_Gisf_t* msg, bool ef) {
  * @param msg Pointer to an ACF_GISF message.
  * @param op The value to set.
  */
-static inline void Avtp_Gisf_SetEvt(Avtp_Gisf_t* msg, bool evt) {
+static inline void Avtp_Gisf_SetEvt(Avtp_Gisf_t* msg, uint8_t evt) {
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_EVT, evt);
 }
 
@@ -391,7 +392,7 @@ static inline void Avtp_Gisf_SetBf(Avtp_Gisf_t* msg, bool bf) {
  * @param msg Pointer to an ACF_GISF message.
  * @param err The value to set.
  */
-static inline void Avtp_Gisf_SetErr(Avtp_Gisf_t* msg, uint8_t lineTypeId) {
+static inline void Avtp_Gisf_SetLineTypeId(Avtp_Gisf_t* msg, uint8_t lineTypeId) {
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_LINE_TYPE_ID, lineTypeId);
 }
 
@@ -447,7 +448,7 @@ static inline void Avtp_Gisf_SetPayloadLen(Avtp_Gisf_t* msg, uint16_t payloadLen
  * 
  * @param msg Pointer to the ACF_GISF message to initialize.
  */
-void Avtp_Gisf_Init(Avtp_Gisf_t* msg) {
+static inline void Avtp_Gisf_Init(Avtp_Gisf_t* msg) {
     memset(msg, 0, sizeof(Avtp_Gisf_t));
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_ANCILLARY);
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH, AVTP_GISF_HEADER_LEN / AVTP_QUADLET_SIZE);

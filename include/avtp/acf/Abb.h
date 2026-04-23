@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -450,7 +451,7 @@ static inline void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) 
  * 
  * @param msg Pointer to the ACF_ABB message to initialize.
  */
-void Avtp_Abb_Init(Avtp_Abb_t* msg) {
+static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
     memset(msg, 0, sizeof(Avtp_Abb_t));
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
