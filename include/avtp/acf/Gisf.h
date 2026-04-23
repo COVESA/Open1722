@@ -35,6 +35,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -42,10 +46,6 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 #include "avtp/Utils.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Length of ACF_GISF message header in bytes.
@@ -264,7 +264,7 @@ static inline uint8_t Avtp_Gisf_GetISeqNum(Avtp_Gisf_t* msg) {
  * @param msg Pointer to an ACF_GISF message.
  * @returns The value of the line_number field.
  */
-static inline uint16_t Avtp_Gisf_GetLine_number(Avtp_Gisf_t* msg) {
+static inline uint16_t Avtp_Gisf_GetLineNumber(Avtp_Gisf_t* msg) {
     return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_LINE_NUMBER);
 }
 
@@ -324,17 +324,6 @@ static inline void Avtp_Gisf_SetMessageTimestamp(Avtp_Gisf_t* msg, uint64_t mess
 }
 
 /**
- * Sets the value of the gisf_data_length field in an ACF_GISF message header.
- * 
- * @param msg Pointer to an ACF_GISF message.
- * @param evt The value to set.
- */
-
-static inline void Avtp_Gisf_SetGisfDataLength(Avtp_Gisf_t* msg, uint16_t gisfDataLength) {
-    __Avtp_Gisf_SetField(AVTP_GISF_FIELD_GISF_DATA_LENGTH, gisfDataLength);
-}
-
-/**
  * Sets the value of the end line (el) flag in an ACF_GISF message header.
  * 
  * @param msg Pointer to an ACF_GISF message.
@@ -343,7 +332,6 @@ static inline void Avtp_Gisf_SetGisfDataLength(Avtp_Gisf_t* msg, uint16_t gisfDa
 static inline void Avtp_Gisf_SetEl(Avtp_Gisf_t* msg, bool el) {
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_EL, el);
 }
-
 
 /**
  * Sets the value of the timestamp line (tl) flag in an ACF_GISF message
@@ -450,7 +438,7 @@ static inline void Avtp_Gisf_SetPayloadLen(Avtp_Gisf_t* msg, uint16_t payloadLen
  */
 static inline void Avtp_Gisf_Init(Avtp_Gisf_t* msg) {
     memset(msg, 0, sizeof(Avtp_Gisf_t));
-    __Avtp_Gisf_SetField(AVTP_GISF_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_ANCILLARY);
+    __Avtp_Gisf_SetField(AVTP_GISF_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_GISF);
     __Avtp_Gisf_SetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH, AVTP_GISF_HEADER_LEN / AVTP_QUADLET_SIZE);
 }
 

@@ -35,6 +35,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -42,10 +46,6 @@
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
 #include "avtp/Utils.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Length of ACF_GBB message header in bytes.
