@@ -54,15 +54,6 @@ static void Test_Gisf_Init(void** state)
         0x0,  0x0,  0x0,  0x0
     };
 
-    // for (int i = 0; i < buffer_len; ++i) {
-    //     printf("%x ", buffer[i]);
-    // }
-    // printf("\n");
-    // for (int i = 0; i < buffer_len; ++i) {
-    //     printf("%x ", expected_buf[i]);
-    // }
-    // printf("\n");
-
     assert_memory_equal(buffer, expected_buf, buffer_len);
 }
 
@@ -360,15 +351,6 @@ static void Test_Gisf_SetMessageTimestamp(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-
-    for (int i = 0; i < buffer_len; ++i) {
-        printf("%x ", buffer[i]);
-    }
-    printf("\n");
-    for (int i = 0; i < buffer_len; ++i) {
-        printf("%x ", expected_buf[i]);
-    }
-    printf("\n");
 
     assert_memory_equal(buffer, expected_buf, buffer_len);
 }

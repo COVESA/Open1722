@@ -50,7 +50,7 @@ extern "C" {
 /**
  * Length of ACF_ABB message header in bytes.
  */
-#define AVTP_ABB_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
+#define AVTP_ABB_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
 /**
  * ACF_ABB message structure suitable for in-place de-/serialization of fields
@@ -72,7 +72,6 @@ typedef enum {
     AVTP_ABB_FIELD_PAD,
     AVTP_ABB_FIELD_MTV,
     AVTP_ABB_FIELD_BYTE_BUS_ID,
-    AVTP_ABB_FIELD_MESSAGE_TIMESTAMP,
     AVTP_ABB_FIELD_EVT,
     AVTP_ABB_FIELD_HS,
     AVTP_ABB_FIELD_CS,
@@ -94,7 +93,7 @@ static const Avtp_FieldDescriptor_t __AVTP_ABB_FIELDS[AVTP_ABB_FIELD_MAX] =
     /* ACF common header fields */
     [AVTP_ABB_FIELD_ACF_MSG_TYPE]           = { .quadlet = 0, .offset =  0, .bits = 7   },
     [AVTP_ABB_FIELD_ACF_MSG_LENGTH]         = { .quadlet = 0, .offset =  7, .bits = 9   },
-    /* ACF GBB header fields */
+    /* ACF ABB header fields */
     [AVTP_ABB_FIELD_PAD]                    = { .quadlet = 0, .offset = 16, .bits =   2 },
     [AVTP_ABB_FIELD_MTV]                    = { .quadlet = 0, .offset = 18, .bits =   1 },
     [AVTP_ABB_FIELD_BYTE_BUS_ID]            = { .quadlet = 0, .offset = 21, .bits =  11 },
@@ -128,6 +127,19 @@ static const Avtp_FieldDescriptor_t __AVTP_ABB_FIELDS[AVTP_ABB_FIELD_MAX] =
         (Avtp_SetField(__AVTP_ABB_FIELDS, AVTP_ABB_FIELD_MAX, (uint8_t*)msg, field, value))
 
 /**
+ * Initializes an ACF_ABB message with default values for the header fields
+ * including acf_msg_type and acf_msg_length.
+ *
+ * @param msg Pointer to the ACF_ABB message to initialize.
+ */
+static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
+    memset(msg, 0, sizeof(Avtp_Abb_t));
+    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
+    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
+}
+
+
+/**
  * Returns the pad field from an ACF_ABB message header.
  * 
  * @param msg Pointer to an ACF_ABB message.
@@ -156,17 +168,6 @@ static inline bool Avtp_Abb_IsMtv(Avtp_Abb_t* msg) {
  */
 static inline uint16_t Avtp_Abb_GetByteBusId(Avtp_Abb_t* msg) {
     return __Avtp_Abb_GetField(AVTP_ABB_FIELD_BYTE_BUS_ID);
-}
-
-/**
- * Returns the value of the message_timestamp field from an ACF_ABB message
- * header.
- * 
- * @param msg Pointer to an ACF_ABB message.
- * @returns The value of the message_timestamp field.
- */
-static inline uint64_t Avtp_Abb_GetMessageTimestamp(Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -318,16 +319,6 @@ static inline void Avtp_Abb_SetByteBusId(Avtp_Abb_t* msg, uint16_t byteBusId) {
 }
 
 /**
- * Sets the value of the message_timestamp field in an ACF_ABB message header.
- * 
- * @param msg Pointer to an ACF_ABB message.
- * @param messageTimestamp The value to set.
- */
-static inline void Avtp_Abb_SetMessageTimestamp(Avtp_Abb_t* msg, uint64_t messageTimestamp) {
-    __Avtp_Abb_SetField(AVTP_ABB_FIELD_MESSAGE_TIMESTAMP, messageTimestamp);
-}
-
-/**
  * Sets the value of the evt field in an ACF_ABB message header.
  * 
  * @param msg Pointer to an ACF_ABB message.
@@ -443,18 +434,6 @@ static inline void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) 
     uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, msgLenQuadlets);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_PAD, pad);
-}
-
-/**
- * Initializes an ACF_ABB message with default values for the header fields
- * including acf_msg_type and acf_msg_length.
- * 
- * @param msg Pointer to the ACF_ABB message to initialize.
- */
-static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
-    memset(msg, 0, sizeof(Avtp_Abb_t));
-    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
-    __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
 }
 
 #ifdef __cplusplus
