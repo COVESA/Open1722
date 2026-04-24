@@ -138,7 +138,6 @@ static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
 }
 
-
 /**
  * Returns the pad field from an ACF_ABB message header.
  * 

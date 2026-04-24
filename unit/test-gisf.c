@@ -40,12 +40,12 @@ extern "C" {
 
 static void Test_Gisf_Init(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -54,13 +54,13 @@ static void Test_Gisf_Init(void** state)
         0x0,  0x0,  0x0,  0x0
     };
 
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_GetPad(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x06, 0xC0, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -68,14 +68,14 @@ static void Test_Gisf_GetPad(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetPad(gisf), 3);
 }
 
 static void Test_Gisf_IsMtv(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x20, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -83,14 +83,14 @@ static void Test_Gisf_IsMtv(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_IsMtv(gisf), true);
 }
 
 static void Test_Gisf_GetImageSensorId(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x5,  0xFF,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -98,14 +98,14 @@ static void Test_Gisf_GetImageSensorId(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetImageSensorId(gisf), 0x5FF);
 }
 
 static void Test_Gisf_GetMessageTimestamp(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0xBF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF,
@@ -113,14 +113,14 @@ static void Test_Gisf_GetMessageTimestamp(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetMessageTimestamp(gisf), 0xBFFFFFFFFFFFFFFFull);
 }
 
 static void Test_Gisf_IsEl(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -128,14 +128,14 @@ static void Test_Gisf_IsEl(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_IsEl(gisf), true);
 }
 
 static void Test_Gisf_IsTl(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -143,14 +143,14 @@ static void Test_Gisf_IsTl(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_IsTl(gisf), true);
 }
 
 static void Test_Gisf_IsEf(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -158,14 +158,14 @@ static void Test_Gisf_IsEf(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_IsEf(gisf), true);
 }
 
 static void Test_Gisf_GetEvt(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -173,14 +173,14 @@ static void Test_Gisf_GetEvt(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetEvt(gisf), 0xB);
 }
 
 static void Test_Gisf_IsBf(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -188,14 +188,14 @@ static void Test_Gisf_IsBf(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_IsBf(gisf), true);
 }
 
 static void Test_Gisf_GetLineTypeId(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -203,14 +203,14 @@ static void Test_Gisf_GetLineTypeId(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetLineTypeId(gisf), 0x17);
 }
 
 static void Test_Gisf_GetEvt2(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -218,14 +218,14 @@ static void Test_Gisf_GetEvt2(void** state)
         0xBF, 0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetEvt2(gisf), 0xBF);
 }
 
 static void Test_Gisf_GetISeqNum(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -233,14 +233,14 @@ static void Test_Gisf_GetISeqNum(void** state)
         0x0,  0xBF, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetISeqNum(gisf), 0xBF);
 }
 
 static void Test_Gisf_GetLineNumber(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -248,14 +248,14 @@ static void Test_Gisf_GetLineNumber(void** state)
         0x0,  0x0,  0xBF, 0xFF,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetLineNumber(gisf), 0xBFFFul);
 }
 
 static void Test_Gisf_GetPayloadLen(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x06, 0xC0, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -263,14 +263,14 @@ static void Test_Gisf_GetPayloadLen(void** state)
         0x0,  0x0,  0xBF, 0xFF,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetPayloadLen(gisf), 1);
 }
 
 static void Test_Gisf_GetPayloadLen_NoPadding(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x06, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -278,14 +278,14 @@ static void Test_Gisf_GetPayloadLen_NoPadding(void** state)
         0x0,  0x0,  0xBF, 0xFF,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetPayloadLen(gisf), 4);
 }
 
 static void Test_Gisf_GetLen(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {
         0x18, 0x06, 0xC0, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -293,19 +293,19 @@ static void Test_Gisf_GetLen(void** state)
         0x0,  0x0,  0xBF, 0xFF,
         0x0,  0x0,  0x0,  0x0,
     };
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     assert_int_equal(Avtp_Gisf_GetLen(gisf), 6 * 4);
 }
 
 static void Test_Gisf_SetMtv(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetMtv(gisf, true);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x20, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -313,18 +313,18 @@ static void Test_Gisf_SetMtv(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetImageSensorId(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetImageSensorId(gisf, 0x5FF);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x5,  0xFF,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -332,18 +332,18 @@ static void Test_Gisf_SetImageSensorId(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetMessageTimestamp(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetMessageTimestamp(gisf, 0xBFFFFFFFull);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0xBF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF,
@@ -352,18 +352,18 @@ static void Test_Gisf_SetMessageTimestamp(void** state)
         0x0,  0x0,  0x0,  0x0
     };
 
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetEl(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetEl(gisf, true);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -371,18 +371,18 @@ static void Test_Gisf_SetEl(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetTl(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetTl(gisf, true);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -390,18 +390,18 @@ static void Test_Gisf_SetTl(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetEf(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetEf(gisf, true);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -409,18 +409,18 @@ static void Test_Gisf_SetEf(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetEvt(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetEvt(gisf, 0xB);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -428,18 +428,18 @@ static void Test_Gisf_SetEvt(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetBf(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetBf(gisf, true);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -447,18 +447,18 @@ static void Test_Gisf_SetBf(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetLineTypeId(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetLineTypeId(gisf, 0x17);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -466,18 +466,18 @@ static void Test_Gisf_SetLineTypeId(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetEvt2(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetEvt2(gisf, 0xBF);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -485,18 +485,18 @@ static void Test_Gisf_SetEvt2(void** state)
         0xBF, 0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetISeqNum(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetISeqNum(gisf, 0xBF);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -504,18 +504,18 @@ static void Test_Gisf_SetISeqNum(void** state)
         0x0,  0xBF, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetLineNumber(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetLineNumber(gisf, 0xBFFF);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -523,18 +523,18 @@ static void Test_Gisf_SetLineNumber(void** state)
         0x0,  0x0,  0xBF, 0xFF,
         0x0,  0x0,  0x0,  0x0
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetPayloadLen(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetPayloadLen(gisf, 3);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x06, 0x40, 0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -542,18 +542,18 @@ static void Test_Gisf_SetPayloadLen(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 static void Test_Gisf_SetPayloadLen_NoPadding(void** state)
 {
-    const size_t buffer_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t buffer[buffer_len] = {0};
-    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)buffer;
+    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
+    uint8_t msg[msg_len] = {0};
+    Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
     Avtp_Gisf_SetPayloadLen(gisf, 4);
 
-    uint8_t expected_buf[buffer_len] = {
+    uint8_t expected_msg[msg_len] = {
         0x18, 0x06, 0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
@@ -561,7 +561,7 @@ static void Test_Gisf_SetPayloadLen_NoPadding(void** state)
         0x0,  0x0,  0x0,  0x0,
         0x0,  0x0,  0x0,  0x0,
     };
-    assert_memory_equal(buffer, expected_buf, buffer_len);
+    assert_memory_equal(msg, expected_msg, msg_len);
 }
 
 int main(void)
