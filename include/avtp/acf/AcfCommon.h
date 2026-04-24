@@ -54,7 +54,7 @@ typedef struct {
 } Avtp_AcfCommon_t;
 
 /**
- * AVTP message types. See IEEE Std 1722-2016 table 22.
+ * AVTP message types. See IEEE Std 1722-2025 table 22.
  */
 typedef enum {
     AVTP_ACF_TYPE_FLEXRAY           = 0x0,
@@ -67,8 +67,8 @@ typedef enum {
     AVTP_ACF_TYPE_PARALLEL          = 0x7,
     AVTP_ACF_TYPE_SENSOR            = 0x8,
     AVTP_ACF_TYPE_SENSOR_BRIEF      = 0x9,
-    AVTP_ACF_TYPE_AECP              = 0x10,
-    AVTP_ACF_TYPE_ANCILLARY         = 0x11,
+    AVTP_ACF_TYPE_AECP              = 0x0A,
+    AVTP_ACF_TYPE_ANCILLARY         = 0x0B,
     AVTP_ACF_TYPE_GISF              = 0x0C,
     AVTP_ACF_TYPE_BYTE_BUS          = 0x0D,
     AVTP_ACF_TYPE_BYTE_BUS_BRIEF    = 0x0E,
