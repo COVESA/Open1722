@@ -12,27 +12,28 @@ To build freestanding Zephyr applications, refer the [blog article](https://www.
 
 For this, we will source the Zephyr dependencies in the terminal:
 ```
-$ source ~/zephyrproject/.venv/bin/activate
-$ source ~/zephyrproject/zephyr/zephyr-env.sh
+source ~/zephyrproject/.venv/bin/activate
+source ~/zephyrproject/zephyr/zephyr-env.sh
 ```
 
 Subsequently, you can build the application using _west_. We have integrated the build dependencies of the acf-can-bridge application into the main CMake of the project. Hence build commands are executed from the main folder of the repository.
 ```
-$ west build --pristine -b <board_name> . -- -DCONF_FILE=./examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=<overlay file if reqd.>
-$ west build -t run # OR west build -t flash
+west build --pristine -b <board_name> . -- -DCONF_FILE=./examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=<overlay file if reqd.>
+west build -t run # OR west build -t flash
 ```
 
 The parameters of the application (e.g. use UDP or the TSCF format) can be set from the [prj.conf.](prj.conf)
 
 In theory, this should work with any supported Zephyr boards having a CAN and an Ethernet interface. You may need to adjust the name of the interface in the corresponding device tree or code. We have tested the application with following Zephyr boards.
 - native_sim (Use overlay file: [native_sim.overlay](./boards/native_sim.overlay))
-- arduino_portenta_h7 (Use overlay file: [arduino_portenta_ht.overlay](./boards/arduino_portenta_h7.overlay))
+- arduino_portenta_h7 (Use overlay file: [arduino_portenta_h7.overlay](./boards/arduino_portenta_h7.overlay))
 
 ```
 $ west build -b native_sim -d build_native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay # For native_sim
 
 $ west build -b arduino_portenta_h7/stm32h747xx/m7 -d build_arduino . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/arduino_portenta_h7.overlay # For arduino_portenta_h7
 ```
+- arduino_portenta_h7 (Use overlay file: [arduino_portenta_h7.overlay](./boards/arduino_portenta_h7.overlay))
 
 ## Testing on native_sim
 To test on native sim, we first create an Ethernet interface and a CAN interface for the simulator.
@@ -41,11 +42,12 @@ For creation of an Ethernet interface, have a look at the [net-tools repository 
 ```
 $ ./net-setup.sh
 ```
-This creates the zeth Ethernet interface. You must also create a virtual CAN interface based on the devicetree (_zcan_) of the native_sim.
+This creates the zeth Ethernet interface. You must also create a virtual CAN interface based on the devicetree (_vcan0_) of the native_sim.
 
-With a virtual Ethernet and CAN interface, the application can be executed on native_sim as follows:
+With a virtual Ethernet and CAN interface, the application can be executed on native_sim from the main repository folder as follows:
 ```
-$ west build -t run # OR west build -t flash
+west build -b native_sim . -- -DCONF_FILE=examples/acf-can/zephyr/prj.conf -DOPEN1722_ZEPHYR_APP=acf-can-bridge -DDTC_OVERLAY_FILE=examples/acf-can/zephyr/boards/native_sim.overlay
+west build -t run # Or ./<build_directory>/zephyr/zephyr.exe
 ```
 
-For testing, one can use can-utils to generate traffic on _zcan_ and observe the Ethernet packets on _zeth_ and vice-versa.
+For testing, one can use can-utils to generate traffic on _vcan0_ and observe the Ethernet packets on _zeth_ and vice-versa.
