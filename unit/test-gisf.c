@@ -341,7 +341,7 @@ static void Test_Gisf_SetMessageTimestamp(void** state)
     uint8_t msg[msg_len] = {0};
     Avtp_Gisf_t* gisf = (Avtp_Gisf_t*)msg;
     Avtp_Gisf_Init(gisf);
-    Avtp_Gisf_SetMessageTimestamp(gisf, 0xBFFFFFFFull);
+    Avtp_Gisf_SetMessageTimestamp(gisf, 0xBFFFFFFFFFFFFFFFull);
 
     uint8_t expected_msg[msg_len] = {
         0x18, 0x05, 0x0,  0x0,
