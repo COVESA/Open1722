@@ -35,8 +35,6 @@ Open1722 is a fork of [AVNU/libavtp](https://github.com/Avnu/libavtp) which is a
 
 IEEE 1722 is also gaining a lot of traction in the automotive community, mainly, to bridge fieldbus technologies over automotive Ethernet. In particular the AVTP Control Formats (ACF) specify serialization for a set of data formats relevant for automotive applications (e.g., CAN, LIN, etc.). Open1722 extends/modifies _libavtp_ to also include these ACF formats.
 
-NOTE: Open1722 is currently incubating and under active development. The APIs are not fully stable and are subject to changes.
-
 Open1722 is under BSD License. For more information see LICENSE file.
 
 ## Implementation
