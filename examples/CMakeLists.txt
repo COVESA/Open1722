@@ -33,7 +33,7 @@ target_include_directories(open1722examples PRIVATE
     $<INSTALL_INTERFACE:include>
     ${CMAKE_CURRENT_SOURCE_DIR})
 if (DEFINED ENV{ZEPHYR_BASE})
-    target_link_libraries(open1722examples PRIVATE zephyr_interface)
+    target_link_libraries(open1722examples PRIVATE zephyr_interface zephyr_generated_headers)
 endif()
 add_dependencies(examples open1722examples)
 
