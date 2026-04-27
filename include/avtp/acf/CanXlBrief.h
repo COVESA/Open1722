@@ -30,7 +30,7 @@
 /**
  * @file This file contains functions for de-/serialization of the ACF_CAN_XL_BRIEF
  * message format (CAN XL Brief). For details see IEEE Std. 1722-2025,
- * chapter 9.4.19.
+ * chapter 9.4.16.
  */
 
 #pragma once
@@ -68,13 +68,13 @@ typedef enum {
     /* ACF common header fields */
     AVTP_CANXL_BRIEF_FIELD_ACF_MSG_TYPE = 0,
     AVTP_CANXL_BRIEF_FIELD_ACF_MSG_LENGTH,
-    /* ACF CAN-XL brief header fields */
+    /* ACF CAN_XL_BRIEF header fields */
     AVTP_CANXL_BRIEF_FIELD_PAD,
     AVTP_CANXL_BRIEF_FIELD_MTV,
     AVTP_CANXL_BRIEF_FIELD_CAN_BUS_ID,
     AVTP_CANXL_BRIEF_FIELD_VCID,
     AVTP_CANXL_BRIEF_FIELD_SDT,
-    AVTP_CANXL_BRIEF_FIELD_RSS,
+    AVTP_CANXL_BRIEF_FIELD_RRS,
     AVTP_CANXL_BRIEF_FIELD_SEC,
     AVTP_CANXL_BRIEF_FIELD_PRIORITY_ID,
     AVTP_CANXL_BRIEF_FIELD_ACCEPTANCE_FIELD,
@@ -93,13 +93,13 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_BRIEF_FIELDS[AVTP_CANXL_BRIEF_F
     /* ACF common header fields */
     [AVTP_CANXL_BRIEF_FIELD_ACF_MSG_TYPE]           = { .quadlet = 0, .offset =  0, .bits = 7 },
     [AVTP_CANXL_BRIEF_FIELD_ACF_MSG_LENGTH]         = { .quadlet = 0, .offset =  7, .bits = 9 },
-    /* ACF CAN-XL brief header fields */
+    /* ACF CAN_XL_BRIEF header fields */
     [AVTP_CANXL_BRIEF_FIELD_PAD]                    = { .quadlet = 0, .offset = 16, .bits =   2 },
     [AVTP_CANXL_BRIEF_FIELD_MTV]                    = { .quadlet = 0, .offset = 18, .bits =   1 },
     [AVTP_CANXL_BRIEF_FIELD_CAN_BUS_ID]             = { .quadlet = 0, .offset = 21, .bits =  11 },
     [AVTP_CANXL_BRIEF_FIELD_VCID]                   = { .quadlet = 1, .offset =  0, .bits =   8 },
     [AVTP_CANXL_BRIEF_FIELD_SDT]                    = { .quadlet = 1, .offset =  8, .bits =   8 },
-    [AVTP_CANXL_BRIEF_FIELD_RSS]                    = { .quadlet = 1, .offset = 19, .bits =   1 },
+    [AVTP_CANXL_BRIEF_FIELD_RRS]                    = { .quadlet = 1, .offset = 19, .bits =   1 },
     [AVTP_CANXL_BRIEF_FIELD_SEC]                    = { .quadlet = 1, .offset = 20, .bits =   1 },
     [AVTP_CANXL_BRIEF_FIELD_PRIORITY_ID]            = { .quadlet = 1, .offset = 21, .bits =  11 },
     [AVTP_CANXL_BRIEF_FIELD_ACCEPTANCE_FIELD]       = { .quadlet = 2, .offset =  0, .bits =  32 },
@@ -121,7 +121,7 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_BRIEF_FIELDS[AVTP_CANXL_BRIEF_F
  * Macro to set the value of a field in an ACF_CAN_XL_BRIEF message header.
  * 
  * @note This macro should not be used directly, instead use the field specific
- * setter functions defined below.
+ * getter functions defined below.
  */
 #define __Avtp_CanXlBrief_SetField(field, value) \
         (Avtp_SetField(__AVTP_CANXL_BRIEF_FIELDS, AVTP_CANXL_BRIEF_FIELD_MAX, (uint8_t*)msg, field, value))
@@ -190,13 +190,13 @@ static inline uint8_t Avtp_CanXlBrief_GetSdt(const Avtp_CanXlBrief_t* msg) {
 }
 
 /**
- * Returns the value of the rss flag from an ACF_CAN_XL_BRIEF message header.
+ * Returns the value of the rrs flag from an ACF_CAN_XL_BRIEF message header.
  * 
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
- * @returns The value of the rss flag.
+ * @returns The value of the rrs flag.
  */
-static inline bool Avtp_CanXlBrief_IsRss(const Avtp_CanXlBrief_t* msg) {
-    return __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_RSS);
+static inline bool Avtp_CanXlBrief_IsRrs(const Avtp_CanXlBrief_t* msg) {
+    return __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_RRS);
 }
 
 /**
@@ -210,7 +210,8 @@ static inline bool Avtp_CanXlBrief_IsSec(const Avtp_CanXlBrief_t* msg) {
 }
 
 /**
- * Returns the value of the priority_id field from an ACF_CAN_XL_BRIEF message header.
+ * Returns the value of the priority_id field from an ACF_CAN_XL_BRIEF message
+ * header.
  * 
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the priority_id field.
@@ -327,13 +328,13 @@ static inline void Avtp_CanXlBrief_SetSdt(Avtp_CanXlBrief_t* msg, uint8_t sdt) {
 }
 
 /**
- * Sets the value of the rss flag in an ACF_CAN_XL_BRIEF message header.
+ * Sets the value of the rrs flag in an ACF_CAN_XL_BRIEF message header.
  * 
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
- * @param rss The value to set.
+ * @param rrs The value to set.
  */
-static inline void Avtp_CanXlBrief_SetRss(Avtp_CanXlBrief_t* msg, bool rss) {
-    __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_RSS, rss);
+static inline void Avtp_CanXlBrief_SetRrs(Avtp_CanXlBrief_t* msg, bool rrs) {
+    __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_RRS, rrs);
 }
 
 /**
