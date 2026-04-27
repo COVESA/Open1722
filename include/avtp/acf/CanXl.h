@@ -30,7 +30,7 @@
 /**
  * @file This files contains functions for de-/serialization of the ACF_CANXL
  * message format (CAN XL). For details see IEEE Std. 1722-2025,
- * chapter 9.4.14.
+ * chapter 9.4.18.
  */
 
 #pragma once
