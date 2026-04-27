@@ -75,7 +75,7 @@ typedef enum {
     AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP,
     AVTP_CANXL_FIELD_VCID,
     AVTP_CANXL_FIELD_SDT,
-    AVTP_CANXL_FIELD_RSS,
+    AVTP_CANXL_FIELD_RRS,
     AVTP_CANXL_FIELD_SEC,
     AVTP_CANXL_FIELD_PRIORITY_ID,
     AVTP_CANXL_FIELD_ACCEPTANCE_FIELD,
@@ -101,7 +101,7 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_FIELDS[AVTP_CANXL_FIELD_MAX] =
     [AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP]      = { .quadlet = 1, .offset =  0, .bits =  64 },
     [AVTP_CANXL_FIELD_VCID]                   = { .quadlet = 3, .offset =  0, .bits =   8 },
     [AVTP_CANXL_FIELD_SDT]                    = { .quadlet = 3, .offset =  8, .bits =   8 },
-    [AVTP_CANXL_FIELD_RSS]                    = { .quadlet = 3, .offset = 19, .bits =   1 },
+    [AVTP_CANXL_FIELD_RRS]                    = { .quadlet = 3, .offset = 19, .bits =   1 },
     [AVTP_CANXL_FIELD_SEC]                    = { .quadlet = 3, .offset = 20, .bits =   1 },
     [AVTP_CANXL_FIELD_PRIORITY_ID]            = { .quadlet = 3, .offset = 21, .bits =  11 },
     [AVTP_CANXL_FIELD_ACCEPTANCE_FIELD]       = { .quadlet = 4, .offset =  0, .bits =  32 },
@@ -203,13 +203,13 @@ static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
 }
 
 /**
- * Returns the value of the rss flag from an ACF_CANXL message header.
+ * Returns the value of the rrs flag from an ACF_CANXL message header.
  * 
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the rss flag.
  */
-static inline bool Avtp_CanXl_IsRss(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RSS);
+static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
+    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RRS);
 }
 
 /**
@@ -352,10 +352,10 @@ static inline void Avtp_CanXl_SetSdt(Avtp_CanXl_t* msg, uint8_t sdt) {
  * Sets the value of the rss flag in an ACF_CANXL message header.
  * 
  * @param msg Pointer to an ACF_CANXL message.
- * @param rss The value to set.
+ * @param rrs The value to set.
  */
-static inline void Avtp_CanXl_SetRss(Avtp_CanXl_t* msg, bool rss) {
-    __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_RSS, rss);
+static inline void Avtp_CanXl_SetRrs(Avtp_CanXl_t* msg, bool rrs) {
+    __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_RRS, rrs);
 }
 
 /**
