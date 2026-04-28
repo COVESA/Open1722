@@ -123,7 +123,7 @@ static const Avtp_FieldDescriptor_t __AVTP_GISF_FIELDS[AVTP_GISF_FIELD_MAX] =
  * Macro to set the value of a field in an ACF_GISF message header.
  * 
  * @note This macro should not be used directly, instead use the field specific
- * getter functions defined below.
+ * setter functions defined below.
  */
 #define __Avtp_Gisf_SetField(field, value) \
         (Avtp_SetField(__AVTP_GISF_FIELDS, AVTP_GISF_FIELD_MAX, (uint8_t*)msg, field, value))

@@ -28,7 +28,7 @@
  */
 
 /**
- * @file This files contains functions for de-/serialization of the ACF_CANXL
+ * @file This file contains functions for de-/serialization of the ACF_CANXL
  * message format (CAN XL). For details see IEEE Std. 1722-2025,
  * chapter 9.4.18.
  */
@@ -123,7 +123,7 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_FIELDS[AVTP_CANXL_FIELD_MAX] =
  * Macro to set the value of a field in an ACF_CANXL message header.
  * 
  * @note This macro should not be used directly, instead use the field specific
- * getter functions defined below.
+ * setter functions defined below.
  */
 #define __Avtp_CanXl_SetField(field, value) \
         (Avtp_SetField(__AVTP_CANXL_FIELDS, AVTP_CANXL_FIELD_MAX, (uint8_t*)msg, field, value))
@@ -206,7 +206,7 @@ static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
  * Returns the value of the rrs flag from an ACF_CANXL message header.
  * 
  * @param msg Pointer to an ACF_CANXL message.
- * @returns The value of the rss flag.
+ * @returns The value of the rrs flag.
  */
 static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
     return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RRS);
@@ -274,7 +274,7 @@ static inline uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
 }
 
 /**
- * Returns the paload length from an ACF_CANXL message (in bytes). This is
+ * Returns the payload length from an ACF_CANXL message (in bytes). This is
  * calculated based on the value of the acf_msg_length field in the header
  * as well as the value of the pad field.
  * 
@@ -349,7 +349,7 @@ static inline void Avtp_CanXl_SetSdt(Avtp_CanXl_t* msg, uint8_t sdt) {
 }
 
 /**
- * Sets the value of the rss flag in an ACF_CANXL message header.
+ * Sets the value of the rrs flag in an ACF_CANXL message header.
  * 
  * @param msg Pointer to an ACF_CANXL message.
  * @param rrs The value to set.
