@@ -258,7 +258,7 @@ Vss_Datatype_t Avtp_Vss_GetDatatype(const Avtp_Vss_t* const pdu);
 uint64_t Avtp_Vss_GetMsgTimestamp(const Avtp_Vss_t* const pdu);
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t* const pdu, VssPath_t* val);
 void Avtp_Vss_GetVssData(const Avtp_Vss_t* const pdu, VssData_t* val);
-uint8_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* str_array);
+uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* str_array);
 uint16_t Avtp_Vss_CalcVssPathLength (const Avtp_Vss_t* const pdu);
 void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t*  const vss_data_string_array,
                                      VssDataString_t* strings[],

@@ -155,14 +155,33 @@ uint16_t Avtp_Vss_CalcVssPathLength(const Avtp_Vss_t* const pdu) {
     return path_length;
 }
 
-uint8_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* const str_array) {
-
+uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* const str_array) {
+    /* Walk the [length-prefix : 2 bytes][string : length bytes] pairs that
+     * make up the on-wire string-array layout, counting how many fit in
+     * str_array->data_length.
+     *
+     * Bounds checks:
+     *   1. ptr_idx + 2 <= total_length, before reading the length prefix
+     *      (the previous loop condition `ptr_idx < total_length` was off
+     *      by one and would OOB-read the length field on the last byte).
+     *   2. ptr_idx + 2 + str_length <= total_length, before accepting the
+     *      string. This is computed in uint32_t so the addition cannot
+     *      itself overflow when str_length approaches UINT16_MAX.
+     *
+     * Return type widened from uint8_t to uint16_t so counts up to 65535
+     * (a real upper bound given total_length is uint16_t) are not
+     * silently truncated mod 256. */
     uint16_t total_length = str_array->data_length;
     const uint8_t * vss_data_string_array_raw = str_array->data;
     uint16_t idx = 0, ptr_idx = 0;
-    while (ptr_idx < total_length) {
+    while ((uint32_t)ptr_idx + 2 <= total_length) {
 
         uint16_t str_length = Avtp_BeToCpu16(*(const uint16_t*)(vss_data_string_array_raw+ptr_idx));
+        if ((uint32_t)ptr_idx + 2 + str_length > total_length) {
+            /* Truncated or malformed array: stop counting at the last
+             * fully-contained string. */
+            break;
+        }
         ptr_idx += 2 + str_length;
         idx++;
     }
@@ -173,19 +192,38 @@ uint8_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* const s
 void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t* const vss_data_string_array,
                                      VssDataString_t* strings[],
                                      uint16_t num_strings) {
-
+    /* Same on-wire layout as in GetVSSDataStringArrayLength above, but here
+     * we copy each string's body into the caller-supplied output structs.
+     *
+     * The previous implementation declared `uint16_t idx = 0;` and only
+     * checked `if (idx >= array_length) break;` — but `idx` was never
+     * incremented, so the break was dead code (it only fired when
+     * array_length == 0). Combined with attacker-controlled str_length
+     * values up to UINT16_MAX, this allowed memcpy() to read up to ~64 KiB
+     * past the end of vss_data_string_array->data on every iteration after
+     * the first malicious string.
+     *
+     * Track bytes consumed and validate (a) that 2 length-prefix bytes are
+     * available before reading them, and (b) that str_length more bytes
+     * are available before memcpy'ing them. The additions are computed in
+     * uint32_t so the bound check itself cannot overflow. */
     uint16_t array_length = vss_data_string_array->data_length;
     const uint8_t* array_data = vss_data_string_array->data;
-    uint16_t idx = 0;
+    uint16_t consumed = 0;
 
     for (int i = 0; i < num_strings; i++) {
-        if(idx >= array_length) break;
+        if ((uint32_t)consumed + 2 > array_length) break;
 
-        strings[i]->data_length = Avtp_BeToCpu16(*(const uint16_t*)array_data);
+        uint16_t str_length = Avtp_BeToCpu16(*(const uint16_t*)array_data);
+        if ((uint32_t)consumed + 2 + str_length > array_length) break;
+
+        if (strings[i] == NULL) break;
+        strings[i]->data_length = str_length;
         if (strings[i]->data != NULL) {
-            memcpy(strings[i]->data, array_data+2, strings[i]->data_length);
+            memcpy(strings[i]->data, array_data + 2, str_length);
         }
-        array_data += 2 + strings[i]->data_length;
+        array_data += 2 + str_length;
+        consumed   += 2 + str_length;
     }
 }
 
