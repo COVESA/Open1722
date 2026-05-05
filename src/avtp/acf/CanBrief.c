@@ -79,9 +79,21 @@ const uint8_t* Avtp_CanBrief_GetPayload(const Avtp_CanBrief_t* const can_pdu) {
 }
 
 uint8_t Avtp_CanBrief_GetCanPayloadLength(const Avtp_CanBrief_t* const pdu) {
-    uint8_t acf_msg_length = Avtp_CanBrief_GetAcfMsgLength(pdu) * 4;
-    uint8_t acf_pad_length = Avtp_CanBrief_GetPad(pdu);
-    return acf_msg_length - AVTP_CAN_BRIEF_HEADER_LEN - acf_pad_length;
+    /* See the matching logic in src/avtp/acf/Can.c — same bounds-rejection
+     * approach, applied to the CAN Brief variant. */
+    static const uint16_t MAX_CAN_FD_PAYLOAD = 64;
+    uint16_t msg_length_bytes = (uint16_t)Avtp_CanBrief_GetAcfMsgLength(pdu) * 4;
+    uint8_t  pad_length       = Avtp_CanBrief_GetPad(pdu);
+    uint16_t header_and_pad   = (uint16_t)AVTP_CAN_BRIEF_HEADER_LEN + pad_length;
+
+    if (msg_length_bytes < header_and_pad) {
+        return 0;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+    if (payload_length > MAX_CAN_FD_PAYLOAD) {
+        return 0;
+    }
+    return (uint8_t)payload_length;
 }
 
 uint8_t Avtp_CanBrief_IsValid(const Avtp_CanBrief_t* const pdu, size_t bufferSize)

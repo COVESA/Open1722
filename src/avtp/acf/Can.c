@@ -68,9 +68,36 @@ void Avtp_Can_Finalize(Avtp_Can_t* pdu, uint16_t payload_length)
 
 uint8_t Avtp_Can_GetCanPayloadLength(const Avtp_Can_t* const pdu)
 {
-    uint8_t acf_msg_length = Avtp_Can_GetAcfMsgLength(pdu) * 4;
-    uint8_t acf_pad_length = Avtp_Can_GetPad(pdu);
-    return acf_msg_length - AVTP_CAN_HEADER_LEN - acf_pad_length;
+    /* CAN-FD's maximum valid payload is 64 bytes (classic CAN: 8). Any
+     * encoded length outside that range cannot represent a valid CAN
+     * frame, so we reject by returning 0 rather than silently producing
+     * a wrong number.
+     *
+     * The earlier implementation stored both the byte-count and the
+     * return value in uint8_t. The byte-count is computed as
+     * AcfMsgLength * 4, where AcfMsgLength is a 9-bit field, so the
+     * (uint8_t)(...*4) truncated mod 256 for any frame whose AcfMsgLength
+     * exceeded 63 quadlets — yielding a plausible-looking but incorrect
+     * payload length. We compute in uint16_t internally and bounds-
+     * reject before narrowing back to uint8_t for the return. */
+    static const uint16_t MAX_CAN_FD_PAYLOAD = 64;
+    uint16_t msg_length_bytes = (uint16_t)Avtp_Can_GetAcfMsgLength(pdu) * 4;
+    uint8_t  pad_length       = Avtp_Can_GetPad(pdu);
+    uint16_t header_and_pad   = (uint16_t)AVTP_CAN_HEADER_LEN + pad_length;
+
+    /* Underflow guard: header + pad must not exceed the encoded message
+     * length. Otherwise the subtraction below wraps and we'd return a
+     * huge value cast to uint8_t. */
+    if (msg_length_bytes < header_and_pad) {
+        return 0;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+
+    /* Overflow guard: a valid CAN/CAN-FD payload can't exceed 64 bytes. */
+    if (payload_length > MAX_CAN_FD_PAYLOAD) {
+        return 0;
+    }
+    return (uint8_t)payload_length;
 }
 
 uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
