@@ -1,6 +1,6 @@
 module open1722-can-tracing-extensive
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/bsipos/thist v1.0.0
@@ -13,7 +13,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/image v0.38.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
 	gonum.org/v1/plot v0.0.0-20190515093506-e2840ee46a6b // indirect
