@@ -315,6 +315,17 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
             return -1;
         }
 
+        /* Verify the CAN-specific invariants now that the ACF message
+         * type is confirmed: the encoded message length must fit the
+         * remaining buffer, and the resulting payload size must match
+         * the CAN/CAN-FD bound encoded by the FDF bit. Without this
+         * guard a malformed frame could feed garbage values to the
+         * consumers below. */
+        if (!Avtp_Can_IsValid((Avtp_Can_t*)acf_pdu, msg_length - proc_bytes)) {
+            LOG_ERR("Error: ACF CAN frame failed validation, ignoring frame.\n");
+            return -1;
+        }
+
         canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
         const uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
         uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;

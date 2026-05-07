@@ -442,6 +442,12 @@ void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
  * Returns the length of the CAN payload without the padding bytes and the
  * header length of the encapsulating ACF Frame.
  *
+ * Precondition: the caller must have validated the PDU with
+ * Avtp_Can_IsValid(). IsValid checks both buffer-size containment and the
+ * CAN payload-length invariant (<= 8 bytes for classic CAN, <= 64 bytes
+ * for CAN-FD). This function performs no further bounds checking and
+ * assumes those invariants already hold.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return  Length of CAN payload in bytes
  */
