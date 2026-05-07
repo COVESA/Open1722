@@ -32,7 +32,7 @@
 
 ## Introduction
 
-Open1722 is a fork of [AVNU/libavtp](https://github.com/Avnu/libavtp) which is an open source reference implementation of the Audio Video Transport Protocol (AVTP) specified in IEEE 1722-2016 spec. _libavtp_ primarily focuses on audio video data formats of the IEEE 1722-2016 spec.
+Open1722 is a fork of [AVNU/libavtp](https://github.com/Avnu/libavtp) which is an open source reference implementation of the Audio Video Transport Protocol (AVTP) specified in IEEE 1722-2025 spec. _libavtp_ primarily focuses on audio video data formats of the IEEE 1722-2016 spec.
 
 IEEE 1722 is also gaining a lot of traction in the automotive community, mainly, to bridge fieldbus technologies over automotive Ethernet. In particular the AVTP Control Formats (ACF) specify serialization for a set of data formats relevant for automotive applications (e.g., CAN, LIN, etc.). Open1722 extends/modifies _libavtp_ to also include these ACF formats.
 
@@ -57,7 +57,7 @@ $ cd build
 $ cmake ..
 $ make
 ```
-This builds the libraries _libopen1722_ containing all the data formats specified in the IEEE 1722-2016 specification along with _libopen1722custom_ which contains customized serialization formats which can be sent over IEEE 1722.
+This builds the libraries _libopen1722_ containing all the data formats specified in the IEEE 1722-2025 specification along with _libopen1722custom_ which contains customized serialization formats which can be sent over IEEE 1722.
 
 To execute available unit tests:
 ```
@@ -90,22 +90,27 @@ $ make
 
 ## AVTP Formats Support
 
-AVTP protocol defines several AVTPDU type formats (see Table 6 from IEEE 1722-2016 spec).
+AVTP protocol defines several AVTPDU type formats (see Table 7 from IEEE 1722-2025 spec).
 
 The following is the list of the formats currently supported by Open1722:
  - AAF (PCM encapsulation only)
  - CRF
  - CVF (H.264, MJPEG, JPEG2000)
  - RVF
- - AVTP Control Formats (ACF) with Non-Time-Synchronous as well as Time-Synchronous formats (see Table 22 from IEEE 1722-2016 spec)
-    - CAN
-    - CAN Brief
+ - AVTP Control Formats (ACF) with Non-Time-Synchronous as well as Time-Synchronous formats (see Table 23 from IEEE 1722-2025 spec)
+    - CAN (v1 & v2)
+    - CAN Brief (v1 & v2)
+    - CAN-XL
+    - CAN-XL Brief
     - Flexray
     - LIN
     - MOST
     - GPC
     - Sensor
     - Sensor Brief
+    - Generic Byte Bus
+    - Abbreviated Byte Bus
+    - Generic Image Sensor Format (GISF)
   - Custom formats not included in the standard but can be transported on top of IEEE 1722
     - COVESA Vehicle Signal Specification (VSS) [(Protocol description)](./examples/acf-vss/protocol_description/acf-vss.md)
 
