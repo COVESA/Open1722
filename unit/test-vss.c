@@ -1022,6 +1022,59 @@ static void vss_data_string_array(void **state) {
 
 }
 
+static void vss_data_string_array_malformed(void **state) {
+    /* On-wire layout for a VSS string array is [u16 length][bytes ...]
+     * pairs. Construct a 23-byte payload identical to the well-formed
+     * fixture in vss_data_string_array, except the third length prefix
+     * has been corrupted from 0x0007 to 0x00AA. The third entry now
+     * claims 170 bytes of body, but only 7 bytes of buffer remain after
+     * its length prefix.
+     *
+     * Per the bounds-check fix in this PR, the parser must:
+     *   - stop counting at the last fully-contained string, so
+     *     GetVSSDataStringArrayLength returns 2 (not 3, and not 0);
+     *   - refuse to memcpy past the buffer end, so
+     *     DeserializeStringArray fills the first two output structs
+     *     with the well-formed strings and leaves the third untouched.
+     *
+     * Without the fix, the same input would have driven memcpy to read
+     * up to ~64 KiB past the end of the buffer in
+     * DeserializeStringArray (heap disclosure / crash) and produced an
+     * uint16_t-arithmetic wrap in GetVSSDataStringArrayLength
+     * (pseudo-infinite loop / DoS). */
+    uint8_t arr_in_mem[] = {
+        0x00, 0x05, 'H', 'e', 'l', 'l', 'o',
+        0x00, 0x05, 'W', 'o', 'r', 'l', 'd',
+        0x00, 0xAA, 'T', 's', 'c', 'h', 'u', 's', 's',
+    };
+
+    VssDataStringArray_t str_array = {0};
+    str_array.data = arr_in_mem;
+    str_array.data_length = sizeof(arr_in_mem);
+
+    /* Counting must stop at the second well-formed string. */
+    assert_int_equal(Avtp_Vss_GetVSSDataStringArrayLength(&str_array), 2);
+
+    /* Deserialisation must fill only the first two entries. The third
+     * struct stays at its initial state (data_length == 0). */
+    char buf1[8] = {0}, buf2[8] = {0}, buf3[8] = {0};
+    VssDataString_t s1 = {0}; s1.data = buf1;
+    VssDataString_t s2 = {0}; s2.data = buf2;
+    VssDataString_t s3 = {0}; s3.data = buf3;
+    VssDataString_t* strings_array[] = {&s1, &s2, &s3};
+
+    Avtp_Vss_DeserializeStringArray(&str_array, strings_array, 3);
+
+    assert_int_equal(s1.data_length, 5);
+    assert_memory_equal(s1.data, "Hello", 5);
+    assert_int_equal(s2.data_length, 5);
+    assert_memory_equal(s2.data, "World", 5);
+
+    /* Third string was rejected by the bounds check; the output struct
+     * is left at its initial state. */
+    assert_int_equal(s3.data_length, 0);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -1053,6 +1106,7 @@ int main(void)
         cmocka_unit_test(vss_data_float_array),
         cmocka_unit_test(vss_data_double_array),
         cmocka_unit_test(vss_data_string_array),
+        cmocka_unit_test(vss_data_string_array_malformed),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
