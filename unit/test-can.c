@@ -124,26 +124,68 @@ static void can_set_payload(void **state) {
 
 static void can_is_valid(void **state) {
 
-    uint8_t pdu[MAX_PDU_SIZE], result;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t frame_id = 0x123;
 
-    // Valid IEEE 1722 CAN Frame
+    // An Init-only PDU has AcfMsgLength == 0 — i.e. it declares a frame
+    // shorter than its own header. Per IEEE 1722 ACF wire format that is
+    // not a valid frame, so IsValid must reject it.
     Avtp_Can_Init((Avtp_Can_t*)pdu);
-    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 0);
 
-    // Not a IEEE 1722 CAN Frame
+    // A properly-formed classic CAN frame with an 8-byte payload (the
+    // classic-CAN max) is valid.
+    {
+        uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+        Avtp_Can_Init((Avtp_Can_t*)pdu);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t*)pdu, frame_id, payload,
+                                  sizeof(payload), AVTP_CAN_CLASSIC);
+        assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 1);
+    }
+
+    // Not an IEEE 1722 ACF-CAN message (zero buffer, AcfMsgType != CAN).
     memset(pdu, 0, MAX_PDU_SIZE);
     assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 0);
 
-    // Valid IEEE 1722 CAN Frame (Length 24, Buffer 25)
+    // Valid IEEE 1722 CAN Frame (Length 24, Buffer 25). AcfMsgLength=6
+    // quadlets = 24 bytes; payload = 24 - 16 header = 8 bytes (classic max).
     Avtp_Can_Init((Avtp_Can_t*)pdu);
     Avtp_Can_SetAcfMsgLength((Avtp_Can_t*)pdu, 6);
     assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, 25), 1);
 
-    // Invalid IEEE 1722 CAN Frame (Length 24 but buffer only 9!)
+    // Invalid IEEE 1722 CAN Frame (Length 24 but buffer only 9!).
     Avtp_Can_Init((Avtp_Can_t*)pdu);
     Avtp_Can_SetAcfMsgLength((Avtp_Can_t*)pdu, 6);
     assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, 9), 0);
 
+    // Classic CAN payload bound: a frame declaring a 12-byte payload as
+    // classic CAN is invalid (classic tops out at 8). Constructed by
+    // handing CreateAcfMessage an oversized payload while marking the
+    // frame as classic — the wire encoding succeeds but IsValid rejects.
+    {
+        uint8_t too_big[12] = {0};
+        Avtp_Can_Init((Avtp_Can_t*)pdu);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t*)pdu, frame_id, too_big,
+                                  sizeof(too_big), AVTP_CAN_CLASSIC);
+        assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 0);
+    }
+
+    // CAN-FD payload bound: 64 bytes is at the FD limit (valid); 68 bytes
+    // exceeds it (invalid).
+    {
+        uint8_t fd_max[64] = {0};
+        Avtp_Can_Init((Avtp_Can_t*)pdu);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t*)pdu, frame_id, fd_max,
+                                  sizeof(fd_max), AVTP_CAN_FD);
+        assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 1);
+    }
+    {
+        uint8_t fd_too_big[68] = {0};
+        Avtp_Can_Init((Avtp_Can_t*)pdu);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t*)pdu, frame_id, fd_too_big,
+                                  sizeof(fd_too_big), AVTP_CAN_FD);
+        assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 0);
+    }
 }
 
 int main(void)
