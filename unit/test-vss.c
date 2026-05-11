@@ -1030,18 +1030,13 @@ static void vss_data_string_array_malformed(void **state) {
      * claims 170 bytes of body, but only 7 bytes of buffer remain after
      * its length prefix.
      *
-     * Per the bounds-check fix in this PR, the parser must:
+     * Per the bounds-check, the parser must:
      *   - stop counting at the last fully-contained string, so
      *     GetVSSDataStringArrayLength returns 2 (not 3, and not 0);
      *   - refuse to memcpy past the buffer end, so
      *     DeserializeStringArray fills the first two output structs
      *     with the well-formed strings and leaves the third untouched.
-     *
-     * Without the fix, the same input would have driven memcpy to read
-     * up to ~64 KiB past the end of the buffer in
-     * DeserializeStringArray (heap disclosure / crash) and produced an
-     * uint16_t-arithmetic wrap in GetVSSDataStringArrayLength
-     * (pseudo-infinite loop / DoS). */
+     */
     uint8_t arr_in_mem[] = {
         0x00, 0x05, 'H', 'e', 'l', 'l', 'o',
         0x00, 0x05, 'W', 'o', 'r', 'l', 'd',
