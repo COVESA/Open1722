@@ -65,37 +65,37 @@ uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t* const pdu, Avtp_AafFields_t field)
 
 uint8_t Avtp_Aaf_GetSubtype(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_SUBTYPE);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_SV);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SV);
 }
 
 uint8_t Avtp_Aaf_GetVersion(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_VERSION);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_VERSION);
 }
 
 uint8_t Avtp_Aaf_GetMr(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_MR);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_MR);
 }
 
 uint8_t Avtp_Aaf_GetTv(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_TV);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_TV);
 }
 
 uint8_t Avtp_Aaf_GetSequenceNum(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_SEQUENCE_NUM);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SEQUENCE_NUM);
 }
 
 uint8_t Avtp_Aaf_GetTu(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_TU);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_TU);
 }
 
 uint64_t Avtp_Aaf_GetStreamId(const Avtp_Aaf_t* const pdu)
@@ -105,32 +105,32 @@ uint64_t Avtp_Aaf_GetStreamId(const Avtp_Aaf_t* const pdu)
 
 uint32_t Avtp_Aaf_GetAvtpTimestamp(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_AVTP_TIMESTAMP);
+    return (uint32_t)GET_FIELD(AVTP_AAF_FIELD_AVTP_TIMESTAMP);
 }
 
 uint8_t Avtp_Aaf_GetFormat(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_FORMAT);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_FORMAT);
 }
 
 uint16_t Avtp_Aaf_GetStreamDataLength(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_STREAM_DATA_LENGTH);
+    return (uint16_t)GET_FIELD(AVTP_AAF_FIELD_STREAM_DATA_LENGTH);
 }
 
 uint8_t Avtp_Aaf_GetAfsd(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_AFSD);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_AFSD);
 }
 
 uint8_t Avtp_Aaf_GetSp(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_SP);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SP);
 }
 
 uint8_t Avtp_Aaf_GetEvt(const Avtp_Aaf_t* const pdu)
 {
-    return GET_FIELD(AVTP_AAF_FIELD_EVT);
+    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_EVT);
 }
 
 void Avtp_Aaf_SetField(Avtp_Aaf_t* pdu, Avtp_AafFields_t field, uint64_t value)

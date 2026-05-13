@@ -141,7 +141,7 @@ static inline void Avtp_CanV2_Init(Avtp_CanV2_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_CanV2_GetPad(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_PAD);
+    return (uint8_t) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_PAD);
 }
 
 /**
@@ -152,7 +152,7 @@ static inline uint8_t Avtp_CanV2_GetPad(const Avtp_CanV2_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_CanV2_IsMtv(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_MTV);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_MTV);
 }
 
 /**
@@ -163,7 +163,7 @@ static inline bool Avtp_CanV2_IsMtv(const Avtp_CanV2_t* msg) {
  * @returns The value of the rtr flag.
  */
 static inline bool Avtp_CanV2_IsRtr(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_RTR);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_RTR);
 }
 
 /**
@@ -174,7 +174,7 @@ static inline bool Avtp_CanV2_IsRtr(const Avtp_CanV2_t* msg) {
  * @returns The value of the eff flag.
  */
 static inline bool Avtp_CanV2_IsEff(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_EFF);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_EFF);
 }
 
 /**
@@ -184,7 +184,7 @@ static inline bool Avtp_CanV2_IsEff(const Avtp_CanV2_t* msg) {
  * @returns The value of the can_bus_id field.
  */
 static inline uint16_t Avtp_CanV2_GetCanBusId(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_CAN_BUS_ID);
+    return (uint16_t) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -195,7 +195,7 @@ static inline uint16_t Avtp_CanV2_GetCanBusId(const Avtp_CanV2_t* msg) {
  * @returns The value of the message_timestamp field.
  */
 static inline uint64_t Avtp_CanV2_GetMessageTimestamp(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -205,7 +205,7 @@ static inline uint64_t Avtp_CanV2_GetMessageTimestamp(const Avtp_CanV2_t* msg) {
  * @returns The value of the brs flag.
  */
 static inline bool Avtp_CanV2_IsBrs(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_BRS);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_BRS);
 }
 
 /**
@@ -215,7 +215,7 @@ static inline bool Avtp_CanV2_IsBrs(const Avtp_CanV2_t* msg) {
  * @returns The value of the fdf flag.
  */
 static inline bool Avtp_CanV2_IsFdf(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_FDF);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_FDF);
 }
 
 /**
@@ -225,7 +225,7 @@ static inline bool Avtp_CanV2_IsFdf(const Avtp_CanV2_t* msg) {
  * @returns The value of the esi flag.
  */
 static inline bool Avtp_CanV2_IsEsi(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ESI);
+    return (bool) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ESI);
 }
 
 /**
@@ -235,7 +235,7 @@ static inline bool Avtp_CanV2_IsEsi(const Avtp_CanV2_t* msg) {
  * @returns The value of the can_identifier field.
  */
 static inline uint32_t Avtp_CanV2_GetCanIdentifier(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_CAN_IDENTIFIER);
+    return (uint32_t) __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_CAN_IDENTIFIER);
 }
 
 /**
@@ -247,9 +247,9 @@ static inline uint32_t Avtp_CanV2_GetCanIdentifier(const Avtp_CanV2_t* msg) {
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_CanV2_GetPayloadLen(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_CAN_V2_HEADER_LEN
-           - __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_PAD);
+           - __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_PAD));
 }
 
 /**
@@ -260,7 +260,7 @@ static inline uint16_t Avtp_CanV2_GetPayloadLen(const Avtp_CanV2_t* msg) {
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_CanV2_GetLen(const Avtp_CanV2_t* msg) {
-    return __Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_CanV2_GetField(AVTP_CAN_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

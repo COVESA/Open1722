@@ -96,37 +96,37 @@ uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t* const pdu, Avtp_RvfField_t field)
 
 uint8_t Avtp_Rvf_GetSubtype(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_SUBTYPE);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_SV);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_SV);
 }
 
 uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_VERSION);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_VERSION);
 }
 
 uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_MR);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_MR);
 }
 
 uint8_t Avtp_Rvf_GetTv(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_TV);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_TV);
 }
 
 uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_SEQUENCE_NUM);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_SEQUENCE_NUM);
 }
 
 uint8_t Avtp_Rvf_GetTu(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_TU);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_TU);
 }
 
 uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t* const pdu)
@@ -136,87 +136,87 @@ uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t* const pdu)
 
 uint32_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_AVTP_TIMESTAMP);
+    return (uint32_t)GET_FIELD(AVTP_RVF_FIELD_AVTP_TIMESTAMP);
 }
 
 uint16_t Avtp_Rvf_GetActivePixels(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_ACTIVE_PIXELS);
+    return (uint16_t)GET_FIELD(AVTP_RVF_FIELD_ACTIVE_PIXELS);
 }
 
 uint16_t Avtp_Rvf_GetTotalLines(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_TOTAL_LINES);
+    return (uint16_t)GET_FIELD(AVTP_RVF_FIELD_TOTAL_LINES);
 }
 
 uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_STREAM_DATA_LEN);
+    return (uint16_t)GET_FIELD(AVTP_RVF_FIELD_STREAM_DATA_LEN);
 }
 
 uint8_t Avtp_Rvf_GetAp(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_AP);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_AP);
 }
 
 uint8_t Avtp_Rvf_GetF(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_F);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_F);
 }
 
 uint8_t Avtp_Rvf_GetEf(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_EF);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_EF);
 }
 
 uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_EVT);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_EVT);
 }
 
 uint8_t Avtp_Rvf_GetPd(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_PD);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_PD);
 }
 
 uint8_t Avtp_Rvf_GetI(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_I);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_I);
 }
 
 Avtp_RvfPixelDepth_t Avtp_Rvf_GetPixelDepth(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_PIXEL_DEPTH);
+    return (Avtp_RvfPixelDepth_t)GET_FIELD(AVTP_RVF_FIELD_PIXEL_DEPTH);
 }
 
 Avtp_RvfPixelFormat_t Avtp_Rvf_GetPixelFormat(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_PIXEL_FORMAT);
+    return (Avtp_RvfPixelFormat_t)GET_FIELD(AVTP_RVF_FIELD_PIXEL_FORMAT);
 }
 
 Avtp_RvfFrameRate_t Avtp_Rvf_GetFrameRate(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_FRAME_RATE);
+    return (Avtp_RvfFrameRate_t)GET_FIELD(AVTP_RVF_FIELD_FRAME_RATE);
 }
 
 Avtp_RvfColorspace_t Avtp_Rvf_GetColorspace(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_COLORSPACE);
+    return (Avtp_RvfColorspace_t)GET_FIELD(AVTP_RVF_FIELD_COLORSPACE);
 }
 
 uint8_t Avtp_Rvf_GetNumLines(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_NUM_LINES);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_NUM_LINES);
 }
 
 uint8_t Avtp_Rvf_GetISeqNum(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_I_SEQ_NUM);
+    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_I_SEQ_NUM);
 }
 
 uint16_t Avtp_Rvf_GetLineNumber(const Avtp_Rvf_t* const pdu)
 {
-    return GET_FIELD(AVTP_RVF_FIELD_LINE_NUMBER);
+    return (uint16_t)GET_FIELD(AVTP_RVF_FIELD_LINE_NUMBER);
 }
 
 void Avtp_Rvf_SetField(Avtp_Rvf_t* pdu, Avtp_RvfField_t field, uint64_t value)

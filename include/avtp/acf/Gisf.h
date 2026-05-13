@@ -147,7 +147,7 @@ static inline void Avtp_Gisf_Init(Avtp_Gisf_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_PAD);
+    return (uint8_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_PAD);
 }
 
 /**
@@ -158,7 +158,7 @@ static inline uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_Gisf_IsMtv(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_MTV);
+    return (bool) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_MTV);
 }
 
 /**
@@ -169,7 +169,7 @@ static inline bool Avtp_Gisf_IsMtv(const Avtp_Gisf_t* msg) {
  * @returns The value of the image_sensor_id field.
  */
 static inline uint16_t Avtp_Gisf_GetImageSensorId(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_IMAGE_SENSOR_ID);
+    return (uint16_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_IMAGE_SENSOR_ID);
 }
 
 /**
@@ -180,7 +180,7 @@ static inline uint16_t Avtp_Gisf_GetImageSensorId(const Avtp_Gisf_t* msg) {
  * @returns The value of the message_timestamp field.
  */
 static inline uint64_t Avtp_Gisf_GetMessageTimestamp(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -190,7 +190,7 @@ static inline uint64_t Avtp_Gisf_GetMessageTimestamp(const Avtp_Gisf_t* msg) {
  * @returns The value of the el flag.
  */
 static inline bool Avtp_Gisf_IsEl(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EL);
+    return (bool) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EL);
 }
 
 /**
@@ -201,7 +201,7 @@ static inline bool Avtp_Gisf_IsEl(const Avtp_Gisf_t* msg) {
  * @returns The value of the tl flag.
  */
 static inline bool Avtp_Gisf_IsTl(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_TL);
+    return (bool) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_TL);
 }
 
 /**
@@ -212,7 +212,7 @@ static inline bool Avtp_Gisf_IsTl(const Avtp_Gisf_t* msg) {
  * @returns The value of the ef flag.
  */
 static inline bool Avtp_Gisf_IsEf(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EF);
+    return (bool) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EF);
 }
 
 /**
@@ -222,7 +222,7 @@ static inline bool Avtp_Gisf_IsEf(const Avtp_Gisf_t* msg) {
  * @returns The value of the evt field.
  */
 static inline uint8_t Avtp_Gisf_GetEvt(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EVT);
+    return (uint8_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EVT);
 }
 
 /**
@@ -233,7 +233,7 @@ static inline uint8_t Avtp_Gisf_GetEvt(const Avtp_Gisf_t* msg) {
  * @returns The value of the bf flag.
  */
 static inline bool Avtp_Gisf_IsBf(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_BF);
+    return (bool) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_BF);
 }
 
 /**
@@ -243,7 +243,7 @@ static inline bool Avtp_Gisf_IsBf(const Avtp_Gisf_t* msg) {
  * @returns The value of the line_type_id value.
  */
 static inline uint8_t Avtp_Gisf_GetLineTypeId(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_LINE_TYPE_ID);
+    return (uint8_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_LINE_TYPE_ID);
 }
 
 /**
@@ -254,7 +254,7 @@ static inline uint8_t Avtp_Gisf_GetLineTypeId(const Avtp_Gisf_t* msg) {
  * @returns The value of the evt2 field.
  */
 static inline uint8_t Avtp_Gisf_GetEvt2(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EVT2);
+    return (uint8_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_EVT2);
 }
 
 /**
@@ -265,7 +265,7 @@ static inline uint8_t Avtp_Gisf_GetEvt2(const Avtp_Gisf_t* msg) {
  * @returns The value of the i_seq_num field.
  */
 static inline uint8_t Avtp_Gisf_GetISeqNum(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_I_SEQ_NUM);
+    return (uint8_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_I_SEQ_NUM);
 }
 
 /**
@@ -275,7 +275,7 @@ static inline uint8_t Avtp_Gisf_GetISeqNum(const Avtp_Gisf_t* msg) {
  * @returns The value of the line_number field.
  */
 static inline uint16_t Avtp_Gisf_GetLineNumber(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_LINE_NUMBER);
+    return (uint16_t) __Avtp_Gisf_GetField(AVTP_GISF_FIELD_LINE_NUMBER);
 }
 
 /**
@@ -287,9 +287,9 @@ static inline uint16_t Avtp_Gisf_GetLineNumber(const Avtp_Gisf_t* msg) {
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_Gisf_GetPayloadLen(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_Gisf_GetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_GISF_HEADER_LEN
-           - __Avtp_Gisf_GetField(AVTP_GISF_FIELD_PAD);
+           - __Avtp_Gisf_GetField(AVTP_GISF_FIELD_PAD));
 }
 
 /**
@@ -300,7 +300,7 @@ static inline uint16_t Avtp_Gisf_GetPayloadLen(const Avtp_Gisf_t* msg) {
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_Gisf_GetLen(const Avtp_Gisf_t* msg) {
-    return __Avtp_Gisf_GetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_Gisf_GetField(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

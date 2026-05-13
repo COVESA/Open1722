@@ -63,7 +63,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 # Compiler setting
-add_compile_options(-Wfatal-errors)
+add_compile_options(-Wfatal-errors -Wconversion -Wsign-conversion)
 find_program(CCACHE_BIN ccache)
 if(CCACHE_BIN)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_BIN})
