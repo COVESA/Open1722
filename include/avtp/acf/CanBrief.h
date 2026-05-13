@@ -120,7 +120,7 @@ static inline uint64_t Avtp_CanBrief_GetField(const Avtp_CanBrief_t* const pdu, 
  * @returns Value of the ACF message type field.
  */
 static inline uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_TYPE);
 }
 /**
  * Return the value of an an ACF message length field as specified in the IEEE 1722 Specification.
@@ -129,7 +129,7 @@ static inline uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t* const p
  * @returns Value of the ACF message length field.
  */
 static inline uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -139,7 +139,7 @@ static inline uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t* cons
  * @returns Value of the ACF padding field.
  */
 static inline uint8_t Avtp_CanBrief_GetPad(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
 }
 
 /** 
@@ -149,7 +149,7 @@ static inline uint8_t Avtp_CanBrief_GetPad(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU MTV field.
  */
 static inline uint8_t Avtp_CanBrief_GetMtv(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_MTV);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_MTV);
 }
 
 /**
@@ -159,7 +159,7 @@ static inline uint8_t Avtp_CanBrief_GetMtv(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU RTR field.
  */
 static inline uint8_t Avtp_CanBrief_GetRtr(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_RTR);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_RTR);
 }
 
 /**
@@ -169,7 +169,7 @@ static inline uint8_t Avtp_CanBrief_GetRtr(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU EFF field.
  */
 static inline uint8_t Avtp_CanBrief_GetEff(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_EFF);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_EFF);
 }
 
 /** 
@@ -179,7 +179,7 @@ static inline uint8_t Avtp_CanBrief_GetEff(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU BRS field.
  */
 static inline uint8_t Avtp_CanBrief_GetBrs(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_BRS);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_BRS);
 }
 
 /**
@@ -189,7 +189,7 @@ static inline uint8_t Avtp_CanBrief_GetBrs(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU FDF field.
  */
 static inline uint8_t Avtp_CanBrief_GetFdf(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_FDF);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_FDF);
 }
 
 /**
@@ -199,7 +199,7 @@ static inline uint8_t Avtp_CanBrief_GetFdf(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU ESI field.
  */
 static inline uint8_t Avtp_CanBrief_GetEsi(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ESI);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ESI);
 }
 
 /**
@@ -209,7 +209,7 @@ static inline uint8_t Avtp_CanBrief_GetEsi(const Avtp_CanBrief_t* const pdu) {
  * @returns Value of the ACF CAN Brief PDU CAN Bus ID field.
  */
 static inline uint8_t Avtp_CanBrief_GetCanBusId(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID);
+    return (uint8_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -219,7 +219,7 @@ static inline uint8_t Avtp_CanBrief_GetCanBusId(const Avtp_CanBrief_t* const pdu
  * @returns Value of the ACF CAN Brief PDU CAN Identifier field.
  */
 static inline uint32_t Avtp_CanBrief_GetCanIdentifier(const Avtp_CanBrief_t* const pdu) {
-    return GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER);
+    return (uint32_t) GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER);
 }
 
 /**

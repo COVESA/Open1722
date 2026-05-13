@@ -62,8 +62,8 @@ int calculate_avtp_time(uint32_t *avtp_time, uint32_t max_transit_time)
         return -1;
     }
 
-    ptime = (tspec.tv_sec * NSEC_PER_SEC) +
-            (max_transit_time * NSEC_PER_MSEC) + tspec.tv_nsec;
+    ptime = ((uint64_t)tspec.tv_sec * NSEC_PER_SEC) +
+            (max_transit_time * NSEC_PER_MSEC) + (uint64_t)tspec.tv_nsec;
 
     *avtp_time = ptime % (1ULL << 32);
 
@@ -81,7 +81,7 @@ int get_presentation_time(uint64_t avtp_time, struct timespec *tspec)
         return -1;
     }
 
-    now = (tspec->tv_sec * NSEC_PER_SEC) + tspec->tv_nsec;
+    now = ((uint64_t)tspec->tv_sec * NSEC_PER_SEC) + (uint64_t)tspec->tv_nsec;
 
     /* The avtp_timestamp within AAF packet is the lower part (32
      * less-significant bits) from presentation time calculated by the
@@ -96,8 +96,8 @@ int get_presentation_time(uint64_t avtp_time, struct timespec *tspec)
     if (ptime < now)
         ptime += (1ULL << 32);
 
-    tspec->tv_sec = ptime / NSEC_PER_SEC;
-    tspec->tv_nsec = ptime % NSEC_PER_SEC;
+    tspec->tv_sec = (__time_t)(ptime / NSEC_PER_SEC);
+    tspec->tv_nsec = (__syscall_slong_t)(ptime % NSEC_PER_SEC);
 
     return 0;
 }
@@ -147,12 +147,12 @@ int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
     }
 
     sk_addr->sll_family = AF_PACKET;
-    sk_addr->sll_protocol = htons(protocol);
+    sk_addr->sll_protocol = htons((uint16_t)protocol);
     sk_addr->sll_halen = ETH_ALEN;
     sk_addr->sll_ifindex = req.ifr_ifindex;
 #elif defined(__ZEPHYR__)
     sk_addr->sll_family = AF_PACKET;
-    sk_addr->sll_protocol = htons(protocol);
+    sk_addr->sll_protocol = htons((uint16_t)protocol);
     sk_addr->sll_halen = ETH_ALEN;
     sk_addr->sll_ifindex = net_if_get_by_iface(net_if_get_default());
 #endif
@@ -166,7 +166,7 @@ int setup_udp_socket_address(struct in_addr *addr, uint32_t port,
 
     sk_addr->sin_family = AF_INET;
     sk_addr->sin_addr = *addr;
-    sk_addr->sin_port = htons(port);
+    sk_addr->sin_port = htons((uint16_t)port);
 
     return 0;
 
@@ -239,7 +239,7 @@ int create_listener_socket_udp(uint32_t udp_port) {
     // Initialize the socket
     memset((char *) &sk_addr, 0, sizeof(sk_addr));
     sk_addr.sin_family = AF_INET;
-    sk_addr.sin_port = htons(udp_port);
+    sk_addr.sin_port = htons((uint16_t)udp_port);
     sk_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     res = bind(fd, (struct sockaddr *) &sk_addr, sizeof(sk_addr));
@@ -260,7 +260,7 @@ int create_listener_socket(char *ifname, uint8_t* macaddr, int protocol)
     int fd, res;
     struct sockaddr_ll sk_addr;
 
-    fd = socket(AF_PACKET, SOCK_DGRAM, htons(protocol));
+    fd = socket(AF_PACKET, SOCK_DGRAM, htons((uint16_t)protocol));
     if (fd < 0) {
         perror("Failed to open socket");
         return -1;

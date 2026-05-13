@@ -147,7 +147,7 @@ static inline void Avtp_CanXl_Init(Avtp_CanXl_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD);
+    return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD);
 }
 
 /**
@@ -158,7 +158,7 @@ static inline uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MTV);
+    return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MTV);
 }
 
 /**
@@ -168,7 +168,7 @@ static inline bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* msg) {
  * @returns The value of the can_bus_id field.
  */
 static inline uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_CAN_BUS_ID);
+    return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -179,7 +179,7 @@ static inline uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* msg) {
  * @returns The value of the message_timestamp field.
  */
 static inline uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -189,7 +189,7 @@ static inline uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* msg) {
  * @returns The value of the vcid field.
  */
 static inline uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_VCID);
+    return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_VCID);
 }
 
 /**
@@ -199,7 +199,7 @@ static inline uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* msg) {
  * @returns The value of the sdt field.
  */
 static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SDT);
+    return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SDT);
 }
 
 /**
@@ -209,7 +209,7 @@ static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
  * @returns The value of the rrs flag.
  */
 static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RRS);
+    return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RRS);
 }
 
 /**
@@ -219,7 +219,7 @@ static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
  * @returns The value of the sec flag.
  */
 static inline bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEC);
+    return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEC);
 }
 
 /**
@@ -229,7 +229,7 @@ static inline bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* msg) {
  * @returns The value of the priority_id field.
  */
 static inline uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PRIORITY_ID);
+    return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PRIORITY_ID);
 }
 
 /**
@@ -239,7 +239,7 @@ static inline uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* msg) {
  * @returns The value of the acceptance_field.
  */
 static inline uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD);
+    return (uint32_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD);
 }
 
 /**
@@ -250,7 +250,7 @@ static inline uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* msg) {
  * @returns The value of the transaction_num field.
  */
 static inline uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_TRANSACTION_NUM);
+    return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_TRANSACTION_NUM);
 }
 
 /**
@@ -260,7 +260,7 @@ static inline uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* msg) {
  * @returns The value of the ms flag.
  */
 static inline bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MS);
+    return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MS);
 }
 
 /**
@@ -270,7 +270,7 @@ static inline bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* msg) {
  * @returns The value of the segment_num field.
  */
 static inline uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEGMENT_NUM);
+    return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEGMENT_NUM);
 }
 
 /**
@@ -282,9 +282,9 @@ static inline uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_CanXl_GetPayloadLen(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_CANXL_HEADER_LEN
-           - __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD);
+           - __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD));
 }
 
 /**
@@ -295,7 +295,7 @@ static inline uint16_t Avtp_CanXl_GetPayloadLen(const Avtp_CanXl_t* msg) {
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_CanXl_GetLen(const Avtp_CanXl_t* msg) {
-    return __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

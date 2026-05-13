@@ -62,17 +62,17 @@ uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t* const pdu,
 
 uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t* const pdu)
 {
-    return GET_FIELD(AVTP_COMMON_HEADER_FIELD_SUBTYPE);
+    return (uint8_t)GET_FIELD(AVTP_COMMON_HEADER_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t* const pdu)
 {
-    return GET_FIELD(AVTP_COMMON_HEADER_FIELD_H);
+    return (uint8_t)GET_FIELD(AVTP_COMMON_HEADER_FIELD_H);
 }
 
 uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t* const pdu)
 {
-    return GET_FIELD(AVTP_COMMON_HEADER_FIELD_VERSION);
+    return (uint8_t)GET_FIELD(AVTP_COMMON_HEADER_FIELD_VERSION);
 }
 
 void Avtp_CommonHeader_SetField(Avtp_CommonHeader_t* pdu,

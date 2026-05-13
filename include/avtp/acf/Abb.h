@@ -145,7 +145,7 @@ static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD);
+    return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD);
 }
 
 /**
@@ -156,7 +156,7 @@ static inline uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_Abb_IsMtv(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_MTV);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_MTV);
 }
 
 /**
@@ -166,7 +166,7 @@ static inline bool Avtp_Abb_IsMtv(const Avtp_Abb_t* msg) {
  * @returns The value of the byte_bus_id field.
  */
 static inline uint16_t Avtp_Abb_GetByteBusId(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_BYTE_BUS_ID);
+    return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_BYTE_BUS_ID);
 }
 
 /**
@@ -176,7 +176,7 @@ static inline uint16_t Avtp_Abb_GetByteBusId(const Avtp_Abb_t* msg) {
  * @returns The value of the evt field.
  */
 static inline uint8_t Avtp_Abb_GetEvt(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_EVT);
+    return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_EVT);
 }
 
 /**
@@ -186,7 +186,7 @@ static inline uint8_t Avtp_Abb_GetEvt(const Avtp_Abb_t* msg) {
  * @returns The value of the hs field.
  */
 static inline bool Avtp_Abb_IsHs(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_HS);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_HS);
 }
 
 /**
@@ -196,7 +196,7 @@ static inline bool Avtp_Abb_IsHs(const Avtp_Abb_t* msg) {
  * @returns The value of the cs field.
  */
 static inline bool Avtp_Abb_IsCs(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_CS);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_CS);
 }
 
 /**
@@ -207,7 +207,7 @@ static inline bool Avtp_Abb_IsCs(const Avtp_Abb_t* msg) {
  * @returns The value of the transaction_num field.
  */
 static inline uint8_t Avtp_Abb_GetTransactionNum(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_TRANSACTION_NUM);
+    return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_TRANSACTION_NUM);
 }
 
 /**
@@ -217,7 +217,7 @@ static inline uint8_t Avtp_Abb_GetTransactionNum(const Avtp_Abb_t* msg) {
  * @returns The value of the op flag.
  */
 static inline bool Avtp_Abb_IsOp(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_OP);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_OP);
 }
 
 /**
@@ -227,7 +227,7 @@ static inline bool Avtp_Abb_IsOp(const Avtp_Abb_t* msg) {
  * @returns The value of the rsp flag.
  */
 static inline bool Avtp_Abb_IsRsp(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_RSP);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_RSP);
 }
 
 /**
@@ -237,7 +237,7 @@ static inline bool Avtp_Abb_IsRsp(const Avtp_Abb_t* msg) {
  * @returns The value of the err flag.
  */
 static inline bool Avtp_Abb_IsErr(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_ERR);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_ERR);
 }
 
 /**
@@ -247,7 +247,7 @@ static inline bool Avtp_Abb_IsErr(const Avtp_Abb_t* msg) {
  * @returns The value of the ms flag.
  */
 static inline bool Avtp_Abb_IsMs(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_MS);
+    return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_MS);
 }
 
 /**
@@ -258,7 +258,7 @@ static inline bool Avtp_Abb_IsMs(const Avtp_Abb_t* msg) {
  * @returns The value of the read_size/segment_num field.
  */
 static inline uint16_t Avtp_Abb_GetReadSize(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
+    return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
 /**
@@ -269,7 +269,7 @@ static inline uint16_t Avtp_Abb_GetReadSize(const Avtp_Abb_t* msg) {
  * @returns The value of the read_size/segment_num field.
  */
 static inline uint16_t Avtp_Abb_GetSegmentNum(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
+    return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
 /**
@@ -281,9 +281,9 @@ static inline uint16_t Avtp_Abb_GetSegmentNum(const Avtp_Abb_t* msg) {
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_Abb_GetPayloadLen(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_ABB_HEADER_LEN
-           - __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD);
+           - __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD));
 }
 
 /**
@@ -294,7 +294,7 @@ static inline uint16_t Avtp_Abb_GetPayloadLen(const Avtp_Abb_t* msg) {
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_Abb_GetLen(const Avtp_Abb_t* msg) {
-    return __Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

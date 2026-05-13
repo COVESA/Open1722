@@ -147,7 +147,7 @@ static inline void Avtp_Gbb_Init(Avtp_Gbb_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD);
+    return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD);
 }
 
 /**
@@ -158,7 +158,7 @@ static inline uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_Gbb_IsMtv(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MTV);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MTV);
 }
 
 /**
@@ -168,7 +168,7 @@ static inline bool Avtp_Gbb_IsMtv(const Avtp_Gbb_t* msg) {
  * @returns The value of the byte_bus_id field.
  */
 static inline uint16_t Avtp_Gbb_GetByteBusId(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_BYTE_BUS_ID);
+    return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_BYTE_BUS_ID);
 }
 
 /**
@@ -179,7 +179,7 @@ static inline uint16_t Avtp_Gbb_GetByteBusId(const Avtp_Gbb_t* msg) {
  * @returns The value of the message_timestamp field.
  */
 static inline uint64_t Avtp_Gbb_GetMessageTimestamp(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -189,7 +189,7 @@ static inline uint64_t Avtp_Gbb_GetMessageTimestamp(const Avtp_Gbb_t* msg) {
  * @returns The value of the evt field.
  */
 static inline uint8_t Avtp_Gbb_GetEvt(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_EVT);
+    return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_EVT);
 }
 
 /**
@@ -199,7 +199,7 @@ static inline uint8_t Avtp_Gbb_GetEvt(const Avtp_Gbb_t* msg) {
  * @returns The value of the hs field.
  */
 static inline bool Avtp_Gbb_IsHs(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_HS);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_HS);
 }
 
 /**
@@ -209,7 +209,7 @@ static inline bool Avtp_Gbb_IsHs(const Avtp_Gbb_t* msg) {
  * @returns The value of the cs field.
  */
 static inline bool Avtp_Gbb_IsCs(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_CS);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_CS);
 }
 
 /**
@@ -220,7 +220,7 @@ static inline bool Avtp_Gbb_IsCs(const Avtp_Gbb_t* msg) {
  * @returns The value of the transaction_num field.
  */
 static inline uint8_t Avtp_Gbb_GetTransactionNum(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_TRANSACTION_NUM);
+    return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_TRANSACTION_NUM);
 }
 
 /**
@@ -230,7 +230,7 @@ static inline uint8_t Avtp_Gbb_GetTransactionNum(const Avtp_Gbb_t* msg) {
  * @returns The value of the op flag.
  */
 static inline bool Avtp_Gbb_IsOp(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_OP);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_OP);
 }
 
 /**
@@ -240,7 +240,7 @@ static inline bool Avtp_Gbb_IsOp(const Avtp_Gbb_t* msg) {
  * @returns The value of the rsp flag.
  */
 static inline bool Avtp_Gbb_IsRsp(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_RSP);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_RSP);
 }
 
 /**
@@ -250,7 +250,7 @@ static inline bool Avtp_Gbb_IsRsp(const Avtp_Gbb_t* msg) {
  * @returns The value of the err flag.
  */
 static inline bool Avtp_Gbb_IsErr(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ERR);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ERR);
 }
 
 /**
@@ -260,7 +260,7 @@ static inline bool Avtp_Gbb_IsErr(const Avtp_Gbb_t* msg) {
  * @returns The value of the ms flag.
  */
 static inline bool Avtp_Gbb_IsMs(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MS);
+    return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MS);
 }
 
 /**
@@ -271,7 +271,7 @@ static inline bool Avtp_Gbb_IsMs(const Avtp_Gbb_t* msg) {
  * @returns The value of the read_size/segment_num field.
  */
 static inline uint16_t Avtp_Gbb_GetReadSize(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
+    return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
 /**
@@ -282,7 +282,7 @@ static inline uint16_t Avtp_Gbb_GetReadSize(const Avtp_Gbb_t* msg) {
  * @returns The value of the read_size/segment_num field.
  */
 static inline uint16_t Avtp_Gbb_GetSegmentNum(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
+    return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
 /**
@@ -294,9 +294,9 @@ static inline uint16_t Avtp_Gbb_GetSegmentNum(const Avtp_Gbb_t* msg) {
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_Gbb_GetPayloadLen(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_GBB_HEADER_LEN
-           - __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD);
+           - __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD));
 }
 
 /**
@@ -307,7 +307,7 @@ static inline uint16_t Avtp_Gbb_GetPayloadLen(const Avtp_Gbb_t* msg) {
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_Gbb_GetLen(const Avtp_Gbb_t* msg) {
-    return __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

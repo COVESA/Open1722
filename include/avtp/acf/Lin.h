@@ -97,7 +97,7 @@ static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] =
  * @returns The value of the ACF Message Type field.
  */
 static inline uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -107,7 +107,7 @@ static inline uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Message Length field.
  */
 static inline uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -117,7 +117,7 @@ static inline uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Lin PDU Pad field.
  */
 static inline uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
+    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
 }
 
 /**
@@ -127,7 +127,7 @@ static inline uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Lin PDU MTV field.
  */
 static inline uint8_t Avtp_Lin_GetMtv(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
+    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
 }
 
 /**
@@ -137,7 +137,7 @@ static inline uint8_t Avtp_Lin_GetMtv(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Lin PDU Lin Bus ID field.
  */
 static inline uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID);
+    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID);
 }
 
 /**
@@ -147,7 +147,7 @@ static inline uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Lin PDU Lin Identifier field.
  */
 static inline uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER);
+    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER);
 }
 
 /**
@@ -157,7 +157,7 @@ static inline uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t* const pdu) {
  * @returns The value of the ACF Lin PDU Message Timestamp field.
  */
 static inline uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t* const pdu) {
-    return GET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) GET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**

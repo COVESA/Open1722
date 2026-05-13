@@ -143,7 +143,7 @@ static inline Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommo
  * @returns Returns the ACF message length field of the PDU.
  */
 static inline uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu) {
-    return GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
 }
 
 /**

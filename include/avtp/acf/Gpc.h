@@ -89,7 +89,7 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
  * @returns The value of the ACF Message Type Field.
  */
 static inline uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu) {
-    return GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -99,7 +99,7 @@ static inline uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu) {
  * @returns The value of the ACF Message Length Field.
  */
 static inline uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu) {
-    return GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -109,7 +109,7 @@ static inline uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu) {
  * @returns The value of the GPC Message ID Field.
  */
 static inline uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu) {
-    return GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
+    return (uint64_t) GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
 }
 
 /**
