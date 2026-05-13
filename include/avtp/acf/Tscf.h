@@ -107,7 +107,7 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] =
  * @returns Value of the TSCF PDU subtype field.
  */
 static inline uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE);
 }
 
 /**
@@ -117,7 +117,7 @@ static inline uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU SV field.
  */
 static inline uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_SV);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SV);
 }
 
 /**
@@ -127,7 +127,7 @@ static inline uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU version field.
  */
 static inline uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION);
 }
 
 /**
@@ -137,7 +137,7 @@ static inline uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU MR field.
  */
 static inline uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_MR);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_MR);
 }
 
 /**
@@ -147,7 +147,7 @@ static inline uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU TV field.
  */
 static inline uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_TV);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_TV);
 }
 
 /**
@@ -157,7 +157,7 @@ static inline uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU Sequence Number field.
  */
 static inline uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -167,7 +167,7 @@ static inline uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU TU field.
  */
 static inline uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_TU);
+    return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_TU);
 }
 
 /**
@@ -177,7 +177,7 @@ static inline uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU Stream ID field.
  */
 static inline uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_ID);
+    return (uint64_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_ID);
 }
 
 /**
@@ -187,7 +187,7 @@ static inline uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu) {
  * @returns Value of the TSCF PDU AVTP Timestamp field.
  */
 static inline uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_AVTP_TIMESTAMP);
+    return (uint32_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_AVTP_TIMESTAMP);
 }
 
 /**
@@ -197,7 +197,7 @@ static inline uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu) 
  * @returns Value of the TSCF PDU Stream Data Length field.
  */
 static inline uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pdu) {
-    return GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
+    return (uint16_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
 }
 
 /**
@@ -366,7 +366,7 @@ static inline void Avtp_Tscf_Init(Avtp_Tscf_t* pdu) {
  * @returns This function returns the value of the field.
  */
 static inline uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field) {
-    return GET_TSCF_FIELD(field);
+    return (uint64_t) GET_TSCF_FIELD(field);
 }
 
 /**

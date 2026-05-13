@@ -65,37 +65,37 @@ uint64_t Avtp_Jpeg2000_GetField(const Avtp_Jpeg2000_t* const pdu, Avtp_Jpeg2000F
 
 uint8_t Avtp_Jpeg2000_GetTp(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_TP);
+    return (uint8_t)GET_FIELD(AVTP_JPEG2000_FIELD_TP);
 }
 
 uint8_t Avtp_Jpeg2000_GetMhf(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_MHF);
+    return (uint8_t)GET_FIELD(AVTP_JPEG2000_FIELD_MHF);
 }
 
 uint8_t Avtp_Jpeg2000_GetMhId(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_MH_ID);
+    return (uint8_t)GET_FIELD(AVTP_JPEG2000_FIELD_MH_ID);
 }
 
 uint8_t Avtp_Jpeg2000_GetT(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_T);
+    return (uint8_t)GET_FIELD(AVTP_JPEG2000_FIELD_T);
 }
 
 uint8_t Avtp_Jpeg2000_GetPriority(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_PRIORITY);
+    return (uint8_t)GET_FIELD(AVTP_JPEG2000_FIELD_PRIORITY);
 }
 
 uint16_t Avtp_Jpeg2000_GetTileNumber(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_TILE_NUMBER);
+    return (uint16_t)GET_FIELD(AVTP_JPEG2000_FIELD_TILE_NUMBER);
 }
 
 uint32_t Avtp_Jpeg2000_GetFragmentOffset(const Avtp_Jpeg2000_t* const pdu)
 {
-    return GET_FIELD(AVTP_JPEG2000_FIELD_FRAGMENT_OFFSET);
+    return (uint32_t)GET_FIELD(AVTP_JPEG2000_FIELD_FRAGMENT_OFFSET);
 }
 
 void Avtp_Jpeg2000_SetField(Avtp_Jpeg2000_t* pdu, Avtp_Jpeg2000Field_t field, uint64_t value)

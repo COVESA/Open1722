@@ -95,7 +95,7 @@ static const Avtp_FieldDescriptor_t Avtp_NtscfFieldDesc[AVTP_NTSCF_FIELD_MAX] =
  * @returns Value of the NTSCF PDU subtype field.
  */
 static inline uint8_t Avtp_Ntscf_GetSubtype(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SUBTYPE);
+    return (uint8_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SUBTYPE);
 }
 
 /**
@@ -105,7 +105,7 @@ static inline uint8_t Avtp_Ntscf_GetSubtype(const Avtp_Ntscf_t* const pdu) {
  * @returns Value of the NTSCF PDU SV field.
  */
 static inline uint8_t Avtp_Ntscf_GetSv(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV);
+    return (uint8_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV);
 }
 
 /**
@@ -115,7 +115,7 @@ static inline uint8_t Avtp_Ntscf_GetSv(const Avtp_Ntscf_t* const pdu) {
  * @returns Value of the NTSCF PDU version field.
  */
 static inline uint8_t Avtp_Ntscf_GetVersion(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_VERSION);
+    return (uint8_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_VERSION);
 }
 
 /**
@@ -125,7 +125,7 @@ static inline uint8_t Avtp_Ntscf_GetVersion(const Avtp_Ntscf_t* const pdu) {
  * @returns Value of the NTSCF PDU Ntscf Data Length field.
  */
 static inline uint16_t Avtp_Ntscf_GetNtscfDataLength(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH);
+    return (uint16_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH);
 }
 
 /**
@@ -135,7 +135,7 @@ static inline uint16_t Avtp_Ntscf_GetNtscfDataLength(const Avtp_Ntscf_t* const p
  * @returns Value of the NTSCF PDU Sequence Number field.
  */
 static inline uint8_t Avtp_Ntscf_GetSequenceNum(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SEQUENCE_NUM);
+    return (uint8_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -145,7 +145,7 @@ static inline uint8_t Avtp_Ntscf_GetSequenceNum(const Avtp_Ntscf_t* const pdu) {
  * @returns Value of the NTSCF PDU Stream ID field.
  */
 static inline uint64_t Avtp_Ntscf_GetStreamId(const Avtp_Ntscf_t* const pdu) {
-    return GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_STREAM_ID);
+    return (uint64_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_STREAM_ID);
 }
 
 /**
@@ -249,7 +249,7 @@ static inline void Avtp_Ntscf_Init(Avtp_Ntscf_t* pdu) {
  * @returns This function returns the value of the field.
  */
 static inline uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t* const pdu, Avtp_NtscfFields_t field) {
-    return GET_NTSCF_FIELD(field);
+    return (uint64_t) GET_NTSCF_FIELD(field);
 }
 
 /**

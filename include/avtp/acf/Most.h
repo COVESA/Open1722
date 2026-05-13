@@ -109,7 +109,7 @@ static const Avtp_FieldDescriptor_t Avtp_MostFieldDesc[AVTP_MOST_FIELD_MAX] =
  * @returns Value of the ACF message type field.
  */
 static inline uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -119,7 +119,7 @@ static inline uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF message length field.
  */
 static inline uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -129,7 +129,7 @@ static inline uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU padding field.
  */
 static inline uint8_t Avtp_Most_GetPad(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
 }
 
 /**
@@ -139,7 +139,7 @@ static inline uint8_t Avtp_Most_GetPad(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU MTV field.
  */
 static inline uint8_t Avtp_Most_GetMtv(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
 }
 
 /**
@@ -149,7 +149,7 @@ static inline uint8_t Avtp_Most_GetMtv(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU Most Net ID field.
  */
 static inline uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_MOST_NET_ID);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MOST_NET_ID);
 }
 
 /**
@@ -159,7 +159,7 @@ static inline uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU Message Timestamp field.
  */
 static inline uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -169,7 +169,7 @@ static inline uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t* const pd
  * @returns Value of the ACF Most PDU Device ID field.
  */
 static inline uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_DEVICE_ID);
+    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_DEVICE_ID);
 }
 
 /**
@@ -179,7 +179,7 @@ static inline uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU FBlock ID field.
  */
 static inline uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_FBLOCK_ID);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_FBLOCK_ID);
 }
 
 /**
@@ -189,7 +189,7 @@ static inline uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU Inst ID field.
  */
 static inline uint8_t Avtp_Most_GetInstId(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_INST_ID);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_INST_ID);
 }
 
 /**
@@ -199,7 +199,7 @@ static inline uint8_t Avtp_Most_GetInstId(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU Func ID field.
  */
 static inline uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_FUNC_ID);
+    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_FUNC_ID);
 }
 
 /**
@@ -209,7 +209,7 @@ static inline uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t* const pdu) {
  * @returns Value of the ACF Most PDU Op Type field.
  */
 static inline uint8_t Avtp_Most_GetOpType(const Avtp_Most_t* const pdu) {
-    return GET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE);
+    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE);
 }
 
 /**

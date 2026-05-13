@@ -97,7 +97,7 @@ static const Avtp_FieldDescriptor_t Avtp_SensorFieldDesc[AVTP_SENSOR_FIELD_MAX] 
  * @returns Value of the ACF message type field.
  */
 static inline uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -107,7 +107,7 @@ static inline uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu) 
  * @returns Value of the ACF message length field.
  */
 static inline uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -117,7 +117,7 @@ static inline uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pd
  * @returns Value of the MTV field.
  */
 static inline uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MTV);
+    return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MTV);
 }
 
 /**
@@ -127,7 +127,7 @@ static inline uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu) {
  * @returns Value of the Num Sensor field.
  */
 static inline uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_NUM_SENSOR);
+    return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_NUM_SENSOR);
 }
 
 /**
@@ -137,7 +137,7 @@ static inline uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu) {
  * @returns Value of the Sz field.
  */
 static inline uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SZ);
+    return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SZ);
 }
 
 /**
@@ -147,7 +147,7 @@ static inline uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu) {
  * @returns Value of the Sensor Group field.
  */
 static inline uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SENSOR_GROUP);
+    return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SENSOR_GROUP);
 }
 
 /**
@@ -157,7 +157,7 @@ static inline uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu)
  * @returns Value of the Message Timestamp field.
  */
 static inline uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* const pdu) {
-    return GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP);
+    return (uint64_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**

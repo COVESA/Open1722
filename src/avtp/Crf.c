@@ -78,42 +78,42 @@ uint64_t Avtp_Crf_GetField(const Avtp_Crf_t* const pdu, Avtp_CrfField_t field)
 
 uint8_t Avtp_Crf_GetSubtype(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_SUBTYPE);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_SV);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_SV);
 }
 
 uint8_t Avtp_Crf_GetVersion(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_VERSION);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_VERSION);
 }
 
 uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_MR);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_MR);
 }
 
 uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_FS);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_FS);
 }
 
 uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_TU);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_TU);
 }
 
 uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM);
 }
 
 uint8_t Avtp_Crf_GetType(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_TYPE);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_TYPE);
 }
 
 uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t* const pdu)
@@ -123,22 +123,22 @@ uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t* const pdu)
 
 uint8_t Avtp_Crf_GetPull(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_PULL);
+    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_PULL);
 }
 
 uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY);
+    return (uint32_t)GET_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY);
 }
 
 uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH);
+    return (uint16_t)GET_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH);
 }
 
 uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t* const pdu)
 {
-    return GET_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
+    return (uint16_t)GET_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
 }
 
 void Avtp_Crf_SetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field, uint64_t value)

@@ -60,17 +60,17 @@ uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
             uint8_t quadletBits;
             uint8_t quadletShift;
             if (processedBits == 0) {
-                quadletBits = MIN(32 - fieldDescriptor->offset, fieldDescriptor->bits - processedBits);
-                quadletShift = 32 - quadletBits - fieldDescriptor->offset;
+                quadletBits = (uint8_t)MIN(32 - fieldDescriptor->offset, fieldDescriptor->bits - processedBits);
+                quadletShift = (uint8_t)(32 - quadletBits - fieldDescriptor->offset);
             } else {
-                quadletBits = MIN(32, fieldDescriptor->bits - processedBits);
-                quadletShift = 32 - quadletBits;
+                quadletBits = (uint8_t)MIN(32, fieldDescriptor->bits - processedBits);
+                quadletShift = (uint8_t)(32 - quadletBits);
             }
-            uint32_t quadletMask = ((1ULL << quadletBits) - 1ULL) << quadletShift;
+            uint32_t quadletMask = (uint32_t)(((1ULL << quadletBits) - 1ULL) << quadletShift);
             const uint32_t* quadletPtr = (const uint32_t*)(pdu + quadletId * 4);
             uint32_t quadletHostOrder = Avtp_BeToCpu32(*quadletPtr);
             uint32_t partialValue = (quadletHostOrder & quadletMask) >> quadletShift;
-            result |= (uint64_t)(partialValue) << (fieldDescriptor->bits - processedBits - quadletBits);
+            result |= (uint64_t)(partialValue) << ((uint32_t)(fieldDescriptor->bits - processedBits - quadletBits));
 
             quadletOffset += 1;
             processedBits += quadletBits;
@@ -91,14 +91,14 @@ void Avtp_SetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
             uint8_t quadletBits;
             uint8_t quadletShift;
             if (processedBits == 0) {
-                quadletBits = MIN(32 - fieldDescriptor->offset, fieldDescriptor->bits - processedBits);
-                quadletShift = 32 - quadletBits - fieldDescriptor->offset;
+                quadletBits = (uint8_t)MIN(32 - fieldDescriptor->offset, fieldDescriptor->bits - processedBits);
+                quadletShift = (uint8_t)(32 - quadletBits - fieldDescriptor->offset);
             } else {
-                quadletBits = MIN(32, fieldDescriptor->bits - processedBits);
-                quadletShift = 32 - quadletBits;
+                quadletBits = (uint8_t)MIN(32, fieldDescriptor->bits - processedBits);
+                quadletShift = (uint8_t)(32 - quadletBits);
             }
-            uint32_t partialValue = value >> (fieldDescriptor->bits - processedBits - quadletBits);
-            uint32_t quadletMask = ((1ULL << quadletBits) - 1ULL) << quadletShift;
+            uint32_t partialValue = (uint32_t)(value >> (fieldDescriptor->bits - processedBits - quadletBits));
+            uint32_t quadletMask = (uint32_t)(((1ULL << quadletBits) - 1ULL) << quadletShift);
             uint32_t* quadletPtr = (uint32_t*)(pdu + quadletId * 4);
             uint32_t quadletHostOrder = Avtp_BeToCpu32(*quadletPtr);
             quadletHostOrder = (quadletHostOrder & ~quadletMask) | ((partialValue << quadletShift) & quadletMask);

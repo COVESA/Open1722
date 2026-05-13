@@ -138,7 +138,7 @@ static inline void Avtp_CanBriefV2_Init(Avtp_CanBriefV2_t* msg) {
  * @returns The value of the pad field.
  */
 static inline uint8_t Avtp_CanBriefV2_GetPad(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_PAD);
+    return (uint8_t) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_PAD);
 }
 
 /**
@@ -149,7 +149,7 @@ static inline uint8_t Avtp_CanBriefV2_GetPad(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the mtv flag.
  */
 static inline bool Avtp_CanBriefV2_IsMtv(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_MTV);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_MTV);
 }
 
 /**
@@ -160,7 +160,7 @@ static inline bool Avtp_CanBriefV2_IsMtv(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the rtr flag.
  */
 static inline bool Avtp_CanBriefV2_IsRtr(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_RTR);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_RTR);
 }
 
 /**
@@ -171,7 +171,7 @@ static inline bool Avtp_CanBriefV2_IsRtr(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the eff flag.
  */
 static inline bool Avtp_CanBriefV2_IsEff(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_EFF);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_EFF);
 }
 
 /**
@@ -181,7 +181,7 @@ static inline bool Avtp_CanBriefV2_IsEff(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the can_bus_id field.
  */
 static inline uint16_t Avtp_CanBriefV2_GetCanBusId(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_CAN_BUS_ID);
+    return (uint16_t) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -191,7 +191,7 @@ static inline uint16_t Avtp_CanBriefV2_GetCanBusId(const Avtp_CanBriefV2_t* msg)
  * @returns The value of the brs flag.
  */
 static inline bool Avtp_CanBriefV2_IsBrs(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_BRS);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_BRS);
 }
 
 /**
@@ -201,7 +201,7 @@ static inline bool Avtp_CanBriefV2_IsBrs(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the fdf flag.
  */
 static inline bool Avtp_CanBriefV2_IsFdf(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_FDF);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_FDF);
 }
 
 /**
@@ -212,7 +212,7 @@ static inline bool Avtp_CanBriefV2_IsFdf(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the esi flag.
  */
 static inline bool Avtp_CanBriefV2_IsEsi(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ESI);
+    return (bool) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ESI);
 }
 
 /**
@@ -222,7 +222,7 @@ static inline bool Avtp_CanBriefV2_IsEsi(const Avtp_CanBriefV2_t* msg) {
  * @returns The value of the can_identifier field.
  */
 static inline uint32_t Avtp_CanBriefV2_GetCanIdentifier(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_CAN_IDENTIFIER);
+    return (uint32_t) __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_CAN_IDENTIFIER);
 }
 
 /**
@@ -234,9 +234,9 @@ static inline uint32_t Avtp_CanBriefV2_GetCanIdentifier(const Avtp_CanBriefV2_t*
  * @returns The payload length in bytes.
  */
 static inline uint16_t Avtp_CanBriefV2_GetPayloadLen(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
+    return (uint16_t) (__Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_CAN_BRIEF_V2_HEADER_LEN
-           - __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_PAD);
+           - __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_PAD));
 }
 
 /**
@@ -247,7 +247,7 @@ static inline uint16_t Avtp_CanBriefV2_GetPayloadLen(const Avtp_CanBriefV2_t* ms
  * @returns The total message length in bytes.
  */
 static inline uint16_t Avtp_CanBriefV2_GetLen(const Avtp_CanBriefV2_t* msg) {
-    return __Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE;
+    return (uint16_t) (__Avtp_CanBriefV2_GetField(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
 /**

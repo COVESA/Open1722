@@ -111,7 +111,7 @@ static const Avtp_FieldDescriptor_t Avtp_CanFieldDesc[AVTP_CAN_FIELD_MAX] =
  * @returns Value of the ACF message type field.
  */
 static inline uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -121,7 +121,7 @@ static inline uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF message length field.
  */
 static inline uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH);
+    return (uint16_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -131,7 +131,7 @@ static inline uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF padding field.
  */
 static inline uint8_t Avtp_Can_GetPad(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_PAD);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_PAD);
 }
 
 /**
@@ -141,7 +141,7 @@ static inline uint8_t Avtp_Can_GetPad(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU MTV field.
  */
 static inline uint8_t Avtp_Can_GetMtv(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_MTV);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_MTV);
 }
 
 /**
@@ -151,7 +151,7 @@ static inline uint8_t Avtp_Can_GetMtv(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU RTR field.
  */
 static inline uint8_t Avtp_Can_GetRtr(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_RTR);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_RTR);
 }
 
 /**
@@ -161,7 +161,7 @@ static inline uint8_t Avtp_Can_GetRtr(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU EFF field.
  */
 static inline uint8_t Avtp_Can_GetEff(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_EFF);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_EFF);
 }
 
 /**
@@ -171,7 +171,7 @@ static inline uint8_t Avtp_Can_GetEff(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU BRS field.
  */
 static inline uint8_t Avtp_Can_GetBrs(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_BRS);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_BRS);
 }
 
 /**
@@ -181,7 +181,7 @@ static inline uint8_t Avtp_Can_GetBrs(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU FDF field.
  */
 static inline uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_FDF);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_FDF);
 }
 
 /**
@@ -191,7 +191,7 @@ static inline uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU ESI field.
  */
 static inline uint8_t Avtp_Can_GetEsi(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_ESI);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ESI);
 }
 
 /**
@@ -201,7 +201,7 @@ static inline uint8_t Avtp_Can_GetEsi(const Avtp_Can_t* const pdu) {
  * @returns Value of the ACF CAN PDU CAN Bus ID field.
  */
 static inline uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID);
+    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -221,7 +221,7 @@ static inline uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t* const pdu)
  * @returns Value of the ACF CAN PDU CAN Identifier field.
  */
 static inline uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t* const pdu) {
-    return GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER);
+    return (uint32_t) GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER);
 }
 
 /**
