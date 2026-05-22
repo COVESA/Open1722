@@ -8,6 +8,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+    - name: Install clang-format
+      run: sudo apt update && sudo apt install -y clang-format
+    - name: Check formatting of changed C/H files
+      run: |
+        changed=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD \
+                  | grep -E '\.(c|h)$' || true)
+        if [ -n "$changed" ]; then
+          echo "Checking format for: $changed"
+          clang-format --dry-run --Werror $changed
+        else
+          echo "No C/H files changed — skipping format check"
+        fi
+
   build:
     runs-on: ubuntu-latest
     steps:
