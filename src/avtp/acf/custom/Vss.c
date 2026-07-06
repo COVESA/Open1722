@@ -389,7 +389,7 @@ void Avtp_Vss_GetVssData(const Avtp_Vss_t* const pdu, VssData_t* val) {
         case VSS_STRING_ARRAY:
             val->data_string_array->data_length = Avtp_BeToCpu16(*(const uint16_t*)vss_data_ptr);
             vss_data_ptr += 2;
-            if (val->data_double_array->data != NULL) {
+            if (val->data_string_array->data != NULL) {
                 memcpy(val->data_string_array->data, vss_data_ptr, val->data_string_array->data_length);
             }
             break;
