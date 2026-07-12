@@ -29,11 +29,11 @@
 
 add_executable(aaf-talker EXCLUDE_FROM_ALL aaf-talker.c)
 target_link_libraries(aaf-talker open1722 open1722examples)
-target_include_directories(aaf-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
+target_include_directories(aaf-talker PUBLIC ${PROJECT_SOURCE_DIR}/include ../)
 
 add_executable(aaf-listener EXCLUDE_FROM_ALL aaf-listener.c)
 target_link_libraries(aaf-listener open1722 open1722examples)
-target_include_directories(aaf-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
+target_include_directories(aaf-listener PUBLIC ${PROJECT_SOURCE_DIR}/include ../)
 
 add_dependencies(examples aaf-talker aaf-listener)
 

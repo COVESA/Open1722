@@ -29,15 +29,15 @@
 
 add_executable(acf-can-talker EXCLUDE_FROM_ALL acf-can-talker.c ../acf-can-common.c)
 target_link_libraries(acf-can-talker open1722 open1722examples)
-target_include_directories(acf-can-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
+target_include_directories(acf-can-talker PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
 
 add_executable(acf-can-listener EXCLUDE_FROM_ALL acf-can-listener.c ../acf-can-common.c)
 target_link_libraries(acf-can-listener open1722 open1722examples)
-target_include_directories(acf-can-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
+target_include_directories(acf-can-listener PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
 
 add_executable(acf-can-bridge EXCLUDE_FROM_ALL acf-can-bridge.c ../acf-can-common.c)
 target_link_libraries(acf-can-bridge open1722 open1722examples)
-target_include_directories(acf-can-bridge PUBLIC ${CMAKE_SOURCE_DIR}/include ../ ../../)
+target_include_directories(acf-can-bridge PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
 
 add_dependencies(examples acf-can-talker acf-can-listener acf-can-bridge)
 

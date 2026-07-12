@@ -41,7 +41,7 @@ target_compile_options(${LIB_NAME} PRIVATE
     $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wconversion -Wsign-conversion>
 )
 target_include_directories(${LIB_NAME} PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 set_target_properties(${LIB_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
@@ -56,7 +56,7 @@ target_compile_options(${LIB_NAME}custom PRIVATE
 )
 target_compile_options(${LIB_NAME}custom PRIVATE -Wall -Wextra -Wconversion -Wsign-conversion)
 target_include_directories(${LIB_NAME}custom PRIVATE
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 set_target_properties(${LIB_NAME}custom PROPERTIES VERSION ${PROJECT_VERSION})
 
