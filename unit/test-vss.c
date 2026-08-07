@@ -1466,6 +1466,114 @@ static void vss_data_double_array_oob(void **state)
     assert_memory_equal(&out[1], "\x5A\x5A\x5A\x5A\x5A\x5A\x5A\x5A", 8);
 }
 
+/* Helper for the inflated-path tests: build an INTEROP-mode PDU where the
+ * on‑wire path_length (0xFFFD) claims far more path bytes than the declared
+ * msg_length allows.  CalcVssPathLength would return 0xFFFD + 2 = 0xFFFF
+ * (65535 — no uint16_t wrap), pushing the computed data pointer 65547 bytes
+ * past the PDU start — well beyond any plausible frame. */
+static Avtp_Vss_t* vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size,
+                                                uint8_t msg_quadlets,
+                                                Vss_Datatype_t datatype)
+{
+    memset(buf, 0, buf_size);
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, msg_quadlets);
+    Avtp_Vss_SetDatatype(pdu, datatype);
+
+    /* Inflated path_length at offset 12 (INTEROP length prefix).
+     * 0xFFFD was chosen because 0xFFFD + 2 = 0xFFFF without wrapping. */
+    buf[12] = 0xFF;
+    buf[13] = 0xFD;
+
+    return pdu;
+}
+
+/* ── Regression tests for inflated-path → data-pointer OOB ─────────────
+ * When a crafted INTEROP
+ * path_length pushes the data pointer beyond the declared PDU, the
+ * getters must treat the data area as empty and avoid any dereference.
+
+/* VSS_STRING: the length-prefix dereference inside vss_read_clamped_length
+ * must be guarded so it is never reached when the data pointer sits at or
+ * past the frame end.  Correct behavior: data_length is 0, output untouched. */
+static void vss_data_string_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_STRING);
+
+    VssDataString_t str = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_string = &str;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(str.data_length, 0);
+
+    char out[16];
+    memset(out, 0x5A, sizeof(out));
+    str.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal((uint8_t)out[0], 0x5A);
+}
+
+/* Scalar VSS_UINT8: the raw dereference of *vss_data_ptr must be guarded
+ * so that an out‑of‑frame data pointer is never read.  
+ * Correct behavior: Avtp_Vss_GetVssData is noop, pre‑set sentinel survives. */
+static void vss_data_uint8_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_UINT8);
+
+    VssData_t vd;
+    memset(&vd, 0xAA, sizeof(vd));
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(vd.data_uint8, 0xAA);
+}
+
+/* VSS_UINT8_ARRAY: like the string case but exercises the array path
+ * through vss_read_clamped_length (prefix, then memcpy). */
+static void vss_data_uint8_array_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_UINT8_ARRAY);
+
+    VssDataUint8Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint8_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 0);
+
+    uint8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x5A);
+}
+
+/* STATIC_ID with a frame that is too short for the 4‑byte path: the
+ * path must be treated as empty, and the scalar read skipped because
+ * the data pointer still exceeds the declared frame. */
+static void vss_data_static_id_truncated_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, 3);  /* 12 bytes — header only */
+    Avtp_Vss_SetDatatype(pdu, VSS_UINT8);
+
+    VssData_t vd;
+    memset(&vd, 0xAA, sizeof(vd));
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(vd.data_uint8, 0xAA);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -1512,6 +1620,10 @@ int main(void)
         cmocka_unit_test(vss_data_int64_array_oob),
         cmocka_unit_test(vss_data_float_array_oob),
         cmocka_unit_test(vss_data_double_array_oob),
+        cmocka_unit_test(vss_data_string_inflated_path_oob),
+        cmocka_unit_test(vss_data_uint8_inflated_path_oob),
+        cmocka_unit_test(vss_data_uint8_array_inflated_path_oob),
+        cmocka_unit_test(vss_data_static_id_truncated_oob),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
