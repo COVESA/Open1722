@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, COVESA
+ * Copyright (c) 2024-2026 COVESA
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,6 +28,7 @@
  */
 
 #include <errno.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "avtp/acf/AcfCommon.h"
@@ -111,13 +112,14 @@ static uint16_t vss_get_clamped_path_length(const Avtp_Vss_t* pdu)
     return 0;
 }
 
-/* True when there are at least `size` bytes available starting at `ptr`
+/* True when there are at least `num_bytes` bytes available starting at `ptr`
  * within the declared frame.  Used to guard fixed‑size scalar reads in
  * GetVssData when the data pointer sits at or past the frame end. */
-static int vss_readable(const Avtp_Vss_t* pdu, const uint8_t* ptr,
-                         uint16_t declared, uint16_t size)
+static bool vss_has_bytes(const Avtp_Vss_t* pdu, const uint8_t* ptr,
+                          uint16_t num_bytes)
 {
-    return (uint32_t)(ptr - (const uint8_t*)pdu) + size <= declared;
+    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
+    return (uint32_t)(ptr - (const uint8_t*)pdu) + num_bytes <= declared;
 }
 
 void Avtp_Vss_Init(Avtp_Vss_t* vss_pdu) {
@@ -192,14 +194,13 @@ uint64_t Avtp_Vss_GetMsgTimestamp(const Avtp_Vss_t* const pdu) {
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t* const pdu, VssPath_t* val) {
 
     const uint8_t* vss_path_ptr = (const uint8_t* const) pdu + AVTP_VSS_FIXED_HEADER_LEN;
-    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
 
     // Check the used VSS addressing mode
     Vss_AddrMode_t addr_mode = Avtp_Vss_GetAddrMode(pdu);
 
     if (addr_mode == VSS_STATIC_ID_MODE) {
         /* Fixed 4‑byte path: only read it when the frame is large enough. */
-        if (vss_readable(pdu, vss_path_ptr, declared, 4))
+        if (vss_has_bytes(pdu, vss_path_ptr, 4))
             val->vss_static_id_path = Avtp_BeToCpu32(*(const uint32_t*)vss_path_ptr);
         else
             val->vss_static_id_path = 0;
@@ -290,9 +291,6 @@ void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t* const vss_data_
 
 void Avtp_Vss_GetVssData(const Avtp_Vss_t* const pdu, VssData_t* val) {
 
-    /* Declared PDU size in bytes (0 → unframed, skip all bounds checks). */
-    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
-
     /* Compute the data pointer using the clamped getter‑side path length
      * so that the pointer itself never leaves the declared frame. */
     const uint8_t* vss_data_ptr = (const uint8_t* const) pdu + AVTP_VSS_FIXED_HEADER_LEN +
@@ -305,59 +303,59 @@ void Avtp_Vss_GetVssData(const Avtp_Vss_t* const pdu, VssData_t* val) {
     // Check VSS Datatype
     switch (datatype) {
         case VSS_UINT8:
-            if (vss_readable(pdu, vss_data_ptr, declared, 1))
+            if (vss_has_bytes(pdu, vss_data_ptr, 1))
                 val->data_uint8 = *vss_data_ptr;
             break;
 
         case VSS_INT8:
-            if (vss_readable(pdu, vss_data_ptr, declared, 1))
+            if (vss_has_bytes(pdu, vss_data_ptr, 1))
                 val->data_int8 = *(const int8_t*) vss_data_ptr;
             break;
 
         case VSS_UINT16:
-            if (vss_readable(pdu, vss_data_ptr, declared, 2))
+            if (vss_has_bytes(pdu, vss_data_ptr, 2))
                 val->data_uint16 = Avtp_BeToCpu16(*(const uint16_t*) vss_data_ptr);
             break;
 
         case VSS_INT16:
-            if (vss_readable(pdu, vss_data_ptr, declared, 2))
+            if (vss_has_bytes(pdu, vss_data_ptr, 2))
                 val->data_int16 =  (int16_t) Avtp_BeToCpu16(*(const uint16_t*) vss_data_ptr);
             break;
 
         case VSS_UINT32:
-            if (vss_readable(pdu, vss_data_ptr, declared, 4))
+            if (vss_has_bytes(pdu, vss_data_ptr, 4))
                 val->data_uint32 = Avtp_BeToCpu32(*(const uint32_t*) vss_data_ptr);
             break;
 
         case VSS_INT32:
-            if (vss_readable(pdu, vss_data_ptr, declared, 4))
+            if (vss_has_bytes(pdu, vss_data_ptr, 4))
                 val->data_int32 = (int32_t) Avtp_BeToCpu32(*(const uint32_t*) vss_data_ptr);
             break;
 
         case VSS_UINT64:
-            if (vss_readable(pdu, vss_data_ptr, declared, 8))
+            if (vss_has_bytes(pdu, vss_data_ptr, 8))
                 val->data_uint64 = Avtp_BeToCpu64(*(const uint64_t*) vss_data_ptr);
             break;
 
         case VSS_INT64:
-            if (vss_readable(pdu, vss_data_ptr, declared, 8))
+            if (vss_has_bytes(pdu, vss_data_ptr, 8))
                 val->data_int64 = (int64_t) Avtp_BeToCpu64(*(const uint64_t*) vss_data_ptr);
             break;
 
         case VSS_BOOL:
-            if (vss_readable(pdu, vss_data_ptr, declared, 1))
+            if (vss_has_bytes(pdu, vss_data_ptr, 1))
                 val->data_bool = *vss_data_ptr;
             break;
 
         case VSS_FLOAT:
-            if (vss_readable(pdu, vss_data_ptr, declared, 4)) {
+            if (vss_has_bytes(pdu, vss_data_ptr, 4)) {
                 temp_float =  Avtp_BeToCpu32(*(const uint32_t*) vss_data_ptr);
                 memcpy(&(val->data_float), &temp_float, sizeof(float));
             }
             break;
 
         case VSS_DOUBLE:
-            if (vss_readable(pdu, vss_data_ptr, declared, 8)) {
+            if (vss_has_bytes(pdu, vss_data_ptr, 8)) {
                 temp_double = Avtp_BeToCpu64(*(const uint64_t*) vss_data_ptr);
                 memcpy(&(val->data_double), &temp_double, sizeof(double));
             }
