@@ -80,9 +80,13 @@ static uint16_t vss_read_clamped_length(const Avtp_Vss_t* pdu,
     uint16_t wire_len = Avtp_BeToCpu16(*(const uint16_t*)ptr);
 
     if (offset + 2 + wire_len > declared) {
-        /* Prefix fits but the payload it describes is too long → clamp. */
+        /* Prefix fits but the payload it describes is too long → clamp. 
+         * Can never be negative, returns the maximum nuber of bytes that can 
+         * be read
+         */
         return declared - (uint16_t)offset - 2;
     }
+    /* The normal case: All bytes declared fit in frame and can be read. */
     return wire_len;
 }
 
