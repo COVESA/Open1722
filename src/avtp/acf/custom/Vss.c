@@ -94,7 +94,7 @@ static uint16_t vss_read_clamped_length(const Avtp_Vss_t* pdu,
  * AVTP_VSS_FIXED_HEADER_LEN + path_length ≤ declared PDU size.
  * Setters use CalcVssPathLength (raw) instead; this helper is for the
  * read path only so that the data‑pointer computation never leaves the
- * frame.  Unframed PDUs (msg_length == 0) keep the legacy raw value. */
+ * frame.  */
 static uint16_t vss_get_clamped_path_length(const Avtp_Vss_t* pdu)
 {
     uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
@@ -198,21 +198,22 @@ uint64_t Avtp_Vss_GetMsgTimestamp(const Avtp_Vss_t* const pdu) {
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t* const pdu, VssPath_t* val) {
 
     const uint8_t* vss_path_ptr = (const uint8_t* const) pdu + AVTP_VSS_FIXED_HEADER_LEN;
-
-    // Check the used VSS addressing mode
     Vss_AddrMode_t addr_mode = Avtp_Vss_GetAddrMode(pdu);
+    uint16_t clamped_len = vss_get_clamped_path_length(pdu);
 
     if (addr_mode == VSS_STATIC_ID_MODE) {
         /* Fixed 4‑byte path: only read it when the frame is large enough. */
-        if (vss_has_bytes(pdu, vss_path_ptr, 4))
+        if (clamped_len >= 4)
             val->vss_static_id_path = Avtp_BeToCpu32(*(const uint32_t*)vss_path_ptr);
         else
             val->vss_static_id_path = 0;
     } else if (addr_mode == VSS_INTEROP_MODE) {
-        val->vss_interop_path.path_length =
-            vss_read_clamped_length(pdu, vss_path_ptr);
-        memcpy(val->vss_interop_path.path, vss_path_ptr+2,
-               val->vss_interop_path.path_length);
+        if (clamped_len >= 2) {
+            val->vss_interop_path.path_length = (uint16_t)(clamped_len - 2);
+            memcpy(val->vss_interop_path.path, vss_path_ptr + 2, clamped_len - 2);
+        } else {
+            val->vss_interop_path.path_length = 0;
+        }
     }
 }
 
