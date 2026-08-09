@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -132,7 +133,7 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_BRIEF_FIELDS[AVTP_CANXL_BRIEF_F
  *
  * @param msg Pointer to the ACF_CAN_XL_BRIEF message to initialize.
  */
-static inline void Avtp_CanXlBrief_Init(Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE void Avtp_CanXlBrief_Init(Avtp_CanXlBrief_t* msg) {
     memset(msg, 0, sizeof(Avtp_CanXlBrief_t));
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_CAN_XL_BRIEF);
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_ACF_MSG_LENGTH, AVTP_CANXL_BRIEF_HEADER_LEN / AVTP_QUADLET_SIZE);
@@ -144,7 +145,7 @@ static inline void Avtp_CanXlBrief_Init(Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the pad field.
  */
-static inline uint8_t Avtp_CanXlBrief_GetPad(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetPad(const Avtp_CanXlBrief_t* msg) {
     return (uint8_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_PAD);
 }
 
@@ -155,7 +156,7 @@ static inline uint8_t Avtp_CanXlBrief_GetPad(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_CanXlBrief_IsMtv(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXlBrief_IsMtv(const Avtp_CanXlBrief_t* msg) {
     return (bool) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_MTV);
 }
 
@@ -165,7 +166,7 @@ static inline bool Avtp_CanXlBrief_IsMtv(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the can_bus_id field.
  */
-static inline uint16_t Avtp_CanXlBrief_GetCanBusId(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetCanBusId(const Avtp_CanXlBrief_t* msg) {
     return (uint16_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_CAN_BUS_ID);
 }
 
@@ -175,7 +176,7 @@ static inline uint16_t Avtp_CanXlBrief_GetCanBusId(const Avtp_CanXlBrief_t* msg)
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the vcid field.
  */
-static inline uint8_t Avtp_CanXlBrief_GetVcid(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetVcid(const Avtp_CanXlBrief_t* msg) {
     return (uint8_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_VCID);
 }
 
@@ -185,7 +186,7 @@ static inline uint8_t Avtp_CanXlBrief_GetVcid(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the sdt field.
  */
-static inline uint8_t Avtp_CanXlBrief_GetSdt(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetSdt(const Avtp_CanXlBrief_t* msg) {
     return (uint8_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_SDT);
 }
 
@@ -195,7 +196,7 @@ static inline uint8_t Avtp_CanXlBrief_GetSdt(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the rrs flag.
  */
-static inline bool Avtp_CanXlBrief_IsRrs(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXlBrief_IsRrs(const Avtp_CanXlBrief_t* msg) {
     return (bool) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_RRS);
 }
 
@@ -205,7 +206,7 @@ static inline bool Avtp_CanXlBrief_IsRrs(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the sec flag.
  */
-static inline bool Avtp_CanXlBrief_IsSec(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXlBrief_IsSec(const Avtp_CanXlBrief_t* msg) {
     return (bool) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_SEC);
 }
 
@@ -216,7 +217,7 @@ static inline bool Avtp_CanXlBrief_IsSec(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the priority_id field.
  */
-static inline uint16_t Avtp_CanXlBrief_GetPriorityId(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetPriorityId(const Avtp_CanXlBrief_t* msg) {
     return (uint16_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_PRIORITY_ID);
 }
 
@@ -226,7 +227,7 @@ static inline uint16_t Avtp_CanXlBrief_GetPriorityId(const Avtp_CanXlBrief_t* ms
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the acceptance_field.
  */
-static inline uint32_t Avtp_CanXlBrief_GetAcceptanceField(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint32_t Avtp_CanXlBrief_GetAcceptanceField(const Avtp_CanXlBrief_t* msg) {
     return (uint32_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_ACCEPTANCE_FIELD);
 }
 
@@ -237,7 +238,7 @@ static inline uint32_t Avtp_CanXlBrief_GetAcceptanceField(const Avtp_CanXlBrief_
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the transaction_num field.
  */
-static inline uint8_t Avtp_CanXlBrief_GetTransactionNum(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetTransactionNum(const Avtp_CanXlBrief_t* msg) {
     return (uint8_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_TRANSACTION_NUM);
 }
 
@@ -247,7 +248,7 @@ static inline uint8_t Avtp_CanXlBrief_GetTransactionNum(const Avtp_CanXlBrief_t*
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_CanXlBrief_IsMs(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXlBrief_IsMs(const Avtp_CanXlBrief_t* msg) {
     return (bool) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_MS);
 }
 
@@ -258,7 +259,7 @@ static inline bool Avtp_CanXlBrief_IsMs(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The value of the segment_num field.
  */
-static inline uint16_t Avtp_CanXlBrief_GetSegmentNum(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetSegmentNum(const Avtp_CanXlBrief_t* msg) {
     return (uint16_t) __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_SEGMENT_NUM);
 }
 
@@ -270,7 +271,7 @@ static inline uint16_t Avtp_CanXlBrief_GetSegmentNum(const Avtp_CanXlBrief_t* ms
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The payload length in bytes.
  */
-static inline uint16_t Avtp_CanXlBrief_GetPayloadLen(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetPayloadLen(const Avtp_CanXlBrief_t* msg) {
     return (uint16_t) (__Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_CANXL_BRIEF_HEADER_LEN
            - __Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_PAD));
@@ -283,7 +284,7 @@ static inline uint16_t Avtp_CanXlBrief_GetPayloadLen(const Avtp_CanXlBrief_t* ms
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @returns The total message length in bytes.
  */
-static inline uint16_t Avtp_CanXlBrief_GetLen(const Avtp_CanXlBrief_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetLen(const Avtp_CanXlBrief_t* msg) {
     return (uint16_t) (__Avtp_CanXlBrief_GetField(AVTP_CANXL_BRIEF_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
@@ -293,7 +294,7 @@ static inline uint16_t Avtp_CanXlBrief_GetLen(const Avtp_CanXlBrief_t* msg) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param mtv The value to set.
  */
-static inline void Avtp_CanXlBrief_SetMtv(Avtp_CanXlBrief_t* msg, bool mtv) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetMtv(Avtp_CanXlBrief_t* msg, bool mtv) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_MTV, mtv);
 }
 
@@ -303,7 +304,7 @@ static inline void Avtp_CanXlBrief_SetMtv(Avtp_CanXlBrief_t* msg, bool mtv) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param canBusId The value to set.
  */
-static inline void Avtp_CanXlBrief_SetCanBusId(Avtp_CanXlBrief_t* msg, uint16_t canBusId) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetCanBusId(Avtp_CanXlBrief_t* msg, uint16_t canBusId) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_CAN_BUS_ID, canBusId);
 }
 
@@ -313,7 +314,7 @@ static inline void Avtp_CanXlBrief_SetCanBusId(Avtp_CanXlBrief_t* msg, uint16_t 
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param vcid The value to set.
  */
-static inline void Avtp_CanXlBrief_SetVcid(Avtp_CanXlBrief_t* msg, uint8_t vcid) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetVcid(Avtp_CanXlBrief_t* msg, uint8_t vcid) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_VCID, vcid);
 }
 
@@ -323,7 +324,7 @@ static inline void Avtp_CanXlBrief_SetVcid(Avtp_CanXlBrief_t* msg, uint8_t vcid)
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param sdt The value to set.
  */
-static inline void Avtp_CanXlBrief_SetSdt(Avtp_CanXlBrief_t* msg, uint8_t sdt) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetSdt(Avtp_CanXlBrief_t* msg, uint8_t sdt) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_SDT, sdt);
 }
 
@@ -333,7 +334,7 @@ static inline void Avtp_CanXlBrief_SetSdt(Avtp_CanXlBrief_t* msg, uint8_t sdt) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param rrs The value to set.
  */
-static inline void Avtp_CanXlBrief_SetRrs(Avtp_CanXlBrief_t* msg, bool rrs) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetRrs(Avtp_CanXlBrief_t* msg, bool rrs) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_RRS, rrs);
 }
 
@@ -343,7 +344,7 @@ static inline void Avtp_CanXlBrief_SetRrs(Avtp_CanXlBrief_t* msg, bool rrs) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param sec The value to set.
  */
-static inline void Avtp_CanXlBrief_SetSec(Avtp_CanXlBrief_t* msg, bool sec) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetSec(Avtp_CanXlBrief_t* msg, bool sec) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_SEC, sec);
 }
 
@@ -353,7 +354,7 @@ static inline void Avtp_CanXlBrief_SetSec(Avtp_CanXlBrief_t* msg, bool sec) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param priorityId The value to set.
  */
-static inline void Avtp_CanXlBrief_SetPriorityId(Avtp_CanXlBrief_t* msg, uint16_t priorityId) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetPriorityId(Avtp_CanXlBrief_t* msg, uint16_t priorityId) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_PRIORITY_ID, priorityId);
 }
 
@@ -363,7 +364,7 @@ static inline void Avtp_CanXlBrief_SetPriorityId(Avtp_CanXlBrief_t* msg, uint16_
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param acceptanceField The value to set.
  */
-static inline void Avtp_CanXlBrief_SetAcceptanceField(Avtp_CanXlBrief_t* msg, uint32_t acceptanceField) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetAcceptanceField(Avtp_CanXlBrief_t* msg, uint32_t acceptanceField) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_ACCEPTANCE_FIELD, acceptanceField);
 }
 
@@ -373,7 +374,7 @@ static inline void Avtp_CanXlBrief_SetAcceptanceField(Avtp_CanXlBrief_t* msg, ui
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param transactionNum The value to set.
  */
-static inline void Avtp_CanXlBrief_SetTransactionNum(Avtp_CanXlBrief_t* msg, uint8_t transactionNum) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetTransactionNum(Avtp_CanXlBrief_t* msg, uint8_t transactionNum) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_TRANSACTION_NUM, transactionNum);
 }
 
@@ -383,7 +384,7 @@ static inline void Avtp_CanXlBrief_SetTransactionNum(Avtp_CanXlBrief_t* msg, uin
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param ms The value to set.
  */
-static inline void Avtp_CanXlBrief_SetMs(Avtp_CanXlBrief_t* msg, bool ms) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetMs(Avtp_CanXlBrief_t* msg, bool ms) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_MS, ms);
 }
 
@@ -393,7 +394,7 @@ static inline void Avtp_CanXlBrief_SetMs(Avtp_CanXlBrief_t* msg, bool ms) {
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param segmentNum The value to set.
  */
-static inline void Avtp_CanXlBrief_SetSegmentNum(Avtp_CanXlBrief_t* msg, uint16_t segmentNum) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetSegmentNum(Avtp_CanXlBrief_t* msg, uint16_t segmentNum) {
     __Avtp_CanXlBrief_SetField(AVTP_CANXL_BRIEF_FIELD_SEGMENT_NUM, segmentNum);
 }
 
@@ -405,7 +406,7 @@ static inline void Avtp_CanXlBrief_SetSegmentNum(Avtp_CanXlBrief_t* msg, uint16_
  * @param msg Pointer to an ACF_CAN_XL_BRIEF message.
  * @param payloadLen The length of the payload in bytes.
  */
-static inline void Avtp_CanXlBrief_SetPayloadLen(Avtp_CanXlBrief_t* msg, uint16_t payloadLen) {
+OPEN1722_INLINE void Avtp_CanXlBrief_SetPayloadLen(Avtp_CanXlBrief_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_CANXL_BRIEF_HEADER_LEN + payloadLen;
     uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
     uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;

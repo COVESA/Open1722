@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef LINUX_KERNEL1722
 #include <linux/string.h>
@@ -106,7 +107,7 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] =
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU subtype field.
  */
-static inline uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE);
 }
 
@@ -116,7 +117,7 @@ static inline uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU SV field.
  */
-static inline uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SV);
 }
 
@@ -126,7 +127,7 @@ static inline uint8_t Avtp_Tscf_GetSv(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU version field.
  */
-static inline uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION);
 }
 
@@ -136,7 +137,7 @@ static inline uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU MR field.
  */
-static inline uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_MR);
 }
 
@@ -146,7 +147,7 @@ static inline uint8_t Avtp_Tscf_GetMr(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU TV field.
  */
-static inline uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_TV);
 }
 
@@ -156,7 +157,7 @@ static inline uint8_t Avtp_Tscf_GetTv(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU Sequence Number field.
  */
-static inline uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM);
 }
 
@@ -166,7 +167,7 @@ static inline uint8_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU TU field.
  */
-static inline uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu) {
     return (uint8_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_TU);
 }
 
@@ -176,7 +177,7 @@ static inline uint8_t Avtp_Tscf_GetTu(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU Stream ID field.
  */
-static inline uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu) {
     return (uint64_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_ID);
 }
 
@@ -186,7 +187,7 @@ static inline uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU AVTP Timestamp field.
  */
-static inline uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu) {
     return (uint32_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_AVTP_TIMESTAMP);
 }
 
@@ -196,7 +197,7 @@ static inline uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t* const pdu) 
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @returns Value of the TSCF PDU Stream Data Length field.
  */
-static inline uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pdu) {
+OPEN1722_INLINE uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pdu) {
     return (uint16_t) GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
 }
 
@@ -206,7 +207,7 @@ static inline uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t* const pd
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU subtype field to.
  */
-static inline void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE, value);
 }
 
@@ -215,7 +216,7 @@ static inline void Avtp_Tscf_SetSubtype(Avtp_Tscf_t* pdu, uint8_t value) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_EnableSv(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_EnableSv(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_SV, 1);
 }
 
@@ -224,7 +225,7 @@ static inline void Avtp_Tscf_EnableSv(Avtp_Tscf_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_DisableSv(Avtp_Tscf_t* pdu)
+OPEN1722_INLINE void Avtp_Tscf_DisableSv(Avtp_Tscf_t* pdu)
 {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_SV, 0);
 }
@@ -235,7 +236,7 @@ static inline void Avtp_Tscf_DisableSv(Avtp_Tscf_t* pdu)
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU version field to.
  */
-static inline void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION, value);
 }
 
@@ -244,7 +245,7 @@ static inline void Avtp_Tscf_SetVersion(Avtp_Tscf_t* pdu, uint8_t value) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_EnableMr(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_EnableMr(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_MR, 1);
 }
 
@@ -253,7 +254,7 @@ static inline void Avtp_Tscf_EnableMr(Avtp_Tscf_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_DisableMr(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_DisableMr(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_MR, 0);
 }
 
@@ -262,7 +263,7 @@ static inline void Avtp_Tscf_DisableMr(Avtp_Tscf_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_EnableTv(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_EnableTv(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_TV, 1);
 }
 
@@ -271,7 +272,7 @@ static inline void Avtp_Tscf_EnableTv(Avtp_Tscf_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_DisableTv(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_DisableTv(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_TV, 0);
 }
 
@@ -281,7 +282,7 @@ static inline void Avtp_Tscf_DisableTv(Avtp_Tscf_t* pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU Sequence Number field to.
  */
-static inline void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_SEQUENCE_NUM, value);
 }
 
@@ -290,7 +291,7 @@ static inline void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t* pdu, uint8_t value) {
  * 
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_EnableTu(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_EnableTu(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_TU, 1);
 }   
 
@@ -299,7 +300,7 @@ static inline void Avtp_Tscf_EnableTu(Avtp_Tscf_t* pdu) {
  * 
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  */
-static inline void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_TU, 0);
 }
 
@@ -309,7 +310,7 @@ static inline void Avtp_Tscf_DisableTu(Avtp_Tscf_t* pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU Stream ID field to.
  */
-static inline void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_ID, value);
 }
 
@@ -319,7 +320,7 @@ static inline void Avtp_Tscf_SetStreamId(Avtp_Tscf_t* pdu, uint64_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU AVTP Timestamp field to.
  */
-static inline void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t* pdu, uint32_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t* pdu, uint32_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_AVTP_TIMESTAMP, value);
 }
 
@@ -329,7 +330,7 @@ static inline void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t* pdu, uint32_t value) 
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
  * @param value Value to set the TSCF PDU Stream Data Length field to.
  */
-static inline void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t* pdu, uint16_t value) {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
@@ -349,7 +350,7 @@ uint8_t Avtp_Tscf_IsValid(const Avtp_Tscf_t* const pdu, size_t bufferSize);
  * @param pdu Pointer to the first bit of a 1722 PDU. This is typically an AVTP-
  * or an ACF header.
  */
-static inline void Avtp_Tscf_Init(Avtp_Tscf_t* pdu) {
+OPEN1722_INLINE void Avtp_Tscf_Init(Avtp_Tscf_t* pdu) {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Tscf_t));
         Avtp_Tscf_SetSubtype(pdu, AVTP_SUBTYPE_TSCF);
@@ -365,7 +366,7 @@ static inline void Avtp_Tscf_Init(Avtp_Tscf_t* pdu) {
  * @param value Pointer to location to store the value.
  * @returns This function returns the value of the field.
  */
-static inline uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field) {
+OPEN1722_INLINE uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_TscfFields_t field) {
     return (uint64_t) GET_TSCF_FIELD(field);
 }
 
@@ -376,7 +377,7 @@ static inline uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t* const pdu, Avtp_Tsc
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-static inline void Avtp_Tscf_SetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field, uint64_t value) {
+OPEN1722_INLINE void Avtp_Tscf_SetField(Avtp_Tscf_t* pdu, Avtp_TscfFields_t field, uint64_t value) {
     SET_TSCF_FIELD(field, value);
 }
 

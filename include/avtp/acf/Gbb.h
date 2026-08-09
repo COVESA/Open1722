@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,7 +135,7 @@ static const Avtp_FieldDescriptor_t __AVTP_GBB_FIELDS[AVTP_GBB_FIELD_MAX] =
  *
  * @param msg Pointer to the ACF_GBB message to initialize.
  */
-static inline void Avtp_Gbb_Init(Avtp_Gbb_t* msg) {
+OPEN1722_INLINE void Avtp_Gbb_Init(Avtp_Gbb_t* msg) {
     memset(msg, 0, sizeof(Avtp_Gbb_t));
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS);
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH, AVTP_GBB_HEADER_LEN / AVTP_QUADLET_SIZE);
@@ -146,7 +147,7 @@ static inline void Avtp_Gbb_Init(Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the pad field.
  */
-static inline uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t* msg) {
     return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD);
 }
 
@@ -157,7 +158,7 @@ static inline uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_Gbb_IsMtv(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsMtv(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MTV);
 }
 
@@ -167,7 +168,7 @@ static inline bool Avtp_Gbb_IsMtv(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the byte_bus_id field.
  */
-static inline uint16_t Avtp_Gbb_GetByteBusId(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Gbb_GetByteBusId(const Avtp_Gbb_t* msg) {
     return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_BYTE_BUS_ID);
 }
 
@@ -178,7 +179,7 @@ static inline uint16_t Avtp_Gbb_GetByteBusId(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the message_timestamp field.
  */
-static inline uint64_t Avtp_Gbb_GetMessageTimestamp(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint64_t Avtp_Gbb_GetMessageTimestamp(const Avtp_Gbb_t* msg) {
     return (uint64_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MESSAGE_TIMESTAMP);
 }
 
@@ -188,7 +189,7 @@ static inline uint64_t Avtp_Gbb_GetMessageTimestamp(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the evt field.
  */
-static inline uint8_t Avtp_Gbb_GetEvt(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Gbb_GetEvt(const Avtp_Gbb_t* msg) {
     return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_EVT);
 }
 
@@ -198,7 +199,7 @@ static inline uint8_t Avtp_Gbb_GetEvt(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the hs field.
  */
-static inline bool Avtp_Gbb_IsHs(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsHs(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_HS);
 }
 
@@ -208,7 +209,7 @@ static inline bool Avtp_Gbb_IsHs(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the cs field.
  */
-static inline bool Avtp_Gbb_IsCs(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsCs(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_CS);
 }
 
@@ -219,7 +220,7 @@ static inline bool Avtp_Gbb_IsCs(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the transaction_num field.
  */
-static inline uint8_t Avtp_Gbb_GetTransactionNum(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Gbb_GetTransactionNum(const Avtp_Gbb_t* msg) {
     return (uint8_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_TRANSACTION_NUM);
 }
 
@@ -229,7 +230,7 @@ static inline uint8_t Avtp_Gbb_GetTransactionNum(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the op flag.
  */
-static inline bool Avtp_Gbb_IsOp(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsOp(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_OP);
 }
 
@@ -239,7 +240,7 @@ static inline bool Avtp_Gbb_IsOp(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the rsp flag.
  */
-static inline bool Avtp_Gbb_IsRsp(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsRsp(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_RSP);
 }
 
@@ -249,7 +250,7 @@ static inline bool Avtp_Gbb_IsRsp(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the err flag.
  */
-static inline bool Avtp_Gbb_IsErr(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsErr(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_ERR);
 }
 
@@ -259,7 +260,7 @@ static inline bool Avtp_Gbb_IsErr(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_Gbb_IsMs(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE bool Avtp_Gbb_IsMs(const Avtp_Gbb_t* msg) {
     return (bool) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_MS);
 }
 
@@ -270,7 +271,7 @@ static inline bool Avtp_Gbb_IsMs(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the read_size/segment_num field.
  */
-static inline uint16_t Avtp_Gbb_GetReadSize(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Gbb_GetReadSize(const Avtp_Gbb_t* msg) {
     return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
@@ -281,7 +282,7 @@ static inline uint16_t Avtp_Gbb_GetReadSize(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The value of the read_size/segment_num field.
  */
-static inline uint16_t Avtp_Gbb_GetSegmentNum(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Gbb_GetSegmentNum(const Avtp_Gbb_t* msg) {
     return (uint16_t) __Avtp_Gbb_GetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
@@ -293,7 +294,7 @@ static inline uint16_t Avtp_Gbb_GetSegmentNum(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The payload length in bytes.
  */
-static inline uint16_t Avtp_Gbb_GetPayloadLen(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Gbb_GetPayloadLen(const Avtp_Gbb_t* msg) {
     return (uint16_t) (__Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_GBB_HEADER_LEN
            - __Avtp_Gbb_GetField(AVTP_GBB_FIELD_PAD));
@@ -306,7 +307,7 @@ static inline uint16_t Avtp_Gbb_GetPayloadLen(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @returns The total message length in bytes.
  */
-static inline uint16_t Avtp_Gbb_GetLen(const Avtp_Gbb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Gbb_GetLen(const Avtp_Gbb_t* msg) {
     return (uint16_t) (__Avtp_Gbb_GetField(AVTP_GBB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
@@ -316,7 +317,7 @@ static inline uint16_t Avtp_Gbb_GetLen(const Avtp_Gbb_t* msg) {
  * @param msg Pointer to an ACF_GBB message.
  * @param mtv The value to set.
  */
-static inline void Avtp_Gbb_SetMtv(Avtp_Gbb_t* msg, bool mtv) {
+OPEN1722_INLINE void Avtp_Gbb_SetMtv(Avtp_Gbb_t* msg, bool mtv) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_MTV, mtv);
 }
 
@@ -326,7 +327,7 @@ static inline void Avtp_Gbb_SetMtv(Avtp_Gbb_t* msg, bool mtv) {
  * @param msg Pointer to an ACF_GBB message.
  * @param byteBusId The value to set.
  */
-static inline void Avtp_Gbb_SetByteBusId(Avtp_Gbb_t* msg, uint16_t byteBusId) {
+OPEN1722_INLINE void Avtp_Gbb_SetByteBusId(Avtp_Gbb_t* msg, uint16_t byteBusId) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_BYTE_BUS_ID, byteBusId);
 }
 
@@ -336,7 +337,7 @@ static inline void Avtp_Gbb_SetByteBusId(Avtp_Gbb_t* msg, uint16_t byteBusId) {
  * @param msg Pointer to an ACF_GBB message.
  * @param messageTimestamp The value to set.
  */
-static inline void Avtp_Gbb_SetMessageTimestamp(Avtp_Gbb_t* msg, uint64_t messageTimestamp) {
+OPEN1722_INLINE void Avtp_Gbb_SetMessageTimestamp(Avtp_Gbb_t* msg, uint64_t messageTimestamp) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_MESSAGE_TIMESTAMP, messageTimestamp);
 }
 
@@ -347,7 +348,7 @@ static inline void Avtp_Gbb_SetMessageTimestamp(Avtp_Gbb_t* msg, uint64_t messag
  * @param evt The value to set.
  */
 
-static inline void Avtp_Gbb_SetEvt(Avtp_Gbb_t* msg, uint8_t evt) {
+OPEN1722_INLINE void Avtp_Gbb_SetEvt(Avtp_Gbb_t* msg, uint8_t evt) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_EVT, evt);
 }
 
@@ -357,7 +358,7 @@ static inline void Avtp_Gbb_SetEvt(Avtp_Gbb_t* msg, uint8_t evt) {
  * @param msg Pointer to an ACF_GBB message.
  * @param hs The value to set.
  */
-static inline void Avtp_Gbb_SetHs(Avtp_Gbb_t* msg, bool hs) {
+OPEN1722_INLINE void Avtp_Gbb_SetHs(Avtp_Gbb_t* msg, bool hs) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_HS, hs);
 }
 
@@ -368,7 +369,7 @@ static inline void Avtp_Gbb_SetHs(Avtp_Gbb_t* msg, bool hs) {
  * @param msg Pointer to an ACF_GBB message.
  * @param cs The value to set.
  */
-static inline void Avtp_Gbb_SetCs(Avtp_Gbb_t* msg, bool cs) {
+OPEN1722_INLINE void Avtp_Gbb_SetCs(Avtp_Gbb_t* msg, bool cs) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_CS, cs);
 }
 
@@ -378,7 +379,7 @@ static inline void Avtp_Gbb_SetCs(Avtp_Gbb_t* msg, bool cs) {
  * @param msg Pointer to an ACF_GBB message.
  * @param transactionNum The value to set.
  */
-static inline void Avtp_Gbb_SetTransactionNum(Avtp_Gbb_t* msg, uint8_t transactionNum) {
+OPEN1722_INLINE void Avtp_Gbb_SetTransactionNum(Avtp_Gbb_t* msg, uint8_t transactionNum) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_TRANSACTION_NUM, transactionNum);
 }
 
@@ -388,7 +389,7 @@ static inline void Avtp_Gbb_SetTransactionNum(Avtp_Gbb_t* msg, uint8_t transacti
  * @param msg Pointer to an ACF_GBB message.
  * @param op The value to set.
  */
-static inline void Avtp_Gbb_SetOp(Avtp_Gbb_t* msg, bool op) {
+OPEN1722_INLINE void Avtp_Gbb_SetOp(Avtp_Gbb_t* msg, bool op) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_OP, op);
 }
 
@@ -398,7 +399,7 @@ static inline void Avtp_Gbb_SetOp(Avtp_Gbb_t* msg, bool op) {
  * @param msg Pointer to an ACF_GBB message.
  * @param rsp The value to set.
  */
-static inline void Avtp_Gbb_SetRsp(Avtp_Gbb_t* msg, bool rsp) {
+OPEN1722_INLINE void Avtp_Gbb_SetRsp(Avtp_Gbb_t* msg, bool rsp) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_RSP, rsp);
 }
 
@@ -408,7 +409,7 @@ static inline void Avtp_Gbb_SetRsp(Avtp_Gbb_t* msg, bool rsp) {
  * @param msg Pointer to an ACF_GBB message.
  * @param err The value to set.
  */
-static inline void Avtp_Gbb_SetErr(Avtp_Gbb_t* msg, bool err) {
+OPEN1722_INLINE void Avtp_Gbb_SetErr(Avtp_Gbb_t* msg, bool err) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_ERR, err);
 }
 
@@ -418,7 +419,7 @@ static inline void Avtp_Gbb_SetErr(Avtp_Gbb_t* msg, bool err) {
  * @param msg Pointer to an ACF_GBB message.
  * @param ms The value to set.
  */
-static inline void Avtp_Gbb_SetMs(Avtp_Gbb_t* msg, bool ms) {
+OPEN1722_INLINE void Avtp_Gbb_SetMs(Avtp_Gbb_t* msg, bool ms) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_MS, ms);
 }
 
@@ -428,7 +429,7 @@ static inline void Avtp_Gbb_SetMs(Avtp_Gbb_t* msg, bool ms) {
  * @param msg Pointer to an ACF_GBB message.
  * @param readSize The value to set.
  */
-static inline void Avtp_Gbb_SetReadSize(Avtp_Gbb_t* msg, uint16_t readSize) {
+OPEN1722_INLINE void Avtp_Gbb_SetReadSize(Avtp_Gbb_t* msg, uint16_t readSize) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM, readSize);
 }
 
@@ -438,7 +439,7 @@ static inline void Avtp_Gbb_SetReadSize(Avtp_Gbb_t* msg, uint16_t readSize) {
  * @param msg Pointer to an ACF_GBB message.
  * @param segmentNum The value to set.
  */
-static inline void Avtp_Gbb_SetSegmentNum(Avtp_Gbb_t* msg, uint16_t segmentNum) {
+OPEN1722_INLINE void Avtp_Gbb_SetSegmentNum(Avtp_Gbb_t* msg, uint16_t segmentNum) {
     __Avtp_Gbb_SetField(AVTP_GBB_FIELD_READ_SIZE_SEGMENT_NUM, segmentNum);
 }
 
@@ -450,7 +451,7 @@ static inline void Avtp_Gbb_SetSegmentNum(Avtp_Gbb_t* msg, uint16_t segmentNum) 
  * @param msg Pointer to an ACF_GBB message.
  * @param payloadLen The length of the payload in bytes.
  */
-static inline void Avtp_Gbb_SetPayloadLen(Avtp_Gbb_t* msg, uint16_t payloadLen) {
+OPEN1722_INLINE void Avtp_Gbb_SetPayloadLen(Avtp_Gbb_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_GBB_HEADER_LEN + payloadLen;
     uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
     uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;

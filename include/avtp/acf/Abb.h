@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -132,7 +133,7 @@ static const Avtp_FieldDescriptor_t __AVTP_ABB_FIELDS[AVTP_ABB_FIELD_MAX] =
  *
  * @param msg Pointer to the ACF_ABB message to initialize.
  */
-static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
+OPEN1722_INLINE void Avtp_Abb_Init(Avtp_Abb_t* msg) {
     memset(msg, 0, sizeof(Avtp_Abb_t));
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, AVTP_ABB_HEADER_LEN / AVTP_QUADLET_SIZE);
@@ -144,7 +145,7 @@ static inline void Avtp_Abb_Init(Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the pad field.
  */
-static inline uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t* msg) {
     return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD);
 }
 
@@ -155,7 +156,7 @@ static inline uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_Abb_IsMtv(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsMtv(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_MTV);
 }
 
@@ -165,7 +166,7 @@ static inline bool Avtp_Abb_IsMtv(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the byte_bus_id field.
  */
-static inline uint16_t Avtp_Abb_GetByteBusId(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Abb_GetByteBusId(const Avtp_Abb_t* msg) {
     return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_BYTE_BUS_ID);
 }
 
@@ -175,7 +176,7 @@ static inline uint16_t Avtp_Abb_GetByteBusId(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the evt field.
  */
-static inline uint8_t Avtp_Abb_GetEvt(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Abb_GetEvt(const Avtp_Abb_t* msg) {
     return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_EVT);
 }
 
@@ -185,7 +186,7 @@ static inline uint8_t Avtp_Abb_GetEvt(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the hs field.
  */
-static inline bool Avtp_Abb_IsHs(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsHs(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_HS);
 }
 
@@ -195,7 +196,7 @@ static inline bool Avtp_Abb_IsHs(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the cs field.
  */
-static inline bool Avtp_Abb_IsCs(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsCs(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_CS);
 }
 
@@ -206,7 +207,7 @@ static inline bool Avtp_Abb_IsCs(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the transaction_num field.
  */
-static inline uint8_t Avtp_Abb_GetTransactionNum(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_Abb_GetTransactionNum(const Avtp_Abb_t* msg) {
     return (uint8_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_TRANSACTION_NUM);
 }
 
@@ -216,7 +217,7 @@ static inline uint8_t Avtp_Abb_GetTransactionNum(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the op flag.
  */
-static inline bool Avtp_Abb_IsOp(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsOp(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_OP);
 }
 
@@ -226,7 +227,7 @@ static inline bool Avtp_Abb_IsOp(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the rsp flag.
  */
-static inline bool Avtp_Abb_IsRsp(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsRsp(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_RSP);
 }
 
@@ -236,7 +237,7 @@ static inline bool Avtp_Abb_IsRsp(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the err flag.
  */
-static inline bool Avtp_Abb_IsErr(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsErr(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_ERR);
 }
 
@@ -246,7 +247,7 @@ static inline bool Avtp_Abb_IsErr(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_Abb_IsMs(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE bool Avtp_Abb_IsMs(const Avtp_Abb_t* msg) {
     return (bool) __Avtp_Abb_GetField(AVTP_ABB_FIELD_MS);
 }
 
@@ -257,7 +258,7 @@ static inline bool Avtp_Abb_IsMs(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the read_size/segment_num field.
  */
-static inline uint16_t Avtp_Abb_GetReadSize(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Abb_GetReadSize(const Avtp_Abb_t* msg) {
     return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
@@ -268,7 +269,7 @@ static inline uint16_t Avtp_Abb_GetReadSize(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The value of the read_size/segment_num field.
  */
-static inline uint16_t Avtp_Abb_GetSegmentNum(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Abb_GetSegmentNum(const Avtp_Abb_t* msg) {
     return (uint16_t) __Avtp_Abb_GetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM);
 }
 
@@ -280,7 +281,7 @@ static inline uint16_t Avtp_Abb_GetSegmentNum(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The payload length in bytes.
  */
-static inline uint16_t Avtp_Abb_GetPayloadLen(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Abb_GetPayloadLen(const Avtp_Abb_t* msg) {
     return (uint16_t) (__Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_ABB_HEADER_LEN
            - __Avtp_Abb_GetField(AVTP_ABB_FIELD_PAD));
@@ -293,7 +294,7 @@ static inline uint16_t Avtp_Abb_GetPayloadLen(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @returns The total message length in bytes.
  */
-static inline uint16_t Avtp_Abb_GetLen(const Avtp_Abb_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_Abb_GetLen(const Avtp_Abb_t* msg) {
     return (uint16_t) (__Avtp_Abb_GetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
@@ -303,7 +304,7 @@ static inline uint16_t Avtp_Abb_GetLen(const Avtp_Abb_t* msg) {
  * @param msg Pointer to an ACF_ABB message.
  * @param mtv The value to set.
  */
-static inline void Avtp_Abb_SetMtv(Avtp_Abb_t* msg, bool mtv) {
+OPEN1722_INLINE void Avtp_Abb_SetMtv(Avtp_Abb_t* msg, bool mtv) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_MTV, mtv);
 }
 
@@ -313,7 +314,7 @@ static inline void Avtp_Abb_SetMtv(Avtp_Abb_t* msg, bool mtv) {
  * @param msg Pointer to an ACF_ABB message.
  * @param byteBusId The value to set.
  */
-static inline void Avtp_Abb_SetByteBusId(Avtp_Abb_t* msg, uint16_t byteBusId) {
+OPEN1722_INLINE void Avtp_Abb_SetByteBusId(Avtp_Abb_t* msg, uint16_t byteBusId) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_BYTE_BUS_ID, byteBusId);
 }
 
@@ -324,7 +325,7 @@ static inline void Avtp_Abb_SetByteBusId(Avtp_Abb_t* msg, uint16_t byteBusId) {
  * @param evt The value to set.
  */
 
-static inline void Avtp_Abb_SetEvt(Avtp_Abb_t* msg, uint8_t evt) {
+OPEN1722_INLINE void Avtp_Abb_SetEvt(Avtp_Abb_t* msg, uint8_t evt) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_EVT, evt);
 }
 
@@ -334,7 +335,7 @@ static inline void Avtp_Abb_SetEvt(Avtp_Abb_t* msg, uint8_t evt) {
  * @param msg Pointer to an ACF_ABB message.
  * @param hs The value to set.
  */
-static inline void Avtp_Abb_SetHs(Avtp_Abb_t* msg, bool hs) {
+OPEN1722_INLINE void Avtp_Abb_SetHs(Avtp_Abb_t* msg, bool hs) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_HS, hs);
 }
 
@@ -345,7 +346,7 @@ static inline void Avtp_Abb_SetHs(Avtp_Abb_t* msg, bool hs) {
  * @param msg Pointer to an ACF_ABB message.
  * @param cs The value to set.
  */
-static inline void Avtp_Abb_SetCs(Avtp_Abb_t* msg, bool cs) {
+OPEN1722_INLINE void Avtp_Abb_SetCs(Avtp_Abb_t* msg, bool cs) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_CS, cs);
 }
 
@@ -355,7 +356,7 @@ static inline void Avtp_Abb_SetCs(Avtp_Abb_t* msg, bool cs) {
  * @param msg Pointer to an ACF_ABB message.
  * @param transactionNum The value to set.
  */
-static inline void Avtp_Abb_SetTransactionNum(Avtp_Abb_t* msg, uint8_t transactionNum) {
+OPEN1722_INLINE void Avtp_Abb_SetTransactionNum(Avtp_Abb_t* msg, uint8_t transactionNum) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_TRANSACTION_NUM, transactionNum);
 }
 
@@ -365,7 +366,7 @@ static inline void Avtp_Abb_SetTransactionNum(Avtp_Abb_t* msg, uint8_t transacti
  * @param msg Pointer to an ACF_ABB message.
  * @param op The value to set.
  */
-static inline void Avtp_Abb_SetOp(Avtp_Abb_t* msg, bool op) {
+OPEN1722_INLINE void Avtp_Abb_SetOp(Avtp_Abb_t* msg, bool op) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_OP, op);
 }
 
@@ -375,7 +376,7 @@ static inline void Avtp_Abb_SetOp(Avtp_Abb_t* msg, bool op) {
  * @param msg Pointer to an ACF_ABB message.
  * @param rsp The value to set.
  */
-static inline void Avtp_Abb_SetRsp(Avtp_Abb_t* msg, bool rsp) {
+OPEN1722_INLINE void Avtp_Abb_SetRsp(Avtp_Abb_t* msg, bool rsp) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_RSP, rsp);
 }
 
@@ -385,7 +386,7 @@ static inline void Avtp_Abb_SetRsp(Avtp_Abb_t* msg, bool rsp) {
  * @param msg Pointer to an ACF_ABB message.
  * @param err The value to set.
  */
-static inline void Avtp_Abb_SetErr(Avtp_Abb_t* msg, bool err) {
+OPEN1722_INLINE void Avtp_Abb_SetErr(Avtp_Abb_t* msg, bool err) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ERR, err);
 }
 
@@ -395,7 +396,7 @@ static inline void Avtp_Abb_SetErr(Avtp_Abb_t* msg, bool err) {
  * @param msg Pointer to an ACF_ABB message.
  * @param ms The value to set.
  */
-static inline void Avtp_Abb_SetMs(Avtp_Abb_t* msg, bool ms) {
+OPEN1722_INLINE void Avtp_Abb_SetMs(Avtp_Abb_t* msg, bool ms) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_MS, ms);
 }
 
@@ -405,7 +406,7 @@ static inline void Avtp_Abb_SetMs(Avtp_Abb_t* msg, bool ms) {
  * @param msg Pointer to an ACF_ABB message.
  * @param readSize The value to set.
  */
-static inline void Avtp_Abb_SetReadSize(Avtp_Abb_t* msg, uint16_t readSize) {
+OPEN1722_INLINE void Avtp_Abb_SetReadSize(Avtp_Abb_t* msg, uint16_t readSize) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM, readSize);
 }
 
@@ -415,7 +416,7 @@ static inline void Avtp_Abb_SetReadSize(Avtp_Abb_t* msg, uint16_t readSize) {
  * @param msg Pointer to an ACF_ABB message.
  * @param segmentNum The value to set.
  */
-static inline void Avtp_Abb_SetSegmentNum(Avtp_Abb_t* msg, uint16_t segmentNum) {
+OPEN1722_INLINE void Avtp_Abb_SetSegmentNum(Avtp_Abb_t* msg, uint16_t segmentNum) {
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_READ_SIZE_SEGMENT_NUM, segmentNum);
 }
 
@@ -427,7 +428,7 @@ static inline void Avtp_Abb_SetSegmentNum(Avtp_Abb_t* msg, uint16_t segmentNum) 
  * @param msg Pointer to an ACF_ABB message.
  * @param payloadLen The length of the payload in bytes.
  */
-static inline void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) {
+OPEN1722_INLINE void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_ABB_HEADER_LEN + payloadLen;
     uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
     uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;

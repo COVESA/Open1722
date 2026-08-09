@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #include <string.h>
 
@@ -96,7 +97,7 @@ static const Avtp_FieldDescriptor_t Avtp_SensorFieldDesc[AVTP_SENSOR_FIELD_MAX] 
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the ACF message type field.
  */
-static inline uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu) {
     return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_TYPE);
 }
 
@@ -106,7 +107,7 @@ static inline uint8_t Avtp_Sensor_GetAcfMsgType(const Avtp_Sensor_t* const pdu) 
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the ACF message length field.
  */
-static inline uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pdu) {
     return (uint16_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_LENGTH);
 }
 
@@ -116,7 +117,7 @@ static inline uint16_t Avtp_Sensor_GetAcfMsgLength(const Avtp_Sensor_t* const pd
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the MTV field.
  */
-static inline uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu) {
     return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MTV);
 }
 
@@ -126,7 +127,7 @@ static inline uint8_t Avtp_Sensor_GetMtv(const Avtp_Sensor_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the Num Sensor field.
  */
-static inline uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu) {
     return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_NUM_SENSOR);
 }
 
@@ -136,7 +137,7 @@ static inline uint8_t Avtp_Sensor_GetNumSensor(const Avtp_Sensor_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the Sz field.
  */
-static inline uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu) {
     return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SZ);
 }
 
@@ -146,7 +147,7 @@ static inline uint8_t Avtp_Sensor_GetSz(const Avtp_Sensor_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the Sensor Group field.
  */
-static inline uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu) {
     return (uint8_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SENSOR_GROUP);
 }
 
@@ -156,7 +157,7 @@ static inline uint8_t Avtp_Sensor_GetSensorGroup(const Avtp_Sensor_t* const pdu)
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @returns Value of the Message Timestamp field.
  */
-static inline uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* const pdu) {
+OPEN1722_INLINE uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* const pdu) {
     return (uint64_t) GET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP);
 }
 
@@ -166,7 +167,7 @@ static inline uint64_t Avtp_Sensor_GetMessageTimestamp(const Avtp_Sensor_t* cons
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the ACF message type field.
  */
-static inline void Avtp_Sensor_SetAcfMsgType(Avtp_Sensor_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetAcfMsgType(Avtp_Sensor_t* pdu, uint8_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -176,7 +177,7 @@ static inline void Avtp_Sensor_SetAcfMsgType(Avtp_Sensor_t* pdu, uint8_t value) 
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the ACF message length field.
  */
-static inline void Avtp_Sensor_SetAcfMsgLength(Avtp_Sensor_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetAcfMsgLength(Avtp_Sensor_t* pdu, uint16_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -185,7 +186,7 @@ static inline void Avtp_Sensor_SetAcfMsgLength(Avtp_Sensor_t* pdu, uint16_t valu
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  */
-static inline void Avtp_Sensor_EnableMtv(Avtp_Sensor_t* pdu) {
+OPEN1722_INLINE void Avtp_Sensor_EnableMtv(Avtp_Sensor_t* pdu) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MTV, 1);
 }
 
@@ -194,7 +195,7 @@ static inline void Avtp_Sensor_EnableMtv(Avtp_Sensor_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  */
-static inline void Avtp_Sensor_DisableMtv(Avtp_Sensor_t* pdu) {
+OPEN1722_INLINE void Avtp_Sensor_DisableMtv(Avtp_Sensor_t* pdu) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MTV, 0);
 }
 
@@ -204,7 +205,7 @@ static inline void Avtp_Sensor_DisableMtv(Avtp_Sensor_t* pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the Num Sensor field.
  */
-static inline void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_NUM_SENSOR, value);
 }
 
@@ -214,7 +215,7 @@ static inline void Avtp_Sensor_SetNumSensor(Avtp_Sensor_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the Sz field (2 bits).
  */
-static inline void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SZ, value);
 }
 
@@ -224,7 +225,7 @@ static inline void Avtp_Sensor_SetSz(Avtp_Sensor_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the Sensor Group field.
  */
-static inline void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_SENSOR_GROUP, value);
 }
 
@@ -234,7 +235,7 @@ static inline void Avtp_Sensor_SetSensorGroup(Avtp_Sensor_t* pdu, uint8_t value)
  * @param pdu Pointer to the first bit of an 1722 ACF Sensor PDU.
  * @param value Value to set the Message Timestamp field.
  */
-static inline void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Sensor_SetMessageTimestamp(Avtp_Sensor_t* pdu, uint64_t value) {
     SET_SENSOR_FIELD(AVTP_SENSOR_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
@@ -253,7 +254,7 @@ uint8_t Avtp_Sensor_IsValid(const Avtp_Sensor_t* const pdu, size_t bufferSize);
  *
  * @param pdu Pointer to the first bit of a 1722 ACF Sensor PDU.
  */
-static inline void Avtp_Sensor_Init(Avtp_Sensor_t* pdu) {
+OPEN1722_INLINE void Avtp_Sensor_Init(Avtp_Sensor_t* pdu) {
     if(pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Sensor_t));
         Avtp_Sensor_SetAcfMsgType(pdu, AVTP_ACF_TYPE_SENSOR);

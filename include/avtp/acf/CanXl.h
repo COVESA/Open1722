@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,7 +135,7 @@ static const Avtp_FieldDescriptor_t __AVTP_CANXL_FIELDS[AVTP_CANXL_FIELD_MAX] =
  *
  * @param msg Pointer to the ACF_CANXL message to initialize.
  */
-static inline void Avtp_CanXl_Init(Avtp_CanXl_t* msg) {
+OPEN1722_INLINE void Avtp_CanXl_Init(Avtp_CanXl_t* msg) {
     memset(msg, 0, sizeof(Avtp_CanXl_t));
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_ACF_MSG_TYPE, AVTP_ACF_TYPE_CAN_XL);
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH, AVTP_CANXL_HEADER_LEN / AVTP_QUADLET_SIZE);
@@ -146,7 +147,7 @@ static inline void Avtp_CanXl_Init(Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the pad field.
  */
-static inline uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* msg) {
     return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD);
 }
 
@@ -157,7 +158,7 @@ static inline uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the mtv flag.
  */
-static inline bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* msg) {
     return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MTV);
 }
 
@@ -167,7 +168,7 @@ static inline bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the can_bus_id field.
  */
-static inline uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* msg) {
     return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_CAN_BUS_ID);
 }
 
@@ -178,7 +179,7 @@ static inline uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the message_timestamp field.
  */
-static inline uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* msg) {
     return (uint64_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP);
 }
 
@@ -188,7 +189,7 @@ static inline uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the vcid field.
  */
-static inline uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* msg) {
     return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_VCID);
 }
 
@@ -198,7 +199,7 @@ static inline uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the sdt field.
  */
-static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
     return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SDT);
 }
 
@@ -208,7 +209,7 @@ static inline uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the rrs flag.
  */
-static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
     return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_RRS);
 }
 
@@ -218,7 +219,7 @@ static inline bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the sec flag.
  */
-static inline bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* msg) {
     return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEC);
 }
 
@@ -228,7 +229,7 @@ static inline bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the priority_id field.
  */
-static inline uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* msg) {
     return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PRIORITY_ID);
 }
 
@@ -238,7 +239,7 @@ static inline uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the acceptance_field.
  */
-static inline uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* msg) {
     return (uint32_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD);
 }
 
@@ -249,7 +250,7 @@ static inline uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the transaction_num field.
  */
-static inline uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* msg) {
     return (uint8_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_TRANSACTION_NUM);
 }
 
@@ -259,7 +260,7 @@ static inline uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the ms flag.
  */
-static inline bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* msg) {
     return (bool) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_MS);
 }
 
@@ -269,7 +270,7 @@ static inline bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The value of the segment_num field.
  */
-static inline uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
     return (uint16_t) __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_SEGMENT_NUM);
 }
 
@@ -281,7 +282,7 @@ static inline uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The payload length in bytes.
  */
-static inline uint16_t Avtp_CanXl_GetPayloadLen(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetPayloadLen(const Avtp_CanXl_t* msg) {
     return (uint16_t) (__Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE
            - AVTP_CANXL_HEADER_LEN
            - __Avtp_CanXl_GetField(AVTP_CANXL_FIELD_PAD));
@@ -294,7 +295,7 @@ static inline uint16_t Avtp_CanXl_GetPayloadLen(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @returns The total message length in bytes.
  */
-static inline uint16_t Avtp_CanXl_GetLen(const Avtp_CanXl_t* msg) {
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetLen(const Avtp_CanXl_t* msg) {
     return (uint16_t) (__Avtp_CanXl_GetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * AVTP_QUADLET_SIZE);
 }
 
@@ -304,7 +305,7 @@ static inline uint16_t Avtp_CanXl_GetLen(const Avtp_CanXl_t* msg) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param mtv The value to set.
  */
-static inline void Avtp_CanXl_SetMtv(Avtp_CanXl_t* msg, bool mtv) {
+OPEN1722_INLINE void Avtp_CanXl_SetMtv(Avtp_CanXl_t* msg, bool mtv) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_MTV, mtv);
 }
 
@@ -314,7 +315,7 @@ static inline void Avtp_CanXl_SetMtv(Avtp_CanXl_t* msg, bool mtv) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param canBusId The value to set.
  */
-static inline void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t* msg, uint16_t canBusId) {
+OPEN1722_INLINE void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t* msg, uint16_t canBusId) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_CAN_BUS_ID, canBusId);
 }
 
@@ -324,7 +325,7 @@ static inline void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t* msg, uint16_t canBusId) 
  * @param msg Pointer to an ACF_CANXL message.
  * @param messageTimestamp The value to set.
  */
-static inline void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t* msg, uint64_t messageTimestamp) {
+OPEN1722_INLINE void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t* msg, uint64_t messageTimestamp) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP, messageTimestamp);
 }
 
@@ -334,7 +335,7 @@ static inline void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t* msg, uint64_t me
  * @param msg Pointer to an ACF_CANXL message.
  * @param vcid The value to set.
  */
-static inline void Avtp_CanXl_SetVcid(Avtp_CanXl_t* msg, uint8_t vcid) {
+OPEN1722_INLINE void Avtp_CanXl_SetVcid(Avtp_CanXl_t* msg, uint8_t vcid) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_VCID, vcid);
 }
 
@@ -344,7 +345,7 @@ static inline void Avtp_CanXl_SetVcid(Avtp_CanXl_t* msg, uint8_t vcid) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param sdt The value to set.
  */
-static inline void Avtp_CanXl_SetSdt(Avtp_CanXl_t* msg, uint8_t sdt) {
+OPEN1722_INLINE void Avtp_CanXl_SetSdt(Avtp_CanXl_t* msg, uint8_t sdt) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_SDT, sdt);
 }
 
@@ -354,7 +355,7 @@ static inline void Avtp_CanXl_SetSdt(Avtp_CanXl_t* msg, uint8_t sdt) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param rrs The value to set.
  */
-static inline void Avtp_CanXl_SetRrs(Avtp_CanXl_t* msg, bool rrs) {
+OPEN1722_INLINE void Avtp_CanXl_SetRrs(Avtp_CanXl_t* msg, bool rrs) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_RRS, rrs);
 }
 
@@ -364,7 +365,7 @@ static inline void Avtp_CanXl_SetRrs(Avtp_CanXl_t* msg, bool rrs) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param sec The value to set.
  */
-static inline void Avtp_CanXl_SetSec(Avtp_CanXl_t* msg, bool sec) {
+OPEN1722_INLINE void Avtp_CanXl_SetSec(Avtp_CanXl_t* msg, bool sec) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_SEC, sec);
 }
 
@@ -374,7 +375,7 @@ static inline void Avtp_CanXl_SetSec(Avtp_CanXl_t* msg, bool sec) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param priorityId The value to set.
  */
-static inline void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t* msg, uint16_t priorityId) {
+OPEN1722_INLINE void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t* msg, uint16_t priorityId) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_PRIORITY_ID, priorityId);
 }
 
@@ -384,7 +385,7 @@ static inline void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t* msg, uint16_t priority
  * @param msg Pointer to an ACF_CANXL message.
  * @param acceptanceField The value to set.
  */
-static inline void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t* msg, uint32_t acceptanceField) {
+OPEN1722_INLINE void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t* msg, uint32_t acceptanceField) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD, acceptanceField);
 }
 
@@ -394,7 +395,7 @@ static inline void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t* msg, uint32_t acc
  * @param msg Pointer to an ACF_CANXL message.
  * @param transactionNum The value to set.
  */
-static inline void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t* msg, uint8_t transactionNum) {
+OPEN1722_INLINE void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t* msg, uint8_t transactionNum) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_TRANSACTION_NUM, transactionNum);
 }
 
@@ -404,7 +405,7 @@ static inline void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t* msg, uint8_t trans
  * @param msg Pointer to an ACF_CANXL message.
  * @param ms The value to set.
  */
-static inline void Avtp_CanXl_SetMs(Avtp_CanXl_t* msg, bool ms) {
+OPEN1722_INLINE void Avtp_CanXl_SetMs(Avtp_CanXl_t* msg, bool ms) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_MS, ms);
 }
 
@@ -414,7 +415,7 @@ static inline void Avtp_CanXl_SetMs(Avtp_CanXl_t* msg, bool ms) {
  * @param msg Pointer to an ACF_CANXL message.
  * @param segmentNum The value to set.
  */
-static inline void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* msg, uint16_t segmentNum) {
+OPEN1722_INLINE void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* msg, uint16_t segmentNum) {
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_SEGMENT_NUM, segmentNum);
 }
 
@@ -426,7 +427,7 @@ static inline void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* msg, uint16_t segmentN
  * @param msg Pointer to an ACF_CANXL message.
  * @param payloadLen The length of the payload in bytes.
  */
-static inline void Avtp_CanXl_SetPayloadLen(Avtp_CanXl_t* msg, uint16_t payloadLen) {
+OPEN1722_INLINE void Avtp_CanXl_SetPayloadLen(Avtp_CanXl_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_CANXL_HEADER_LEN + payloadLen;
     uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
     uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;

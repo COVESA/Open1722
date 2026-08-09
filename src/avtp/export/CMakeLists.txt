@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2024, COVESA
+# Copyright (c) 2026 COVESA
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -29,12 +29,4 @@
 
 file(GLOB LIB_SOURCES *.c)
 target_sources(${LIB_NAME} PRIVATE ${LIB_SOURCES})
-
-# Add subdirectories
-add_subdirectory(acf)
-add_subdirectory(aaf)
-add_subdirectory(cvf)
-add_subdirectory(export)
-
-
-
+target_include_directories(${LIB_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

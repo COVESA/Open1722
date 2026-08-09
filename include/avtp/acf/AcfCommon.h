@@ -33,6 +33,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
@@ -122,7 +123,7 @@ typedef enum {
  * @param field Specifies the position of the data field to be read.
  * @returns Returns the field of the PDU.
  */
-static inline uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu, Avtp_AcfCommonFields_t field) {
+OPEN1722_INLINE uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu, Avtp_AcfCommonFields_t field) {
     return GET_ACF_COMMON_FIELD(field);
 }
 
@@ -132,7 +133,7 @@ static inline uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message type field of the PDU.
  */
-static inline Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t* const pdu) {
+OPEN1722_INLINE Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t* const pdu) {
     return (Avtp_AcfMsgType_t)GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE);
 }
 
@@ -142,7 +143,7 @@ static inline Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommo
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message length field of the PDU.
  */
-static inline uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu) {
+OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu) {
     return (uint16_t) GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
 }
 
@@ -153,7 +154,7 @@ static inline uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* co
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-static inline void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field, uint64_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field, uint64_t value) {
     SET_ACF_COMMON_FIELD(field, value);
 }
 
@@ -163,7 +164,7 @@ static inline void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommon
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @param value Value to set the ACF message type field to.
  */
-static inline void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t* pdu, Avtp_AcfMsgType_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t* pdu, Avtp_AcfMsgType_t value) {
     SET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -173,7 +174,7 @@ static inline void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t* pdu, Avtp_AcfM
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @param value Value to set the ACF message length field to.
  */
-static inline void Avtp_AcfCommon_SetAcfMsgLength(Avtp_AcfCommon_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgLength(Avtp_AcfCommon_t* pdu, uint16_t value) {
     SET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH, value);
 }
 

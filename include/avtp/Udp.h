@@ -34,6 +34,7 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -81,7 +82,7 @@ static const Avtp_FieldDescriptor_t Avtp_UdpFieldDesc[AVTP_UDP_FIELD_MAX] = {
  * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
  * @param value Pointer to location to store the value.
  */
-static inline uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu) {
+OPEN1722_INLINE uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu) {
     return GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
 }
 
@@ -91,7 +92,7 @@ static inline uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pd
  * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
  * @param value Pointer to location to store the value.
  */
-static inline void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value) {
+OPEN1722_INLINE void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value) {
     SET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, value);
 }
 
@@ -100,7 +101,7 @@ static inline void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t valu
  *
  * @param pdu Pointer to the first bit of an IEEE 1722 UDP PDU. 
  */
-static inline void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
+OPEN1722_INLINE void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Udp_t));
         Avtp_Udp_SetEncapsulationSeqNo(pdu, 0);
@@ -115,7 +116,7 @@ static inline void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
  * @param value Pointer to location to store the value.
  * @returns This function returns the value of the field.
  */
-static inline uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field) {
+OPEN1722_INLINE uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field) {
     return GET_UDP_FIELD(field);
 }
 
@@ -126,7 +127,7 @@ static inline uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFi
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-static inline void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value) {
+OPEN1722_INLINE void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value) {
     SET_UDP_FIELD(field, value);
 }
 

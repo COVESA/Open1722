@@ -27,6 +27,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #pragma once
+#include "avtp/Inline.h"
 
 #ifdef LINUX_KERNEL1722
 #include <linux/types.h>
@@ -41,7 +42,7 @@ extern "C" {
 /**
  * Swap byteorder of 16bit integer
  */
-static inline uint16_t Avtp_Bswap16(uint16_t x)
+OPEN1722_INLINE uint16_t Avtp_Bswap16(uint16_t x)
 {
     return    ((x & 0xff00u) >> 8u)
             | ((x & 0x00ffu) << 8u);
@@ -50,7 +51,7 @@ static inline uint16_t Avtp_Bswap16(uint16_t x)
 /**
  * Swap byteorder of 32bit integer
  */
-static inline uint32_t Avtp_Bswap32(uint32_t x)
+OPEN1722_INLINE uint32_t Avtp_Bswap32(uint32_t x)
 {
     return    ((x & 0xff000000u) >> 24u)
             | ((x & 0x00ff0000u) >>  8u)
@@ -61,7 +62,7 @@ static inline uint32_t Avtp_Bswap32(uint32_t x)
 /**
  * Swap byteorder of 64bit integer
  */
-static inline uint64_t Avtp_Bswap64(uint64_t x)
+OPEN1722_INLINE uint64_t Avtp_Bswap64(uint64_t x)
 {
     return    ((x & 0xff00000000000000u) >> 56u)
             | ((x & 0x00ff000000000000u) >> 40u)
@@ -75,32 +76,32 @@ static inline uint64_t Avtp_Bswap64(uint64_t x)
 
 #if(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 /* System uses little-endian */
-static inline uint16_t Avtp_CpuToLe16(uint16_t x) { return x; }
-static inline uint32_t Avtp_CpuToLe32(uint32_t x) { return x; }
-static inline uint64_t Avtp_CpuToLe64(uint64_t x) { return x; }
-static inline uint16_t Avtp_CpuToBe16(uint16_t x) { return Avtp_Bswap16(x); }
-static inline uint32_t Avtp_CpuToBe32(uint32_t x) { return Avtp_Bswap32(x); }
-static inline uint64_t Avtp_CpuToBe64(uint64_t x) { return Avtp_Bswap64(x); }
-static inline uint16_t Avtp_LeToCpu16(uint16_t x) { return x; }
-static inline uint32_t Avtp_LeToCpu32(uint32_t x) { return x; }
-static inline uint64_t Avtp_LeToCpu64(uint64_t x) { return x; }
-static inline uint16_t Avtp_BeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
-static inline uint32_t Avtp_BeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
-static inline uint64_t Avtp_BeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
+OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x) { return x; }
+OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x) { return x; }
+OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x) { return x; }
+OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x) { return Avtp_Bswap16(x); }
+OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x) { return Avtp_Bswap32(x); }
+OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x) { return Avtp_Bswap64(x); }
+OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x) { return x; }
+OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x) { return x; }
+OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x) { return x; }
+OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
+OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
+OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
 #else
 /* System uses big-endian */
-static inline uint16_t Avtp_CpuToLe16(uint16_t x) { return Avtp_Bswap16(x); }
-static inline uint32_t Avtp_CpuToLe32(uint32_t x) { return Avtp_Bswap32(x); }
-static inline uint64_t Avtp_CpuToLe64(uint64_t x) { return Avtp_Bswap64(x); }
-static inline uint16_t Avtp_CpuToBe16(uint16_t x) { return x; }
-static inline uint32_t Avtp_CpuToBe32(uint32_t x) { return x; }
-static inline uint64_t Avtp_CpuToBe64(uint64_t x) { return x; }
-static inline uint16_t Avtp_LeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
-static inline uint32_t Avtp_LeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
-static inline uint64_t Avtp_LeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
-static inline uint16_t Avtp_BeToCpu16(uint16_t x) { return x; }
-static inline uint32_t Avtp_BeToCpu32(uint32_t x) { return x; }
-static inline uint64_t Avtp_BeToCpu64(uint64_t x) { return x; }
+OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x) { return Avtp_Bswap16(x); }
+OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x) { return Avtp_Bswap32(x); }
+OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x) { return Avtp_Bswap64(x); }
+OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x) { return x; }
+OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x) { return x; }
+OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x) { return x; }
+OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
+OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
+OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
+OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x) { return x; }
+OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x) { return x; }
+OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x) { return x; }
 #endif
 
 #ifdef __cplusplus
