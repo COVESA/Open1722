@@ -27,7 +27,48 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "ExportPreIncludes.h"
+/*
+ * Forces external definitions of all inline functions in the public headers.
+ *
+ * Phase 1 includes all transitive dependencies (Byteorder, Utils,
+ * AcfCommon, etc.) in the default static-inline mode so they have
+ * internal linkage and do not conflict between translation units.
+ *
+ * Phase 2 overrides OPEN1722_INLINE to empty and includes each target
+ * header, making its inline functions regular extern definitions.
+ */
+
+/* --- Phase 1: shared deps (static-inline mode) ----------------------- */
+
+#include <string.h>
+#include "avtp/Inline.h"
+#include "avtp/Defines.h"
+#include "avtp/Byteorder.h"
+#include "avtp/Utils.h"
+#include "avtp/CommonHeader.h"
+#include "avtp/acf/AcfCommon.h"
+
+/* --- Phase 2: target headers (extern-definition mode) ---------------- */
+
 #undef OPEN1722_INLINE
 #define OPEN1722_INLINE
+
+#include "avtp/Udp.h"
+
+#include "avtp/acf/Abb.h"
+#include "avtp/acf/Can.h"
+#include "avtp/acf/CanBrief.h"
+#include "avtp/acf/CanBriefV2.h"
+#include "avtp/acf/CanV2.h"
+#include "avtp/acf/CanXl.h"
+#include "avtp/acf/CanXlBrief.h"
+#include "avtp/acf/FlexRay.h"
+#include "avtp/acf/Gbb.h"
+#include "avtp/acf/Gisf.h"
+#include "avtp/acf/Gpc.h"
+#include "avtp/acf/Lin.h"
+#include "avtp/acf/Most.h"
 #include "avtp/acf/Ntscf.h"
+#include "avtp/acf/Sensor.h"
+#include "avtp/acf/SensorBrief.h"
+#include "avtp/acf/Tscf.h"

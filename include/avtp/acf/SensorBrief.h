@@ -46,15 +46,15 @@
 extern "C" {
 #endif
 
-#define AVTP_SENSOR_HEADER_LEN         (1 * AVTP_QUADLET_SIZE)
+#define AVTP_SENSOR_BRIEF_HEADER_LEN         (1 * AVTP_QUADLET_SIZE)
 
 #define GET_SENSOR_BRIEF_FIELD(field) \
-        (Avtp_GetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_FIELD_MAX, (uint8_t*)pdu, field))
+        (Avtp_GetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_BRIEF_FIELD_MAX, (uint8_t*)pdu, field))
 #define SET_SENSOR_BRIEF_FIELD(field, value) \
-        (Avtp_SetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_FIELD_MAX, (uint8_t*)pdu, field, value))
+        (Avtp_SetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_BRIEF_FIELD_MAX, (uint8_t*)pdu, field, value))
 
 typedef struct {
-    uint8_t header[AVTP_SENSOR_HEADER_LEN];
+    uint8_t header[AVTP_SENSOR_BRIEF_HEADER_LEN];
     uint8_t payload[0];
 } Avtp_SensorBrief_t;
 
@@ -68,13 +68,13 @@ typedef enum {
     AVTP_SENSOR_BRIEF_FIELD_SZ,
     AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP,
     /* Count number of fields for bound checks */
-    AVTP_SENSOR_FIELD_MAX
+    AVTP_SENSOR_BRIEF_FIELD_MAX
 } Avtp_SensorBriefFields_t;
 
 /**
  * This table maps all IEEE 1722 ACF Abbreviated Sensor header fields to a descriptor.
  */
-static const Avtp_FieldDescriptor_t Avtp_SensorBriefFieldDesc[AVTP_SENSOR_FIELD_MAX] =
+static const Avtp_FieldDescriptor_t Avtp_SensorBriefFieldDesc[AVTP_SENSOR_BRIEF_FIELD_MAX] =
 {
 
     /* ACF common header fields */

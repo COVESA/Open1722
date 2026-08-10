@@ -27,6 +27,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-file(GLOB LIB_SOURCES *.c)
-target_sources(${LIB_NAME} PRIVATE ${LIB_SOURCES})
-target_include_directories(${LIB_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_sources(${LIB_NAME} PRIVATE InlineExports.c)

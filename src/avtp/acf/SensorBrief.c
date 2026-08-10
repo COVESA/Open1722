@@ -35,7 +35,7 @@ uint8_t Avtp_SensorBrief_IsValid(const Avtp_SensorBrief_t* const pdu, size_t buf
         return FALSE;
     }
 
-    if(bufferSize < AVTP_SENSOR_HEADER_LEN) {
+    if(bufferSize < AVTP_SENSOR_BRIEF_HEADER_LEN) {
         return FALSE;
     }
 

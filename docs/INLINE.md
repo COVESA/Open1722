@@ -22,18 +22,26 @@ All performance-critical functions in the public headers use `OPEN1722_INLINE` i
 
 ### Export translation units
 
-The shared library build includes a set of small `.c` files in `src/avtp/export/` that override the macro and re-include the headers:
+The shared library build includes a single file `src/avtp/export/InlineExports.c` that overrides the macro and re-includes all inline headers:
 
 ```c
-#include "ExportPreIncludes.h"   // common dependencies in static-inline mode
+// Phase 1: include shared deps in static-inline mode
+#include "avtp/Inline.h"
+#include "avtp/Defines.h"
+#include "avtp/Byteorder.h"
+// ...
+
+// Phase 2: override and include all target headers
 #undef OPEN1722_INLINE
-#define OPEN1722_INLINE          // empty — forces regular extern definitions
+#define OPEN1722_INLINE
+#include "avtp/Udp.h"
 #include "avtp/acf/Ntscf.h"
+// ... all remaining format headers
 ```
 
-When `OPEN1722_INLINE` is empty, each function definition in the header becomes a regular external function definition, emitted as an exported symbol in `libopen1722.so`.
+When `OPEN1722_INLINE` is empty, each function definition in the target headers becomes a regular external function definition, emitted as an exported symbol in `libopen1722.so`.
 
-The `ExportPreIncludes.h` pre-includes all transitive dependencies (Byteorder, Utils, AcfCommon, etc.) *before* the override, so only the target format's own inline functions become external — avoiding duplicate symbol definitions.
+Phase 1 ensures that all shared dependencies (Byteorder, Utils, AcfCommon, etc.) are processed in the default static-inline mode, so they have internal linkage and do not cause duplicate-symbol errors.
 
 ## Usage
 
@@ -92,12 +100,10 @@ This makes the function declarations plain `extern` declarations — no function
 include/avtp/Inline.h                     ← defines OPEN1722_INLINE macro
 include/avtp/acf/{Ntscf,Tscf,Can,...}.h   ← uses OPEN1722_INLINE
 src/avtp/export/
-├── ExportPreIncludes.h                   ← pre-includes common deps
-├── Byteorder.c, Udp.c, AcfCommon.c       ← toplevel export units
-└── {Ntscf,Tscf,Can,...}.c                ← per-format export units
+└── InlineExports.c                       ← single export unit (all formats)
 ```
 
-When a new header with inline functions is added, simply create a corresponding `.c` file in `src/avtp/export/` following the existing pattern.
+When a new header with inline functions is added, simply add its `#include` to `InlineExports.c` in phase 2.
 
 ## Frequently Asked Questions
 
