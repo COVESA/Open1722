@@ -50,3 +50,44 @@ uint8_t Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize)
 
     return TRUE;
 }
+
+void Avtp_Lin_Finalize(Avtp_Lin_t* pdu, uint16_t payload_length)
+{
+    uint8_t padSize;
+    uint32_t avtpLinLength = AVTP_LIN_HEADER_LEN + payload_length;
+
+    // Check if padding is required
+    padSize = AVTP_QUADLET_SIZE - (payload_length % AVTP_QUADLET_SIZE);
+    if (payload_length % AVTP_QUADLET_SIZE) {
+        memset(pdu->payload + payload_length, 0, padSize);
+        avtpLinLength += padSize;
+    }
+
+    // Set the length and padding fields
+    Avtp_Lin_SetAcfMsgLength(pdu, (uint16_t) avtpLinLength/AVTP_QUADLET_SIZE);
+    Avtp_Lin_SetPad(pdu, padSize);
+}
+
+uint8_t Avtp_Lin_GetLinPayloadLength(const Avtp_Lin_t* const pdu)
+{
+    /* Precondition: caller has validated the PDU via Avtp_Lin_IsValid().
+     * Compute in uint16_t to avoid the (uint8_t)(AcfMsgLength*4) wrap
+     * that bit any frame > 63 quadlets in earlier versions; IsValid
+     * guarantees the narrowing back to uint8_t is lossless. */
+    uint16_t msg_length_bytes = (uint16_t)Avtp_Lin_GetAcfMsgLength(pdu) * 4;
+    uint8_t  pad_length       = Avtp_Lin_GetPad(pdu);
+    return (uint8_t)(msg_length_bytes - AVTP_LIN_HEADER_LEN - pad_length);
+}
+
+void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t* pdu, uint8_t lin_id,
+                               const uint8_t* payload, uint16_t payload_length)
+{
+    // Copy the payload into the LIN PDU
+    Avtp_Lin_SetPayload(pdu, payload, payload_length);
+
+    // Set the LIN Identifier
+    Avtp_Lin_SetLinIdentifier(pdu, lin_id);
+
+    // Finalize the AVTP LIN Frame
+    Avtp_Lin_Finalize(pdu, payload_length);
+}

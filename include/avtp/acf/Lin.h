@@ -239,6 +239,61 @@ static inline void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value)
 }
 
 /**
+ * Copies the payload data and LIN frame ID into the ACF LIN frame. This function will
+ * also set the length and pad fields while inserting the padded bytes.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF LIN PDU.
+ * @param lin_id LIN identifier (protected ID)
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ */
+void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t* pdu, uint8_t lin_id,
+                               const uint8_t* payload, uint16_t payload_length);
+
+/**
+ * Returns pointer to payload of an ACF LIN frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF LIN PDU.
+ * @return Pointer to ACF LIN frame payload
+ */
+static inline const uint8_t* Avtp_Lin_GetPayload(const Avtp_Lin_t* const pdu) {
+    return pdu->payload;
+}
+
+/**
+ * Sets the LIN payload in an ACF LIN frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF LIN PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ */
+static inline void Avtp_Lin_SetPayload(Avtp_Lin_t* pdu, const uint8_t* payload,
+                                uint16_t payload_length) {
+    memcpy(pdu->payload, payload, payload_length);
+}
+
+/**
+ * Finalizes the ACF LIN frame. This function will set the
+ * length and pad fields while inserting the padded bytes.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF LIN PDU.
+ * @param payload_length Length of the LIN frame payload.
+ */
+void Avtp_Lin_Finalize(Avtp_Lin_t* pdu, uint16_t payload_length);
+
+/**
+ * Returns the length of the LIN payload without the padding bytes and the
+ * header length of the encapsulating ACF Frame.
+ *
+ * Precondition: the caller must have validated the PDU with
+ * Avtp_Lin_IsValid().
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF LIN PDU.
+ * @return  Length of LIN payload in bytes
+ */
+uint8_t Avtp_Lin_GetLinPayloadLength(const Avtp_Lin_t* const pdu);
+
+/**
  * Checks if the ACF Lin frame is valid by checking:
  *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
  *     2) if other format specific invariants are not upheld

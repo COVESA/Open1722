@@ -27,46 +27,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-
-add_library(open1722examples STATIC "common/common.c")
-target_include_directories(open1722examples PRIVATE
-    $<INSTALL_INTERFACE:include>
-    ${CMAKE_CURRENT_SOURCE_DIR})
 if (DEFINED ENV{ZEPHYR_BASE})
-    add_dependencies(open1722examples zephyr_generated_headers)
-    target_link_libraries(open1722examples PRIVATE zephyr_interface)
+    # Zephyr not supported yet for LIN bridge
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    add_subdirectory(linux)
 endif()
-add_dependencies(examples open1722examples)
-
-# These examples can be also built for Zephyr
-add_subdirectory(acf-can)
-
-# These examples are currently exclusively for Linux
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    execute_process(
-    COMMAND ldd --version
-    OUTPUT_VARIABLE LDD_OUT
-    ERROR_VARIABLE LDD_ERROR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    message(STATUS "LDD version err: ${LDD_ERROR}")
-    message(STATUS "LDD version out: ${LDD_OUT}")
-
-    ## MUSL ldd will output to stderr, while glibc ldd will output to stdout
-    if ("${LDD_ERROR}" MATCHES "musl")
-        message(STATUS "musl detected via ldd — linking argp")
-        target_link_libraries(open1722examples /usr/lib/libargp.a)
-    else()
-        message(STATUS "musl not detected via ldd — not linking argp")
-    endif()
-
-    add_subdirectory(aaf)
-    add_subdirectory(crf)
-    add_subdirectory(cvf)
-    add_subdirectory(hello-world)
-    add_subdirectory(acf-vss)
-    add_subdirectory(acf-lin)
-endif()
-
-
