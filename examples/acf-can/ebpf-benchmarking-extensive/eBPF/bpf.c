@@ -33,7 +33,6 @@
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 #include <string.h>
-#include <math.h>
 #include "utils.h"
 
 struct config

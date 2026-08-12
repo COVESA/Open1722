@@ -67,6 +67,8 @@ static void vss_pad(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
     // Check if the function is initializing properly
     Avtp_Vss_Init(vss_pdu);
@@ -87,6 +89,8 @@ static void vss_static_path(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
     VssPath_t path_id = {
         .vss_static_id_path = 0x01020304
@@ -108,6 +112,8 @@ static void vss_interop_path(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
@@ -136,6 +142,8 @@ static void vss_data_uint8(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -164,6 +172,8 @@ static void vss_data_int8(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -192,6 +202,8 @@ static void vss_data_uint16(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -220,6 +232,8 @@ static void vss_data_int16(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -248,6 +262,8 @@ static void vss_data_uint32(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -276,6 +292,8 @@ static void vss_data_int32(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -303,6 +321,8 @@ static void vss_data_uint64(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -332,6 +352,8 @@ static void vss_data_int64(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -361,6 +383,8 @@ static void vss_data_bool(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -389,6 +413,8 @@ static void vss_data_float(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -417,6 +443,8 @@ static void vss_data_double(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -445,6 +473,8 @@ static void vss_data_string(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -485,6 +515,8 @@ static void vss_data_uint8_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -525,6 +557,8 @@ static void vss_data_int8_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -564,6 +598,8 @@ static void vss_data_uint16_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -604,6 +640,8 @@ static void vss_data_int16_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -644,6 +682,8 @@ static void vss_data_uint32_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -684,6 +724,8 @@ static void vss_data_int32_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -728,6 +770,8 @@ static void vss_data_uint64_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -771,6 +815,8 @@ static void vss_data_int64_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -816,6 +862,8 @@ static void vss_data_bool_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -856,6 +904,8 @@ static void vss_data_float_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -901,6 +951,8 @@ static void vss_data_double_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -944,6 +996,8 @@ static void vss_data_string_array(void **state) {
 
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -1070,6 +1124,558 @@ static void vss_data_string_array_malformed(void **state) {
     assert_int_equal(s3.data_length, 0);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * OOB / Bounds Truncation Tests
+ *
+ * Each test constructs a PDU whose ACF msg_length is deliberately smaller
+ * than the wire data_length field (0xFFFF).  The parser must
+ * clamp the field to the bytes actually available within the declared
+ * message length.  Without clamping it would attempt to memcpy or iterate
+ * 65535 bytes from a 24‑byte buffer.
+ *
+ * All data‑type tests use STATIC_ID mode (4‑byte path) so the data payload
+ * always starts at PDU offset 16.  Declared PDU size = msg_quadlets × 4.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* Helper: build a VSS PDU with STATIC_ID path, given msg_quadlets, datatype,
+ * and plant 0xFFFF as the on‑wire data_length followed by fill_data.
+ * Available data bytes = msg_quadlets × 4 − 16 (header+path) − 2 (prefix). */
+static Avtp_Vss_t* vss_build_data_oob_pdu(uint8_t *buf, size_t buf_size,
+                                            uint8_t msg_quadlets,
+                                            Vss_Datatype_t datatype,
+                                            const uint8_t *fill_data,
+                                            uint16_t fill_len)
+{
+    memset(buf, 0, buf_size);
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, msg_quadlets);
+    Avtp_Vss_SetDatatype(pdu, datatype);
+
+    /* Inflated wire data_length at offset 16 (payload start) */
+    buf[16] = 0xFF;
+    buf[17] = 0xFF;
+
+    uint16_t max_data = (uint16_t)msg_quadlets * 4 - 16 - 2;
+    uint16_t copy_len = fill_len < max_data ? fill_len : max_data;
+    if (copy_len > 0 && fill_data != NULL)
+        memcpy(buf + 18, fill_data, copy_len);
+
+    return pdu;
+}
+
+/* ── Avtp_Vss_GetVssPath  –  INTEROP mode ────────────────────────────── */
+
+static void vss_path_interop_oob(void **state)
+{
+    uint8_t buf[32];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+
+    /* 5 quadlets = 20 bytes. Path at offset 12, 2‑byte prefix →
+     * 6 bytes available for path data after the length prefix. */
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, 5);
+
+    buf[12] = 0xFF; buf[13] = 0xFF;    /* wire path_length = 0xFFFF */
+    buf[14] = 'A';  buf[15] = 'B';     /* only 2 bytes of real path data
+                                         * (bytes 16‑17 are zero from memset) */
+
+    char path_buf[16];
+    memset(path_buf, 0x5A, sizeof(path_buf));
+    VssPath_t get_path;
+    get_path.vss_interop_path.path = path_buf;
+    Avtp_Vss_GetVssPath(pdu, &get_path);
+
+    /* path_length must be clamped to 6 (20 − 12 − 2 = 6) */
+    assert_int_equal(get_path.vss_interop_path.path_length, 6);
+    assert_memory_equal(path_buf, "AB\0\0\0\0", 6);
+
+    /* CalcVssPathLength returns the raw wire value (0xFFFF + 2 = 1 in
+     * uint16_t arithmetic).  It is intentionally not clamped — setters
+     * (SetVssPath, SetVssData, Pad) use it and need the real on‑wire
+     * length.  Only the getters apply vss_read_clamped_length. */
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(pdu), 1);
+}
+
+/* ── Avtp_Vss_GetVssData  –  memcpy group (wire length→memcpy) ──────── */
+
+static void vss_data_string_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_STRING, fill, sizeof(fill));
+
+    VssDataString_t str = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_string = &str;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(str.data_length, 6);
+
+    char out[16];
+    memset(out, 0x5A, sizeof(out));
+    str.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_memory_equal(out, fill, 6);
+    /* byte 6 untouched → no past‑buffer write */
+    assert_int_equal((uint8_t)out[6], 0x5A);
+}
+
+static void vss_data_uint8_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_UINT8_ARRAY, fill, sizeof(fill));
+
+    VssDataUint8Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint8_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    uint8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_memory_equal(out, fill, 6);
+    assert_int_equal(out[6], 0x5A);
+}
+
+static void vss_data_int8_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_INT8_ARRAY, fill, sizeof(fill));
+
+    VssDataInt8Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_int8_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    int8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_memory_equal(out, fill, 6);
+    assert_int_equal((uint8_t)out[6], 0x5A);
+}
+
+static void vss_data_bool_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_BOOL_ARRAY, fill, sizeof(fill));
+
+    VssDataBoolArray_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_bool_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    uint8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_memory_equal(out, fill, 6);
+    assert_int_equal(out[6], 0x5A);
+}
+
+/* STRING_ARRAY advances vss_data_ptr by 2 past the prefix, then memcpy's
+ * from the same position. Behaviour identical to the cases above. */
+static void vss_data_string_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_STRING_ARRAY, fill, sizeof(fill));
+
+    VssDataStringArray_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_string_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    uint8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_memory_equal(out, fill, 6);
+    assert_int_equal(out[6], 0x5A);
+}
+
+/* ── Avtp_Vss_GetVssData  –  loop/iteration group (wire length→loop) ── */
+
+static void vss_data_uint16_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_UINT16_ARRAY, fill, sizeof(fill));
+
+    VssDataUint16Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint16_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    /* 6 bytes → 3 uint16 elements: {0x0102, 0x0304, 0x0506} */
+    uint16_t out[8];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x0102);
+    assert_int_equal(out[1], 0x0304);
+    assert_int_equal(out[2], 0x0506);
+    assert_int_equal(out[3], 0x5A5A);
+}
+
+static void vss_data_int16_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_INT16_ARRAY, fill, sizeof(fill));
+
+    VssDataInt16Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_int16_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    /* 6 bytes → 3 int16 elements: {0x0102, 0x0304, 0x0506} */
+    int16_t out[8];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x0102);
+    assert_int_equal(out[1], 0x0304);
+    assert_int_equal(out[2], 0x0506);
+    assert_int_equal(out[3], 0x5A5A);
+}
+
+static void vss_data_uint32_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_UINT32_ARRAY, fill, sizeof(fill));
+
+    VssDataUint32Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint32_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    /* 6 bytes → 1 uint32 element: {0x01020304} */
+    uint32_t out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x01020304);
+    assert_int_equal(out[1], 0x5A5A5A5A);
+}
+
+static void vss_data_int32_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_INT32_ARRAY, fill, sizeof(fill));
+
+    VssDataInt32Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_int32_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    /* 6 bytes → 1 int32 element: {0x01020304} */
+    int32_t out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x01020304);
+    assert_int_equal(out[1], 0x5A5A5A5A);
+}
+
+/* msg_quadlets=7 (28 bytes) → 10 bytes available for data payload,
+ * enough for one 8‑byte element. */
+static void vss_data_uint64_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
+                                               VSS_UINT64_ARRAY, fill, sizeof(fill));
+
+    VssDataUint64Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint64_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 10);
+
+    /* 10 bytes → 1 uint64 element: {0x0102030405060708} */
+    uint64_t out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x0102030405060708ull);
+    assert_int_equal(out[1], 0x5A5A5A5A5A5A5A5Aull);
+}
+
+static void vss_data_int64_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
+                                               VSS_INT64_ARRAY, fill, sizeof(fill));
+
+    VssDataInt64Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_int64_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 10);
+
+    /* 10 bytes → 1 int64 element: {0x0102030405060708} */
+    int64_t out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x0102030405060708ull);
+    assert_int_equal(out[1], 0x5A5A5A5A5A5A5A5Aull);
+}
+
+static void vss_data_float_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
+                                               VSS_FLOAT_ARRAY, fill, sizeof(fill));
+
+    VssDataFloatArray_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_float_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 6);
+
+    /* 6 bytes → 1 float element (4 bytes read).
+     * Wire {0x01,0x02,0x03,0x04} as BE uint32 → Avtp_BeToCpu32 →
+     * 0x01020304, stored on LE as {0x04,0x03,0x02,0x01}. */
+    float out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    {
+        uint8_t exp[] = {0x04, 0x03, 0x02, 0x01};
+        assert_memory_equal(out, exp, 4);
+    }
+    /* Second float slot still holds the sentinel */
+    assert_memory_equal(&out[1], "\x5A\x5A\x5A\x5A", 4);
+}
+
+static void vss_data_double_array_oob(void **state)
+{
+    uint8_t buf[64];
+    uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
+                                               VSS_DOUBLE_ARRAY, fill, sizeof(fill));
+
+    VssDataDoubleArray_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_double_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 10);
+
+    /* 10 bytes → 1 double element (8 bytes read).
+     * Wire {0x01..0x08} as BE uint64 → Avtp_BeToCpu64 →
+     * 0x0102030405060708, stored on LE as {0x08..0x01}. */
+    double out[4];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    {
+        uint8_t exp[] = {0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01};
+        assert_memory_equal(out, exp, 8);
+    }
+    assert_memory_equal(&out[1], "\x5A\x5A\x5A\x5A\x5A\x5A\x5A\x5A", 8);
+}
+
+/* Helper for the inflated-path tests: build an INTEROP-mode PDU where the
+ * on‑wire path_length (0xFFFD) claims far more path bytes than the declared
+ * msg_length allows.  CalcVssPathLength would return 0xFFFD + 2 = 0xFFFF
+ * (65535 — no uint16_t wrap), pushing the computed data pointer 65547 bytes
+ * past the PDU start — well beyond any plausible frame. */
+static Avtp_Vss_t* vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size,
+                                                uint8_t msg_quadlets,
+                                                Vss_Datatype_t datatype)
+{
+    memset(buf, 0, buf_size);
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, msg_quadlets);
+    Avtp_Vss_SetDatatype(pdu, datatype);
+
+    /* Inflated path_length at offset 12 (INTEROP length prefix).
+     * 0xFFFD was chosen because 0xFFFD + 2 = 0xFFFF without wrapping. */
+    buf[12] = 0xFF;
+    buf[13] = 0xFD;
+
+    return pdu;
+}
+
+/* ── Regression tests for inflated-path → data-pointer OOB ─────────────
+ * When a crafted INTEROP
+ * path_length pushes the data pointer beyond the declared PDU, the
+ * getters must treat the data area as empty and avoid any dereference.
+
+/* VSS_STRING: the length-prefix dereference inside vss_read_clamped_length
+ * must be guarded so it is never reached when the data pointer sits at or
+ * past the frame end.  Correct behavior: data_length is 0, output untouched. */
+static void vss_data_string_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_STRING);
+
+    VssDataString_t str = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_string = &str;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(str.data_length, 0);
+
+    char out[16];
+    memset(out, 0x5A, sizeof(out));
+    str.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal((uint8_t)out[0], 0x5A);
+}
+
+/* Scalar VSS_UINT8: the raw dereference of *vss_data_ptr must be guarded
+ * so that an out‑of‑frame data pointer is never read.  
+ * Correct behavior: Avtp_Vss_GetVssData is noop, pre‑set sentinel survives. */
+static void vss_data_uint8_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_UINT8);
+
+    VssData_t vd;
+    memset(&vd, 0xAA, sizeof(vd));
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(vd.data_uint8, 0xAA);
+}
+
+/* VSS_UINT8_ARRAY: like the string case but exercises the array path
+ * through vss_read_clamped_length (prefix, then memcpy). */
+static void vss_data_uint8_array_inflated_path_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
+                                                    VSS_UINT8_ARRAY);
+
+    VssDataUint8Array_t arr = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_uint8_array = &arr;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(arr.data_length, 0);
+
+    uint8_t out[16];
+    memset(out, 0x5A, sizeof(out));
+    arr.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(out[0], 0x5A);
+}
+
+/* STATIC_ID with a frame that is too short for the 4‑byte path: the
+ * path must be treated as empty, and the scalar read skipped because
+ * the data pointer still exceeds the declared frame. */
+static void vss_data_static_id_truncated_oob(void **state)
+{
+    uint8_t buf[64];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
+    Avtp_Vss_SetAcfMsgLength(pdu, 3);  /* 12 bytes — header only */
+    Avtp_Vss_SetDatatype(pdu, VSS_UINT8);
+
+    VssData_t vd;
+    memset(&vd, 0xAA, sizeof(vd));
+     Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(vd.data_uint8, 0xAA);
+}
+
+/* ACF msg_length == 0 means the declared PDU size is 0 bytes.  
+ * This is testing for a regression: There used to be a 
+ * legacy bypass where the lentghts in ACF-VSS frames where trusted
+ * when the ACF length was set to 0.
+ * Correct behavior:: A zero‑msg‑length frame is treated as empty
+ * (all getters no‑op). */
+
+/* INTEROP path with msg_length == 0: the inflated path length must be
+ * clamped to 0, memcpy must copy 0 bytes, and the output buffer must
+ * survive untouched. */
+static void vss_path_interop_zero_msg_length_oob(void **state)
+{
+    uint8_t buf[64];
+    /* msg_quadlets = 0 → declared PDU = 0 bytes */
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0,
+                                                    VSS_UINT8);
+
+    char path_buf[16];
+    memset(path_buf, 0x5A, sizeof(path_buf));
+    VssPath_t get_path;
+    get_path.vss_interop_path.path = path_buf;
+    Avtp_Vss_GetVssPath(pdu, &get_path);
+
+    assert_int_equal(get_path.vss_interop_path.path_length, 0);
+    assert_int_equal((uint8_t)path_buf[0], 0x5A);
+}
+
+/* VSS_STRING data with msg_length == 0 (via inflated‑path helper):
+ * data_length must be 0, output buffer untouched. */
+static void vss_data_string_zero_msg_length_oob(void **state)
+{
+    uint8_t buf[64];
+    /* msg_quadlets = 0 → declared PDU = 0 bytes */
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0,
+                                                    VSS_STRING);
+
+    VssDataString_t str = { .data = NULL };
+    VssData_t vd;
+    memset(&vd, 0, sizeof(vd));
+    vd.data_string = &str;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal(str.data_length, 0);
+
+    char out[16];
+    memset(out, 0x5A, sizeof(out));
+    str.data = out;
+    Avtp_Vss_GetVssData(pdu, &vd);
+    assert_int_equal((uint8_t)out[0], 0x5A);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -1102,6 +1708,26 @@ int main(void)
         cmocka_unit_test(vss_data_double_array),
         cmocka_unit_test(vss_data_string_array),
         cmocka_unit_test(vss_data_string_array_malformed),
+        cmocka_unit_test(vss_path_interop_oob),
+        cmocka_unit_test(vss_data_string_oob),
+        cmocka_unit_test(vss_data_uint8_array_oob),
+        cmocka_unit_test(vss_data_int8_array_oob),
+        cmocka_unit_test(vss_data_bool_array_oob),
+        cmocka_unit_test(vss_data_string_array_oob),
+        cmocka_unit_test(vss_data_uint16_array_oob),
+        cmocka_unit_test(vss_data_int16_array_oob),
+        cmocka_unit_test(vss_data_uint32_array_oob),
+        cmocka_unit_test(vss_data_int32_array_oob),
+        cmocka_unit_test(vss_data_uint64_array_oob),
+        cmocka_unit_test(vss_data_int64_array_oob),
+        cmocka_unit_test(vss_data_float_array_oob),
+        cmocka_unit_test(vss_data_double_array_oob),
+        cmocka_unit_test(vss_data_string_inflated_path_oob),
+        cmocka_unit_test(vss_data_uint8_inflated_path_oob),
+        cmocka_unit_test(vss_data_uint8_array_inflated_path_oob),
+        cmocka_unit_test(vss_data_static_id_truncated_oob),
+        cmocka_unit_test(vss_path_interop_zero_msg_length_oob),
+        cmocka_unit_test(vss_data_string_zero_msg_length_oob),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
