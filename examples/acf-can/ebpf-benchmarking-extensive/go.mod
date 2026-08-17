@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/bsipos/thist v1.0.0
-	github.com/cilium/ebpf v0.18.0
+	github.com/cilium/ebpf v0.22.0
 )
 
 require (
