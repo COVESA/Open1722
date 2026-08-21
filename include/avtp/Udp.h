@@ -83,7 +83,7 @@ static const Avtp_FieldDescriptor_t Avtp_UdpFieldDesc[AVTP_UDP_FIELD_MAX] = {
  * @param value Pointer to location to store the value.
  */
 OPEN1722_INLINE uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu) {
-    return GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
+    return (uint32_t) GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
 }
 
 /**

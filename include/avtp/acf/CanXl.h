@@ -429,8 +429,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* msg, uint16_t segmen
  */
 OPEN1722_INLINE void Avtp_CanXl_SetPayloadLen(Avtp_CanXl_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_CANXL_HEADER_LEN + payloadLen;
-    uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
-    uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;
+    uint8_t pad = (uint8_t) (4 - (msgLenBytes % 4)) % 4;
+    uint16_t msgLenQuadlets = (uint16_t) ((msgLenBytes + pad) / 4);
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_ACF_MSG_LENGTH, msgLenQuadlets);
     __Avtp_CanXl_SetField(AVTP_CANXL_FIELD_PAD, pad);
 }

@@ -430,8 +430,8 @@ OPEN1722_INLINE void Avtp_Abb_SetSegmentNum(Avtp_Abb_t* msg, uint16_t segmentNum
  */
 OPEN1722_INLINE void Avtp_Abb_SetPayloadLen(Avtp_Abb_t* msg, uint16_t payloadLen) {
     uint16_t msgLenBytes = AVTP_ABB_HEADER_LEN + payloadLen;
-    uint8_t pad = (4 - (msgLenBytes % 4)) % 4;
-    uint16_t msgLenQuadlets = (msgLenBytes + pad) / 4;
+    uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+    uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_ACF_MSG_LENGTH, msgLenQuadlets);
     __Avtp_Abb_SetField(AVTP_ABB_FIELD_PAD, pad);
 }
