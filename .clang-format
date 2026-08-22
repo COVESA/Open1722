@@ -1,0 +1,24 @@
+---
+# Clang-format style for Open1722
+# Matches the existing code style: 4-space indent, K&R for control structures,
+# Allman-style (new-line brace) for function definitions.
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 80
+# Function opening brace on its own line; control-structure braces on same line
+BreakBeforeBraces: Linux
+# case labels aligned with enclosing switch
+IndentCaseLabels: false
+# Do not reorder #include groups
+SortIncludes: Never
+# Pointer/reference alignment
+PointerAlignment: Right
+# Allow short functions only in class bodies (not top-level)
+AllowShortFunctionsOnASingleLine: InlineOnly
+# Keep else on same line as closing brace
+BeforeElse: false
+# No space before opening parenthesis of a function call
+SpaceBeforeFunctionCallOpenParenthesis: Never
+...
