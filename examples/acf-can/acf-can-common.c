@@ -332,6 +332,10 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         uint16_t can_payload_length = Avtp_Can_GetCanPayloadLength((Avtp_Can_t*)acf_pdu);
         proc_bytes += acf_msg_length;
         frame_t* frame = &(can_frames[i++]);
+        if (i > MAX_CAN_FRAMES_IN_ACF) {
+            LOG_ERR("Error: Number of CAN frames in ACF exceeds maximum allowed.\n");
+            return -1;
+        }
 
         // Handle EFF Flag
         if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
