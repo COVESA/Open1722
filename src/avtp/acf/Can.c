@@ -29,8 +29,8 @@
 
 #include "avtp/acf/Can.h"
 
-void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payload,
-                        uint16_t payload_length, Avtp_CanVariant_t can_variant)
+void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id, uint8_t *payload,
+                               uint16_t payload_length, Avtp_CanVariant_t can_variant)
 {
     // Copy the payload into the CAN PDU
     Avtp_Can_SetPayload(pdu, payload, payload_length);
@@ -49,8 +49,7 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payl
     Avtp_Can_SetPayloadLength(pdu, payload_length);
 }
 
-
-bool Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
+bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
@@ -74,13 +73,13 @@ bool Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
      * bytes (selected by the FDF bit). The encoded message length must
      * also accommodate header + declared padding so the payload
      * computation in Avtp_Can_GetCanPayloadLength() doesn't underflow. */
-    uint8_t  pad_length     = Avtp_Can_GetPad(pdu);
+    uint8_t pad_length = Avtp_Can_GetPad(pdu);
     uint16_t header_and_pad = (uint16_t)AVTP_CAN_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;
     }
     uint16_t payload_length = msg_length_bytes - header_and_pad;
-    uint16_t max_payload    = Avtp_Can_IsFdf(pdu) ? 64u : 8u;
+    uint16_t max_payload = Avtp_Can_IsFdf(pdu) ? 64u : 8u;
     if (payload_length > max_payload) {
         return false;
     }

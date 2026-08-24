@@ -56,54 +56,50 @@ void prepare_ntscf_header(Avtp_Ntscf_t *ntscf_header, struct acfcan_cfg *cfg)
 
 void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const struct sk_buff *skb)
 {
-    struct canfd_frame *cfd = (struct canfd_frame *)skb->data; // this also works work can_frame struct, as the beginning is similar
+    struct canfd_frame *cfd =
+        (struct canfd_frame *)
+            skb->data; // this also works work can_frame struct, as the beginning is similar
 
     Avtp_Can_Init(can_header);
     Avtp_Can_SetCanBusId(can_header, cfg->canbusId);
-    if (cfd->can_id & CAN_RTR_FLAG)
-    {
+    if (cfd->can_id & CAN_RTR_FLAG) {
         Avtp_Can_SetRtr(can_header, true);
     }
-    if (cfd->can_id & CAN_EFF_FLAG)
-    {
+    if (cfd->can_id & CAN_EFF_FLAG) {
         Avtp_Can_SetEff(can_header, true);
     }
 
-    if (cfd->can_id & CAN_EFF_FLAG)
-    {
+    if (cfd->can_id & CAN_EFF_FLAG) {
         Avtp_Can_SetCanIdentifier(can_header, cfd->can_id & CAN_EFF_MASK);
-    }
-    else
-    {
+    } else {
         Avtp_Can_SetCanIdentifier(can_header, cfd->can_id & CAN_SFF_MASK);
     }
 
-    if (can_is_canfd_skb(skb))
-    {
-        if (cfd->flags & CANFD_BRS)
-        {
+    if (can_is_canfd_skb(skb)) {
+        if (cfd->flags & CANFD_BRS) {
             Avtp_Can_SetBrs(can_header, true);
         }
-        if (cfd->flags & CANFD_FDF)
-        {
+        if (cfd->flags & CANFD_FDF) {
             Avtp_Can_SetFdf(can_header, true);
         }
-        if (cfd->flags & CANFD_ESI)
-        {
+        if (cfd->flags & CANFD_ESI) {
             Avtp_Can_SetEsi(can_header, true);
         }
     }
 
     // 1722 is a mess. Here we need to pad to quadlets
-    uint8_t padSize = (AVTP_QUADLET_SIZE - ((AVTP_CAN_HEADER_LEN + cfd->len) % AVTP_QUADLET_SIZE)) % AVTP_QUADLET_SIZE;
-    Avtp_Can_SetAcfMsgLength(can_header, (AVTP_CAN_HEADER_LEN + cfd->len + padSize) / AVTP_QUADLET_SIZE);
+    uint8_t padSize = (AVTP_QUADLET_SIZE - ((AVTP_CAN_HEADER_LEN + cfd->len) % AVTP_QUADLET_SIZE)) %
+                      AVTP_QUADLET_SIZE;
+    Avtp_Can_SetAcfMsgLength(can_header,
+                             (AVTP_CAN_HEADER_LEN + cfd->len + padSize) / AVTP_QUADLET_SIZE);
     Avtp_Can_SetPad(can_header, padSize);
 
-    pr_debug("Prepared AVTP ACFCAN msg for can id 0x%08x, len %i\n", Avtp_Can_GetCanIdentifier(can_header), cfd->len);
+    pr_debug("Prepared AVTP ACFCAN msg for can id 0x%08x, len %i\n",
+             Avtp_Can_GetCanIdentifier(can_header), cfd->len);
     /*
-    printk(KERN_INFO "Prepared CAN  packet for send,  ID: 0x%04x ", Avtp_Can_GetCanIdentifier(can_header));
-    printk(KERN_CONT " frame data: ");
-    for (int i = 0; i < cfd->len; i++)
+    printk(KERN_INFO "Prepared CAN  packet for send,  ID: 0x%04x ",
+    Avtp_Can_GetCanIdentifier(can_header)); printk(KERN_CONT " frame data: "); for (int i = 0; i <
+    cfd->len; i++)
     {
         printk(KERN_CONT "%02x ", cfd->data[i]);
     }
@@ -121,8 +117,7 @@ void calculate_and_set_ntscf_size(ACFCANPdu_t *pdu)
 int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
 {
     struct acfcan_cfg *cfg = get_acfcan_cfg(can_dev);
-    if (cfg->eth_netdev == NULL)
-    {
+    if (cfg->eth_netdev == NULL) {
         printk(KERN_INFO "No ethernet device set for ACFCAN device %s\n", can_dev->name);
         return -1;
     }
@@ -138,10 +133,10 @@ int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
     struct canfd_frame *cfd = (struct canfd_frame *)skb_can->data;
 
     // Allocate a socket buffer
-    skb_eth = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cfd->len + Avtp_Can_GetPad(&pdu.can), GFP_KERNEL);
+    skb_eth = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cfd->len + Avtp_Can_GetPad(&pdu.can),
+                        GFP_KERNEL);
     pr_debug("ACFCAN: Allocating skb for ethernet frame: 0x%p\n", (void *)skb_eth->data);
-    if (!skb_eth)
-    {
+    if (!skb_eth) {
         printk(KERN_ERR "Failed to allocate skb\n");
         return -ENOMEM;
     }
@@ -170,8 +165,7 @@ int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
     // Send the frame
     pr_debug("ACFCAN sending ethernet frame\n");
     int ret = dev_queue_xmit(skb_eth);
-    if (ret != NET_XMIT_SUCCESS)
-    {
+    if (ret != NET_XMIT_SUCCESS) {
         printk(KERN_ERR "Failed to send ethernet frame: %d\n", ret);
         kfree_skb(skb_eth);
         return -1;
@@ -182,26 +176,26 @@ int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
 
 extern struct list_head acfcaninterface_list;
 
-int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
-                             struct packet_type *pt, struct net_device *orig_dev)
+int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt,
+                             struct net_device *orig_dev)
 {
 
     struct ethhdr *eth = eth_hdr(skb);
-    if (ntohs(eth->h_proto) != IEEE1722_PROTO)
-    {
+    if (ntohs(eth->h_proto) != IEEE1722_PROTO) {
         kfree_skb(skb);
         return NET_RX_DROP;
     }
 
     // Ignore packets not destined for us
-    if (skb->pkt_type != PACKET_HOST && skb->pkt_type != PACKET_BROADCAST)
-    {
+    if (skb->pkt_type != PACKET_HOST && skb->pkt_type != PACKET_BROADCAST) {
         kfree_skb(skb);
         return NET_RX_DROP;
     }
 
-    pr_debug("ETH Received 1722 packet: src=%pM, dst=%pM, proto=0x%04x, type %i, buf is %p with %i refs\n",
-             eth->h_source, eth->h_dest, ntohs(eth->h_proto), skb->pkt_type, (void *)skb->data, refcount_read(&skb->users));
+    pr_debug("ETH Received 1722 packet: src=%pM, dst=%pM, proto=0x%04x, type %i, buf is %p with %i "
+             "refs\n",
+             eth->h_source, eth->h_dest, ntohs(eth->h_proto), skb->pkt_type, (void *)skb->data,
+             refcount_read(&skb->users));
 
     /*
     printk(KERN_CONT "Data: ");
@@ -213,16 +207,15 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     */
 
     // Check if this is an ACF-CAN packet
-    if (skb->len < sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t))
-    {
-        printk(KERN_INFO "ACFCAN short packet, %u > %li\n", skb->len, sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t));
+    if (skb->len < sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t)) {
+        printk(KERN_INFO "ACFCAN short packet, %u > %li\n", skb->len,
+               sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t));
         kfree_skb(skb);
         return NET_RX_DROP;
     }
 
     Avtp_CommonHeader_t *common = (Avtp_CommonHeader_t *)skb->data;
-    if (Avtp_CommonHeader_GetSubtype(common) != AVTP_SUBTYPE_NTSCF)
-    {
+    if (Avtp_CommonHeader_GetSubtype(common) != AVTP_SUBTYPE_NTSCF) {
         printk(KERN_INFO "ACFCAN: Drop non NTSCF-type %i\n", Avtp_CommonHeader_GetSubtype(common));
         kfree_skb(skb);
         return NET_RX_DROP;
@@ -235,9 +228,9 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     uint16_t msg_length = Avtp_Ntscf_GetNtscfDataLength(ntscf);
 
     // seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t*)cf_pdu);
-    if (msg_length > skb->len - sizeof(Avtp_Ntscf_t))
-    {
-        printk(KERN_INFO "ACFCAN: Drop short packet. NTSCF length %i, packet bytes: %li\n", msg_length, skb->len - sizeof(Avtp_Ntscf_t));
+    if (msg_length > skb->len - sizeof(Avtp_Ntscf_t)) {
+        printk(KERN_INFO "ACFCAN: Drop short packet. NTSCF length %i, packet bytes: %li\n",
+               msg_length, skb->len - sizeof(Avtp_Ntscf_t));
         kfree_skb(skb);
         return NET_RX_DROP;
     }
@@ -245,7 +238,9 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     uint64_t stream_id = Avtp_Ntscf_GetStreamId(ntscf);
     uint8_t busid = Avtp_Can_GetCanBusId(can);
 
-    pr_debug("ACFCAN: Received valid ACFCAN packet, stream_id=%016llx, busid=%i , msg_length=%i on %s\n", stream_id, busid, msg_length, dev->name);
+    pr_debug(
+        "ACFCAN: Received valid ACFCAN packet, stream_id=%016llx, busid=%i , msg_length=%i on %s\n",
+        stream_id, busid, msg_length, dev->name);
 
     // Iterate over all active devices
     struct list_head *pos = NULL;
@@ -254,16 +249,16 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     list_for_each(pos, &acfcaninterface_list)
     {
         cfg = list_entry(pos, struct acfcan_cfg, list);
-        if (cfg->rx_streamid == stream_id && cfg->canbusId == busid && strcmp(cfg->ethif, dev->name) == 0)
-        {
-            pr_debug("ACFCAN Found match, if=%s, stream=%016llx, busid %i\n", cfg->ethif, cfg->rx_streamid, cfg->canbusId);
+        if (cfg->rx_streamid == stream_id && cfg->canbusId == busid &&
+            strcmp(cfg->ethif, dev->name) == 0) {
+            pr_debug("ACFCAN Found match, if=%s, stream=%016llx, busid %i\n", cfg->ethif,
+                     cfg->rx_streamid, cfg->canbusId);
             can_dev = cfg->can_netdev;
             break; // Only first match
         }
     }
 
-    if (can_dev == NULL)
-    {
+    if (can_dev == NULL) {
         printk(KERN_WARNING "No receiving ACFCAN for stream=%016llx, busid %i\n", stream_id, busid);
         kfree_skb(skb);
         return NET_RX_DROP;
@@ -277,75 +272,58 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     int err;
 
     // Allocate a CAN skb
-    if (is_fd)
-    {
+    if (is_fd) {
         pr_debug("ACFCAN: Allocating CAN FD skb\n");
         can_skb = alloc_canfd_skb(can_dev, &cfd);
-        cf = (struct can_frame *)cfd; // This is a bit of a hack, but the beginning of the struct is the same
-    }
-    else
-    {
+        cf = (struct can_frame *)
+            cfd; // This is a bit of a hack, but the beginning of the struct is the same
+    } else {
         pr_debug("ACFCAN: Allocating CAN skb\n");
         can_skb = alloc_can_skb(can_dev, &cf);
     }
-    if (!can_skb)
-    {
+    if (!can_skb) {
         printk(KERN_ERR "Failed to allocate CAN skb\n");
         kfree_skb(skb);
         return NET_RX_DROP;
     }
 
     cf->can_id = Avtp_Can_GetCanIdentifier(can);
-    if (Avtp_Can_IsEff(can))
-    {
+    if (Avtp_Can_IsEff(can)) {
         cf->can_id |= CAN_EFF_FLAG;
     }
-    if (Avtp_Can_IsRtr(can))
-    {
+    if (Avtp_Can_IsRtr(can)) {
         cf->can_id |= CAN_RTR_FLAG;
     }
 
-    if (is_fd)
-    {
+    if (is_fd) {
         cfd->flags = 0;
-        if (Avtp_Can_IsBrs(can))
-        {
+        if (Avtp_Can_IsBrs(can)) {
             cfd->flags |= CANFD_BRS;
         }
-        if (Avtp_Can_IsFdf(can))
-        {
+        if (Avtp_Can_IsFdf(can)) {
             cfd->flags |= CANFD_FDF;
         }
-        if (Avtp_Can_IsEsi(can))
-        {
+        if (Avtp_Can_IsEsi(can)) {
             cfd->flags |= CANFD_ESI;
         }
         cfd->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
-    }
-    else
-    {
+    } else {
         cf->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
     }
 
-    if (is_fd && cfd->len > CANFD_MAX_DLEN)
-    {
+    if (is_fd && cfd->len > CANFD_MAX_DLEN) {
         printk(KERN_ERR "DLC too large for CAN FD\n");
         kfree_skb(skb);
         return NET_RX_DROP;
-    }
-    else if (!is_fd && cf->len > CAN_MAX_DLEN)
-    {
+    } else if (!is_fd && cf->len > CAN_MAX_DLEN) {
         printk(KERN_ERR "DLC too large for CAN\n");
         kfree_skb(skb);
         return NET_RX_DROP;
     }
 
-    if (is_fd)
-    {
+    if (is_fd) {
         memcpy(cfd->data, skb->data + sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t), cfd->len);
-    }
-    else
-    {
+    } else {
         memcpy(cf->data, skb->data + sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t), cf->len);
     }
 
@@ -354,8 +332,7 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     // it's own frame)
     // TODO: Do we need to free can_skb?
     err = can_send(can_skb, 1);
-    if (err)
-    {
+    if (err) {
         printk(KERN_ERR "Failed to send CAN skb: %d\n", err);
         kfree_skb(skb);
         return NET_RX_DROP;

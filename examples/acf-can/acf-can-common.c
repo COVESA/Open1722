@@ -78,8 +78,8 @@ typedef uint32_t canid_t;
 #endif
 
 #ifdef __linux__
-int setup_can_socket(const char* can_ifname,
-                     Avtp_CanVariant_t can_variant) {
+int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant)
+{
 
     int can_socket, res;
     struct sockaddr_can can_addr;
@@ -101,8 +101,7 @@ int setup_can_socket(const char* can_ifname,
 
     if (can_variant == AVTP_CAN_FD) {
         int enable_canfx = 1;
-        setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
-                    &enable_canfx, sizeof(enable_canfx));
+        setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfx, sizeof(enable_canfx));
     }
 
     res = bind(can_socket, (struct sockaddr *)&can_addr, sizeof(can_addr));
@@ -116,9 +115,9 @@ int setup_can_socket(const char* can_ifname,
 }
 #endif
 
-static int is_valid_acf_packet(uint8_t* acf_pdu)
+static int is_valid_acf_packet(uint8_t *acf_pdu)
 {
-    Avtp_AcfCommon_t *pdu = (Avtp_AcfCommon_t*) acf_pdu;
+    Avtp_AcfCommon_t *pdu = (Avtp_AcfCommon_t *)acf_pdu;
     uint8_t acf_msg_type = Avtp_AcfCommon_GetAcfMsgType(pdu);
     if (acf_msg_type != AVTP_ACF_TYPE_CAN) {
         return 0;
@@ -127,11 +126,11 @@ static int is_valid_acf_packet(uint8_t* acf_pdu)
     return 1;
 }
 
-static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_num)
+static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, int use_tscf, int seq_num)
 {
     int res;
     if (use_tscf) {
-        Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
+        Avtp_Tscf_t *tscf_pdu = (Avtp_Tscf_t *)pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
         Avtp_Tscf_DisableTu(tscf_pdu);
@@ -139,7 +138,7 @@ static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_n
         Avtp_Tscf_SetStreamId(tscf_pdu, stream_id);
         res = AVTP_TSCF_HEADER_LEN;
     } else {
-        Avtp_Ntscf_t* ntscf_pdu = (Avtp_Ntscf_t*) pdu;
+        Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
         Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num);
@@ -149,28 +148,27 @@ static int init_cf_pdu(uint8_t* pdu, uint64_t stream_id, int use_tscf, int seq_n
     return res;
 }
 
-static int update_cf_length(uint8_t* cf_pdu, uint64_t length, int use_tscf)
+static int update_cf_length(uint8_t *cf_pdu, uint64_t length, int use_tscf)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)cf_pdu, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)cf_pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu, payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, payloadLen);
     }
     return 0;
 }
 
-static int prepare_acf_packet(uint8_t* acf_pdu,
-                              frame_t* frame,
-                              Avtp_CanVariant_t can_variant) {
+static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_t can_variant)
+{
 
     struct timespec now;
     canid_t can_id;
     uint8_t can_payload_length;
 
     // Clear bits
-    Avtp_Can_t* pdu = (Avtp_Can_t*) acf_pdu;
+    Avtp_Can_t *pdu = (Avtp_Can_t *)acf_pdu;
     memset(pdu, 0, AVTP_CAN_HEADER_LEN);
 
     // Prepare ACF PDU for CAN
@@ -207,19 +205,20 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     }
 
     // Copy payload to ACF CAN PDU
-    if(can_variant == AVTP_CAN_FD)
-        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->fd.data,
-                                         can_payload_length, can_variant);
+    if (can_variant == AVTP_CAN_FD)
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length,
+                                  can_variant);
     else
-        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->cc.data,
-                                         can_payload_length, can_variant);
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
+                                  can_variant);
 
-    return Avtp_Can_GetAcfMsgLength(pdu)*4;
+    return Avtp_Can_GetAcfMsgLength(pdu) * 4;
 }
 
-int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu,
-                     int use_udp, int use_tscf, uint64_t stream_id,
-                     uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num) {
+int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu, int use_udp,
+                int use_tscf, uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num,
+                uint32_t udp_seq_num)
+{
 
     // Pack into control formats
     uint8_t *cf_pdu;
@@ -228,9 +227,9 @@ int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu
 
     // Usage of UDP means the PDU needs an encapsulation
     if (use_udp) {
-        Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *) pdu;
+        Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *)pdu;
         Avtp_Udp_SetEncapsulationSeqNo(udp_pdu, udp_seq_num);
-        pdu_length +=  sizeof(Avtp_Udp_t);
+        pdu_length += sizeof(Avtp_Udp_t);
     }
 
     // Prepare the control format: TSCF/NTSCF
@@ -241,7 +240,7 @@ int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu
 
     int i = 0;
     while (i < num_acf_msgs) {
-        uint8_t* acf_pdu = pdu + pdu_length;
+        uint8_t *acf_pdu = pdu + pdu_length;
         res = prepare_acf_packet(acf_pdu, &(can_frames[i]), can_variant);
         pdu_length += res;
         cf_length += res;
@@ -252,12 +251,11 @@ int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu
     update_cf_length(cf_pdu, cf_length, use_tscf);
 
     return pdu_length;
-
 }
 
-int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant,
-                int use_udp, uint64_t stream_id, uint8_t* exp_cf_seqnum,
-                uint32_t* exp_udp_seqnum) {
+int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant, int use_udp,
+                uint64_t stream_id, uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
+{
 
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, seq_num, i = 0;
     uint32_t udp_seq_num;
@@ -272,8 +270,8 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         proc_bytes += AVTP_UDP_HEADER_LEN;
         msg_length += AVTP_UDP_HEADER_LEN;
         if (udp_seq_num != *exp_udp_seqnum) {
-            LOG_ERR("Incorrect UDP sequence num. Expected: %d Recd.: %d\n",
-                                                *exp_udp_seqnum, udp_seq_num);
+            LOG_ERR("Incorrect UDP sequence num. Expected: %d Recd.: %d\n", *exp_udp_seqnum,
+                    udp_seq_num);
             *exp_udp_seqnum = udp_seq_num;
         }
     } else {
@@ -281,17 +279,17 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
     }
 
     // Only NTSCF and TSCF formats allowed
-    uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
+    uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cf_pdu);
     if (subtype == AVTP_SUBTYPE_TSCF) {
         proc_bytes += AVTP_TSCF_HEADER_LEN;
-        msg_length += Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu) + AVTP_TSCF_HEADER_LEN;
-        s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t*)cf_pdu);
-        seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t*)cf_pdu);
+        msg_length += Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t *)cf_pdu) + AVTP_TSCF_HEADER_LEN;
+        s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t *)cf_pdu);
+        seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
-        msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
-        s_id = Avtp_Ntscf_GetStreamId((Avtp_Ntscf_t*)cf_pdu);
-        seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t*)cf_pdu);
+        msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
+        s_id = Avtp_Ntscf_GetStreamId((Avtp_Ntscf_t *)cf_pdu);
+        seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t *)cf_pdu);
     } else {
         return -1;
     }
@@ -303,8 +301,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
 
     // Check sequence numbers.
     if (seq_num != *exp_cf_seqnum) {
-        LOG_ERR("Incorrect sequence num. Expected: %d Recd.: %d\n",
-                                            *exp_cf_seqnum, seq_num);
+        LOG_ERR("Incorrect sequence num. Expected: %d Recd.: %d\n", *exp_cf_seqnum, seq_num);
         *exp_cf_seqnum = seq_num;
     }
 
@@ -322,25 +319,25 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
          * the CAN/CAN-FD bound encoded by the FDF bit. Without this
          * guard a malformed frame could feed garbage values to the
          * consumers below. */
-        if (!Avtp_Can_IsValid((Avtp_Can_t*)acf_pdu, msg_length - proc_bytes)) {
+        if (!Avtp_Can_IsValid((Avtp_Can_t *)acf_pdu, msg_length - proc_bytes)) {
             LOG_ERR("Error: ACF CAN frame failed validation, ignoring frame.\n");
             return -1;
         }
 
-        canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t*)acf_pdu);
-        const uint8_t* can_payload = Avtp_Can_GetPayload((Avtp_Can_t*)acf_pdu);
-        uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t*)acf_pdu)*4;
-        uint16_t can_payload_length = Avtp_Can_GetPayloadLength((Avtp_Can_t*)acf_pdu);
+        canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t *)acf_pdu);
+        const uint8_t *can_payload = Avtp_Can_GetPayload((Avtp_Can_t *)acf_pdu);
+        uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t *)acf_pdu) * 4;
+        uint16_t can_payload_length = Avtp_Can_GetPayloadLength((Avtp_Can_t *)acf_pdu);
         proc_bytes += acf_msg_length;
-        
+
         if (i >= MAX_CAN_FRAMES_IN_ACF) {
             LOG_ERR("Error: Number of CAN frames in ACF exceeds maximum allowed.\n");
             return -1;
         }
-        frame_t* frame = &(can_frames[i++]);
+        frame_t *frame = &(can_frames[i++]);
 
         // Handle EFF Flag
-        if (Avtp_Can_IsEff((Avtp_Can_t*)acf_pdu)) {
+        if (Avtp_Can_IsEff((Avtp_Can_t *)acf_pdu)) {
             can_id |= CAN_EFF_FLAG;
         } else if (can_id > 0x7FF) {
             LOG_ERR("Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
@@ -348,18 +345,18 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         }
 
         // Handle RTR Flag
-        if (Avtp_Can_IsRtr((Avtp_Can_t*)acf_pdu)) {
+        if (Avtp_Can_IsRtr((Avtp_Can_t *)acf_pdu)) {
             can_id |= CAN_RTR_FLAG;
         }
 
         if (can_variant == AVTP_CAN_FD) {
-            if (Avtp_Can_IsBrs((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsBrs((Avtp_Can_t *)acf_pdu)) {
                 frame->fd.flags |= CANFD_BRS;
             }
-            if (Avtp_Can_IsFdf((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsFdf((Avtp_Can_t *)acf_pdu)) {
                 frame->fd.flags |= CANFD_FDF;
             }
-            if (Avtp_Can_IsEsi((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsEsi((Avtp_Can_t *)acf_pdu)) {
                 frame->fd.flags |= CANFD_ESI;
             }
 #ifdef __linux__
