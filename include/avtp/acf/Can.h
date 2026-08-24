@@ -50,19 +50,19 @@
 extern "C" {
 #endif
 
-#define GET_CAN_FIELD(field) \
-        (Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX, (uint8_t*)pdu, field))
-#define SET_CAN_FIELD(field, value) \
-        (Avtp_SetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX, (uint8_t*)pdu, field, value))
+#define GET_CAN_FIELD(field)                                                                       \
+    (Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX, (uint8_t *)pdu, field))
+#define SET_CAN_FIELD(field, value)                                                                \
+    (Avtp_SetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX, (uint8_t *)pdu, field, value))
 
-#define AVTP_CAN_HEADER_LEN         (4 * AVTP_QUADLET_SIZE)
+#define AVTP_CAN_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
 
 typedef struct {
     uint8_t header[AVTP_CAN_HEADER_LEN];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_Can_t;
 
-typedef enum  {
+typedef enum {
 
     /* ACF common header fields */
     AVTP_CAN_FIELD_ACF_MSG_TYPE = 0,
@@ -87,22 +87,21 @@ typedef enum  {
 /**
  * This table maps all IEEE 1722 ACF CAN header fields to a descriptor.
  */
-static const Avtp_FieldDescriptor_t Avtp_CanFieldDesc[AVTP_CAN_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_CanFieldDesc[AVTP_CAN_FIELD_MAX] = {
     /* ACF common header fields */
-    [AVTP_CAN_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset =  0, .bits = 7 },
-    [AVTP_CAN_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },
+    [AVTP_CAN_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_CAN_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
     /* ACF CAN header fields */
-    [AVTP_CAN_FIELD_PAD]                = { .quadlet = 0, .offset = 16, .bits =  2 },
-    [AVTP_CAN_FIELD_MTV]                = { .quadlet = 0, .offset = 18, .bits =  1 },
-    [AVTP_CAN_FIELD_RTR]                = { .quadlet = 0, .offset = 19, .bits =  1 },
-    [AVTP_CAN_FIELD_EFF]                = { .quadlet = 0, .offset = 20, .bits =  1 },
-    [AVTP_CAN_FIELD_BRS]                = { .quadlet = 0, .offset = 21, .bits =  1 },
-    [AVTP_CAN_FIELD_FDF]                = { .quadlet = 0, .offset = 22, .bits =  1 },
-    [AVTP_CAN_FIELD_ESI]                = { .quadlet = 0, .offset = 23, .bits =  1 },
-    [AVTP_CAN_FIELD_CAN_BUS_ID]         = { .quadlet = 0, .offset = 27, .bits =  5 },
-    [AVTP_CAN_FIELD_MESSAGE_TIMESTAMP]  = { .quadlet = 1, .offset =  0, .bits = 64 },
-    [AVTP_CAN_FIELD_CAN_IDENTIFIER]     = { .quadlet = 3, .offset =  3, .bits = 29 },
+    [AVTP_CAN_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
+    [AVTP_CAN_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_CAN_FIELD_RTR] = {.quadlet = 0, .offset = 19, .bits = 1},
+    [AVTP_CAN_FIELD_EFF] = {.quadlet = 0, .offset = 20, .bits = 1},
+    [AVTP_CAN_FIELD_BRS] = {.quadlet = 0, .offset = 21, .bits = 1},
+    [AVTP_CAN_FIELD_FDF] = {.quadlet = 0, .offset = 22, .bits = 1},
+    [AVTP_CAN_FIELD_ESI] = {.quadlet = 0, .offset = 23, .bits = 1},
+    [AVTP_CAN_FIELD_CAN_BUS_ID] = {.quadlet = 0, .offset = 27, .bits = 5},
+    [AVTP_CAN_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_CAN_FIELD_CAN_IDENTIFIER] = {.quadlet = 3, .offset = 3, .bits = 29},
 };
 
 /**
@@ -111,78 +110,100 @@ static const Avtp_FieldDescriptor_t Avtp_CanFieldDesc[AVTP_CAN_FIELD_MAX] =
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF message type field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Can_GetAcfMsgType(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE);
 }
 
 /**
  * Return the value of an an ACF message length field as specified in the IEEE 1722 Specification.
+ * This returns the length in Quadlets as specified in the IEEE 1722 Specification.
+ *
+ * You can use Avtp_Can_GetCanPayloadLength to get the length in bytes without padding.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF message length field.
  */
-OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t* const pdu) {
-    return (uint16_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t *const pdu)
+{
+    return (uint16_t)GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH);
+}
+
+/**
+ * Return the ACF message length
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
+ * @returns Length of the ACF message in bytes.
+ */
+OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLengthInBytes(const Avtp_Can_t *const pdu)
+{
+    return (uint16_t)GET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH) * 4;
 }
 
 /**
  * Return the value of an an ACF padding field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF padding field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetPad(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_PAD);
+OPEN1722_INLINE uint8_t Avtp_Can_GetPad(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_PAD);
 }
 
 /**
  * Return the value of an an ACF CAN PDU MTV field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU MTV field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetMtv(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_MTV);
+OPEN1722_INLINE uint8_t Avtp_Can_GetMtv(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_MTV);
 }
 
 /**
  * Return the value of an an ACF CAN PDU RTR field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU RTR field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetRtr(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_RTR);
+OPEN1722_INLINE uint8_t Avtp_Can_GetRtr(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_RTR);
 }
 
 /**
  * Return the value of an an ACF CAN PDU EFF field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU EFF field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetEff(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_EFF);
+OPEN1722_INLINE uint8_t Avtp_Can_GetEff(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_EFF);
 }
 
 /**
  * Return the value of an an ACF CAN PDU BRS field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU BRS field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetBrs(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_BRS);
+OPEN1722_INLINE uint8_t Avtp_Can_GetBrs(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_BRS);
 }
 
 /**
  * Return the value of an an ACF CAN PDU FDF field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU FDF field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_FDF);
+OPEN1722_INLINE uint8_t Avtp_Can_GetFdf(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_FDF);
 }
 
 /**
@@ -191,38 +212,45 @@ OPEN1722_INLINE uint8_t Avtp_Can_GetFdf(const Avtp_Can_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU ESI field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetEsi(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_ESI);
+OPEN1722_INLINE uint8_t Avtp_Can_GetEsi(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_ESI);
 }
 
 /**
- * Return the value of an an ACF CAN PDU CAN Bus ID field as specified in the IEEE 1722 Specification.
- * 
+ * Return the value of an an ACF CAN PDU CAN Bus ID field as specified in the IEEE 1722
+ * Specification.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU CAN Bus ID field.
  */
-OPEN1722_INLINE uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t* const pdu) {
-    return (uint8_t) GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID);
+OPEN1722_INLINE uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t *const pdu)
+{
+    return (uint8_t)GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID);
 }
 
 /**
- * Return the value of an an ACF CAN PDU Message Timestamp field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF CAN PDU Message Timestamp field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU Message Timestamp field.
  */
-OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t* const pdu) {
+OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t *const pdu)
+{
     return GET_CAN_FIELD(AVTP_CAN_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
- * Return the value of an an ACF CAN PDU CAN Identifier field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF CAN PDU CAN Identifier field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @returns Value of the ACF CAN PDU CAN Identifier field.
  */
-OPEN1722_INLINE uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t* const pdu) {
-    return (uint32_t) GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER);
+OPEN1722_INLINE uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t *const pdu)
+{
+    return (uint32_t)GET_CAN_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER);
 }
 
 /**
@@ -231,17 +259,22 @@ OPEN1722_INLINE uint32_t Avtp_Can_GetCanIdentifier(const Avtp_Can_t* const pdu) 
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetAcfMsgType(Avtp_Can_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Can_SetAcfMsgType(Avtp_Can_t *pdu, uint8_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_TYPE, value);
 }
 
 /**
  * Set the value of an an ACF message length field as specified in the IEEE 1722 Specification.
+ * Note: the size is in Quadlets as specified in the IEEE 1722 Specification.
+ * You can use Avtp_Can_SetPayloadLength to set length in bytes and automatically set the
+ * correct padding.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF message length field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetAcfMsgLength(Avtp_Can_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Can_SetAcfMsgLength(Avtp_Can_t *pdu, uint16_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -251,7 +284,8 @@ OPEN1722_INLINE void Avtp_Can_SetAcfMsgLength(Avtp_Can_t* pdu, uint16_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF padding field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetPad(Avtp_Can_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Can_SetPad(Avtp_Can_t *pdu, uint8_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_PAD, value);
 }
 
@@ -261,17 +295,20 @@ OPEN1722_INLINE void Avtp_Can_SetPad(Avtp_Can_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF CAN Bus ID field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetCanBusId(Avtp_Can_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Can_SetCanBusId(Avtp_Can_t *pdu, uint8_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_CAN_BUS_ID, value);
 }
 
 /**
- * Set the value of an an ACF CAN Message Timestamp field as specified in the IEEE 1722 Specification.
+ * Set the value of an an ACF CAN Message Timestamp field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF CAN Message Timestamp field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetMessageTimestamp(Avtp_Can_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Can_SetMessageTimestamp(Avtp_Can_t *pdu, uint64_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
@@ -281,16 +318,18 @@ OPEN1722_INLINE void Avtp_Can_SetMessageTimestamp(Avtp_Can_t* pdu, uint64_t valu
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param value Value to set the ACF CAN Identifier field to.
  */
-OPEN1722_INLINE void Avtp_Can_SetCanIdentifier(Avtp_Can_t* pdu, uint32_t value) {
+OPEN1722_INLINE void Avtp_Can_SetCanIdentifier(Avtp_Can_t *pdu, uint32_t value)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_CAN_IDENTIFIER, value);
 }
 
 /**
-* Enable the MTV bit in an ACF CAN frame as specified in the IEEE 1722 Specification.
-*
+ * Enable the MTV bit in an ACF CAN frame as specified in the IEEE 1722 Specification.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableMtv(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableMtv(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_MTV, 1);
 }
 
@@ -299,7 +338,8 @@ OPEN1722_INLINE void Avtp_Can_EnableMtv(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableMtv(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableMtv(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_MTV, 0);
 }
 
@@ -308,7 +348,8 @@ OPEN1722_INLINE void Avtp_Can_DisableMtv(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableRtr(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableRtr(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_RTR, 1);
 }
 
@@ -317,7 +358,8 @@ OPEN1722_INLINE void Avtp_Can_EnableRtr(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableRtr(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableRtr(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_RTR, 0);
 }
 
@@ -326,7 +368,8 @@ OPEN1722_INLINE void Avtp_Can_DisableRtr(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableEff(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableEff(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_EFF, 1);
 }
 
@@ -335,7 +378,8 @@ OPEN1722_INLINE void Avtp_Can_EnableEff(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableEff(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableEff(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_EFF, 0);
 }
 
@@ -344,16 +388,18 @@ OPEN1722_INLINE void Avtp_Can_DisableEff(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableBrs(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableBrs(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_BRS, 1);
 }
 
-/** 
+/**
  * Disable the BRS bit in an ACF CAN frame as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableBrs(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableBrs(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_BRS, 0);
 }
 
@@ -362,7 +408,8 @@ OPEN1722_INLINE void Avtp_Can_DisableBrs(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableFdf(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableFdf(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_FDF, 1);
 }
 
@@ -371,7 +418,8 @@ OPEN1722_INLINE void Avtp_Can_EnableFdf(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableFdf(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableFdf(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_FDF, 0);
 }
 
@@ -380,7 +428,8 @@ OPEN1722_INLINE void Avtp_Can_DisableFdf(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_EnableEsi(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_EnableEsi(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_ESI, 1);
 }
 
@@ -389,10 +438,10 @@ OPEN1722_INLINE void Avtp_Can_EnableEsi(Avtp_Can_t* pdu) {
  *
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_DisableEsi(Avtp_Can_t* pdu) {
+OPEN1722_INLINE void Avtp_Can_DisableEsi(Avtp_Can_t *pdu)
+{
     SET_CAN_FIELD(AVTP_CAN_FIELD_ESI, 0);
 }
-
 
 /**
  * Copies the payload data and CAN frame ID into the ACF CAN frame. This function will
@@ -404,8 +453,8 @@ OPEN1722_INLINE void Avtp_Can_DisableEsi(Avtp_Can_t* pdu) {
  * @param payload_length Length of the payload.
  * @param can_variant Classic CAN or CAN-FD
  */
-void Avtp_Can_CreateAcfMessage(Avtp_Can_t* can_pdu, uint32_t frame_id, uint8_t* payload,
-                        uint16_t payload_length, Avtp_CanVariant_t can_variant);
+void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id, uint8_t *payload,
+                               uint16_t payload_length, Avtp_CanVariant_t can_variant);
 
 /**
  * Returns pointer to payload of an ACF CAN frame.
@@ -413,7 +462,8 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* can_pdu, uint32_t frame_id, uint8_t* 
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return Pointer to ACF CAN frame payload
  */
-OPEN1722_INLINE const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const can_pdu) {
+OPEN1722_INLINE const uint8_t *Avtp_Can_GetPayload(const Avtp_Can_t *const can_pdu)
+{
     return can_pdu->payload;
 }
 
@@ -424,20 +474,33 @@ OPEN1722_INLINE const uint8_t* Avtp_Can_GetPayload(const Avtp_Can_t* const can_p
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload
  */
-OPEN1722_INLINE void Avtp_Can_SetPayload(Avtp_Can_t* can_pdu, uint8_t* payload,
-                                uint16_t payload_length) {
+OPEN1722_INLINE void Avtp_Can_SetPayload(Avtp_Can_t *can_pdu, uint8_t *payload,
+                                         uint16_t payload_length)
+{
     memcpy(can_pdu->payload, payload, payload_length);
 }
 
 /**
  * Finalizes the ACF CAN frame. This function will set the
- * length and pad fields while inserting the padded bytes.
+ * length and pad fields while inserting the padded bytes. This will also
+ * set padding bytes to zero if the payload length is not a multiple of 4.
+ * to avoid leaking information
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the CAN frame payload.
  */
-void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
+OPEN1722_INLINE void Avtp_Can_SetPayloadLength(Avtp_Can_t *can_pdu, uint16_t payload_length)
+{
+    uint16_t msgLenBytes = AVTP_CAN_HEADER_LEN + payload_length;
+    uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+    if (pad > 0) {
+        memset(can_pdu->payload + payload_length, 0, pad);
+    }
+    uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
+    Avtp_Can_SetPad(can_pdu, pad);
+    Avtp_Can_SetAcfMsgLength(can_pdu, msgLenQuadlets);
+}
 
 /**
  * Returns the length of the CAN payload without the padding bytes and the
@@ -452,26 +515,31 @@ void Avtp_Can_Finalize(Avtp_Can_t* can_pdu, uint16_t payload_length);
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @return  Length of CAN payload in bytes
  */
-uint8_t Avtp_Can_GetCanPayloadLength(const Avtp_Can_t* const pdu);
-
+OPEN1722_INLINE uint8_t Avtp_Can_GetPayloadLength(const Avtp_Can_t *const pdu)
+{
+    uint8_t pad_length = Avtp_Can_GetPad(pdu);
+    uint16_t acf_length_bytes = Avtp_Can_GetAcfMsgLengthInBytes(pdu);
+    return (uint8_t)(acf_length_bytes - AVTP_CAN_HEADER_LEN - pad_length);
+}
 
 /**
  * Checks if the ACF CAN frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
+ * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
  * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param bufferSize Size of the buffer containing the ACF CAN frame.
  * @return true if the ACF CAN frame is valid, false otherwise.
  */
-uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize);
+uint8_t Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
 
 /**
  * Initializes an ACF CAN PDU header as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of a 1722 ACF CAN PDU.
  */
-OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t* pdu) {
-    if(pdu != NULL) {
+OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
+{
+    if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Can_t));
         Avtp_Can_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN);
     }

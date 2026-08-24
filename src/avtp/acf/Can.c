@@ -46,36 +46,9 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payl
     }
 
     // Finalize the AVTP CAN Frame
-    Avtp_Can_Finalize(pdu, payload_length);
+    Avtp_Can_SetPayloadLength(pdu, payload_length);
 }
 
-void Avtp_Can_Finalize(Avtp_Can_t* pdu, uint16_t payload_length)
-{
-    uint8_t padSize;
-    uint32_t avtpCanLength = AVTP_CAN_HEADER_LEN + payload_length;
-
-    // Check if padding is required
-    padSize = AVTP_QUADLET_SIZE - (payload_length % AVTP_QUADLET_SIZE);
-    if (payload_length % AVTP_QUADLET_SIZE) {
-        memset(pdu->payload + payload_length, 0, padSize);
-        avtpCanLength += padSize;
-    }
-
-    // Set the length and padding fields
-    Avtp_Can_SetAcfMsgLength(pdu, (uint16_t) avtpCanLength/AVTP_QUADLET_SIZE);
-    Avtp_Can_SetPad(pdu, padSize);
-}
-
-uint8_t Avtp_Can_GetCanPayloadLength(const Avtp_Can_t* const pdu)
-{
-    /* Precondition: caller has validated the PDU via Avtp_Can_IsValid().
-     * Compute in uint16_t to avoid the (uint8_t)(AcfMsgLength*4) wrap
-     * that bit any frame > 63 quadlets in earlier versions; IsValid
-     * guarantees the narrowing back to uint8_t is lossless. */
-    uint16_t msg_length_bytes = (uint16_t)Avtp_Can_GetAcfMsgLength(pdu) * 4;
-    uint8_t  pad_length       = Avtp_Can_GetPad(pdu);
-    return (uint8_t)(msg_length_bytes - AVTP_CAN_HEADER_LEN - pad_length);
-}
 
 uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
 {
