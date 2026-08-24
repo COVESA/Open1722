@@ -49,6 +49,7 @@ LOG_MODULE_REGISTER(acf_can_common, LOG_LEVEL_DBG);
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "avtp/Udp.h"
 #include "avtp/CommonHeader.h"
@@ -176,7 +177,7 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     Avtp_Can_Init(pdu);
     clock_gettime(CLOCK_REALTIME, &now);
     Avtp_Can_SetMessageTimestamp(pdu, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
-    Avtp_Can_EnableMtv(pdu);
+    Avtp_Can_SetMtv(pdu, true);
 
     // Set required CAN Flags
 #ifdef __linux__
@@ -187,21 +188,21 @@ static int prepare_acf_packet(uint8_t* acf_pdu,
     can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.dlc : (*frame).cc.dlc;
 #endif
     if (can_id & CAN_EFF_FLAG) {
-        Avtp_Can_EnableEff(pdu);
+        Avtp_Can_SetEff(pdu, true);
     }
     if (can_id & CAN_RTR_FLAG) {
-        Avtp_Can_EnableRtr(pdu);
+        Avtp_Can_SetRtr(pdu, true);
     }
 
     if (can_variant == AVTP_CAN_FD) {
         if (frame->fd.flags & CANFD_BRS) {
-            Avtp_Can_EnableBrs(pdu);
+            Avtp_Can_SetBrs(pdu, true);
         }
         if (frame->fd.flags & CANFD_FDF) {
-            Avtp_Can_EnableFdf(pdu);
+            Avtp_Can_SetFdf(pdu, true);
         }
         if (frame->fd.flags & CANFD_ESI) {
-            Avtp_Can_EnableEsi(pdu);
+            Avtp_Can_SetEsi(pdu, true);
         }
     }
 
@@ -339,7 +340,7 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         frame_t* frame = &(can_frames[i++]);
 
         // Handle EFF Flag
-        if (Avtp_Can_GetEff((Avtp_Can_t*)acf_pdu)) {
+        if (Avtp_Can_IsEff((Avtp_Can_t*)acf_pdu)) {
             can_id |= CAN_EFF_FLAG;
         } else if (can_id > 0x7FF) {
             LOG_ERR("Error: CAN ID is > 0x7FF but the EFF bit is not set.\n");
@@ -347,18 +348,18 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
         }
 
         // Handle RTR Flag
-        if (Avtp_Can_GetRtr((Avtp_Can_t*)acf_pdu)) {
+        if (Avtp_Can_IsRtr((Avtp_Can_t*)acf_pdu)) {
             can_id |= CAN_RTR_FLAG;
         }
 
         if (can_variant == AVTP_CAN_FD) {
-            if (Avtp_Can_GetBrs((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsBrs((Avtp_Can_t*)acf_pdu)) {
                 frame->fd.flags |= CANFD_BRS;
             }
-            if (Avtp_Can_GetFdf((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsFdf((Avtp_Can_t*)acf_pdu)) {
                 frame->fd.flags |= CANFD_FDF;
             }
-            if (Avtp_Can_GetEsi((Avtp_Can_t*)acf_pdu)) {
+            if (Avtp_Can_IsEsi((Avtp_Can_t*)acf_pdu)) {
                 frame->fd.flags |= CANFD_ESI;
             }
 #ifdef __linux__

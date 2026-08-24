@@ -62,11 +62,11 @@ void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const st
     Avtp_Can_SetCanBusId(can_header, cfg->canbusId);
     if (cfd->can_id & CAN_RTR_FLAG)
     {
-        Avtp_Can_EnableRtr(can_header);
+        Avtp_Can_SetRtr(can_header, true);
     }
     if (cfd->can_id & CAN_EFF_FLAG)
     {
-        Avtp_Can_EnableEff(can_header);
+        Avtp_Can_SetEff(can_header, true);
     }
 
     if (cfd->can_id & CAN_EFF_FLAG)
@@ -82,15 +82,15 @@ void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const st
     {
         if (cfd->flags & CANFD_BRS)
         {
-            Avtp_Can_EnableBrs(can_header);
+            Avtp_Can_SetBrs(can_header, true);
         }
         if (cfd->flags & CANFD_FDF)
         {
-            Avtp_Can_EnableFdf(can_header);
+            Avtp_Can_SetFdf(can_header, true);
         }
         if (cfd->flags & CANFD_ESI)
         {
-            Avtp_Can_GetEsi(can_header);
+            Avtp_Can_SetEsi(can_header, true);
         }
     }
 
@@ -269,7 +269,7 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
         return NET_RX_DROP;
     }
 
-    uint8_t is_fd = Avtp_Can_GetFdf(can);
+    bool is_fd = Avtp_Can_IsFdf(can);
     struct sk_buff *can_skb;
     struct can_frame *cf;
     struct canfd_frame *cfd;
@@ -296,11 +296,11 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     }
 
     cf->can_id = Avtp_Can_GetCanIdentifier(can);
-    if (Avtp_Can_GetEff(can))
+    if (Avtp_Can_IsEff(can))
     {
         cf->can_id |= CAN_EFF_FLAG;
     }
-    if (Avtp_Can_GetRtr(can))
+    if (Avtp_Can_IsRtr(can))
     {
         cf->can_id |= CAN_RTR_FLAG;
     }
@@ -308,15 +308,15 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
     if (is_fd)
     {
         cfd->flags = 0;
-        if (Avtp_Can_GetBrs(can))
+        if (Avtp_Can_IsBrs(can))
         {
             cfd->flags |= CANFD_BRS;
         }
-        if (Avtp_Can_GetFdf(can))
+        if (Avtp_Can_IsFdf(can))
         {
             cfd->flags |= CANFD_FDF;
         }
-        if (Avtp_Can_GetEsi(can))
+        if (Avtp_Can_IsEsi(can))
         {
             cfd->flags |= CANFD_ESI;
         }

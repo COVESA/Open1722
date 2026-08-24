@@ -35,13 +35,13 @@ Those exact names reappear in the API:
 
 ```c
 Avtp_Can_GetPad(pdu);
-Avtp_Can_GetMtv(pdu);
+Avtp_Can_IsMtv(pdu);
 Avtp_Can_GetCanIdentifier(pdu);
 Avtp_Can_SetMessageTimestamp(pdu, value);
 ```
 
 There is no "rename for taste" step. If the spec calls a field `eff`, the
-function is `Avtp_Can_GetEff`, not `Avtp_Can_GetExtendedFrameFormat`.
+function is `Avtp_Can_IsEff`, not `Avtp_Can_GetExtendedFrameFormat`.
 
 ### 1.2 Plumbing, not porcelain
 
@@ -95,27 +95,27 @@ Avtp_<Format>_<Verb><Field>
 |------|---------|----------|
 | `Avtp_` | Common prefix for everything. | — |
 | `<Format>` | The PDU format. | `Can`, `CanBrief`, `Lin`, `Vss`, `CommonHeader`, `Udp`, `Tscf`, `Ntscf` |
-| `<Verb>` | What the function does (see below). | `Get`, `Set`, `Enable`, `Disable`, `Init`, `IsValid` |
+| `<Verb>` | What the function does (see below). | `Get`, `Is`, `Set`, `Init`, `IsValid` |
 | `<Field>` | The spec field name, verbatim. | `AcfMsgType`, `Pad`, `Mtv`, `CanBusId`, `MessageTimestamp` |
 
 Verbs:
 
 - **`Get<Field>`** — read a field, returning a value.
 - **`Set<Field>`** — write a field, taking a value.
-- **`Enable<Flag>` / `Disable<Flag>`** — convenience wrappers for single-bit
-  fields, used instead of `Set<Flag>(pdu, 1)` / `Set<Flag>(pdu, 0)`.
+- **`Is<Flag>`** — read a single-bit flag, returning a `bool`.
 - **`Init`** — zero-initialise the PDU header and set its message type.
 - **`IsValid`** — validate a frame (see [§6](#6-accessor-semantics--the-safety-contract)).
 - **`Create…`** — build a complete message in one call (convenience, see [§8](#8-convenience-functions)).
 
-A `Get`ter takes the PDU as a `const` pointer and returns a value; a `Set`ter
-takes a non-`const` pointer and a value and returns `void`:
+A `Get`ter takes the PDU as a `const` pointer and returns a value; an `Is`
+getter returns a `bool` for single-bit flags; a `Set`ter takes a non-`const`
+pointer and a value and returns `void`:
 
 ```c
 OPEN1722_INLINE uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE void    Avtp_Can_SetCanBusId(Avtp_Can_t *pdu, uint8_t value);
-OPEN1722_INLINE void    Avtp_Can_EnableMtv(Avtp_Can_t *pdu);
-OPEN1722_INLINE void    Avtp_Can_DisableMtv(Avtp_Can_t *pdu);
+OPEN1722_INLINE bool    Avtp_Can_IsMtv(const Avtp_Can_t *const pdu);
+OPEN1722_INLINE void    Avtp_Can_SetMtv(Avtp_Can_t *pdu, bool mtv);
 ```
 
 ### 2.2 Return types
@@ -127,6 +127,13 @@ Getters return the natural C type for the field width — `uint8_t`,
 OPEN1722_INLINE uint8_t  Avtp_Can_GetPad(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t *const pdu);
+```
+
+Single-bit flag fields are booleans and return `bool` (via `Is<Flag>`, see
+[§2.1](#21-functions)):
+
+```c
+OPEN1722_INLINE bool Avtp_Can_IsMtv(const Avtp_Can_t *const pdu);
 ```
 
 Fields that represent an enumeration of named values (most notably the ACF
@@ -273,18 +280,18 @@ OPEN1722_INLINE void Avtp_Can_SetCanBusId(Avtp_Can_t *pdu, uint8_t value)
 }
 ```
 
-For single-bit flag fields, `Enable<Flag>`/`Disable<Flag>` replace the raw
-`Set<Flag>(pdu, 0|1)` calls:
+For single-bit flag fields, `Is<Flag>` reads the flag as a `bool` and
+`Set<Flag>(pdu, bool)` writes it:
 
 ```c
-OPEN1722_INLINE void Avtp_Can_EnableMtv(Avtp_Can_t *pdu)
+OPEN1722_INLINE bool Avtp_Can_IsMtv(const Avtp_Can_t *const pdu)
 {
-    SET_CAN_FIELD(AVTP_CAN_FIELD_MTV, 1);
+    return (bool)GET_CAN_FIELD(AVTP_CAN_FIELD_MTV);
 }
 
-OPEN1722_INLINE void Avtp_Can_DisableMtv(Avtp_Can_t *pdu)
+OPEN1722_INLINE void Avtp_Can_SetMtv(Avtp_Can_t *pdu, bool mtv)
 {
-    SET_CAN_FIELD(AVTP_CAN_FIELD_MTV, 0);
+    SET_CAN_FIELD(AVTP_CAN_FIELD_MTV, mtv);
 }
 ```
 
@@ -310,7 +317,7 @@ length field is contained within the actual buffer, and (2) any format-specific
 invariants. See [§6](#6-accessor-semantics--the-safety-contract).
 
 ```c
-uint8_t Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
+bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
 ```
 
 ### 3.8 Convenience functions
@@ -520,8 +527,8 @@ this order and the template in [§3](#3-anatomy-of-a-format-module):
    fields (`ACF_MSG_TYPE`, `ACF_MSG_LENGTH`) and ending with `..._FIELD_MAX`.
 4. Add the `static const` field descriptor table `Avtp_<Format>FieldDesc`.
 5. Add the `GET_/SET_<FORMAT>_FIELD` macros.
-6. Add one `Get`/`Set` accessor per field (using `OPEN1722_INLINE`), and
-   `Enable`/`Disable` for single-bit flags.
+6. Add one `Get`/`Set` accessor per field (using `OPEN1722_INLINE`); single-bit
+   flags use `Is<Flag>` (returns `bool`) and `Set<Flag>(bool)`.
 7. Add `Avtp_<Format>_Init` (zero + set the ACF message type).
 8. Add the convenience functions (`Get/SetPayload`, `SetPayloadLength`,
    `GetPayloadLength`, and `Create…` if a full-message builder makes sense).

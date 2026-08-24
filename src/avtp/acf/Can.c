@@ -37,12 +37,12 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payl
 
     // Set the Frame ID and CAN variant
     if (frame_id > 0x7ff) {
-        Avtp_Can_EnableEff(pdu);
+        Avtp_Can_SetEff(pdu, true);
     }
 
     Avtp_Can_SetCanIdentifier(pdu, frame_id);
     if (can_variant == AVTP_CAN_FD) {
-        Avtp_Can_EnableFdf(pdu);
+        Avtp_Can_SetFdf(pdu, true);
     }
 
     // Finalize the AVTP CAN Frame
@@ -50,24 +50,24 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t* pdu, uint32_t frame_id, uint8_t* payl
 }
 
 
-uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
+bool Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
-        return FALSE;
+        return false;
     }
 
     if (bufferSize < AVTP_CAN_HEADER_LEN) {
-        return FALSE;
+        return false;
     }
 
     if (Avtp_Can_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN) {
-        return FALSE;
+        return false;
     }
 
     // Avtp_Can_GetAcfMsgLength returns quadlets. Convert the length field to octets.
     uint16_t msg_length_bytes = (uint16_t)Avtp_Can_GetAcfMsgLength(pdu) * 4;
     if (msg_length_bytes > bufferSize) {
-        return FALSE;
+        return false;
     }
 
     /* CAN payload-length invariant: classic CAN ≤ 8 bytes, CAN-FD ≤ 64
@@ -77,12 +77,12 @@ uint8_t Avtp_Can_IsValid(const Avtp_Can_t* const pdu, size_t bufferSize)
     uint8_t  pad_length     = Avtp_Can_GetPad(pdu);
     uint16_t header_and_pad = (uint16_t)AVTP_CAN_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
-        return FALSE;
+        return false;
     }
     uint16_t payload_length = msg_length_bytes - header_and_pad;
-    uint16_t max_payload    = Avtp_Can_GetFdf(pdu) ? 64u : 8u;
+    uint16_t max_payload    = Avtp_Can_IsFdf(pdu) ? 64u : 8u;
     if (payload_length > max_payload) {
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
