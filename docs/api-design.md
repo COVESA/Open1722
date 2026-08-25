@@ -12,7 +12,7 @@ reference implementation of that template; when in doubt, follow it.
 
 Companion documents:
 
-- [`INLINE.md`](INLINE.md) — how inline accessors are also exported as shared
+- [`inline.md`](inline.md) — how inline accessors are also exported as shared
   library symbols.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) — licence, commit and style rules.
 
@@ -447,7 +447,7 @@ emptied, forcing an external symbol for every inline function in
 `libopen1722.so`.
 
 The full mechanism, and how to force non-inline use in your own code, is
-documented in [`INLINE.md`](INLINE.md). For the purposes of this document the
+documented in [`inline.md`](inline.md). For the purposes of this document the
 rule is simply: **performance-critical functions in public headers use
 `OPEN1722_INLINE`, never a bare `static inline`.**
 
@@ -538,7 +538,7 @@ this order and the template in [§3](#3-anatomy-of-a-format-module):
     [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h).
 11. Register any new inline header in `src/avtp/export/InlineExports.c`
     (phase 2) so the accessors are exported to the shared library — see
-    [`INLINE.md`](INLINE.md).
+    [`inline.md`](inline.md).
 12. Add unit tests under `unit/` and register the test target in the build.
 
 A concrete reference for every step is `Can.h` / `Can.c`.

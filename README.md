@@ -196,9 +196,13 @@ int main()
 }
 ```
 
+## Open1722 API
+
+To learn what you can expect from the Open1722 API and to get a starting point in case you want to extend Open1722 see the [API design documentation](docs/api-design.md).
+
 ## Inline Functions and Shared Library Exports
 
-Open1722 uses `static inline` functions for field accessors to enable compiler optimizations on embedded targets. These same functions are also exported as regular symbols in the shared library for FFI users. See [INLINE.md](docs/INLINE.md) for details.
+Open1722 uses `static inline` functions for field accessors to enable compiler optimizations on embedded targets. These same functions are also exported as regular symbols in the shared library for FFI users. See [inline.md](docs/inline.md) for details.
 
 ## Contribute to Open1722
 
