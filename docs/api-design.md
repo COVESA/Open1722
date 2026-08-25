@@ -4,30 +4,39 @@ This document describes the design and conventions of the Open1722 API. It
 explains *how* and *why* the API is shaped the way it is, so that a reader can
 use it fluently and a contributor can extend it consistently.
 
-It focuses on the **AVTP Control Formats (ACF)** — CAN, LIN, FlexRay, VSS and
-the other fieldbus formats — because that is where most of Open1722's own API
+It focuses on the **AVTP Control Formats (ACF)** - CAN, LIN, FlexRay, VSS and
+the other fieldbus formats - because that is where most of Open1722's own API
 surface lives and where the conventions matter most. The ACF format modules all
 follow one shared template. `ACF CAN` (`include/avtp/acf/Can.h`) is the
 reference implementation of that template; when in doubt, follow it.
 
+The document is split along two audiences:
+
+- [Part 1 - Using Open1722](#part-1--using-open1722) covers everything an
+  application developer needs to build and parse PDUs with the existing
+  formats.
+- [Part 2 - Extending Open1722](#part-2--extending-open1722) covers the
+  internals and conventions needed to add or modify a format module.
+
 Companion documents:
 
-- [`inline.md`](inline.md) — how inline accessors are also exported as shared
+- [`inline.md`](inline.md) - how inline accessors are also exported as shared
   library symbols.
-- [`CONTRIBUTING.md`](../CONTRIBUTING.md) — licence, commit and style rules.
+- [`CONTRIBUTING.md`](../CONTRIBUTING.md) - licence, commit and style rules.
 
 ---
 
-## 1. Design principles
+## Design principles
 
-Four principles shape every part of the API.
+Four principles shape every part of the API, and are worth knowing before
+reading either half of this document.
 
-### 1.1 Names mirror the IEEE 1722 specification
+### Names mirror the IEEE 1722 specification
 
 Function, type and field names are taken directly from the IEEE 1722
 specification. The guiding idea is: **if you have read and understood the spec,
-you can use Open1722 directly** — the mapping from a spec field to the
-corresponding API call is mechanical.
+you can use Open1722 directly** - the mapping from a spec field to the
+corresponding API call is mechanical. 
 
 For example, the ACF CAN header contains the fields `pad`, `mtv`, `rtr`, `eff`,
 `brs`, `fdf`, `esi`, `can_bus_id`, `message_timestamp` and `can_identifier`.
@@ -43,7 +52,7 @@ Avtp_Can_SetMessageTimestamp(pdu, value);
 There is no "rename for taste" step. If the spec calls a field `eff`, the
 function is `Avtp_Can_IsEff`, not `Avtp_Can_GetExtendedFrameFormat`.
 
-### 1.2 Plumbing, not porcelain
+### Plumbing, not porcelain
 
 Open1722 deliberately provides a *plumbing* API, not a *porcelain* one. It gives
 you the raw primitives to build and parse PDUs; it does **not** attempt to hide
@@ -51,7 +60,7 @@ the wire format, nor to abstract all ACF variants behind one unified high-level
 interface.
 
 There *is* a small layer of convenience functions (see
-[Convenience functions](#8-convenience-functions)) — for example a helper that
+[Convenience functions](#convenience-functions)) - for example a helper that
 sets the payload length *and* computes the padding bytes and the
 quadlet-encoded length field in one call. But those conveniences are thin and
 predictable; they never hide the underlying format.
@@ -60,7 +69,7 @@ If you are looking for an API that abstracts away every version of NTSCF/TSCF
 and every ACF format behind a single unified interface, Open1722 is not that.
 We like to think it is a very good *basis* for building one.
 
-### 1.3 Performance first
+### Performance first
 
 The accessors are designed to be as cheap as possible. For simple formats the
 getters/setters **assume the frame is already correctly formatted** and perform
@@ -70,20 +79,26 @@ high-rate CAN traffic on a small microcontroller.
 
 Where validation is wanted, each format offers an `IsValid()` function you can
 call *once* to check a frame before accessing it (see
-[Accessor semantics](#6-accessor-semantics--the-safety-contract)).
+[Accessor semantics & the safety contract](#accessor-semantics--the-safety-contract)).
 
-### 1.4 Consistency across formats
+### Consistency across formats
 
 Every format follows the same shape: same struct layout, same field-descriptor
 mechanism, same naming scheme, same function families. Once you know one format
 module, you know them all. The remainder of this document describes that shared
-shape.
+shape from both sides.
 
 ---
 
-## 2. Naming conventions
+# Part 1 - Using Open1722
 
-### 2.1 Functions
+This part is for application developers who consume the library: reading,
+writing and validating PDUs with the already-existing formats. It assumes you
+know *what* fields a format has (from the spec); it explains how to reach them.
+
+## Naming conventions
+
+### Functions
 
 Every API function follows one pattern:
 
@@ -93,19 +108,21 @@ Avtp_<Format>_<Verb><Field>
 
 | Part | Meaning | Examples |
 |------|---------|----------|
-| `Avtp_` | Common prefix for everything. | — |
+| `Avtp_` | Common prefix for everything. | - |
 | `<Format>` | The PDU format. | `Can`, `CanBrief`, `Lin`, `Vss`, `CommonHeader`, `Udp`, `Tscf`, `Ntscf` |
 | `<Verb>` | What the function does (see below). | `Get`, `Is`, `Set`, `Init`, `IsValid` |
 | `<Field>` | The spec field name, verbatim. | `AcfMsgType`, `Pad`, `Mtv`, `CanBusId`, `MessageTimestamp` |
 
 Verbs:
 
-- **`Get<Field>`** — read a field, returning a value.
-- **`Set<Field>`** — write a field, taking a value.
-- **`Is<Flag>`** — read a single-bit flag, returning a `bool`.
-- **`Init`** — zero-initialise the PDU header and set its message type.
-- **`IsValid`** — validate a frame (see [§6](#6-accessor-semantics--the-safety-contract)).
-- **`Create…`** — build a complete message in one call (convenience, see [§8](#8-convenience-functions)).
+- **`Get<Field>`** - read a field, returning a value.
+- **`Set<Field>`** - write a field, taking a value.
+- **`Is<Flag>`** - read a single-bit flag, returning a `bool`.
+- **`Init`** - zero-initialise the PDU header and set its message type.
+- **`IsValid`** - validate a frame (see
+  [Accessor semantics & the safety contract](#accessor-semantics--the-safety-contract)).
+- **`Create…`** - build a complete message in one call (see
+  [Convenience functions](#convenience-functions)).
 
 A `Get`ter takes the PDU as a `const` pointer and returns a value; an `Is`
 getter returns a `bool` for single-bit flags; a `Set`ter takes a non-`const`
@@ -118,9 +135,9 @@ OPEN1722_INLINE bool    Avtp_Can_IsMtv(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE void    Avtp_Can_SetMtv(Avtp_Can_t *pdu, bool mtv);
 ```
 
-### 2.2 Return types
+### Return types
 
-Getters return the natural C type for the field width — `uint8_t`,
+Getters return the natural C type for the field width - `uint8_t`,
 `uint16_t`, `uint32_t` or `uint64_t`:
 
 ```c
@@ -129,8 +146,7 @@ OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t *const pdu);
 ```
 
-Single-bit flag fields are booleans and return `bool` (via `Is<Flag>`, see
-[§2.1](#21-functions)):
+Single-bit flag fields are booleans and return `bool` (via `Is<Flag>`):
 
 ```c
 OPEN1722_INLINE bool Avtp_Can_IsMtv(const Avtp_Can_t *const pdu);
@@ -143,7 +159,134 @@ message type) return the corresponding typed enum rather than a bare integer:
 Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu);
 ```
 
-### 2.3 Types, enums and macros
+## The PDU struct in memory
+
+Every format is described by a struct with a fixed-size `header` followed by a
+zero-length flexible array member for the payload:
+
+```c
+#define AVTP_CAN_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
+
+typedef struct {
+    uint8_t header[AVTP_CAN_HEADER_LEN];
+    uint8_t payload[0];
+} __attribute__((packed)) Avtp_Can_t;
+```
+
+The struct is deliberately `packed` so that it can be overlaid directly on a
+network buffer. The flexible `payload[0]` means the payload lives in the memory
+immediately following the header: after casting a buffer to `Avtp_Can_t *`, you
+read and write payload bytes through `pdu->payload` and the header fields
+through the accessors.
+
+When several PDU structs are combined into one frame, the outer struct must
+also be `packed` so the compiler inserts no padding between them:
+
+```c
+typedef struct __attribute__((packed)) {
+    Avtp_Tscf_t tscf;
+    Avtp_Can_t  can;
+    uint8_t     canPayload[8];
+} My1722Pdu_t;
+```
+
+## Accessor semantics & the safety contract
+
+Accessors are intentionally *unsafe against malformed input*. A getter assumes
+the PDU it points at is a well-formed frame and reads the described bits without
+checking. This keeps the hot path free of validation branches.
+
+Validation is available explicitly, and the contract between the two is:
+
+> **If `Avtp_<Format>_IsValid(pdu, bufferSize)` returns true, then every
+> getter on that format is safe to call and will never overread the buffer.**
+
+`IsValid` checks at minimum:
+
+1. that the ACF length field, converted to octets, does not exceed `bufferSize`,
+   and
+2. any format-specific invariants (for CAN: the payload-length limit implied by
+   classic CAN vs. CAN-FD, and that the declared padding is consistent with the
+   length field).
+
+Typical usage: validate once, then access freely:
+
+```c
+if (Avtp_Can_IsValid(pdu, buffer_size)) {
+    uint32_t id = Avtp_Can_GetCanIdentifier(pdu);
+    uint8_t  n  = Avtp_Can_GetPayloadLength(pdu);
+    /* ... */
+}
+```
+
+> **General rule, with exceptions.** This assume-valid model is the norm. Where
+> it does not hold - because a format's validity check would be expensive or
+> complex - the accessors perform their own bounds checking instead. See
+> [Exceptions to the rules](#exceptions-to-the-rules).
+
+## Convenience functions
+
+Beyond the raw field accessors, each format offers a small set of *convenience*
+functions for the most common operations. These are still plumbing - they do
+predictable, spec-level work - but they spare you the tedious multi-step dance.
+
+The canonical set (CAN as reference):
+
+- **`GetPayload` / `SetPayload`** - access or copy the raw payload bytes.
+- **`SetPayloadLength`** -  if you did read the IEEE-1722 specification you will have noticed it uses quadlets and 32 bit word aligned structures in some places and byte lengths elsewhere. Sometimes the same thing is measured in different ways. This helper got you covered:
+  given a payload length it computes the padding required to reach a whole
+  number of quadlets, zeroes the pad bytes (to avoid leaking information),
+  writes the `pad` field, and sets the quadlet-encoded `acf_msg_length` field:
+
+  ```c
+  OPEN1722_INLINE void Avtp_Can_SetPayloadLength(Avtp_Can_t *can_pdu, uint16_t payload_length)
+  {
+      uint16_t msgLenBytes = AVTP_CAN_HEADER_LEN + payload_length;
+      uint8_t  pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+      if (pad > 0)
+          memset(can_pdu->payload + payload_length, 0, pad);
+      uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
+      Avtp_Can_SetPad(can_pdu, pad);
+      Avtp_Can_SetAcfMsgLength(can_pdu, msgLenQuadlets);
+  }
+  ```
+
+- **`GetPayloadLength`** - the inverse: recover the true payload length by
+  subtracting the header length and the declared padding from the quadlet-encoded
+  length. It assumes the PDU has already been validated with `IsValid`.
+- **`CreateAcfMessage`** - one-shot message construction: copy the payload,
+  set the CAN identifier (and the extended-frame flag if the ID needs it), set
+  the CAN-FD flag if requested, and finalise the length/pad fields.
+
+`SetAcfMsgLength` itself remains available for when you want to set the raw
+quadlet value directly; `SetPayloadLength` is the friendlier path that keeps the
+padding consistent for you.
+
+## Inline accessors & the shared library
+
+Accessors, `Init` and the common-header helpers are declared `OPEN1722_INLINE`
+rather than `static inline`. By default this resolves to `static inline`, so
+embedded and bare-metal consumers get fully-inlined accessors with no call
+overhead.
+
+For shared-library/FFI users (e.g. Python `ctypes`, Rust FFI), the same
+functions are also exported as regular symbols in `libopen1722.so`, so they can
+be called across an FFI boundary. The mechanism, and how to force non-inline
+use in your own code, is documented in [`inline.md`](inline.md).
+
+---
+
+# Part 2 - Extending Open1722
+
+This part is for contributors who add or modify format modules. It describes
+the internal template each format follows, the shared machinery it relies on,
+and the checklist for adding a new format consistently.
+
+## Naming: types, enums and macros
+
+When writing a format module, the following naming patterns apply (see
+[Anatomy of a format module](#anatomy-of-a-format-module) for how they are
+used):
 
 | Kind | Pattern | Example |
 |------|---------|---------|
@@ -157,24 +300,20 @@ Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu
 
 Field enum values are always declared with the terminator `..._FIELD_MAX` as the
 last entry. This value is never a real field; it exists to give the field-count
-used for bounds checking in the access engine (see [§5](#5-the-field-access-engine)).
+used for bounds checking in the access engine (see
+[The field-access engine](#the-field-access-engine)).
 
----
-
-## 3. Anatomy of a format module
+## Anatomy of a format module
 
 A format module is one header (`include/avtp/acf/<Format>.h`) plus, where
 needed, a source file (`src/avtp/acf/<Format>.c`). The header contains the data
 description and the inline accessors; the source file contains anything that
-should *not* be inlined — typically `IsValid()` and the higher-level
+should *not* be inlined - typically `IsValid()` and the higher-level
 convenience functions.
 
 Using `Can.h` as the reference, a module contains these pieces in order:
 
-### 3.1 The PDU struct
-
-A format is described by a struct with a fixed-size `header` followed by a
-zero-length flexible array member for the payload:
+### The PDU struct
 
 ```c
 #define AVTP_CAN_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
@@ -185,14 +324,12 @@ typedef struct {
 } __attribute__((packed)) Avtp_Can_t;
 ```
 
-The struct is deliberately `packed` so that it can be overlaid directly on a
-network buffer, and so that several PDU structs can be combined into one frame
-without compiler-inserted padding. The flexible `payload[0]` means the payload
-lives in the memory immediately following the header.
+See [The PDU struct in memory](#the-pdu-struct-in-memory) for the user-facing
+view of how this struct is overlaid on a buffer.
 
-### 3.2 The field enum
+### The field enum
 
-Every field of the header — including the two ACF *common* fields — is listed in
+Every field of the header - including the two ACF *common* fields - is listed in
 one enum:
 
 ```c
@@ -222,7 +359,7 @@ The common fields (`ACF_MSG_TYPE`, `ACF_MSG_LENGTH`) are always present and
 always first. They are shared by all ACF formats and defined in
 [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h).
 
-### 3.3 The field descriptor table
+### The field descriptor table
 
 A `static const` table maps each field enum value to its position in the header:
 
@@ -248,7 +385,7 @@ within that quadlet, counted from the most-significant bit) and the *bits*
 (field width). This table is the single source of truth for where every field
 lives; the accessors below never hard-code bit positions.
 
-### 3.4 The GET/SET macros
+### The GET/SET macros
 
 Two macros wrap the generic field-access engine, binding it to this format's
 descriptor table:
@@ -263,7 +400,7 @@ descriptor table:
 The parameter name `pdu` is assumed by the macro, so it must appear in the
 enclosing function scope (the accessors below use exactly that name).
 
-### 3.5 Accessors
+### Accessors
 
 One getter and one setter per field, implemented as thin inline wrappers around
 the macros:
@@ -295,7 +432,7 @@ OPEN1722_INLINE void Avtp_Can_SetMtv(Avtp_Can_t *pdu, bool mtv)
 }
 ```
 
-### 3.6 Init
+### Init
 
 An `Init` function zeroes the header and stamps the message type, so a freshly
 created PDU is at least a structurally correct header:
@@ -310,21 +447,22 @@ OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
 }
 ```
 
-### 3.7 IsValid
+### IsValid
 
 A format provides an `IsValid` function in its `.c` file. It checks (1) that the
 length field is contained within the actual buffer, and (2) any format-specific
-invariants. See [§6](#6-accessor-semantics--the-safety-contract).
+invariants. See
+[Accessor semantics & the safety contract](#accessor-semantics--the-safety-contract).
 
 ```c
 bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
 ```
 
-### 3.8 Convenience functions
+### Convenience functions
 
-Finally, a handful of non-inline helpers for common tasks — building a full
+Finally, a handful of non-inline helpers for common tasks - building a full
 message, reading/writing the payload, and computing the length/padding fields.
-See [§8](#8-convenience-functions).
+See [Convenience functions](#convenience-functions).
 
 ```c
 void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id,
@@ -332,18 +470,16 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id,
                                Avtp_CanVariant_t can_variant);
 ```
 
----
+## ACF layering & the common header
 
-## 4. Layering of ACF formats
-
-ACF formats share a *common header* whose two fields — `acf_msg_type` and
-`acf_msg_length` — occupy the first quadlet of every ACF message. These are
+ACF formats share a *common header* whose two fields - `acf_msg_type` and
+`acf_msg_length` - occupy the first quadlet of every ACF message. These are
 described once in [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h):
 
-- `Avtp_AcfCommon_t` — the common-header PDU struct.
-- `Avtp_AcfMsgType_t` — the enumeration of all ACF message types
+- `Avtp_AcfCommon_t` - the common-header PDU struct.
+- `Avtp_AcfMsgType_t` - the enumeration of all ACF message types
   (`AVTP_ACF_TYPE_CAN`, `AVTP_ACF_TYPE_LIN`, …).
-- `Avtp_AcfCommon_Get/SetAcfMsgType`, `Get/SetAcfMsgLength` — accessors for the
+- `Avtp_AcfCommon_Get/SetAcfMsgType`, `Get/SetAcfMsgLength` - accessors for the
   two shared fields.
 
 Each concrete format then defines its *own* field enum and descriptor table that
@@ -352,9 +488,7 @@ do not require the caller to mix in the common-header struct. That is why
 `Avtp_Can_GetAcfMsgType` exists even though the field is formally part of the
 ACF common header.
 
----
-
-## 5. The field-access engine
+## The field-access engine
 
 All getters and setters ultimately funnel through two generic functions in
 [`Utils.h`](../include/avtp/Utils.h):
@@ -389,45 +523,7 @@ Because all accessors share this engine, byte-order correctness is centralised:
 a format author never writes manual shifts or endianness handling in accessor
 code.
 
----
-
-## 6. Accessor semantics & the safety contract
-
-Accessors are intentionally *unsafe against malformed input*. A getter assumes
-the PDU it points at is a well-formed frame and reads the described bits without
-checking. This keeps the hot path free of validation branches.
-
-Validation is available explicitly, and the contract between the two is:
-
-> **If `Avtp_<Format>_IsValid(pdu, bufferSize)` returns true, then every
-> getter on that format is safe to call and will never overread the buffer.**
-
-`IsValid` checks at minimum:
-
-1. that the ACF length field, converted to octets, does not exceed `bufferSize`,
-   and
-2. any format-specific invariants (for CAN: the payload-length limit implied by
-   classic CAN vs. CAN-FD, and that the declared padding is consistent with the
-   length field).
-
-Typical usage: validate once, then access freely:
-
-```c
-if (Avtp_Can_IsValid(pdu, buffer_size)) {
-    uint32_t id = Avtp_Can_GetCanIdentifier(pdu);
-    uint8_t  n  = Avtp_Can_GetPayloadLength(pdu);
-    /* ... */
-}
-```
-
-> **General rule, with exceptions.** This assume-valid model is the norm. Where
-> it does not hold — because a format's validity check would be expensive or
-> complex — the accessors perform their own bounds checking instead. See
-> [§9](#9-exceptions-to-the-rules).
-
----
-
-## 7. Inline accessors & symbol export
+## Inline accessors & symbol export
 
 Accessors, `Init` and the common-header helpers are declared `OPEN1722_INLINE`
 rather than `static inline`:
@@ -451,49 +547,7 @@ documented in [`inline.md`](inline.md). For the purposes of this document the
 rule is simply: **performance-critical functions in public headers use
 `OPEN1722_INLINE`, never a bare `static inline`.**
 
----
-
-## 8. Convenience functions
-
-Beyond the raw field accessors, each format offers a small set of *convenience*
-functions for the most common operations. These are still plumbing — they do
-predictable, spec-level work — but they spare you the tedious multi-step dance.
-
-The canonical set (CAN as reference):
-
-- **`GetPayload` / `SetPayload`** — access or copy the raw payload bytes.
-- **`SetPayloadLength`** — the convenience that makes the padding dance easy:
-  given a payload length it computes the padding required to reach a whole
-  number of quadlets, zeroes the pad bytes (to avoid leaking information),
-  writes the `pad` field, and sets the quadlet-encoded `acf_msg_length` field:
-
-  ```c
-  OPEN1722_INLINE void Avtp_Can_SetPayloadLength(Avtp_Can_t *can_pdu, uint16_t payload_length)
-  {
-      uint16_t msgLenBytes = AVTP_CAN_HEADER_LEN + payload_length;
-      uint8_t  pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
-      if (pad > 0)
-          memset(can_pdu->payload + payload_length, 0, pad);
-      uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-      Avtp_Can_SetPad(can_pdu, pad);
-      Avtp_Can_SetAcfMsgLength(can_pdu, msgLenQuadlets);
-  }
-  ```
-
-- **`GetPayloadLength`** — the inverse: recover the true payload length by
-  subtracting the header length and the declared padding from the quadlet-encoded
-  length. It assumes the PDU has already been validated with `IsValid`.
-- **`CreateAcfMessage`** — one-shot message construction: copy the payload,
-  set the CAN identifier (and the extended-frame flag if the ID needs it), set
-  the CAN-FD flag if requested, and finalise the length/pad fields.
-
-`SetAcfMsgLength` itself remains available for when you want to set the raw
-quadlet value directly; `SetPayloadLength` is the friendlier path that keeps the
-padding consistent for you.
-
----
-
-## 9. Exceptions to the rules
+## Exceptions to the rules
 
 The rules above are the norm, not an iron law. The main exception is the custom
 **VSS** format (`include/avtp/acf/custom/Vss.h`), which does not live in the
@@ -501,7 +555,7 @@ IEEE 1722 standard and which carries variable-length, length-prefixed data.
 
 For VSS:
 
-- A cheap `IsValid` is not practical — verifying a VSS frame would require
+- A cheap `IsValid` is not practical - verifying a VSS frame would require
   walking variable-length paths and payloads. So VSS accessors instead perform
   their own bounds checking, clamping reads against the *declared* message
   length so a malformed frame cannot cause an overread.
@@ -510,14 +564,14 @@ For VSS:
 
 Custom formats under `include/avtp/acf/custom/` are therefore allowed to deviate
 from the inline, assume-valid pattern when their structure makes it
-unreasonable. Standard formats follow the template of [§3](#3-anatomy-of-a-format-module).
+unreasonable. Standard formats follow the template of
+[Anatomy of a format module](#anatomy-of-a-format-module).
 
----
-
-## 10. Adding a new format — checklist
+## Adding a new format - checklist
 
 When implementing a new format module (e.g. a new ACF message type), follow
-this order and the template in [§3](#3-anatomy-of-a-format-module):
+this order and the template in
+[Anatomy of a format module](#anatomy-of-a-format-module):
 
 1. **Header file** `include/avtp/acf/<Format>.h`, BSD-3-Clause header, `#pragma once`,
    `extern "C"` guards.
@@ -537,7 +591,7 @@ this order and the template in [§3](#3-anatomy-of-a-format-module):
 10. If the format is standard ACF, add its `AVTP_ACF_TYPE_<NAME>` to
     [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h).
 11. Register any new inline header in `src/avtp/export/InlineExports.c`
-    (phase 2) so the accessors are exported to the shared library — see
+    (phase 2) so the accessors are exported to the shared library - see
     [`inline.md`](inline.md).
 12. Add unit tests under `unit/` and register the test target in the build.
 
