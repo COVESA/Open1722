@@ -35,11 +35,16 @@
 #pragma once
 #include "avtp/Inline.h"
 
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
 #include <string.h>
+#include <stdbool.h>
+#endif
 
+#include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
-#include "avtp/Utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +63,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_LIN_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Lin_t;
+} __attribute__((packed)) Avtp_Lin_t;
 
 /** Fields of ACF Lin PDU. */
 typedef enum  {
@@ -127,8 +132,8 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU MTV field.
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetMtv(const Avtp_Lin_t* const pdu) {
-    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_Lin_IsMtv(const Avtp_Lin_t* const pdu) {
+    return (bool) GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
 }
 
 /**
@@ -192,21 +197,13 @@ OPEN1722_INLINE void Avtp_Lin_SetPad(Avtp_Lin_t* pdu, uint8_t value) {
 }
 
 /**
- * Enable the MTV bit in an ACF Lin frame as specified in the IEEE 1722 Specification.
+ * Set the MTV bit in an ACF Lin frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param mtv Value to set the MTV bit to.
  */
-OPEN1722_INLINE void Avtp_Lin_EnableMtv(Avtp_Lin_t* pdu) {
-    SET_LIN_FIELD(AVTP_LIN_FIELD_MTV, 1);
-}
-
-/**
- * Disable the MTV bit in an ACF Lin frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- */
-OPEN1722_INLINE void Avtp_Lin_DisableMtv(Avtp_Lin_t* pdu) {
-    SET_LIN_FIELD(AVTP_LIN_FIELD_MTV, 0);
+OPEN1722_INLINE void Avtp_Lin_SetMtv(Avtp_Lin_t* pdu, bool mtv) {
+    SET_LIN_FIELD(AVTP_LIN_FIELD_MTV, mtv);
 }
 
 /**
@@ -240,6 +237,96 @@ OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t valu
 }
 
 /**
+ * Return the ACF message length in bytes.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @returns Length of the ACF message in bytes.
+ */
+OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLengthInBytes(const Avtp_Lin_t* const pdu)
+{
+    return (uint16_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH) * 4;
+}
+
+/**
+ * Copies the payload data, LIN bus ID, LIN identifier and message timestamp into
+ * the ACF Lin frame. This function will also set the length and pad fields while
+ * inserting the padded bytes.
+ *
+ * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param lin_bus_id LIN bus ID
+ * @param lin_identifier LIN frame identifier
+ * @param message_timestamp Message timestamp
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ */
+void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *lin_pdu, uint8_t lin_bus_id, uint8_t lin_identifier,
+                               uint64_t message_timestamp, uint8_t *payload,
+                               uint16_t payload_length);
+
+/**
+ * Returns pointer to payload of an ACF Lin frame.
+ *
+ * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @return Pointer to ACF Lin frame payload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Lin_GetPayload(const Avtp_Lin_t* const lin_pdu)
+{
+    return lin_pdu->payload;
+}
+
+/**
+ * Sets the LIN payload in an ACF Lin frame.
+ *
+ * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ */
+OPEN1722_INLINE void Avtp_Lin_SetPayload(Avtp_Lin_t *lin_pdu, uint8_t *payload,
+                                         uint16_t payload_length)
+{
+    memcpy(lin_pdu->payload, payload, payload_length);
+}
+
+/**
+ * Finalizes the ACF Lin frame. This function will set the length and pad fields
+ * while inserting the padded bytes. This will also set padding bytes to zero if
+ * the payload length is not a multiple of 4 to avoid leaking information.
+ *
+ * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param payload_length Length of the LIN frame payload.
+ */
+OPEN1722_INLINE void Avtp_Lin_SetPayloadLength(Avtp_Lin_t *lin_pdu, uint16_t payload_length)
+{
+    uint16_t msgLenBytes = AVTP_LIN_HEADER_LEN + payload_length;
+    uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+    if (pad > 0) {
+        memset(lin_pdu->payload + payload_length, 0, pad);
+    }
+    uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
+    Avtp_Lin_SetPad(lin_pdu, pad);
+    Avtp_Lin_SetAcfMsgLength(lin_pdu, msgLenQuadlets);
+}
+
+/**
+ * Returns the length of the LIN payload without the padding bytes and the
+ * header length of the encapsulating ACF Frame.
+ *
+ * Precondition: the caller must have validated the PDU with
+ * Avtp_Lin_IsValid(). IsValid checks both buffer-size containment and the
+ * LIN payload-length invariant (<= 8 bytes). This function performs no
+ * further bounds checking and assumes those invariants already hold.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @return  Length of LIN payload in bytes
+ */
+OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t* const pdu)
+{
+    uint8_t pad_length = Avtp_Lin_GetPad(pdu);
+    uint16_t acf_length_bytes = Avtp_Lin_GetAcfMsgLengthInBytes(pdu);
+    return (uint8_t)(acf_length_bytes - AVTP_LIN_HEADER_LEN - pad_length);
+}
+
+/**
  * Checks if the ACF Lin frame is valid by checking:
  *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
  *     2) if other format specific invariants are not upheld
@@ -247,7 +334,7 @@ OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t valu
  * @param bufferSize Size of the buffer containing the ACF Lin frame.
  * @return true if the ACF Lin frame is valid, false otherwise.
  */
-uint8_t Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize);
+bool Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize);
 
 /**
  * Initializes an ACF Lin PDU.

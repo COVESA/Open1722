@@ -70,11 +70,11 @@ static void lin_get_set_fields(void **state) {
     Avtp_Lin_SetPad((Avtp_Lin_t*)pdu, 3);
     assert_int_equal(Avtp_Lin_GetPad((Avtp_Lin_t*)pdu), 3);
 
-    Avtp_Lin_EnableMtv((Avtp_Lin_t*)pdu);
-    assert_int_equal(Avtp_Lin_GetMtv((Avtp_Lin_t*)pdu), 1);
+    Avtp_Lin_SetMtv((Avtp_Lin_t*)pdu, true);
+    assert_int_equal(Avtp_Lin_IsMtv((Avtp_Lin_t*)pdu), 1);
 
-    Avtp_Lin_DisableMtv((Avtp_Lin_t*)pdu);
-    assert_int_equal(Avtp_Lin_GetMtv((Avtp_Lin_t*)pdu), 0);
+    Avtp_Lin_SetMtv((Avtp_Lin_t*)pdu, false);
+    assert_int_equal(Avtp_Lin_IsMtv((Avtp_Lin_t*)pdu), 0);
 
     Avtp_Lin_SetLinBusId((Avtp_Lin_t*)pdu, 7);
     assert_int_equal(Avtp_Lin_GetLinBusId((Avtp_Lin_t*)pdu), 7);
@@ -89,19 +89,49 @@ static void lin_get_set_fields(void **state) {
 static void lin_is_valid(void **state) {
     uint8_t pdu[MAX_PDU_SIZE];
 
+    // An Init-only PDU has AcfMsgLength == 0 - i.e. it declares a frame
+    // shorter than its own header, so IsValid must reject it.
     Avtp_Lin_Init((Avtp_Lin_t*)pdu);
-    assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, MAX_PDU_SIZE), 0);
 
+    // Not an IEEE 1722 ACF-LIN message (zero buffer, AcfMsgType != LIN).
     memset(pdu, 0, MAX_PDU_SIZE);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, MAX_PDU_SIZE), 0);
 
+    // Valid IEEE 1722 LIN Frame (Length 20, Buffer 25). AcfMsgLength=5
+    // quadlets = 20 bytes; payload = 20 - 12 header = 8 bytes (LIN max).
     Avtp_Lin_Init((Avtp_Lin_t*)pdu);
     Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t*)pdu, 5);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, 25), 1);
 
+    // Invalid IEEE 1722 LIN Frame (Length 20 but buffer only 9!).
     Avtp_Lin_Init((Avtp_Lin_t*)pdu);
     Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t*)pdu, 5);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, 9), 0);
+
+    // LIN payload bound: a frame declaring a 12-byte payload is invalid
+    // (LIN tops out at 8 bytes). AcfMsgLength=6 quadlets = 24 bytes;
+    // payload = 24 - 12 header = 12 bytes.
+    Avtp_Lin_Init((Avtp_Lin_t*)pdu);
+    Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t*)pdu, 6);
+    assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, MAX_PDU_SIZE), 0);
+}
+
+static void lin_create_message(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+
+    Avtp_Lin_Init((Avtp_Lin_t*)pdu);
+    Avtp_Lin_CreateAcfMessage((Avtp_Lin_t*)pdu, 7, 0x3F, 0x123456789ABCULL,
+                              payload, sizeof(payload));
+
+    assert_int_equal(Avtp_Lin_GetLinBusId((Avtp_Lin_t*)pdu), 7);
+    assert_int_equal(Avtp_Lin_GetLinIdentifier((Avtp_Lin_t*)pdu), 0x3F);
+    assert_int_equal(Avtp_Lin_GetMessageTimestamp((Avtp_Lin_t*)pdu), 0x123456789ABCULL);
+    assert_memory_equal(payload, pdu+AVTP_LIN_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Lin_GetPayloadLength((Avtp_Lin_t*)pdu), 8);
+    assert_int_equal(Avtp_Lin_GetAcfMsgLength((Avtp_Lin_t*)pdu), 5);
+    assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t*)pdu, MAX_PDU_SIZE), 1);
 }
 
 int main(void)
@@ -110,6 +140,7 @@ int main(void)
         cmocka_unit_test(lin_init),
         cmocka_unit_test(lin_get_set_fields),
         cmocka_unit_test(lin_is_valid),
+        cmocka_unit_test(lin_create_message),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
