@@ -50,11 +50,10 @@
 extern "C" {
 #endif
 
-#define GET_LIN_FIELD(field) \
-        (Avtp_GetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t*)pdu, field))
-#define SET_LIN_FIELD(field, value) \
-        (Avtp_SetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t*)pdu, field, value))
-
+#define GET_LIN_FIELD(field)                                                                       \
+    (Avtp_GetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t *)pdu, field))
+#define SET_LIN_FIELD(field, value)                                                                \
+    (Avtp_SetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t *)pdu, field, value))
 
 /** Length of ACF Lin header. */
 #define AVTP_LIN_HEADER_LEN (3 * AVTP_QUADLET_SIZE)
@@ -66,7 +65,7 @@ typedef struct {
 } __attribute__((packed)) Avtp_Lin_t;
 
 /** Fields of ACF Lin PDU. */
-typedef enum  {
+typedef enum {
     /* ACF common header fields */
     AVTP_LIN_FIELD_ACF_MSG_TYPE = 0,
     AVTP_LIN_FIELD_ACF_MSG_LENGTH,
@@ -83,116 +82,128 @@ typedef enum  {
 /**
  * This table describes all the offsets of the ACF Lin header fields.
  */
-static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] = {
     /* ACF common header fields */
-    [AVTP_LIN_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset = 0, .bits = 7 },
-    [AVTP_LIN_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset = 7, .bits = 9 },
+    [AVTP_LIN_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_LIN_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
     /* ACF LIN header fields */
-    [AVTP_LIN_FIELD_PAD]                = { .quadlet = 0, .offset = 16, .bits = 2 },
-    [AVTP_LIN_FIELD_MTV]                = { .quadlet = 0, .offset = 18, .bits = 1 },
-    [AVTP_LIN_FIELD_LIN_BUS_ID]         = { .quadlet = 0, .offset = 19, .bits = 5 },
-    [AVTP_LIN_FIELD_LIN_IDENTIFIER]     = { .quadlet = 0, .offset = 24, .bits = 8 },
-    [AVTP_LIN_FIELD_MESSAGE_TIMESTAMP]  = { .quadlet = 1, .offset = 0, .bits = 64 },
+    [AVTP_LIN_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
+    [AVTP_LIN_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_LIN_FIELD_LIN_BUS_ID] = {.quadlet = 0, .offset = 19, .bits = 5},
+    [AVTP_LIN_FIELD_LIN_IDENTIFIER] = {.quadlet = 0, .offset = 24, .bits = 8},
+    [AVTP_LIN_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
 };
 
 /**
  * Returns the value of an an ACF Message type field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Message Type field.
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t* const pdu) {
-    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t *const pdu)
+{
+    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
 }
 
 /**
  * Returns the value of an an ACF Message Length field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Message Length field.
  */
-OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t* const pdu) {
-    return (uint16_t) GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t *const pdu)
+{
+    return (uint16_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
  * Returns the value of an an ACF Lin PDU Pad field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU Pad field.
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t* const pdu) {
-    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
+OPEN1722_INLINE uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t *const pdu)
+{
+    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
 }
 
 /**
  * Returns the value of an an ACF Lin PDU MTV field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU MTV field.
  */
-OPEN1722_INLINE bool Avtp_Lin_IsMtv(const Avtp_Lin_t* const pdu) {
-    return (bool) GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_Lin_IsMtv(const Avtp_Lin_t *const pdu)
+{
+    return (bool)GET_LIN_FIELD(AVTP_LIN_FIELD_MTV);
 }
 
 /**
- * Returns the value of an an ACF Lin PDU Lin Bus ID field as specified in the IEEE 1722 Specification.
- * 
+ * Returns the value of an an ACF Lin PDU Lin Bus ID field as specified in the IEEE 1722
+ * Specification.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU Lin Bus ID field.
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t* const pdu) {
-    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID);
+OPEN1722_INLINE uint8_t Avtp_Lin_GetLinBusId(const Avtp_Lin_t *const pdu)
+{
+    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID);
 }
 
 /**
- * Returns the value of an an ACF Lin PDU Lin Identifier field as specified in the IEEE 1722 Specification.
+ * Returns the value of an an ACF Lin PDU Lin Identifier field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU Lin Identifier field.
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t* const pdu) {
-    return (uint8_t) GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER);
+OPEN1722_INLINE uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t *const pdu)
+{
+    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER);
 }
 
 /**
- * Returns the value of an an ACF Lin PDU Message Timestamp field as specified in the IEEE 1722 Specification.
+ * Returns the value of an an ACF Lin PDU Message Timestamp field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns The value of the ACF Lin PDU Message Timestamp field.
  */
-OPEN1722_INLINE uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t* const pdu) {
-    return (uint64_t) GET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
+OPEN1722_INLINE uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t *const pdu)
+{
+    return (uint64_t)GET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
  * Sets the value of an an ACF Message type field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Message Type field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetAcfMsgType(Avtp_Lin_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetAcfMsgType(Avtp_Lin_t *pdu, uint8_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE, value);
 }
 
 /**
  * Sets the value of an an ACF Message Length field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Message Length field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetAcfMsgLength(Avtp_Lin_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetAcfMsgLength(Avtp_Lin_t *pdu, uint16_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH, value);
 }
 
 /**
  * Sets the value of an an ACF Lin PDU Pad field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Lin PDU Pad field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetPad(Avtp_Lin_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetPad(Avtp_Lin_t *pdu, uint8_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_PAD, value);
 }
 
@@ -202,37 +213,43 @@ OPEN1722_INLINE void Avtp_Lin_SetPad(Avtp_Lin_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param mtv Value to set the MTV bit to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetMtv(Avtp_Lin_t* pdu, bool mtv) {
+OPEN1722_INLINE void Avtp_Lin_SetMtv(Avtp_Lin_t *pdu, bool mtv)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_MTV, mtv);
 }
 
 /**
  * Set the value of an an ACF Lin PDU Lin Bus ID field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Lin PDU Lin Bus ID field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetLinBusId(Avtp_Lin_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetLinBusId(Avtp_Lin_t *pdu, uint8_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_LIN_BUS_ID, value);
 }
 
 /**
- * Set the value of an an ACF Lin PDU Lin Identifier field as specified in the IEEE 1722 Specification.
+ * Set the value of an an ACF Lin PDU Lin Identifier field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Lin PDU Lin Identifier field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetLinIdentifier(Avtp_Lin_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetLinIdentifier(Avtp_Lin_t *pdu, uint8_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_LIN_IDENTIFIER, value);
 }
 
 /**
- * Set the value of an an ACF Lin PDU Message Timestamp field as specified in the IEEE 1722 Specification.
- * 
+ * Set the value of an an ACF Lin PDU Message Timestamp field as specified in the IEEE 1722
+ * Specification.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param value Value to set the ACF Lin PDU Message Timestamp field to.
  */
-OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t *pdu, uint64_t value)
+{
     SET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
@@ -242,7 +259,7 @@ OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t* pdu, uint64_t valu
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @returns Length of the ACF message in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLengthInBytes(const Avtp_Lin_t* const pdu)
+OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLengthInBytes(const Avtp_Lin_t *const pdu)
 {
     return (uint16_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH) * 4;
 }
@@ -269,7 +286,7 @@ void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *lin_pdu, uint8_t lin_bus_id, uint8_t 
  * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @return Pointer to ACF Lin frame payload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Lin_GetPayload(const Avtp_Lin_t* const lin_pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Lin_GetPayload(const Avtp_Lin_t *const lin_pdu)
 {
     return lin_pdu->payload;
 }
@@ -319,7 +336,7 @@ OPEN1722_INLINE void Avtp_Lin_SetPayloadLength(Avtp_Lin_t *lin_pdu, uint16_t pay
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @return  Length of LIN payload in bytes
  */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t* const pdu)
+OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t *const pdu)
 {
     uint8_t pad_length = Avtp_Lin_GetPad(pdu);
     uint16_t acf_length_bytes = Avtp_Lin_GetAcfMsgLengthInBytes(pdu);
@@ -328,21 +345,22 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t* const pdu)
 
 /**
  * Checks if the ACF Lin frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
+ * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
  * @param bufferSize Size of the buffer containing the ACF Lin frame.
  * @return true if the ACF Lin frame is valid, false otherwise.
  */
-bool Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize);
+bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t bufferSize);
 
 /**
  * Initializes an ACF Lin PDU.
  *
  * @param pdu Pointer to the first bit of a 1722 ACF Lin PDU.
  */
-OPEN1722_INLINE void Avtp_Lin_Init(Avtp_Lin_t* pdu) {
-    if(pdu != NULL) {
+OPEN1722_INLINE void Avtp_Lin_Init(Avtp_Lin_t *pdu)
+{
+    if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Lin_t));
         Avtp_Lin_SetAcfMsgType(pdu, AVTP_ACF_TYPE_LIN);
     }
