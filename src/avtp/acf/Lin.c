@@ -45,7 +45,7 @@ void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *pdu, uint8_t lin_bus_id, uint8_t lin_
     Avtp_Lin_SetPayloadLength(pdu, payload_length);
 }
 
-bool Avtp_Lin_IsValid(const Avtp_Lin_t* const pdu, size_t bufferSize)
+bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
