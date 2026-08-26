@@ -188,13 +188,122 @@ static void can_is_valid(void **state) {
     }
 }
 
+static void can_brief_set_payload(void **state) {
+
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t set_frame_id = 0x7ff;
+    uint8_t set_payload[CAN_PAYLOAD_SIZE] = {0,1,2,3,4,5,6,7};
+
+    // Initialize PDU
+    Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+
+    // Set payload and check for EFF
+    Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, set_frame_id, set_payload,
+                                   CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
+    assert_int_equal(Avtp_CanBrief_GetCanIdentifier((Avtp_CanBrief_t*)pdu), set_frame_id);
+    assert_int_equal(Avtp_CanBrief_IsEff((Avtp_CanBrief_t*)pdu), 0);
+    assert_memory_equal(set_payload, pdu + AVTP_CAN_BRIEF_HEADER_LEN, CAN_PAYLOAD_SIZE);
+    assert_int_equal(Avtp_CanBrief_GetPayloadLength((Avtp_CanBrief_t*)pdu), CAN_PAYLOAD_SIZE);
+
+    // Check EFF for extended Frame IDs
+    set_frame_id = 0x800;
+    Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, set_frame_id, set_payload,
+                                   CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
+    assert_int_equal(Avtp_CanBrief_GetCanIdentifier((Avtp_CanBrief_t*)pdu), set_frame_id);
+    assert_int_equal(Avtp_CanBrief_IsEff((Avtp_CanBrief_t*)pdu), 1);
+
+    // Check padding bytes and length field
+    uint8_t zero_array[CAN_PAYLOAD_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
+    for (int i=0; i<CAN_PAYLOAD_SIZE; i++) {
+        memset(pdu, 0, MAX_PDU_SIZE);
+        Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, set_frame_id, set_payload,
+                                       i, AVTP_CAN_CLASSIC);
+        assert_memory_equal(set_payload, pdu + AVTP_CAN_BRIEF_HEADER_LEN, i);
+        assert_memory_equal(zero_array, pdu + AVTP_CAN_BRIEF_HEADER_LEN + i,
+                            CAN_PAYLOAD_SIZE - i);
+
+        uint16_t msgLenBytes = AVTP_CAN_BRIEF_HEADER_LEN + i;
+        uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+        assert_int_equal(Avtp_CanBrief_GetPad((Avtp_CanBrief_t*)pdu), pad);
+        assert_int_equal(Avtp_CanBrief_GetAcfMsgLength((Avtp_CanBrief_t*)pdu),
+                         (msgLenBytes + pad) / 4);
+    }
+}
+
+static void can_brief_is_valid(void **state) {
+
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t frame_id = 0x123;
+
+    // An Init-only PDU has AcfMsgLength == 0 — i.e. it declares a frame
+    // shorter than its own header. Per IEEE 1722 ACF wire format that is
+    // not a valid frame, so IsValid must reject it.
+    Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+    assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 0);
+
+    // A properly-formed classic CAN frame with an 8-byte payload (the
+    // classic-CAN max) is valid.
+    {
+        uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+        Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, frame_id, payload,
+                                       sizeof(payload), AVTP_CAN_CLASSIC);
+        assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 1);
+    }
+
+    // Not an IEEE 1722 ACF-CAN Brief message (zero buffer, AcfMsgType != CAN_BRIEF).
+    memset(pdu, 0, MAX_PDU_SIZE);
+    assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 0);
+
+    // Valid IEEE 1722 CAN Brief Frame (Length 16, Buffer 17). AcfMsgLength=4
+    // quadlets = 16 bytes; payload = 16 - 8 header = 8 bytes (classic max).
+    Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+    Avtp_CanBrief_SetAcfMsgLength((Avtp_CanBrief_t*)pdu, 4);
+    assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, 17), 1);
+
+    // Invalid IEEE 1722 CAN Brief Frame (Length 16 but buffer only 9!).
+    Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+    Avtp_CanBrief_SetAcfMsgLength((Avtp_CanBrief_t*)pdu, 4);
+    assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, 9), 0);
+
+    // Classic CAN payload bound: a frame declaring a 12-byte payload as
+    // classic CAN is invalid (classic tops out at 8).
+    {
+        uint8_t too_big[12] = {0};
+        Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, frame_id, too_big,
+                                       sizeof(too_big), AVTP_CAN_CLASSIC);
+        assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 0);
+    }
+
+    // CAN-FD payload bound: 64 bytes is at the FD limit (valid); 68 bytes
+    // exceeds it (invalid).
+    {
+        uint8_t fd_max[64] = {0};
+        Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, frame_id, fd_max,
+                                       sizeof(fd_max), AVTP_CAN_FD);
+        assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 1);
+    }
+    {
+        uint8_t fd_too_big[68] = {0};
+        Avtp_CanBrief_Init((Avtp_CanBrief_t*)pdu);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, frame_id, fd_too_big,
+                                       sizeof(fd_too_big), AVTP_CAN_FD);
+        assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 0);
+    }
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(can_init),
         cmocka_unit_test(can_brief_init),
         cmocka_unit_test(can_set_payload),
-        cmocka_unit_test(can_is_valid)
+        cmocka_unit_test(can_is_valid),
+        cmocka_unit_test(can_brief_set_payload),
+        cmocka_unit_test(can_brief_is_valid)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
