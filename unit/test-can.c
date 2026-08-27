@@ -299,6 +299,50 @@ static void can_brief_is_valid(void **state)
     }
 }
 
+static void can_create_from_garbage(void **state) {
+
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t frame_id = 0x123;
+    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(pdu, 0xAA, MAX_PDU_SIZE);
+    Avtp_Can_CreateAcfMessage((Avtp_Can_t*)pdu, frame_id, payload, sizeof(payload),
+                              AVTP_CAN_CLASSIC);
+
+    assert_int_equal(Avtp_Can_GetAcfMsgType((Avtp_Can_t*)pdu), AVTP_ACF_TYPE_CAN);
+    assert_int_equal(Avtp_Can_IsMtv((Avtp_Can_t*)pdu), 0);
+    assert_int_equal(Avtp_Can_IsRtr((Avtp_Can_t*)pdu), 0);
+    assert_int_equal(Avtp_Can_IsBrs((Avtp_Can_t*)pdu), 0);
+    assert_int_equal(Avtp_Can_IsFdf((Avtp_Can_t*)pdu), 0);
+    assert_int_equal(Avtp_Can_IsEsi((Avtp_Can_t*)pdu), 0);
+    assert_int_equal(Avtp_Can_GetCanBusId((Avtp_Can_t*)pdu), 0);
+    assert_memory_equal(payload, pdu + AVTP_CAN_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t*)pdu, MAX_PDU_SIZE), 1);
+}
+
+static void can_brief_create_from_garbage(void **state) {
+
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t frame_id = 0x123;
+    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(pdu, 0xAA, MAX_PDU_SIZE);
+    Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t*)pdu, frame_id, payload, sizeof(payload),
+                                   AVTP_CAN_CLASSIC);
+
+    assert_int_equal(Avtp_CanBrief_GetAcfMsgType((Avtp_CanBrief_t*)pdu), AVTP_ACF_TYPE_CAN_BRIEF);
+    assert_int_equal(Avtp_CanBrief_IsMtv((Avtp_CanBrief_t*)pdu), 0);
+    assert_int_equal(Avtp_CanBrief_IsRtr((Avtp_CanBrief_t*)pdu), 0);
+    assert_int_equal(Avtp_CanBrief_IsBrs((Avtp_CanBrief_t*)pdu), 0);
+    assert_int_equal(Avtp_CanBrief_IsFdf((Avtp_CanBrief_t*)pdu), 0);
+    assert_int_equal(Avtp_CanBrief_IsEsi((Avtp_CanBrief_t*)pdu), 0);
+    assert_int_equal(Avtp_CanBrief_GetCanBusId((Avtp_CanBrief_t*)pdu), 0);
+    assert_memory_equal(payload, pdu + AVTP_CAN_BRIEF_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t*)pdu, MAX_PDU_SIZE), 1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(can_init),
@@ -306,7 +350,9 @@ int main(void)
                                        cmocka_unit_test(can_set_payload),
                                        cmocka_unit_test(can_is_valid),
                                        cmocka_unit_test(can_brief_set_payload),
-                                       cmocka_unit_test(can_brief_is_valid)};
+                                       cmocka_unit_test(can_brief_is_valid),
+                                       cmocka_unit_test(can_create_from_garbage),
+                                       cmocka_unit_test(can_brief_create_from_garbage)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

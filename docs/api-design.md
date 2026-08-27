@@ -254,9 +254,12 @@ The canonical set (CAN as reference):
 - **`GetPayloadLength`** - the inverse: recover the true payload length by
   subtracting the header length and the declared padding from the quadlet-encoded
   length. It assumes the PDU has already been validated with `IsValid`.
-- **`CreateAcfMessage`** - one-shot message construction: copy the payload,
-  set the CAN identifier (and the extended-frame flag if the ID needs it), set
-  the CAN-FD flag if requested, and finalise the length/pad fields.
+- **`CreateAcfMessage`** - one-shot message construction: initialise the header
+  (zero it and set the message type via `Init`), copy the payload, set the CAN
+  identifier (and the extended-frame flag if the ID needs it), set the CAN-FD
+  flag if requested, and finalise the length/pad fields. Set any additional
+  header fields (e.g. `mtv`, `message_timestamp`, `rtr`, `brs`, `esi`) *after*
+  calling it.
 
 `SetAcfMsgLength` itself remains available for when you want to set the raw
 quadlet value directly; `SetPayloadLength` is the friendlier path that keeps the

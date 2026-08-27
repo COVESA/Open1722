@@ -397,6 +397,28 @@ static void Test_CanBriefV2_IsValid(void **state)
     }
 }
 
+static void Test_CanBriefV2_CreateFromGarbage(void** state)
+{
+    const size_t msg_len = AVTP_CAN_BRIEF_V2_HEADER_LEN + 8;
+    uint8_t msg[msg_len];
+    Avtp_CanBriefV2_t* canV2 = (Avtp_CanBriefV2_t*)msg;
+    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(msg, 0xAA, msg_len);
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x123, 0x0, payload, sizeof(payload), AVTP_CAN_CLASSIC);
+
+    assert_int_equal(Avtp_CanBriefV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
+    assert_int_equal(Avtp_CanBriefV2_IsMtv(canV2), false);
+    assert_int_equal(Avtp_CanBriefV2_IsRtr(canV2), false);
+    assert_int_equal(Avtp_CanBriefV2_IsBrs(canV2), false);
+    assert_int_equal(Avtp_CanBriefV2_IsFdf(canV2), false);
+    assert_int_equal(Avtp_CanBriefV2_IsEsi(canV2), false);
+    assert_int_equal(Avtp_CanBriefV2_GetCanBusId(canV2), 0x0);
+    assert_memory_equal(payload, msg + AVTP_CAN_BRIEF_V2_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_CanBriefV2_IsValid(canV2, msg_len), 1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanBriefV2_Init),
@@ -428,7 +450,8 @@ int main(void)
                                        cmocka_unit_test(Test_CanBriefV2_SetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_CanBriefV2_Payload),
                                        cmocka_unit_test(Test_CanBriefV2_CreateAcfMessage),
-                                       cmocka_unit_test(Test_CanBriefV2_IsValid)};
+                                       cmocka_unit_test(Test_CanBriefV2_IsValid),
+                                       cmocka_unit_test(Test_CanBriefV2_CreateFromGarbage)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

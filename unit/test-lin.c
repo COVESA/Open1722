@@ -138,6 +138,25 @@ static void lin_create_message(void **state)
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, MAX_PDU_SIZE), 1);
 }
 
+static void lin_create_from_garbage(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(pdu, 0xAA, MAX_PDU_SIZE);
+    Avtp_Lin_CreateAcfMessage((Avtp_Lin_t *)pdu, 7, 0x3F, 0x123456789ABCULL, payload,
+                              sizeof(payload));
+
+    assert_int_equal(Avtp_Lin_GetAcfMsgType((Avtp_Lin_t *)pdu), AVTP_ACF_TYPE_LIN);
+    assert_int_equal(Avtp_Lin_IsMtv((Avtp_Lin_t *)pdu), 0);
+    assert_int_equal(Avtp_Lin_GetLinBusId((Avtp_Lin_t *)pdu), 7);
+    assert_int_equal(Avtp_Lin_GetLinIdentifier((Avtp_Lin_t *)pdu), 0x3F);
+    assert_int_equal(Avtp_Lin_GetMessageTimestamp((Avtp_Lin_t *)pdu), 0x123456789ABCULL);
+    assert_memory_equal(payload, pdu + AVTP_LIN_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, MAX_PDU_SIZE), 1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -145,6 +164,7 @@ int main(void)
         cmocka_unit_test(lin_get_set_fields),
         cmocka_unit_test(lin_is_valid),
         cmocka_unit_test(lin_create_message),
+        cmocka_unit_test(lin_create_from_garbage),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
