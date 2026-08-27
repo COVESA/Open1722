@@ -264,9 +264,10 @@ padding consistent for you.
 
 ## Inline accessors & the shared library
 
-Accessors, `Init` and the common-header helpers are declared `OPEN1722_INLINE`
+Accessors, `Init`, `IsValid` and the convenience helpers (payload access,
+`SetPayloadLength`, `CreateAcfMessage`, …) are all declared `OPEN1722_INLINE`
 rather than `static inline`. By default this resolves to `static inline`, so
-embedded and bare-metal consumers get fully-inlined accessors with no call
+embedded and bare-metal consumers get fully-inlined code with no call
 overhead.
 
 For shared-library/FFI users (e.g. Python `ctypes`, Rust FFI), the same
@@ -305,11 +306,11 @@ used for bounds checking in the access engine (see
 
 ## Anatomy of a format module
 
-A format module is one header (`include/avtp/acf/<Format>.h`) plus, where
-needed, a source file (`src/avtp/acf/<Format>.c`). The header contains the data
-description and the inline accessors; the source file contains anything that
-should *not* be inlined - typically `IsValid()` and the higher-level
-convenience functions.
+A format module is a single self-contained header (`include/avtp/acf/<Format>.h`).
+It contains the data description (struct, field enum, descriptor table), the
+inline accessors, `IsValid()`, `Init` and the higher-level convenience
+functions. No separate source file is needed; the standard ACF formats are
+header-only.
 
 Using `Can.h` as the reference, a module contains these pieces in order:
 
@@ -449,9 +450,9 @@ OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
 
 ### IsValid
 
-A format provides an `IsValid` function in its `.c` file. It checks (1) that the
-length field is contained within the actual buffer, and (2) any format-specific
-invariants. See
+A format provides an `IsValid` function as an inline accessor in its header. It
+checks (1) that the length field is contained within the actual buffer, and (2)
+any format-specific invariants. See
 [Accessor semantics & the safety contract](#accessor-semantics--the-safety-contract).
 
 ```c
@@ -460,7 +461,7 @@ bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
 
 ### Convenience functions
 
-Finally, a handful of non-inline helpers for common tasks - building a full
+Finally, a handful of inline helpers for common tasks - building a full
 message, reading/writing the payload, and computing the length/padding fields.
 See [Convenience functions](#convenience-functions).
 
@@ -525,8 +526,8 @@ code.
 
 ## Inline accessors & symbol export
 
-Accessors, `Init` and the common-header helpers are declared `OPEN1722_INLINE`
-rather than `static inline`:
+Accessors, `Init`, `IsValid` and the convenience helpers are declared
+`OPEN1722_INLINE` rather than `static inline`:
 
 ```c
 /* include/avtp/Inline.h */
@@ -586,7 +587,7 @@ this order and the template in
 7. Add `Avtp_<Format>_Init` (zero + set the ACF message type).
 8. Add the convenience functions (`Get/SetPayload`, `SetPayloadLength`,
    `GetPayloadLength`, and `Create…` if a full-message builder makes sense).
-9. Add `Avtp_<Format>_IsValid` in `src/avtp/acf/<Format>.c`, checking buffer
+9. Add `Avtp_<Format>_IsValid` inline in the header, checking buffer
    containment and format invariants.
 10. If the format is standard ACF, add its `AVTP_ACF_TYPE_<NAME>` to
     [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h).
@@ -595,4 +596,4 @@ this order and the template in
     [`inline.md`](inline.md).
 12. Add unit tests under `unit/` and register the test target in the build.
 
-A concrete reference for every step is `Can.h` / `Can.c`.
+A concrete reference for every step is `Can.h`.

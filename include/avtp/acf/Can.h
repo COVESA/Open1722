@@ -391,19 +391,6 @@ OPEN1722_INLINE void Avtp_Can_SetEsi(Avtp_Can_t *pdu, bool esi)
 }
 
 /**
- * Copies the payload data and CAN frame ID into the ACF CAN frame. This function will
- * also set the length and pad fields while inserting the padded bytes.
- *
- * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
- * @param frame_id ID of the CAN frame
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- * @param can_variant Classic CAN or CAN-FD
- */
-void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id, uint8_t *payload,
-                               uint16_t payload_length, Avtp_CanVariant_t can_variant);
-
-/**
  * Returns pointer to payload of an ACF CAN frame.
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
@@ -470,6 +457,37 @@ OPEN1722_INLINE uint8_t Avtp_Can_GetPayloadLength(const Avtp_Can_t *const pdu)
 }
 
 /**
+ * Copies the payload data and CAN frame ID into the ACF CAN frame. This function will
+ * also set the length and pad fields while inserting the padded bytes.
+ *
+ * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
+ * @param frame_id ID of the CAN frame
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ * @param can_variant Classic CAN or CAN-FD
+ */
+OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id,
+                                               uint8_t *payload, uint16_t payload_length,
+                                               Avtp_CanVariant_t can_variant)
+{
+    // Copy the payload into the CAN PDU
+    Avtp_Can_SetPayload(can_pdu, payload, payload_length);
+
+    // Set the Frame ID and CAN variant
+    if (frame_id > 0x7ff) {
+        Avtp_Can_SetEff(can_pdu, true);
+    }
+
+    Avtp_Can_SetCanIdentifier(can_pdu, frame_id);
+    if (can_variant == AVTP_CAN_FD) {
+        Avtp_Can_SetFdf(can_pdu, true);
+    }
+
+    // Finalize the AVTP CAN Frame
+    Avtp_Can_SetPayloadLength(can_pdu, payload_length);
+}
+
+/**
  * Checks if the ACF CAN frame is valid by checking:
  *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
  * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
@@ -477,7 +495,42 @@ OPEN1722_INLINE uint8_t Avtp_Can_GetPayloadLength(const Avtp_Can_t *const pdu)
  * @param bufferSize Size of the buffer containing the ACF CAN frame.
  * @return true if the ACF CAN frame is valid, false otherwise.
  */
-bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
+OPEN1722_INLINE bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_CAN_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Can_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN) {
+        return false;
+    }
+
+    // Avtp_Can_GetAcfMsgLength returns quadlets. Convert the length field to octets.
+    uint16_t msg_length_bytes = (uint16_t)Avtp_Can_GetAcfMsgLength(pdu) * 4;
+    if (msg_length_bytes > bufferSize) {
+        return false;
+    }
+
+    /* CAN payload-length invariant: classic CAN ≤ 8 bytes, CAN-FD ≤ 64
+     * bytes (selected by the FDF bit). The encoded message length must
+     * also accommodate header + declared padding so the payload
+     * computation in Avtp_Can_GetPayloadLength() doesn't underflow. */
+    uint8_t pad_length = Avtp_Can_GetPad(pdu);
+    uint16_t header_and_pad = (uint16_t)AVTP_CAN_HEADER_LEN + pad_length;
+    if (msg_length_bytes < header_and_pad) {
+        return false;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+    uint16_t max_payload = Avtp_Can_IsFdf(pdu) ? 64u : 8u;
+    if (payload_length > max_payload) {
+        return false;
+    }
+    return true;
+}
 
 /**
  * Initializes an ACF CAN PDU header as specified in the IEEE 1722 Specification.

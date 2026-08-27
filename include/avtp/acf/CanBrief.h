@@ -373,19 +373,6 @@ OPEN1722_INLINE void Avtp_CanBrief_SetCanIdentifier(Avtp_CanBrief_t *pdu, uint32
 }
 
 /**
- * Copies the payload data and CAN frame ID into the ACF CAN Brief frame. This function will
- * also set the length and pad fields while inserting the padded bytes.
- *
- * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
- * @param frame_id ID of the CAN frame
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- * @param can_variant Classic CAN or CAN-FD
- */
-void Avtp_CanBrief_CreateAcfMessage(Avtp_CanBrief_t *can_pdu, uint32_t frame_id, uint8_t *payload,
-                                    uint16_t payload_length, Avtp_CanVariant_t can_variant);
-
-/**
  * Returns pointer to payload of an ACF CAN Brief frame.
  *
  * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
@@ -452,6 +439,37 @@ OPEN1722_INLINE uint8_t Avtp_CanBrief_GetPayloadLength(const Avtp_CanBrief_t *co
 }
 
 /**
+ * Copies the payload data and CAN frame ID into the ACF CAN Brief frame. This function will
+ * also set the length and pad fields while inserting the padded bytes.
+ *
+ * @param can_pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
+ * @param frame_id ID of the CAN frame
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ * @param can_variant Classic CAN or CAN-FD
+ */
+OPEN1722_INLINE void Avtp_CanBrief_CreateAcfMessage(Avtp_CanBrief_t *can_pdu, uint32_t frame_id,
+                                                    uint8_t *payload, uint16_t payload_length,
+                                                    Avtp_CanVariant_t can_variant)
+{
+    // Copy the payload into the CAN PDU
+    Avtp_CanBrief_SetPayload(can_pdu, payload, payload_length);
+
+    // Set the Frame ID and CAN variant
+    if (frame_id > 0x7ff) {
+        Avtp_CanBrief_SetEff(can_pdu, true);
+    }
+
+    Avtp_CanBrief_SetCanIdentifier(can_pdu, frame_id);
+    if (can_variant == AVTP_CAN_FD) {
+        Avtp_CanBrief_SetFdf(can_pdu, true);
+    }
+
+    // Finalize the AVTP CAN Frame
+    Avtp_CanBrief_SetPayloadLength(can_pdu, payload_length);
+}
+
+/**
  * Checks if the ACF CAN Brief frame is valid by checking:
  *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
  * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
@@ -459,7 +477,42 @@ OPEN1722_INLINE uint8_t Avtp_CanBrief_GetPayloadLength(const Avtp_CanBrief_t *co
  * @param bufferSize Size of the buffer containing the ACF CAN Brief frame.
  * @return true if the ACF CAN Brief frame is valid, false otherwise.
  */
-bool Avtp_CanBrief_IsValid(const Avtp_CanBrief_t *const pdu, size_t bufferSize);
+OPEN1722_INLINE bool Avtp_CanBrief_IsValid(const Avtp_CanBrief_t *const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_CAN_BRIEF_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_CanBrief_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN_BRIEF) {
+        return false;
+    }
+
+    // Avtp_CanBrief_GetAcfMsgLength returns quadlets. Convert the length field to octets.
+    uint16_t msg_length_bytes = (uint16_t)Avtp_CanBrief_GetAcfMsgLength(pdu) * 4;
+    if (msg_length_bytes > bufferSize) {
+        return false;
+    }
+
+    /* CAN payload-length invariant: classic CAN ≤ 8 bytes, CAN-FD ≤ 64
+     * bytes (selected by the FDF bit). The encoded message length must
+     * also accommodate header + declared padding so the payload
+     * computation in Avtp_CanBrief_GetPayloadLength() doesn't underflow. */
+    uint8_t pad_length = Avtp_CanBrief_GetPad(pdu);
+    uint16_t header_and_pad = (uint16_t)AVTP_CAN_BRIEF_HEADER_LEN + pad_length;
+    if (msg_length_bytes < header_and_pad) {
+        return false;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+    uint16_t max_payload = Avtp_CanBrief_IsFdf(pdu) ? 64u : 8u;
+    if (payload_length > max_payload) {
+        return false;
+    }
+    return true;
+}
 
 /**
  * Initializes an ACF Abbreviated CAN PDU header as specified in the IEEE 1722 Specification.
