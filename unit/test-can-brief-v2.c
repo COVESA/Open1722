@@ -397,12 +397,12 @@ static void Test_CanBriefV2_IsValid(void **state)
     }
 }
 
-static void Test_CanBriefV2_CreateFromGarbage(void** state)
+static void Test_CanBriefV2_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_CAN_BRIEF_V2_HEADER_LEN + 8;
     uint8_t msg[msg_len];
-    Avtp_CanBriefV2_t* canV2 = (Avtp_CanBriefV2_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_CanBriefV2_t *canV2 = (Avtp_CanBriefV2_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(msg, 0xAA, msg_len);
