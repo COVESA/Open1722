@@ -328,6 +328,19 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t *const pdu)
 }
 
 /**
+ * Initializes an ACF Lin PDU.
+ *
+ * @param pdu Pointer to the first bit of a 1722 ACF Lin PDU.
+ */
+OPEN1722_INLINE void Avtp_Lin_Init(Avtp_Lin_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_Lin_t));
+        Avtp_Lin_SetAcfMsgType(pdu, AVTP_ACF_TYPE_LIN);
+    }
+}
+
+/**
  * Copies the payload data, LIN bus ID, LIN identifier and message timestamp into
  * the ACF Lin frame. This function will also set the length and pad fields while
  * inserting the padded bytes.
@@ -343,6 +356,9 @@ OPEN1722_INLINE void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *lin_pdu, uint8_t lin_
                                                uint8_t lin_identifier, uint64_t message_timestamp,
                                                uint8_t *payload, uint16_t payload_length)
 {
+    // Initialize the ACF Lin header
+    Avtp_Lin_Init(lin_pdu);
+
     // Copy the payload into the LIN PDU
     Avtp_Lin_SetPayload(lin_pdu, payload, payload_length);
 
@@ -396,19 +412,6 @@ OPEN1722_INLINE bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t buffer
         return false;
     }
     return true;
-}
-
-/**
- * Initializes an ACF Lin PDU.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF Lin PDU.
- */
-OPEN1722_INLINE void Avtp_Lin_Init(Avtp_Lin_t *pdu)
-{
-    if (pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Lin_t));
-        Avtp_Lin_SetAcfMsgType(pdu, AVTP_ACF_TYPE_LIN);
-    }
 }
 
 #ifdef __cplusplus

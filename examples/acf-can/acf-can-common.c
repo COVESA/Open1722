@@ -163,19 +163,10 @@ static int update_cf_length(uint8_t *cf_pdu, uint64_t length, int use_tscf)
 static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_t can_variant)
 {
 
-    struct timespec now;
     canid_t can_id;
     uint8_t can_payload_length;
 
-    // Clear bits
     Avtp_Can_t *pdu = (Avtp_Can_t *)acf_pdu;
-    memset(pdu, 0, AVTP_CAN_HEADER_LEN);
-
-    // Prepare ACF PDU for CAN
-    Avtp_Can_Init(pdu);
-    clock_gettime(CLOCK_REALTIME, &now);
-    Avtp_Can_SetMessageTimestamp(pdu, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
-    Avtp_Can_SetMtv(pdu, true);
 
     // Set required CAN Flags
 #ifdef __linux__
@@ -185,9 +176,21 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
     can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.id : (*frame).cc.id;
     can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.dlc : (*frame).cc.dlc;
 #endif
-    if (can_id & CAN_EFF_FLAG) {
-        Avtp_Can_SetEff(pdu, true);
-    }
+
+    // Build the ACF CAN PDU (initializes the header, copies the payload and
+    // finalizes the length/pad fields)
+    if (can_variant == AVTP_CAN_FD)
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length,
+                                  can_variant);
+    else
+        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
+                                  can_variant);
+
+    // Set optional header fields after building the frame
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+    Avtp_Can_SetMessageTimestamp(pdu, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
+    Avtp_Can_SetMtv(pdu, true);
     if (can_id & CAN_RTR_FLAG) {
         Avtp_Can_SetRtr(pdu, true);
     }
@@ -203,14 +206,6 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
             Avtp_Can_SetEsi(pdu, true);
         }
     }
-
-    // Copy payload to ACF CAN PDU
-    if (can_variant == AVTP_CAN_FD)
-        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length,
-                                  can_variant);
-    else
-        Avtp_Can_CreateAcfMessage(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
-                                  can_variant);
 
     return Avtp_Can_GetAcfMsgLength(pdu) * 4;
 }

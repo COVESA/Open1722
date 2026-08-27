@@ -457,6 +457,19 @@ OPEN1722_INLINE uint8_t Avtp_Can_GetPayloadLength(const Avtp_Can_t *const pdu)
 }
 
 /**
+ * Initializes an ACF CAN PDU header as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of a 1722 ACF CAN PDU.
+ */
+OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_Can_t));
+        Avtp_Can_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN);
+    }
+}
+
+/**
  * Copies the payload data and CAN frame ID into the ACF CAN frame. This function will
  * also set the length and pad fields while inserting the padded bytes.
  *
@@ -470,6 +483,9 @@ OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t fra
                                                uint8_t *payload, uint16_t payload_length,
                                                Avtp_CanVariant_t can_variant)
 {
+    // Initialize the ACF CAN header
+    Avtp_Can_Init(can_pdu);
+
     // Copy the payload into the CAN PDU
     Avtp_Can_SetPayload(can_pdu, payload, payload_length);
 
@@ -530,19 +546,6 @@ OPEN1722_INLINE bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t buffer
         return false;
     }
     return true;
-}
-
-/**
- * Initializes an ACF CAN PDU header as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN PDU.
- */
-OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
-{
-    if (pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Can_t));
-        Avtp_Can_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN);
-    }
 }
 
 #ifdef __cplusplus

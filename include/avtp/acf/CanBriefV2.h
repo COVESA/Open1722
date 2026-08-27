@@ -434,6 +434,19 @@ OPEN1722_INLINE uint8_t Avtp_CanBriefV2_GetPayloadLength(const Avtp_CanBriefV2_t
 }
 
 /**
+ * Initializes an ACF_CAN_BRIEF_V2 message header as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of a 1722 ACF CAN Brief V2 PDU.
+ */
+OPEN1722_INLINE void Avtp_CanBriefV2_Init(Avtp_CanBriefV2_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_CanBriefV2_t));
+        Avtp_CanBriefV2_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN_BRIEF_V2);
+    }
+}
+
+/**
  * Copies the payload data, CAN frame ID and CAN bus ID into the ACF CAN Brief V2 frame. This
  * function will also set the length and pad fields while inserting the padded bytes.
  *
@@ -449,6 +462,9 @@ OPEN1722_INLINE void Avtp_CanBriefV2_CreateAcfMessage(Avtp_CanBriefV2_t *pdu, ui
                                                       uint16_t payload_length,
                                                       Avtp_CanVariant_t can_variant)
 {
+    // Initialize the ACF CAN Brief V2 header
+    Avtp_CanBriefV2_Init(pdu);
+
     // Copy the payload into the CAN PDU
     Avtp_CanBriefV2_SetPayload(pdu, payload, payload_length);
 
@@ -510,19 +526,6 @@ OPEN1722_INLINE bool Avtp_CanBriefV2_IsValid(const Avtp_CanBriefV2_t *const pdu,
         return false;
     }
     return true;
-}
-
-/**
- * Initializes an ACF_CAN_BRIEF_V2 message header as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN Brief V2 PDU.
- */
-OPEN1722_INLINE void Avtp_CanBriefV2_Init(Avtp_CanBriefV2_t *pdu)
-{
-    if (pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_CanBriefV2_t));
-        Avtp_CanBriefV2_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN_BRIEF_V2);
-    }
 }
 
 #ifdef __cplusplus
