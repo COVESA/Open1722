@@ -2,7 +2,7 @@
 
 ## Overview
 
-Open1722 uses `static inline` functions in public headers for field accessors (getters/setters, init functions) to allow the compiler to optimize them on embedded and bare-metal targets. However, `static inline` functions are not exported as symbols in the shared library (`libopen1722.so`), making them inaccessible to FFI users (Python ctypes, Rust FFI, etc.).
+Open1722 uses `static inline` functions in public headers for field accessors, validation and message-building helpers (getters/setters, `Init`, `IsValid`, `CreateAcfMessage`) to allow the compiler to optimize them on embedded and bare-metal targets. However, `static inline` functions are not exported as symbols in the shared library (`libopen1722.so`), making them inaccessible to FFI users (Python ctypes, Rust FFI, etc.).
 
 To support both use cases simultaneously, Open1722 uses a configurable inline macro and dedicated **export translation units** that force external definitions of every inline function in the shared library.
 
@@ -18,7 +18,7 @@ The header `include/avtp/Inline.h` defines:
 #endif
 ```
 
-All performance-critical functions in the public headers use `OPEN1722_INLINE` instead of `static inline`. By default (when consumers just include the headers), `OPEN1722_INLINE` resolves to `static inline` — same behaviour as before, same performance characteristics.
+All inline functions in the public headers use `OPEN1722_INLINE` instead of `static inline`. By default (when consumers just include the headers), `OPEN1722_INLINE` resolves to `static inline` — same behaviour as before, same performance characteristics.
 
 ### Export translation units
 

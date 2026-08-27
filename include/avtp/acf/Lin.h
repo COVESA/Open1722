@@ -265,22 +265,6 @@ OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLengthInBytes(const Avtp_Lin_t *const
 }
 
 /**
- * Copies the payload data, LIN bus ID, LIN identifier and message timestamp into
- * the ACF Lin frame. This function will also set the length and pad fields while
- * inserting the padded bytes.
- *
- * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- * @param lin_bus_id LIN bus ID
- * @param lin_identifier LIN frame identifier
- * @param message_timestamp Message timestamp
- * @param payload Pointer to the payload byte array
- * @param payload_length Length of the payload.
- */
-void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *lin_pdu, uint8_t lin_bus_id, uint8_t lin_identifier,
-                               uint64_t message_timestamp, uint8_t *payload,
-                               uint16_t payload_length);
-
-/**
  * Returns pointer to payload of an ACF Lin frame.
  *
  * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
@@ -344,6 +328,34 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t *const pdu)
 }
 
 /**
+ * Copies the payload data, LIN bus ID, LIN identifier and message timestamp into
+ * the ACF Lin frame. This function will also set the length and pad fields while
+ * inserting the padded bytes.
+ *
+ * @param lin_pdu Pointer to the first bit of an 1722 ACF Lin PDU.
+ * @param lin_bus_id LIN bus ID
+ * @param lin_identifier LIN frame identifier
+ * @param message_timestamp Message timestamp
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ */
+OPEN1722_INLINE void Avtp_Lin_CreateAcfMessage(Avtp_Lin_t *lin_pdu, uint8_t lin_bus_id,
+                                               uint8_t lin_identifier, uint64_t message_timestamp,
+                                               uint8_t *payload, uint16_t payload_length)
+{
+    // Copy the payload into the LIN PDU
+    Avtp_Lin_SetPayload(lin_pdu, payload, payload_length);
+
+    // Set the LIN bus ID, identifier and message timestamp
+    Avtp_Lin_SetLinBusId(lin_pdu, lin_bus_id);
+    Avtp_Lin_SetLinIdentifier(lin_pdu, lin_identifier);
+    Avtp_Lin_SetMessageTimestamp(lin_pdu, message_timestamp);
+
+    // Finalize the AVTP LIN Frame
+    Avtp_Lin_SetPayloadLength(lin_pdu, payload_length);
+}
+
+/**
  * Checks if the ACF Lin frame is valid by checking:
  *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
  * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
@@ -351,7 +363,40 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t *const pdu)
  * @param bufferSize Size of the buffer containing the ACF Lin frame.
  * @return true if the ACF Lin frame is valid, false otherwise.
  */
-bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t bufferSize);
+OPEN1722_INLINE bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_LIN_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Lin_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_LIN) {
+        return false;
+    }
+
+    // Avtp_Lin_GetAcfMsgLength returns quadlets. Convert the length field to octets.
+    uint16_t msg_length_bytes = (uint16_t)Avtp_Lin_GetAcfMsgLength(pdu) * 4;
+    if (msg_length_bytes > bufferSize) {
+        return false;
+    }
+
+    /* LIN payload-length invariant: the encoded message length must also
+     * accommodate header + declared padding so the payload computation in
+     * Avtp_Lin_GetPayloadLength() doesn't underflow. */
+    uint8_t pad_length = Avtp_Lin_GetPad(pdu);
+    uint16_t header_and_pad = (uint16_t)AVTP_LIN_HEADER_LEN + pad_length;
+    if (msg_length_bytes < header_and_pad) {
+        return false;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+    if (payload_length > 8u) {
+        return false;
+    }
+    return true;
+}
 
 /**
  * Initializes an ACF Lin PDU.
