@@ -39,463 +39,328 @@ extern "C" {
 #include <cmocka.h>
 #include <stdio.h>
 
-static void Test_CanV2_Init(void** state)
+static void Test_CanV2_Init(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
 
     // Check init function while passing in a null pointer
     Avtp_CanV2_Init(NULL);
 
     Avtp_CanV2_Init(canV2);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_GetAcfMsgType(void** state)
+static void Test_CanV2_GetAcfMsgType(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_V2);
 }
 
-static void Test_CanV2_GetAcfMsgLength(void** state)
+static void Test_CanV2_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetAcfMsgLength(canV2), 4);
 }
 
-static void Test_CanV2_GetPad(void** state)
+static void Test_CanV2_GetPad(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0xC0, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetPad(canV2), 3);
 }
 
-static void Test_CanV2_IsMtv(void** state)
+static void Test_CanV2_IsMtv(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsMtv(canV2), true);
 }
 
-static void Test_CanV2_IsRtr(void** state)
+static void Test_CanV2_IsRtr(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x10, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsRtr(canV2), true);
 }
 
-static void Test_CanV2_IsEff(void** state)
+static void Test_CanV2_IsEff(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x08, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsEff(canV2), true);
 }
 
-static void Test_CanV2_GetCanBusId(void** state)
+static void Test_CanV2_GetCanBusId(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x05, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x05, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetCanBusId(canV2), 0x5FF);
 }
 
-static void Test_CanV2_GetMessageTimestamp(void** state)
+static void Test_CanV2_GetMessageTimestamp(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0xBF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0, 0x0, 0xBF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                            0xFF, 0xFF, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetMessageTimestamp(canV2), 0xBFFFFFFFFFFFFFFFull);
 }
 
-static void Test_CanV2_IsBrs(void** state)
+static void Test_CanV2_IsBrs(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x80, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsBrs(canV2), true);
 }
 
-static void Test_CanV2_IsFdf(void** state)
+static void Test_CanV2_IsFdf(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x40, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsFdf(canV2), true);
 }
 
-static void Test_CanV2_IsEsi(void** state)
+static void Test_CanV2_IsEsi(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x20, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_IsEsi(canV2), true);
 }
 
-static void Test_CanV2_GetCanIdentifier(void** state)
+static void Test_CanV2_GetCanIdentifier(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x17, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x04, 0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x17, 0xFF, 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetCanIdentifier(canV2), 0x17FFFFFFul);
 }
 
-static void Test_CanV2_GetPayloadLength(void** state)
+static void Test_CanV2_GetPayloadLength(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x05, 0xC0, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x05, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetPayloadLength(canV2), 1);
 }
 
-static void Test_CanV2_GetPayloadLength_NoPadding(void** state)
+static void Test_CanV2_GetPayloadLength_NoPadding(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetPayloadLength(canV2), 4);
 }
 
-static void Test_CanV2_GetAcfMsgLengthInBytes(void** state)
+static void Test_CanV2_GetAcfMsgLengthInBytes(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x42, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    uint8_t msg[msg_len] = {0x42, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     assert_int_equal(Avtp_CanV2_GetAcfMsgLengthInBytes(canV2), 5 * 4);
 }
 
-static void Test_CanV2_SetAcfMsgType(void** state)
+static void Test_CanV2_SetAcfMsgType(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetAcfMsgType(canV2, AVTP_ACF_TYPE_CAN_V2);
     assert_int_equal(Avtp_CanV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_V2);
 }
 
-static void Test_CanV2_SetAcfMsgLength(void** state)
+static void Test_CanV2_SetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetAcfMsgLength(canV2, 5);
     assert_int_equal(Avtp_CanV2_GetAcfMsgLength(canV2), 5);
     assert_int_equal(Avtp_CanV2_GetAcfMsgLengthInBytes(canV2), 20);
 }
 
-static void Test_CanV2_SetMtv(void** state)
+static void Test_CanV2_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetMtv(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetRtr(void** state)
+static void Test_CanV2_SetRtr(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetRtr(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x10, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetEff(void** state)
+static void Test_CanV2_SetEff(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetEff(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x08, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetCanBusId(void** state)
+static void Test_CanV2_SetCanBusId(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetCanBusId(canV2, 0x5FF);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x05, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x05, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetMessageTimestamp(void** state)
+static void Test_CanV2_SetMessageTimestamp(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetMessageTimestamp(canV2, 0xBFFFFFFFFFFFFFFFull);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0xBF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0, 0x0, 0xBF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                     0xFF, 0xFF, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetBrs(void** state)
+static void Test_CanV2_SetBrs(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetBrs(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x80, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetFdf(void** state)
+static void Test_CanV2_SetFdf(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetFdf(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x40, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetEsi(void** state)
+static void Test_CanV2_SetEsi(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetEsi(canV2, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x20, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetCanIdentifier(void** state)
+static void Test_CanV2_SetCanIdentifier(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetCanIdentifier(canV2, 0x17FFFFFFul);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x17, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x00, 0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x17, 0xFF, 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetPayloadLength(void** state)
+static void Test_CanV2_SetPayloadLength(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetPayloadLength(canV2, 3);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x05, 0x40, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x05, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_SetPayloadLength_NoPadding(void** state)
+static void Test_CanV2_SetPayloadLength_NoPadding(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetPayloadLength(canV2, 4);
 
-    uint8_t expected_msg[msg_len] = {
-        0x42, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x42, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanV2_Payload(void** state)
+static void Test_CanV2_Payload(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 8;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_CanV2_Init(canV2);
     Avtp_CanV2_SetPayload(canV2, payload, sizeof(payload));
@@ -504,12 +369,12 @@ static void Test_CanV2_Payload(void** state)
     assert_memory_equal(payload, Avtp_CanV2_GetPayload(canV2), sizeof(payload));
 }
 
-static void Test_CanV2_CreateAcfMessage(void** state)
+static void Test_CanV2_CreateAcfMessage(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 8;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_CanV2_CreateAcfMessage(canV2, 0x7ff, payload, sizeof(payload), AVTP_CAN_CLASSIC);
 
@@ -533,12 +398,12 @@ static void Test_CanV2_CreateAcfMessage(void** state)
     assert_int_equal(Avtp_CanV2_IsMtv(canV2), true);
 }
 
-static void Test_CanV2_CreateFromGarbage(void** state)
+static void Test_CanV2_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 8;
     uint8_t msg[msg_len];
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(msg, 0xAA, msg_len);
@@ -556,11 +421,11 @@ static void Test_CanV2_CreateFromGarbage(void** state)
     assert_int_equal(Avtp_CanV2_IsValid(canV2, msg_len), 1);
 }
 
-static void Test_CanV2_IsValid(void** state)
+static void Test_CanV2_IsValid(void **state)
 {
     const size_t msg_len = AVTP_CAN_V2_HEADER_LEN + 68;
     uint8_t msg[msg_len] = {0};
-    Avtp_CanV2_t* canV2 = (Avtp_CanV2_t*)msg;
+    Avtp_CanV2_t *canV2 = (Avtp_CanV2_t *)msg;
     uint32_t frame_id = 0x123;
 
     // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
@@ -569,7 +434,7 @@ static void Test_CanV2_IsValid(void** state)
 
     // A properly-formed classic CAN frame with an 8-byte payload is valid.
     {
-        uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+        uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
         Avtp_CanV2_Init(canV2);
         Avtp_CanV2_CreateAcfMessage(canV2, frame_id, payload, sizeof(payload), AVTP_CAN_CLASSIC);
         assert_int_equal(Avtp_CanV2_IsValid(canV2, msg_len), 1);
@@ -604,41 +469,39 @@ static void Test_CanV2_IsValid(void** state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(Test_CanV2_Init),
-        cmocka_unit_test(Test_CanV2_GetAcfMsgType),
-        cmocka_unit_test(Test_CanV2_GetAcfMsgLength),
-        cmocka_unit_test(Test_CanV2_GetPad),
-        cmocka_unit_test(Test_CanV2_IsMtv),
-        cmocka_unit_test(Test_CanV2_IsRtr),
-        cmocka_unit_test(Test_CanV2_IsEff),
-        cmocka_unit_test(Test_CanV2_GetCanBusId),
-        cmocka_unit_test(Test_CanV2_GetMessageTimestamp),
-        cmocka_unit_test(Test_CanV2_IsBrs),
-        cmocka_unit_test(Test_CanV2_IsFdf),
-        cmocka_unit_test(Test_CanV2_IsEsi),
-        cmocka_unit_test(Test_CanV2_GetCanIdentifier),
-        cmocka_unit_test(Test_CanV2_GetPayloadLength),
-        cmocka_unit_test(Test_CanV2_GetPayloadLength_NoPadding),
-        cmocka_unit_test(Test_CanV2_GetAcfMsgLengthInBytes),
-        cmocka_unit_test(Test_CanV2_SetAcfMsgType),
-        cmocka_unit_test(Test_CanV2_SetAcfMsgLength),
-        cmocka_unit_test(Test_CanV2_SetMtv),
-        cmocka_unit_test(Test_CanV2_SetRtr),
-        cmocka_unit_test(Test_CanV2_SetEff),
-        cmocka_unit_test(Test_CanV2_SetCanBusId),
-        cmocka_unit_test(Test_CanV2_SetMessageTimestamp),
-        cmocka_unit_test(Test_CanV2_SetBrs),
-        cmocka_unit_test(Test_CanV2_SetFdf),
-        cmocka_unit_test(Test_CanV2_SetEsi),
-        cmocka_unit_test(Test_CanV2_SetCanIdentifier),
-        cmocka_unit_test(Test_CanV2_SetPayloadLength),
-        cmocka_unit_test(Test_CanV2_SetPayloadLength_NoPadding),
-        cmocka_unit_test(Test_CanV2_Payload),
-        cmocka_unit_test(Test_CanV2_CreateAcfMessage),
-        cmocka_unit_test(Test_CanV2_CreateFromGarbage),
-        cmocka_unit_test(Test_CanV2_IsValid)
-    };
+    const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanV2_Init),
+                                       cmocka_unit_test(Test_CanV2_GetAcfMsgType),
+                                       cmocka_unit_test(Test_CanV2_GetAcfMsgLength),
+                                       cmocka_unit_test(Test_CanV2_GetPad),
+                                       cmocka_unit_test(Test_CanV2_IsMtv),
+                                       cmocka_unit_test(Test_CanV2_IsRtr),
+                                       cmocka_unit_test(Test_CanV2_IsEff),
+                                       cmocka_unit_test(Test_CanV2_GetCanBusId),
+                                       cmocka_unit_test(Test_CanV2_GetMessageTimestamp),
+                                       cmocka_unit_test(Test_CanV2_IsBrs),
+                                       cmocka_unit_test(Test_CanV2_IsFdf),
+                                       cmocka_unit_test(Test_CanV2_IsEsi),
+                                       cmocka_unit_test(Test_CanV2_GetCanIdentifier),
+                                       cmocka_unit_test(Test_CanV2_GetPayloadLength),
+                                       cmocka_unit_test(Test_CanV2_GetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_CanV2_GetAcfMsgLengthInBytes),
+                                       cmocka_unit_test(Test_CanV2_SetAcfMsgType),
+                                       cmocka_unit_test(Test_CanV2_SetAcfMsgLength),
+                                       cmocka_unit_test(Test_CanV2_SetMtv),
+                                       cmocka_unit_test(Test_CanV2_SetRtr),
+                                       cmocka_unit_test(Test_CanV2_SetEff),
+                                       cmocka_unit_test(Test_CanV2_SetCanBusId),
+                                       cmocka_unit_test(Test_CanV2_SetMessageTimestamp),
+                                       cmocka_unit_test(Test_CanV2_SetBrs),
+                                       cmocka_unit_test(Test_CanV2_SetFdf),
+                                       cmocka_unit_test(Test_CanV2_SetEsi),
+                                       cmocka_unit_test(Test_CanV2_SetCanIdentifier),
+                                       cmocka_unit_test(Test_CanV2_SetPayloadLength),
+                                       cmocka_unit_test(Test_CanV2_SetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_CanV2_Payload),
+                                       cmocka_unit_test(Test_CanV2_CreateAcfMessage),
+                                       cmocka_unit_test(Test_CanV2_CreateFromGarbage),
+                                       cmocka_unit_test(Test_CanV2_IsValid)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
