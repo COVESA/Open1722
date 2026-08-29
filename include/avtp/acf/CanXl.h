@@ -95,25 +95,24 @@ typedef enum {
 /**
  * This table describes all the offsets of the ACF_CANXL header fields.
  */
-static const Avtp_FieldDescriptor_t Avtp_CanXlFieldDesc[AVTP_CANXL_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_CanXlFieldDesc[AVTP_CANXL_FIELD_MAX] = {
     /* ACF common header fields */
-    [AVTP_CANXL_FIELD_ACF_MSG_TYPE]           = { .quadlet = 0, .offset =  0, .bits = 7 },
-    [AVTP_CANXL_FIELD_ACF_MSG_LENGTH]         = { .quadlet = 0, .offset =  7, .bits = 9 },
+    [AVTP_CANXL_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_CANXL_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
     /* ACF CANXL header fields */
-    [AVTP_CANXL_FIELD_PAD]                    = { .quadlet = 0, .offset = 16, .bits =   2 },
-    [AVTP_CANXL_FIELD_MTV]                    = { .quadlet = 0, .offset = 18, .bits =   1 },
-    [AVTP_CANXL_FIELD_CAN_BUS_ID]             = { .quadlet = 0, .offset = 21, .bits =  11 },
-    [AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP]      = { .quadlet = 1, .offset =  0, .bits =  64 },
-    [AVTP_CANXL_FIELD_VCID]                   = { .quadlet = 3, .offset =  0, .bits =   8 },
-    [AVTP_CANXL_FIELD_SDT]                    = { .quadlet = 3, .offset =  8, .bits =   8 },
-    [AVTP_CANXL_FIELD_RRS]                    = { .quadlet = 3, .offset = 19, .bits =   1 },
-    [AVTP_CANXL_FIELD_SEC]                    = { .quadlet = 3, .offset = 20, .bits =   1 },
-    [AVTP_CANXL_FIELD_PRIORITY_ID]            = { .quadlet = 3, .offset = 21, .bits =  11 },
-    [AVTP_CANXL_FIELD_ACCEPTANCE_FIELD]       = { .quadlet = 4, .offset =  0, .bits =  32 },
-    [AVTP_CANXL_FIELD_TRANSACTION_NUM]        = { .quadlet = 5, .offset =  8, .bits =   8 },
-    [AVTP_CANXL_FIELD_MS]                     = { .quadlet = 5, .offset = 19, .bits =   1 },
-    [AVTP_CANXL_FIELD_SEGMENT_NUM]            = { .quadlet = 5, .offset = 20, .bits =  12 },
+    [AVTP_CANXL_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
+    [AVTP_CANXL_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_CANXL_FIELD_CAN_BUS_ID] = {.quadlet = 0, .offset = 21, .bits = 11},
+    [AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_CANXL_FIELD_VCID] = {.quadlet = 3, .offset = 0, .bits = 8},
+    [AVTP_CANXL_FIELD_SDT] = {.quadlet = 3, .offset = 8, .bits = 8},
+    [AVTP_CANXL_FIELD_RRS] = {.quadlet = 3, .offset = 19, .bits = 1},
+    [AVTP_CANXL_FIELD_SEC] = {.quadlet = 3, .offset = 20, .bits = 1},
+    [AVTP_CANXL_FIELD_PRIORITY_ID] = {.quadlet = 3, .offset = 21, .bits = 11},
+    [AVTP_CANXL_FIELD_ACCEPTANCE_FIELD] = {.quadlet = 4, .offset = 0, .bits = 32},
+    [AVTP_CANXL_FIELD_TRANSACTION_NUM] = {.quadlet = 5, .offset = 8, .bits = 8},
+    [AVTP_CANXL_FIELD_MS] = {.quadlet = 5, .offset = 19, .bits = 1},
+    [AVTP_CANXL_FIELD_SEGMENT_NUM] = {.quadlet = 5, .offset = 20, .bits = 12},
 };
 
 /**
@@ -122,8 +121,9 @@ static const Avtp_FieldDescriptor_t Avtp_CanXlFieldDesc[AVTP_CANXL_FIELD_MAX] =
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @returns Value of the ACF message type field.
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetAcfMsgType(const Avtp_CanXl_t* const pdu) {
-    return (uint8_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetAcfMsgType(const Avtp_CanXl_t *const pdu)
+{
+    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -135,8 +135,9 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetAcfMsgType(const Avtp_CanXl_t* const pdu) 
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @returns Value of the ACF message length field.
  */
-OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLength(const Avtp_CanXl_t* const pdu) {
-    return (uint16_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLength(const Avtp_CanXl_t *const pdu)
+{
+    return (uint16_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -145,8 +146,9 @@ OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLength(const Avtp_CanXl_t* const pd
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @returns Length of the ACF message in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLengthInBytes(const Avtp_CanXl_t* const pdu) {
-    return (uint16_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * 4;
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLengthInBytes(const Avtp_CanXl_t *const pdu)
+{
+    return (uint16_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_LENGTH) * 4;
 }
 
 /**
@@ -155,7 +157,8 @@ OPEN1722_INLINE uint16_t Avtp_CanXl_GetAcfMsgLengthInBytes(const Avtp_CanXl_t* c
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgType(Avtp_CanXl_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgType(Avtp_CanXl_t *pdu, uint8_t value)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -168,7 +171,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgType(Avtp_CanXl_t* pdu, uint8_t value) 
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @param value Value to set the ACF message length field to.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgLength(Avtp_CanXl_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgLength(Avtp_CanXl_t *pdu, uint16_t value)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -178,8 +182,9 @@ OPEN1722_INLINE void Avtp_CanXl_SetAcfMsgLength(Avtp_CanXl_t* pdu, uint16_t valu
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the pad field.
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* const pdu) {
-    return (uint8_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD);
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t *const pdu)
+{
+    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD);
 }
 
 /**
@@ -188,7 +193,8 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param pad The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetPad(Avtp_CanXl_t* pdu, uint8_t pad) {
+OPEN1722_INLINE void Avtp_CanXl_SetPad(Avtp_CanXl_t *pdu, uint8_t pad)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD, pad);
 }
 
@@ -198,8 +204,9 @@ OPEN1722_INLINE void Avtp_CanXl_SetPad(Avtp_CanXl_t* pdu, uint8_t pad) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the mtv flag.
  */
-OPEN1722_INLINE bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* const pdu) {
-    return (bool) GET_CANXL_FIELD(AVTP_CANXL_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t *const pdu)
+{
+    return (bool)GET_CANXL_FIELD(AVTP_CANXL_FIELD_MTV);
 }
 
 /**
@@ -208,8 +215,9 @@ OPEN1722_INLINE bool Avtp_CanXl_IsMtv(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the can_bus_id field.
  */
-OPEN1722_INLINE uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* const pdu) {
-    return (uint16_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_CAN_BUS_ID);
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t *const pdu)
+{
+    return (uint16_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_CAN_BUS_ID);
 }
 
 /**
@@ -218,8 +226,9 @@ OPEN1722_INLINE uint16_t Avtp_CanXl_GetCanBusId(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the message_timestamp field.
  */
-OPEN1722_INLINE uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* const pdu) {
-    return (uint64_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP);
+OPEN1722_INLINE uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t *const pdu)
+{
+    return (uint64_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -228,8 +237,9 @@ OPEN1722_INLINE uint64_t Avtp_CanXl_GetMessageTimestamp(const Avtp_CanXl_t* cons
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the vcid field.
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* const pdu) {
-    return (uint8_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_VCID);
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t *const pdu)
+{
+    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_VCID);
 }
 
 /**
@@ -238,8 +248,9 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetVcid(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the sdt field.
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* const pdu) {
-    return (uint8_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_SDT);
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t *const pdu)
+{
+    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_SDT);
 }
 
 /**
@@ -248,8 +259,9 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetSdt(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the rrs flag.
  */
-OPEN1722_INLINE bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* const pdu) {
-    return (bool) GET_CANXL_FIELD(AVTP_CANXL_FIELD_RRS);
+OPEN1722_INLINE bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t *const pdu)
+{
+    return (bool)GET_CANXL_FIELD(AVTP_CANXL_FIELD_RRS);
 }
 
 /**
@@ -258,8 +270,9 @@ OPEN1722_INLINE bool Avtp_CanXl_IsRrs(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the sec flag.
  */
-OPEN1722_INLINE bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* const pdu) {
-    return (bool) GET_CANXL_FIELD(AVTP_CANXL_FIELD_SEC);
+OPEN1722_INLINE bool Avtp_CanXl_IsSec(const Avtp_CanXl_t *const pdu)
+{
+    return (bool)GET_CANXL_FIELD(AVTP_CANXL_FIELD_SEC);
 }
 
 /**
@@ -268,8 +281,9 @@ OPEN1722_INLINE bool Avtp_CanXl_IsSec(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the priority_id field.
  */
-OPEN1722_INLINE uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* const pdu) {
-    return (uint16_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_PRIORITY_ID);
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t *const pdu)
+{
+    return (uint16_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_PRIORITY_ID);
 }
 
 /**
@@ -278,8 +292,9 @@ OPEN1722_INLINE uint16_t Avtp_CanXl_GetPriorityId(const Avtp_CanXl_t* const pdu)
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the acceptance_field.
  */
-OPEN1722_INLINE uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* const pdu) {
-    return (uint32_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD);
+OPEN1722_INLINE uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t *const pdu)
+{
+    return (uint32_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD);
 }
 
 /**
@@ -288,8 +303,9 @@ OPEN1722_INLINE uint32_t Avtp_CanXl_GetAcceptanceField(const Avtp_CanXl_t* const
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the transaction_num field.
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* const pdu) {
-    return (uint8_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_TRANSACTION_NUM);
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t *const pdu)
+{
+    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_TRANSACTION_NUM);
 }
 
 /**
@@ -298,8 +314,9 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetTransactionNum(const Avtp_CanXl_t* const p
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the ms flag.
  */
-OPEN1722_INLINE bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* const pdu) {
-    return (bool) GET_CANXL_FIELD(AVTP_CANXL_FIELD_MS);
+OPEN1722_INLINE bool Avtp_CanXl_IsMs(const Avtp_CanXl_t *const pdu)
+{
+    return (bool)GET_CANXL_FIELD(AVTP_CANXL_FIELD_MS);
 }
 
 /**
@@ -308,8 +325,9 @@ OPEN1722_INLINE bool Avtp_CanXl_IsMs(const Avtp_CanXl_t* const pdu) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @returns The value of the segment_num field.
  */
-OPEN1722_INLINE uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* const pdu) {
-    return (uint16_t) GET_CANXL_FIELD(AVTP_CANXL_FIELD_SEGMENT_NUM);
+OPEN1722_INLINE uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t *const pdu)
+{
+    return (uint16_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_SEGMENT_NUM);
 }
 
 /**
@@ -318,7 +336,8 @@ OPEN1722_INLINE uint16_t Avtp_CanXl_GetSegmentNum(const Avtp_CanXl_t* const pdu)
  * @param pdu Pointer to an ACF_CANXL message.
  * @param mtv The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetMtv(Avtp_CanXl_t* pdu, bool mtv) {
+OPEN1722_INLINE void Avtp_CanXl_SetMtv(Avtp_CanXl_t *pdu, bool mtv)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_MTV, mtv);
 }
 
@@ -328,7 +347,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetMtv(Avtp_CanXl_t* pdu, bool mtv) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param canBusId The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t* pdu, uint16_t canBusId) {
+OPEN1722_INLINE void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t *pdu, uint16_t canBusId)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_CAN_BUS_ID, canBusId);
 }
 
@@ -338,7 +358,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetCanBusId(Avtp_CanXl_t* pdu, uint16_t canBusId
  * @param pdu Pointer to an ACF_CANXL message.
  * @param messageTimestamp The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t* pdu, uint64_t messageTimestamp) {
+OPEN1722_INLINE void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t *pdu, uint64_t messageTimestamp)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_MESSAGE_TIMESTAMP, messageTimestamp);
 }
 
@@ -348,7 +369,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetMessageTimestamp(Avtp_CanXl_t* pdu, uint64_t 
  * @param pdu Pointer to an ACF_CANXL message.
  * @param vcid The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetVcid(Avtp_CanXl_t* pdu, uint8_t vcid) {
+OPEN1722_INLINE void Avtp_CanXl_SetVcid(Avtp_CanXl_t *pdu, uint8_t vcid)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_VCID, vcid);
 }
 
@@ -358,7 +380,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetVcid(Avtp_CanXl_t* pdu, uint8_t vcid) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param sdt The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetSdt(Avtp_CanXl_t* pdu, uint8_t sdt) {
+OPEN1722_INLINE void Avtp_CanXl_SetSdt(Avtp_CanXl_t *pdu, uint8_t sdt)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_SDT, sdt);
 }
 
@@ -368,7 +391,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetSdt(Avtp_CanXl_t* pdu, uint8_t sdt) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param rrs The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetRrs(Avtp_CanXl_t* pdu, bool rrs) {
+OPEN1722_INLINE void Avtp_CanXl_SetRrs(Avtp_CanXl_t *pdu, bool rrs)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_RRS, rrs);
 }
 
@@ -378,7 +402,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetRrs(Avtp_CanXl_t* pdu, bool rrs) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param sec The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetSec(Avtp_CanXl_t* pdu, bool sec) {
+OPEN1722_INLINE void Avtp_CanXl_SetSec(Avtp_CanXl_t *pdu, bool sec)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_SEC, sec);
 }
 
@@ -388,7 +413,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetSec(Avtp_CanXl_t* pdu, bool sec) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param priorityId The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t* pdu, uint16_t priorityId) {
+OPEN1722_INLINE void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t *pdu, uint16_t priorityId)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_PRIORITY_ID, priorityId);
 }
 
@@ -398,7 +424,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetPriorityId(Avtp_CanXl_t* pdu, uint16_t priori
  * @param pdu Pointer to an ACF_CANXL message.
  * @param acceptanceField The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t* pdu, uint32_t acceptanceField) {
+OPEN1722_INLINE void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t *pdu, uint32_t acceptanceField)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_ACCEPTANCE_FIELD, acceptanceField);
 }
 
@@ -408,7 +435,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetAcceptanceField(Avtp_CanXl_t* pdu, uint32_t a
  * @param pdu Pointer to an ACF_CANXL message.
  * @param transactionNum The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t* pdu, uint8_t transactionNum) {
+OPEN1722_INLINE void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t *pdu, uint8_t transactionNum)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_TRANSACTION_NUM, transactionNum);
 }
 
@@ -418,7 +446,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetTransactionNum(Avtp_CanXl_t* pdu, uint8_t tra
  * @param pdu Pointer to an ACF_CANXL message.
  * @param ms The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetMs(Avtp_CanXl_t* pdu, bool ms) {
+OPEN1722_INLINE void Avtp_CanXl_SetMs(Avtp_CanXl_t *pdu, bool ms)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_MS, ms);
 }
 
@@ -428,7 +457,8 @@ OPEN1722_INLINE void Avtp_CanXl_SetMs(Avtp_CanXl_t* pdu, bool ms) {
  * @param pdu Pointer to an ACF_CANXL message.
  * @param segmentNum The value to set.
  */
-OPEN1722_INLINE void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* pdu, uint16_t segmentNum) {
+OPEN1722_INLINE void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t *pdu, uint16_t segmentNum)
+{
     SET_CANXL_FIELD(AVTP_CANXL_FIELD_SEGMENT_NUM, segmentNum);
 }
 
@@ -438,7 +468,7 @@ OPEN1722_INLINE void Avtp_CanXl_SetSegmentNum(Avtp_CanXl_t* pdu, uint16_t segmen
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @return Pointer to ACF CAN XL frame payload
  */
-OPEN1722_INLINE const uint8_t *Avtp_CanXl_GetPayload(const Avtp_CanXl_t* const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_CanXl_GetPayload(const Avtp_CanXl_t *const pdu)
 {
     return pdu->payload;
 }
@@ -488,7 +518,7 @@ OPEN1722_INLINE void Avtp_CanXl_SetPayloadLength(Avtp_CanXl_t *pdu, uint16_t pay
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  * @return  Length of CAN payload in bytes
  */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetPayloadLength(const Avtp_CanXl_t* const pdu)
+OPEN1722_INLINE uint8_t Avtp_CanXl_GetPayloadLength(const Avtp_CanXl_t *const pdu)
 {
     uint8_t pad_length = Avtp_CanXl_GetPad(pdu);
     uint16_t acf_length_bytes = Avtp_CanXl_GetAcfMsgLengthInBytes(pdu);
@@ -500,7 +530,7 @@ OPEN1722_INLINE uint8_t Avtp_CanXl_GetPayloadLength(const Avtp_CanXl_t* const pd
  *
  * @param pdu Pointer to the first bit of a 1722 ACF CANXL PDU.
  */
-OPEN1722_INLINE void Avtp_CanXl_Init(Avtp_CanXl_t* pdu)
+OPEN1722_INLINE void Avtp_CanXl_Init(Avtp_CanXl_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_CanXl_t));
@@ -546,7 +576,7 @@ OPEN1722_INLINE void Avtp_CanXl_CreateAcfMessage(Avtp_CanXl_t *pdu, uint16_t pri
  * @param bufferSize Size of the buffer containing the ACF CAN XL frame.
  * @return true if the ACF CAN XL frame is valid, false otherwise.
  */
-OPEN1722_INLINE bool Avtp_CanXl_IsValid(const Avtp_CanXl_t* const pdu, size_t bufferSize)
+OPEN1722_INLINE bool Avtp_CanXl_IsValid(const Avtp_CanXl_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
