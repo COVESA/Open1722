@@ -39,591 +39,416 @@ extern "C" {
 #include <cmocka.h>
 #include <stdio.h>
 
-static void Test_Gbb_Init(void** state)
+static void Test_Gbb_Init(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
 
     // Check init function while passing in a null pointer
     Avtp_Gbb_Init(NULL);
 
     Avtp_Gbb_Init(gbb);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_GetAcfMsgType(void** state)
+static void Test_Gbb_GetAcfMsgType(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
 }
 
-static void Test_Gbb_GetAcfMsgLength(void** state)
+static void Test_Gbb_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetAcfMsgLength(gbb), 4);
 }
 
-static void Test_Gbb_GetPad(void** state)
+static void Test_Gbb_GetPad(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0xC0, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetPad(gbb), 3);
 }
 
-static void Test_Gbb_IsMtv(void** state)
+static void Test_Gbb_IsMtv(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsMtv(gbb), true);
 }
 
-static void Test_Gbb_GetByteBusId(void** state)
+static void Test_Gbb_GetByteBusId(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x05, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x05, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetByteBusId(gbb), 0x5FF);
 }
 
-static void Test_Gbb_GetMessageTimestamp(void** state)
+static void Test_Gbb_GetMessageTimestamp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0xBF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0xBF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                            0xFF, 0xFF, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetMessageTimestamp(gbb), 0xBFFFFFFFFFFFFFFFull);
 }
 
-static void Test_Gbb_GetEvt(void** state)
+static void Test_Gbb_GetEvt(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0xB0, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0xB0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetEvt(gbb), 0xB);
 }
 
-static void Test_Gbb_IsHs(void** state)
+static void Test_Gbb_IsHs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x2,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsHs(gbb), true);
 }
 
-static void Test_Gbb_IsCs(void** state)
+static void Test_Gbb_IsCs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x1,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsCs(gbb), true);
 }
 
-static void Test_Gbb_GetTransactionNum(void** state)
+static void Test_Gbb_GetTransactionNum(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0xBF, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0xBF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetTransactionNum(gbb), 0xBF);
 }
 
-static void Test_Gbb_IsOp(void** state)
+static void Test_Gbb_IsOp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x80, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsOp(gbb), true);
 }
 
-static void Test_Gbb_IsRsp(void** state)
+static void Test_Gbb_IsRsp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x40, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsRsp(gbb), true);
 }
 
-static void Test_Gbb_IsErr(void** state)
+static void Test_Gbb_IsErr(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsErr(gbb), true);
 }
 
-static void Test_Gbb_IsMs(void** state)
+static void Test_Gbb_IsMs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x10, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_IsMs(gbb), true);
 }
 
-static void Test_Gbb_GetReadSize(void** state)
+static void Test_Gbb_GetReadSize(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0B, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetReadSize(gbb), 0xBFF);
 }
 
-static void Test_Gbb_GetSegmentNum(void** state)
+static void Test_Gbb_GetSegmentNum(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x04, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0B, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetSegmentNum(gbb), 0xBFF);
 }
 
-static void Test_Gbb_GetPayloadLength(void** state)
+static void Test_Gbb_GetPayloadLength(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x05, 0xC0, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0B, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x05, 0xC0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0,  0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 1);
 }
 
-static void Test_Gbb_GetPayloadLength_NoPadding(void** state)
+static void Test_Gbb_GetPayloadLength_NoPadding(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0B, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x05, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 4);
 }
 
-static void Test_Gbb_GetAcfMsgLengthInBytes(void** state)
+static void Test_Gbb_GetAcfMsgLengthInBytes(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x1A, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0B, 0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    uint8_t msg[msg_len] = {0x1A, 0x05, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+                            0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetAcfMsgLengthInBytes(gbb), 5 * 4);
 }
 
-static void Test_Gbb_SetAcfMsgType(void** state)
+static void Test_Gbb_SetAcfMsgType(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetAcfMsgType(gbb, AVTP_ACF_TYPE_BYTE_BUS);
     assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
 }
 
-static void Test_Gbb_SetAcfMsgLength(void** state)
+static void Test_Gbb_SetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetAcfMsgLength(gbb, 5);
     assert_int_equal(Avtp_Gbb_GetAcfMsgLength(gbb), 5);
     assert_int_equal(Avtp_Gbb_GetAcfMsgLengthInBytes(gbb), 20);
 }
 
-static void Test_Gbb_SetMtv(void** state)
+static void Test_Gbb_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetMtv(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetByteBusId(void** state)
+static void Test_Gbb_SetByteBusId(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetByteBusId(gbb, 0x5FF);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x5,  0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x5, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetMessageTimestamp(void** state)
+static void Test_Gbb_SetMessageTimestamp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetMessageTimestamp(gbb, 0xBFFFFFFFFFFFFFFFull);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0xBF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0xBF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                     0xFF, 0xFF, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetEvt(void** state)
+static void Test_Gbb_SetEvt(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetEvt(gbb, 0xB);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0xB0, 0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0xB0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetHs(void** state)
+static void Test_Gbb_SetHs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetHs(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x2,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetCs(void** state)
+static void Test_Gbb_SetCs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetCs(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x1,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetTransactionNum(void** state)
+static void Test_Gbb_SetTransactionNum(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetTransactionNum(gbb, 0xBF);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0xBF, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0xBF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetOp(void** state)
+static void Test_Gbb_SetOp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetOp(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x80, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetRsp(void** state)
+static void Test_Gbb_SetRsp(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetRsp(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x40, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetErr(void** state)
+static void Test_Gbb_SetErr(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetErr(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x20, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x20, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetMs(void** state)
+static void Test_Gbb_SetMs(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetMs(gbb, true);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x10, 0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetReadSize(void** state)
+static void Test_Gbb_SetReadSize(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetReadSize(gbb, 0xBFF);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0xB,  0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0xB, 0xFF, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetSegmentNum(void** state)
+static void Test_Gbb_SetSegmentNum(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetSegmentNum(gbb, 0xBFF);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x00, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0xB,  0xFF,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x00, 0x0, 0x0, 0x0, 0x0,  0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0xB, 0xFF, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetPayloadLength(void** state)
+static void Test_Gbb_SetPayloadLength(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetPayloadLength(gbb, 3);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x05, 0x40, 0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x05, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_SetPayloadLength_NoPadding(void** state)
+static void Test_Gbb_SetPayloadLength_NoPadding(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetPayloadLength(gbb, 4);
 
-    uint8_t expected_msg[msg_len] = {
-        0x1A, 0x05, 0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0,
-        0x0,  0x0,  0x0,  0x0
-    };
+    uint8_t expected_msg[msg_len] = {0x1A, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                                     0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_Payload(void** state)
+static void Test_Gbb_Payload(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 8;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_Gbb_Init(gbb);
     Avtp_Gbb_SetPayload(gbb, payload, sizeof(payload));
@@ -632,12 +457,12 @@ static void Test_Gbb_Payload(void** state)
     assert_memory_equal(payload, Avtp_Gbb_GetPayload(gbb), sizeof(payload));
 }
 
-static void Test_Gbb_CreateAcfMessage(void** state)
+static void Test_Gbb_CreateAcfMessage(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 8;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_Gbb_CreateAcfMessage(gbb, 0x5FF, true, 0xBF, payload, sizeof(payload));
 
@@ -653,12 +478,12 @@ static void Test_Gbb_CreateAcfMessage(void** state)
     assert_int_equal(Avtp_Gbb_GetMessageTimestamp(gbb), 0x123456789ABCDEF0ULL);
 }
 
-static void Test_Gbb_CreateFromGarbage(void** state)
+static void Test_Gbb_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 8;
     uint8_t msg[msg_len];
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(msg, 0xAA, msg_len);
@@ -676,12 +501,12 @@ static void Test_Gbb_CreateFromGarbage(void** state)
     assert_int_equal(Avtp_Gbb_IsValid(gbb, msg_len), 1);
 }
 
-static void Test_Gbb_IsValid(void** state)
+static void Test_Gbb_IsValid(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 32;
     uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t* gbb = (Avtp_Gbb_t*)msg;
-    uint8_t payload[8] = {0,1,2,3,4,5,6,7};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
     Avtp_Gbb_Init(gbb);
@@ -702,49 +527,47 @@ static void Test_Gbb_IsValid(void** state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(Test_Gbb_Init),
-        cmocka_unit_test(Test_Gbb_GetAcfMsgType),
-        cmocka_unit_test(Test_Gbb_GetAcfMsgLength),
-        cmocka_unit_test(Test_Gbb_GetPad),
-        cmocka_unit_test(Test_Gbb_IsMtv),
-        cmocka_unit_test(Test_Gbb_GetByteBusId),
-        cmocka_unit_test(Test_Gbb_GetMessageTimestamp),
-        cmocka_unit_test(Test_Gbb_GetEvt),
-        cmocka_unit_test(Test_Gbb_IsHs),
-        cmocka_unit_test(Test_Gbb_IsCs),
-        cmocka_unit_test(Test_Gbb_GetTransactionNum),
-        cmocka_unit_test(Test_Gbb_IsOp),
-        cmocka_unit_test(Test_Gbb_IsRsp),
-        cmocka_unit_test(Test_Gbb_IsErr),
-        cmocka_unit_test(Test_Gbb_IsMs),
-        cmocka_unit_test(Test_Gbb_GetReadSize),
-        cmocka_unit_test(Test_Gbb_GetSegmentNum),
-        cmocka_unit_test(Test_Gbb_GetPayloadLength),
-        cmocka_unit_test(Test_Gbb_GetPayloadLength_NoPadding),
-        cmocka_unit_test(Test_Gbb_GetAcfMsgLengthInBytes),
-        cmocka_unit_test(Test_Gbb_SetAcfMsgType),
-        cmocka_unit_test(Test_Gbb_SetAcfMsgLength),
-        cmocka_unit_test(Test_Gbb_SetMtv),
-        cmocka_unit_test(Test_Gbb_SetByteBusId),
-        cmocka_unit_test(Test_Gbb_SetMessageTimestamp),
-        cmocka_unit_test(Test_Gbb_SetEvt),
-        cmocka_unit_test(Test_Gbb_SetHs),
-        cmocka_unit_test(Test_Gbb_SetCs),
-        cmocka_unit_test(Test_Gbb_SetTransactionNum),
-        cmocka_unit_test(Test_Gbb_SetOp),
-        cmocka_unit_test(Test_Gbb_SetRsp),
-        cmocka_unit_test(Test_Gbb_SetErr),
-        cmocka_unit_test(Test_Gbb_SetMs),
-        cmocka_unit_test(Test_Gbb_SetReadSize),
-        cmocka_unit_test(Test_Gbb_SetSegmentNum),
-        cmocka_unit_test(Test_Gbb_SetPayloadLength),
-        cmocka_unit_test(Test_Gbb_SetPayloadLength_NoPadding),
-        cmocka_unit_test(Test_Gbb_Payload),
-        cmocka_unit_test(Test_Gbb_CreateAcfMessage),
-        cmocka_unit_test(Test_Gbb_CreateFromGarbage),
-        cmocka_unit_test(Test_Gbb_IsValid)
-    };
+    const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gbb_Init),
+                                       cmocka_unit_test(Test_Gbb_GetAcfMsgType),
+                                       cmocka_unit_test(Test_Gbb_GetAcfMsgLength),
+                                       cmocka_unit_test(Test_Gbb_GetPad),
+                                       cmocka_unit_test(Test_Gbb_IsMtv),
+                                       cmocka_unit_test(Test_Gbb_GetByteBusId),
+                                       cmocka_unit_test(Test_Gbb_GetMessageTimestamp),
+                                       cmocka_unit_test(Test_Gbb_GetEvt),
+                                       cmocka_unit_test(Test_Gbb_IsHs),
+                                       cmocka_unit_test(Test_Gbb_IsCs),
+                                       cmocka_unit_test(Test_Gbb_GetTransactionNum),
+                                       cmocka_unit_test(Test_Gbb_IsOp),
+                                       cmocka_unit_test(Test_Gbb_IsRsp),
+                                       cmocka_unit_test(Test_Gbb_IsErr),
+                                       cmocka_unit_test(Test_Gbb_IsMs),
+                                       cmocka_unit_test(Test_Gbb_GetReadSize),
+                                       cmocka_unit_test(Test_Gbb_GetSegmentNum),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_Gbb_GetAcfMsgLengthInBytes),
+                                       cmocka_unit_test(Test_Gbb_SetAcfMsgType),
+                                       cmocka_unit_test(Test_Gbb_SetAcfMsgLength),
+                                       cmocka_unit_test(Test_Gbb_SetMtv),
+                                       cmocka_unit_test(Test_Gbb_SetByteBusId),
+                                       cmocka_unit_test(Test_Gbb_SetMessageTimestamp),
+                                       cmocka_unit_test(Test_Gbb_SetEvt),
+                                       cmocka_unit_test(Test_Gbb_SetHs),
+                                       cmocka_unit_test(Test_Gbb_SetCs),
+                                       cmocka_unit_test(Test_Gbb_SetTransactionNum),
+                                       cmocka_unit_test(Test_Gbb_SetOp),
+                                       cmocka_unit_test(Test_Gbb_SetRsp),
+                                       cmocka_unit_test(Test_Gbb_SetErr),
+                                       cmocka_unit_test(Test_Gbb_SetMs),
+                                       cmocka_unit_test(Test_Gbb_SetReadSize),
+                                       cmocka_unit_test(Test_Gbb_SetSegmentNum),
+                                       cmocka_unit_test(Test_Gbb_SetPayloadLength),
+                                       cmocka_unit_test(Test_Gbb_SetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_Gbb_Payload),
+                                       cmocka_unit_test(Test_Gbb_CreateAcfMessage),
+                                       cmocka_unit_test(Test_Gbb_CreateFromGarbage),
+                                       cmocka_unit_test(Test_Gbb_IsValid)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
