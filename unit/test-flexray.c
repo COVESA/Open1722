@@ -70,11 +70,11 @@ static void flexray_get_set_fields(void **state) {
     Avtp_FlexRay_SetPad((Avtp_FlexRay_t*)pdu, 2);
     assert_int_equal(Avtp_FlexRay_GetPad((Avtp_FlexRay_t*)pdu), 2);
 
-    Avtp_FlexRay_EnableMtv((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetMtv((Avtp_FlexRay_t*)pdu), 1);
+    Avtp_FlexRay_SetMtv((Avtp_FlexRay_t*)pdu, true);
+    assert_int_equal(Avtp_FlexRay_IsMtv((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_DisableMtv((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetMtv((Avtp_FlexRay_t*)pdu), 0);
+    Avtp_FlexRay_SetMtv((Avtp_FlexRay_t*)pdu, false);
+    assert_int_equal(Avtp_FlexRay_IsMtv((Avtp_FlexRay_t*)pdu), 0);
 
     Avtp_FlexRay_SetFrBusId((Avtp_FlexRay_t*)pdu, 5);
     assert_int_equal(Avtp_FlexRay_GetFrBusId((Avtp_FlexRay_t*)pdu), 5);
@@ -82,29 +82,29 @@ static void flexray_get_set_fields(void **state) {
     Avtp_FlexRay_SetChan((Avtp_FlexRay_t*)pdu, 1);
     assert_int_equal(Avtp_FlexRay_GetChan((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_EnableStr((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetStr((Avtp_FlexRay_t*)pdu), 1);
+    Avtp_FlexRay_SetStr((Avtp_FlexRay_t*)pdu, true);
+    assert_int_equal(Avtp_FlexRay_IsStr((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_DisableStr((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetStr((Avtp_FlexRay_t*)pdu), 0);
+    Avtp_FlexRay_SetStr((Avtp_FlexRay_t*)pdu, false);
+    assert_int_equal(Avtp_FlexRay_IsStr((Avtp_FlexRay_t*)pdu), 0);
 
-    Avtp_FlexRay_EnableSyn((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetSyn((Avtp_FlexRay_t*)pdu), 1);
+    Avtp_FlexRay_SetSyn((Avtp_FlexRay_t*)pdu, true);
+    assert_int_equal(Avtp_FlexRay_IsSyn((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_DisableSyn((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetSyn((Avtp_FlexRay_t*)pdu), 0);
+    Avtp_FlexRay_SetSyn((Avtp_FlexRay_t*)pdu, false);
+    assert_int_equal(Avtp_FlexRay_IsSyn((Avtp_FlexRay_t*)pdu), 0);
 
-    Avtp_FlexRay_EnablePre((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetPre((Avtp_FlexRay_t*)pdu), 1);
+    Avtp_FlexRay_SetPre((Avtp_FlexRay_t*)pdu, true);
+    assert_int_equal(Avtp_FlexRay_IsPre((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_DisablePre((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetPre((Avtp_FlexRay_t*)pdu), 0);
+    Avtp_FlexRay_SetPre((Avtp_FlexRay_t*)pdu, false);
+    assert_int_equal(Avtp_FlexRay_IsPre((Avtp_FlexRay_t*)pdu), 0);
 
-    Avtp_FlexRay_EnableNfi((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetNfi((Avtp_FlexRay_t*)pdu), 1);
+    Avtp_FlexRay_SetNfi((Avtp_FlexRay_t*)pdu, true);
+    assert_int_equal(Avtp_FlexRay_IsNfi((Avtp_FlexRay_t*)pdu), 1);
 
-    Avtp_FlexRay_DisableNfi((Avtp_FlexRay_t*)pdu);
-    assert_int_equal(Avtp_FlexRay_GetNfi((Avtp_FlexRay_t*)pdu), 0);
+    Avtp_FlexRay_SetNfi((Avtp_FlexRay_t*)pdu, false);
+    assert_int_equal(Avtp_FlexRay_IsNfi((Avtp_FlexRay_t*)pdu), 0);
 
     Avtp_FlexRay_SetMessageTimestamp((Avtp_FlexRay_t*)pdu, 0x123456789ABCULL);
     assert_int_equal(Avtp_FlexRay_GetMessageTimestamp((Avtp_FlexRay_t*)pdu), 0x123456789ABCULL);
@@ -118,6 +118,10 @@ static void flexray_get_set_fields(void **state) {
 
 static void flexray_is_valid(void **state) {
     uint8_t pdu[MAX_PDU_SIZE];
+
+    // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
+    Avtp_FlexRay_Init((Avtp_FlexRay_t*)pdu);
+    assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t*)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_FlexRay_Init((Avtp_FlexRay_t*)pdu);
     Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t*)pdu, 4);
@@ -133,6 +137,43 @@ static void flexray_is_valid(void **state) {
     Avtp_FlexRay_Init((Avtp_FlexRay_t*)pdu);
     Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t*)pdu, 6);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t*)pdu, 9), 0);
+
+    // FlexRay payload bound: > 254 bytes is invalid.
+    Avtp_FlexRay_Init((Avtp_FlexRay_t*)pdu);
+    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t*)pdu, 68);
+    assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t*)pdu, MAX_PDU_SIZE), 0);
+}
+
+static void flexray_create_message(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    Avtp_FlexRay_CreateAcfMessage((Avtp_FlexRay_t*)pdu, 0x7FF, 63, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_FlexRay_GetAcfMsgType((Avtp_FlexRay_t*)pdu), AVTP_ACF_TYPE_FLEXRAY);
+    assert_int_equal(Avtp_FlexRay_GetFrFrameId((Avtp_FlexRay_t*)pdu), 0x7FF);
+    assert_int_equal(Avtp_FlexRay_GetCycle((Avtp_FlexRay_t*)pdu), 63);
+    assert_memory_equal(payload, pdu + AVTP_FLEXRAY_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_FlexRay_GetPayloadLength((Avtp_FlexRay_t*)pdu), 8);
+    assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t*)pdu, MAX_PDU_SIZE), 1);
+}
+
+static void flexray_create_from_garbage(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(pdu, 0xAA, MAX_PDU_SIZE);
+    Avtp_FlexRay_CreateAcfMessage((Avtp_FlexRay_t*)pdu, 0x123, 0x3F, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_FlexRay_GetAcfMsgType((Avtp_FlexRay_t*)pdu), AVTP_ACF_TYPE_FLEXRAY);
+    assert_int_equal(Avtp_FlexRay_IsMtv((Avtp_FlexRay_t*)pdu), 0);
+    assert_int_equal(Avtp_FlexRay_IsStr((Avtp_FlexRay_t*)pdu), 0);
+    assert_int_equal(Avtp_FlexRay_IsSyn((Avtp_FlexRay_t*)pdu), 0);
+    assert_int_equal(Avtp_FlexRay_IsPre((Avtp_FlexRay_t*)pdu), 0);
+    assert_int_equal(Avtp_FlexRay_IsNfi((Avtp_FlexRay_t*)pdu), 0);
+    assert_memory_equal(payload, pdu + AVTP_FLEXRAY_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t*)pdu, MAX_PDU_SIZE), 1);
 }
 
 int main(void)
@@ -141,6 +182,8 @@ int main(void)
         cmocka_unit_test(flexray_init),
         cmocka_unit_test(flexray_get_set_fields),
         cmocka_unit_test(flexray_is_valid),
+        cmocka_unit_test(flexray_create_message),
+        cmocka_unit_test(flexray_create_from_garbage),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
