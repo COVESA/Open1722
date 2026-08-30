@@ -55,7 +55,7 @@ static const Avtp_FieldDescriptor_t Avtp_VssFieldDesc[AVTP_VSS_FIELD_MAX] =
     [AVTP_VSS_FIELD_ADDR_MODE]          = { .quadlet = 0, .offset = 19, .bits =  2 },
     [AVTP_VSS_FIELD_VSS_OP]             = { .quadlet = 0, .offset = 21, .bits =  3 },
     [AVTP_VSS_FIELD_VSS_DATATYPE]       = { .quadlet = 0, .offset = 24, .bits =  8 },
-    [AVTP_VSS_FIELD_MSG_TIMESTAMP]      = { .quadlet = 1, .offset =  0, .bits = 64 }
+    [AVTP_VSS_FIELD_MESSAGE_TIMESTAMP]  = { .quadlet = 1, .offset =  0, .bits = 64 }
 };
 
 /* Read a 16‑bit big‑endian length prefix at *ptr and clamp it so that
@@ -146,19 +146,23 @@ void Avtp_Vss_SetField(Avtp_Vss_t* pdu,
     SET_FIELD(field, value);
 }
 
-void Avtp_Vss_Pad(Avtp_Vss_t* vss_pdu, uint16_t vss_length) {
+void Avtp_Vss_SetPayloadLength(Avtp_Vss_t* vss_pdu, uint16_t payload_length) {
 
     uint8_t padSize;
+    uint16_t msgLenBytes;
     uint16_t padded_length;
 
+    // Compute the total message length including the fixed header
+    msgLenBytes = AVTP_VSS_FIXED_HEADER_LEN + payload_length;
+
     // Check if padding is required
-    padSize = (uint8_t)((AVTP_QUADLET_SIZE - (vss_length % AVTP_QUADLET_SIZE)) % AVTP_QUADLET_SIZE);
-    if (vss_length % AVTP_QUADLET_SIZE) {
-        memset((uint8_t*)vss_pdu + vss_length, 0, padSize);
+    padSize = (uint8_t)((AVTP_QUADLET_SIZE - (msgLenBytes % AVTP_QUADLET_SIZE)) % AVTP_QUADLET_SIZE);
+    if (msgLenBytes % AVTP_QUADLET_SIZE) {
+        memset((uint8_t*)vss_pdu + msgLenBytes, 0, padSize);
     }
 
     // Set the length and padding fields
-    padded_length = vss_length + padSize;
+    padded_length = msgLenBytes + padSize;
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_ACF_MSG_LENGTH,
                         (uint64_t)(padded_length / AVTP_QUADLET_SIZE));
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_PAD, padSize);
@@ -168,16 +172,16 @@ Avtp_AcfMsgType_t Avtp_Vss_GetAcfMsgType(const Avtp_Vss_t* const pdu) {
     return GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_TYPE);
 }
 
-uint8_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t* const pdu) {
-    return (uint8_t)GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH);
+uint16_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t* const pdu) {
+    return (uint16_t)GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH);
 }
 
 uint8_t Avtp_Vss_GetPad(const Avtp_Vss_t* const pdu) {
     return (uint8_t)GET_FIELD(AVTP_VSS_FIELD_PAD);
 }
 
-uint8_t Avtp_Vss_GetMtv(const Avtp_Vss_t* const pdu) {
-    return (uint8_t)GET_FIELD(AVTP_VSS_FIELD_MTV);
+bool Avtp_Vss_IsMtv(const Avtp_Vss_t* const pdu) {
+    return (bool)GET_FIELD(AVTP_VSS_FIELD_MTV);
 }
 
 Vss_AddrMode_t Avtp_Vss_GetAddrMode(const Avtp_Vss_t* const pdu) {
@@ -192,8 +196,8 @@ Vss_Datatype_t Avtp_Vss_GetDatatype(const Avtp_Vss_t* const pdu) {
     return GET_FIELD(AVTP_VSS_FIELD_VSS_DATATYPE);
 }
 
-uint64_t Avtp_Vss_GetMsgTimestamp(const Avtp_Vss_t* const pdu) {
-    return GET_FIELD(AVTP_VSS_FIELD_MSG_TIMESTAMP);
+uint64_t Avtp_Vss_GetMessageTimestamp(const Avtp_Vss_t* const pdu) {
+    return GET_FIELD(AVTP_VSS_FIELD_MESSAGE_TIMESTAMP);
 }
 
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t* const pdu, VssPath_t* val) {
@@ -495,7 +499,7 @@ void Avtp_Vss_SetAcfMsgType(Avtp_Vss_t* pdu, Avtp_AcfMsgType_t val) {
     SET_FIELD(AVTP_VSS_FIELD_ACF_MSG_TYPE, val);
 }
 
-void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t* pdu, uint8_t val) {
+void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t* pdu, uint16_t val) {
     SET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH, val);
 }
 
@@ -503,14 +507,9 @@ void Avtp_Vss_SetPad(Avtp_Vss_t* pdu, uint8_t val) {
     SET_FIELD(AVTP_VSS_FIELD_PAD, val);
 }
 
-void Avtp_Vss_EnableMtv(Avtp_Vss_t* pdu)
+void Avtp_Vss_SetMtv(Avtp_Vss_t* pdu, bool mtv)
 {
-    SET_FIELD(AVTP_VSS_FIELD_MTV, 1);
-}
-
-void Avtp_Vss_DisableMtv(Avtp_Vss_t* pdu)
-{
-    SET_FIELD(AVTP_VSS_FIELD_MTV, 0);
+    SET_FIELD(AVTP_VSS_FIELD_MTV, mtv);
 }
 
 void Avtp_Vss_SetAddrMode(Avtp_Vss_t* pdu, Vss_AddrMode_t val) {
@@ -525,8 +524,8 @@ void Avtp_Vss_SetDatatype(Avtp_Vss_t* pdu, Vss_Datatype_t val) {
     SET_FIELD(AVTP_VSS_FIELD_VSS_DATATYPE, val);
 }
 
-void Avtp_Vss_SetMsgTimestamp(Avtp_Vss_t* pdu, uint64_t val)  {
-    SET_FIELD(AVTP_VSS_FIELD_MSG_TIMESTAMP, val);
+void Avtp_Vss_SetMessageTimestamp(Avtp_Vss_t* pdu, uint64_t val)  {
+    SET_FIELD(AVTP_VSS_FIELD_MESSAGE_TIMESTAMP, val);
  }
 
 void Avtp_Vss_SetVssPath(Avtp_Vss_t* pdu, VssPath_t* val)

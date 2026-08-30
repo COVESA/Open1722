@@ -187,7 +187,7 @@ static int prepare_vss_interop_packet(uint8_t* acf_pdu, Vss_Datatype_t dt,
     // Prepare ACF PDU for VSS
     Avtp_Vss_Init(pdu);
     clock_gettime(CLOCK_REALTIME, &now);
-    Avtp_Vss_SetField(pdu, AVTP_VSS_FIELD_MSG_TIMESTAMP,
+    Avtp_Vss_SetField(pdu, AVTP_VSS_FIELD_MESSAGE_TIMESTAMP,
                       (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
     Avtp_Vss_SetField(pdu, AVTP_VSS_FIELD_MTV, 1U);
 
@@ -275,7 +275,8 @@ int main(int argc, char *argv[])
         cf_length += res;
         acf_length = res;
 
-        Avtp_Vss_Pad((Avtp_Vss_t*) acf_pdu, acf_length);
+        Avtp_Vss_SetPayloadLength((Avtp_Vss_t*) acf_pdu,
+                                  acf_length - AVTP_VSS_FIXED_HEADER_LEN);
         uint8_t pad_length = Avtp_Vss_GetField((Avtp_Vss_t*)acf_pdu, AVTP_VSS_FIELD_PAD);
         pdu_length += pad_length;
         cf_length += pad_length;

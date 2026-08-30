@@ -36,6 +36,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -50,7 +51,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_VSS_FIXED_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Vss_t;
+} __attribute__((packed)) Avtp_Vss_t;
 
 typedef enum vss_op_code {
     PUBLISH_CURRENT_VALUE   = 0,
@@ -101,7 +102,7 @@ typedef enum  {
     AVTP_VSS_FIELD_ADDR_MODE,
     AVTP_VSS_FIELD_VSS_OP,
     AVTP_VSS_FIELD_VSS_DATATYPE,
-    AVTP_VSS_FIELD_MSG_TIMESTAMP,
+    AVTP_VSS_FIELD_MESSAGE_TIMESTAMP,
 
     /* Count number of fields for bound checks */
     AVTP_VSS_FIELD_MAX
@@ -243,19 +244,19 @@ void Avtp_Vss_SetField(Avtp_Vss_t* pdu, Avtp_VssFields_t field, uint64_t value);
  * length and pad fields while inserting the padded bytes.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
- * @param vss_length Length of the VSS frame including the header bytes.
+ * @param payload_length Length of the VSS payload (path + data) in bytes.
  */
-void Avtp_Vss_Pad(Avtp_Vss_t* pdu, uint16_t vss_length);
+void Avtp_Vss_SetPayloadLength(Avtp_Vss_t* pdu, uint16_t payload_length);
 
 /* Getter and Setter Functions*/
 Avtp_AcfMsgType_t Avtp_Vss_GetAcfMsgType(const Avtp_Vss_t* const pdu);
-uint8_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t* const pdu);
+uint16_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t* const pdu);
 uint8_t Avtp_Vss_GetPad(const Avtp_Vss_t* const pdu);
-uint8_t Avtp_Vss_GetMtv(const Avtp_Vss_t* const pdu);
+bool Avtp_Vss_IsMtv(const Avtp_Vss_t* const pdu);
 Vss_AddrMode_t Avtp_Vss_GetAddrMode(const Avtp_Vss_t* const pdu);
 Vss_OpCode_t Avtp_Vss_GetOpCode(const Avtp_Vss_t* const pdu);
 Vss_Datatype_t Avtp_Vss_GetDatatype(const Avtp_Vss_t* const pdu);
-uint64_t Avtp_Vss_GetMsgTimestamp(const Avtp_Vss_t* const pdu);
+uint64_t Avtp_Vss_GetMessageTimestamp(const Avtp_Vss_t* const pdu);
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t* const pdu, VssPath_t* val);
 void Avtp_Vss_GetVssData(const Avtp_Vss_t* const pdu, VssData_t* val);
 uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t* str_array);
@@ -264,14 +265,13 @@ void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t*  const vss_data
                                      VssDataString_t* strings[],
                                      uint16_t num_strings);
 void Avtp_Vss_SetAcfMsgType(Avtp_Vss_t* pdu, Avtp_AcfMsgType_t val);
-void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t* pdu, uint8_t val);
+void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t* pdu, uint16_t val);
 void Avtp_Vss_SetPad(Avtp_Vss_t* pdu, uint8_t val);
-void Avtp_Vss_EnableMtv(Avtp_Vss_t* pdu);
-void Avtp_Vss_DisableMtv(Avtp_Vss_t* pdu);
+void Avtp_Vss_SetMtv(Avtp_Vss_t* pdu, bool mtv);
 void Avtp_Vss_SetAddrMode(Avtp_Vss_t* pdu, Vss_AddrMode_t val);
 void Avtp_Vss_SetOpCode(Avtp_Vss_t* pdu, Vss_OpCode_t val);
 void Avtp_Vss_SetDatatype(Avtp_Vss_t* pdu, Vss_Datatype_t val);
-void Avtp_Vss_SetMsgTimestamp(Avtp_Vss_t* pdu, uint64_t val);
+void Avtp_Vss_SetMessageTimestamp(Avtp_Vss_t* pdu, uint64_t val);
 void Avtp_Vss_SetVssPath(Avtp_Vss_t* pdu, VssPath_t* val);
 void Avtp_Vss_SetVssData(Avtp_Vss_t* pdu, VssData_t* val);
 void Avtp_Vss_SerializeStringArray(VssDataStringArray_t* vss_data_string_array,
