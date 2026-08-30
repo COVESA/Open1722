@@ -95,25 +95,24 @@ typedef enum {
 /**
  * This table describes all the offsets of the ACF_GISF header fields.
  */
-static const Avtp_FieldDescriptor_t Avtp_GisfFieldDesc[AVTP_GISF_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_GisfFieldDesc[AVTP_GISF_FIELD_MAX] = {
     /* ACF common header fields */
-    [AVTP_GISF_FIELD_ACF_MSG_TYPE]      = { .quadlet = 0, .offset =  0, .bits =  7 },
-    [AVTP_GISF_FIELD_ACF_MSG_LENGTH]    = { .quadlet = 0, .offset =  7, .bits =  9 },
+    [AVTP_GISF_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_GISF_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
     /* ACF GISF header fields */
-    [AVTP_GISF_FIELD_PAD]               = { .quadlet = 0, .offset = 16, .bits =  2 },
-    [AVTP_GISF_FIELD_MTV]               = { .quadlet = 0, .offset = 18, .bits =  1 },
-    [AVTP_GISF_FIELD_IMAGE_SENSOR_ID]   = { .quadlet = 0, .offset = 21, .bits = 11 },
-    [AVTP_GISF_FIELD_MESSAGE_TIMESTAMP] = { .quadlet = 1, .offset =  0, .bits = 64 },
-    [AVTP_GISF_FIELD_EL]                = { .quadlet = 3, .offset = 17, .bits =  1 },
-    [AVTP_GISF_FIELD_TL]                = { .quadlet = 3, .offset = 18, .bits =  1 },
-    [AVTP_GISF_FIELD_EF]                = { .quadlet = 3, .offset = 19, .bits =  1 },
-    [AVTP_GISF_FIELD_EVT]               = { .quadlet = 3, .offset = 20, .bits =  4 },
-    [AVTP_GISF_FIELD_BF]                = { .quadlet = 3, .offset = 26, .bits =  1 },
-    [AVTP_GISF_FIELD_LINE_TYPE_ID]      = { .quadlet = 3, .offset = 27, .bits =  5 },
-    [AVTP_GISF_FIELD_EVT2]              = { .quadlet = 4, .offset =  0, .bits =  8 },
-    [AVTP_GISF_FIELD_I_SEQ_NUM]         = { .quadlet = 4, .offset =  8, .bits =  8 },
-    [AVTP_GISF_FIELD_LINE_NUMBER]       = { .quadlet = 4, .offset = 16, .bits = 16 },
+    [AVTP_GISF_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
+    [AVTP_GISF_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_GISF_FIELD_IMAGE_SENSOR_ID] = {.quadlet = 0, .offset = 21, .bits = 11},
+    [AVTP_GISF_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_GISF_FIELD_EL] = {.quadlet = 3, .offset = 17, .bits = 1},
+    [AVTP_GISF_FIELD_TL] = {.quadlet = 3, .offset = 18, .bits = 1},
+    [AVTP_GISF_FIELD_EF] = {.quadlet = 3, .offset = 19, .bits = 1},
+    [AVTP_GISF_FIELD_EVT] = {.quadlet = 3, .offset = 20, .bits = 4},
+    [AVTP_GISF_FIELD_BF] = {.quadlet = 3, .offset = 26, .bits = 1},
+    [AVTP_GISF_FIELD_LINE_TYPE_ID] = {.quadlet = 3, .offset = 27, .bits = 5},
+    [AVTP_GISF_FIELD_EVT2] = {.quadlet = 4, .offset = 0, .bits = 8},
+    [AVTP_GISF_FIELD_I_SEQ_NUM] = {.quadlet = 4, .offset = 8, .bits = 8},
+    [AVTP_GISF_FIELD_LINE_NUMBER] = {.quadlet = 4, .offset = 16, .bits = 16},
 };
 
 /**
@@ -122,8 +121,9 @@ static const Avtp_FieldDescriptor_t Avtp_GisfFieldDesc[AVTP_GISF_FIELD_MAX] =
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @returns Value of the ACF message type field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetAcfMsgType(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetAcfMsgType(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -135,8 +135,9 @@ OPEN1722_INLINE uint8_t Avtp_Gisf_GetAcfMsgType(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @returns Value of the ACF message length field.
  */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLength(const Avtp_Gisf_t* const pdu) {
-    return (uint16_t) GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLength(const Avtp_Gisf_t *const pdu)
+{
+    return (uint16_t)GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -145,8 +146,9 @@ OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLength(const Avtp_Gisf_t* const pdu)
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @returns Length of the ACF message in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLengthInBytes(const Avtp_Gisf_t* const pdu) {
-    return (uint16_t) GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * 4;
+OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLengthInBytes(const Avtp_Gisf_t *const pdu)
+{
+    return (uint16_t)GET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_LENGTH) * 4;
 }
 
 /**
@@ -155,7 +157,8 @@ OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLengthInBytes(const Avtp_Gisf_t* con
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgType(Avtp_Gisf_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgType(Avtp_Gisf_t *pdu, uint8_t value)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -168,7 +171,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgType(Avtp_Gisf_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @param value Value to set the ACF message length field to.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgLength(Avtp_Gisf_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgLength(Avtp_Gisf_t *pdu, uint16_t value)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -178,8 +182,9 @@ OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgLength(Avtp_Gisf_t* pdu, uint16_t value)
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the pad field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_PAD);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_PAD);
 }
 
 /**
@@ -188,7 +193,8 @@ OPEN1722_INLINE uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param pad The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetPad(Avtp_Gisf_t* pdu, uint8_t pad) {
+OPEN1722_INLINE void Avtp_Gisf_SetPad(Avtp_Gisf_t *pdu, uint8_t pad)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_PAD, pad);
 }
 
@@ -198,8 +204,9 @@ OPEN1722_INLINE void Avtp_Gisf_SetPad(Avtp_Gisf_t* pdu, uint8_t pad) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the mtv flag.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsMtv(const Avtp_Gisf_t* const pdu) {
-    return (bool) GET_GISF_FIELD(AVTP_GISF_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_Gisf_IsMtv(const Avtp_Gisf_t *const pdu)
+{
+    return (bool)GET_GISF_FIELD(AVTP_GISF_FIELD_MTV);
 }
 
 /**
@@ -208,8 +215,9 @@ OPEN1722_INLINE bool Avtp_Gisf_IsMtv(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the image_sensor_id field.
  */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetImageSensorId(const Avtp_Gisf_t* const pdu) {
-    return (uint16_t) GET_GISF_FIELD(AVTP_GISF_FIELD_IMAGE_SENSOR_ID);
+OPEN1722_INLINE uint16_t Avtp_Gisf_GetImageSensorId(const Avtp_Gisf_t *const pdu)
+{
+    return (uint16_t)GET_GISF_FIELD(AVTP_GISF_FIELD_IMAGE_SENSOR_ID);
 }
 
 /**
@@ -218,8 +226,9 @@ OPEN1722_INLINE uint16_t Avtp_Gisf_GetImageSensorId(const Avtp_Gisf_t* const pdu
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the message_timestamp field.
  */
-OPEN1722_INLINE uint64_t Avtp_Gisf_GetMessageTimestamp(const Avtp_Gisf_t* const pdu) {
-    return (uint64_t) GET_GISF_FIELD(AVTP_GISF_FIELD_MESSAGE_TIMESTAMP);
+OPEN1722_INLINE uint64_t Avtp_Gisf_GetMessageTimestamp(const Avtp_Gisf_t *const pdu)
+{
+    return (uint64_t)GET_GISF_FIELD(AVTP_GISF_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
@@ -228,8 +237,9 @@ OPEN1722_INLINE uint64_t Avtp_Gisf_GetMessageTimestamp(const Avtp_Gisf_t* const 
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the el flag.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsEl(const Avtp_Gisf_t* const pdu) {
-    return (bool) GET_GISF_FIELD(AVTP_GISF_FIELD_EL);
+OPEN1722_INLINE bool Avtp_Gisf_IsEl(const Avtp_Gisf_t *const pdu)
+{
+    return (bool)GET_GISF_FIELD(AVTP_GISF_FIELD_EL);
 }
 
 /**
@@ -238,8 +248,9 @@ OPEN1722_INLINE bool Avtp_Gisf_IsEl(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the tl flag.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsTl(const Avtp_Gisf_t* const pdu) {
-    return (bool) GET_GISF_FIELD(AVTP_GISF_FIELD_TL);
+OPEN1722_INLINE bool Avtp_Gisf_IsTl(const Avtp_Gisf_t *const pdu)
+{
+    return (bool)GET_GISF_FIELD(AVTP_GISF_FIELD_TL);
 }
 
 /**
@@ -248,8 +259,9 @@ OPEN1722_INLINE bool Avtp_Gisf_IsTl(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the ef flag.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsEf(const Avtp_Gisf_t* const pdu) {
-    return (bool) GET_GISF_FIELD(AVTP_GISF_FIELD_EF);
+OPEN1722_INLINE bool Avtp_Gisf_IsEf(const Avtp_Gisf_t *const pdu)
+{
+    return (bool)GET_GISF_FIELD(AVTP_GISF_FIELD_EF);
 }
 
 /**
@@ -258,8 +270,9 @@ OPEN1722_INLINE bool Avtp_Gisf_IsEf(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the evt field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetEvt(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_EVT);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetEvt(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_EVT);
 }
 
 /**
@@ -268,8 +281,9 @@ OPEN1722_INLINE uint8_t Avtp_Gisf_GetEvt(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the bf flag.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsBf(const Avtp_Gisf_t* const pdu) {
-    return (bool) GET_GISF_FIELD(AVTP_GISF_FIELD_BF);
+OPEN1722_INLINE bool Avtp_Gisf_IsBf(const Avtp_Gisf_t *const pdu)
+{
+    return (bool)GET_GISF_FIELD(AVTP_GISF_FIELD_BF);
 }
 
 /**
@@ -278,8 +292,9 @@ OPEN1722_INLINE bool Avtp_Gisf_IsBf(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the line_type_id value.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetLineTypeId(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_LINE_TYPE_ID);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetLineTypeId(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_LINE_TYPE_ID);
 }
 
 /**
@@ -288,18 +303,21 @@ OPEN1722_INLINE uint8_t Avtp_Gisf_GetLineTypeId(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the evt2 field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetEvt2(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_EVT2);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetEvt2(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_EVT2);
 }
 
 /**
- * Returns the value of the i_seq_num (intra line sequence number) field from an ACF_GISF message header.
+ * Returns the value of the i_seq_num (intra line sequence number) field from an ACF_GISF message
+ * header.
  *
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the i_seq_num field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetISeqNum(const Avtp_Gisf_t* const pdu) {
-    return (uint8_t) GET_GISF_FIELD(AVTP_GISF_FIELD_I_SEQ_NUM);
+OPEN1722_INLINE uint8_t Avtp_Gisf_GetISeqNum(const Avtp_Gisf_t *const pdu)
+{
+    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_I_SEQ_NUM);
 }
 
 /**
@@ -308,8 +326,9 @@ OPEN1722_INLINE uint8_t Avtp_Gisf_GetISeqNum(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @returns The value of the line_number field.
  */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetLineNumber(const Avtp_Gisf_t* const pdu) {
-    return (uint16_t) GET_GISF_FIELD(AVTP_GISF_FIELD_LINE_NUMBER);
+OPEN1722_INLINE uint16_t Avtp_Gisf_GetLineNumber(const Avtp_Gisf_t *const pdu)
+{
+    return (uint16_t)GET_GISF_FIELD(AVTP_GISF_FIELD_LINE_NUMBER);
 }
 
 /**
@@ -318,7 +337,8 @@ OPEN1722_INLINE uint16_t Avtp_Gisf_GetLineNumber(const Avtp_Gisf_t* const pdu) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param mtv The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetMtv(Avtp_Gisf_t* pdu, bool mtv) {
+OPEN1722_INLINE void Avtp_Gisf_SetMtv(Avtp_Gisf_t *pdu, bool mtv)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_MTV, mtv);
 }
 
@@ -328,7 +348,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetMtv(Avtp_Gisf_t* pdu, bool mtv) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param imageSensorId The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetImageSensorId(Avtp_Gisf_t* pdu, uint16_t imageSensorId) {
+OPEN1722_INLINE void Avtp_Gisf_SetImageSensorId(Avtp_Gisf_t *pdu, uint16_t imageSensorId)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_IMAGE_SENSOR_ID, imageSensorId);
 }
 
@@ -338,7 +359,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetImageSensorId(Avtp_Gisf_t* pdu, uint16_t image
  * @param pdu Pointer to an ACF_GISF message.
  * @param messageTimestamp The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetMessageTimestamp(Avtp_Gisf_t* pdu, uint64_t messageTimestamp) {
+OPEN1722_INLINE void Avtp_Gisf_SetMessageTimestamp(Avtp_Gisf_t *pdu, uint64_t messageTimestamp)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_MESSAGE_TIMESTAMP, messageTimestamp);
 }
 
@@ -348,7 +370,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetMessageTimestamp(Avtp_Gisf_t* pdu, uint64_t me
  * @param pdu Pointer to an ACF_GISF message.
  * @param el The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetEl(Avtp_Gisf_t* pdu, bool el) {
+OPEN1722_INLINE void Avtp_Gisf_SetEl(Avtp_Gisf_t *pdu, bool el)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_EL, el);
 }
 
@@ -358,7 +381,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetEl(Avtp_Gisf_t* pdu, bool el) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param tl The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetTl(Avtp_Gisf_t* pdu, bool tl) {
+OPEN1722_INLINE void Avtp_Gisf_SetTl(Avtp_Gisf_t *pdu, bool tl)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_TL, tl);
 }
 
@@ -368,7 +392,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetTl(Avtp_Gisf_t* pdu, bool tl) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param ef The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetEf(Avtp_Gisf_t* pdu, bool ef) {
+OPEN1722_INLINE void Avtp_Gisf_SetEf(Avtp_Gisf_t *pdu, bool ef)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_EF, ef);
 }
 
@@ -378,7 +403,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetEf(Avtp_Gisf_t* pdu, bool ef) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param evt The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetEvt(Avtp_Gisf_t* pdu, uint8_t evt) {
+OPEN1722_INLINE void Avtp_Gisf_SetEvt(Avtp_Gisf_t *pdu, uint8_t evt)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_EVT, evt);
 }
 
@@ -388,7 +414,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetEvt(Avtp_Gisf_t* pdu, uint8_t evt) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param bf The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetBf(Avtp_Gisf_t* pdu, bool bf) {
+OPEN1722_INLINE void Avtp_Gisf_SetBf(Avtp_Gisf_t *pdu, bool bf)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_BF, bf);
 }
 
@@ -398,7 +425,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetBf(Avtp_Gisf_t* pdu, bool bf) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param lineTypeId The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetLineTypeId(Avtp_Gisf_t* pdu, uint8_t lineTypeId) {
+OPEN1722_INLINE void Avtp_Gisf_SetLineTypeId(Avtp_Gisf_t *pdu, uint8_t lineTypeId)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_LINE_TYPE_ID, lineTypeId);
 }
 
@@ -408,7 +436,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetLineTypeId(Avtp_Gisf_t* pdu, uint8_t lineTypeI
  * @param pdu Pointer to an ACF_GISF message.
  * @param evt2 The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetEvt2(Avtp_Gisf_t* pdu, uint8_t evt2) {
+OPEN1722_INLINE void Avtp_Gisf_SetEvt2(Avtp_Gisf_t *pdu, uint8_t evt2)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_EVT2, evt2);
 }
 
@@ -418,7 +447,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetEvt2(Avtp_Gisf_t* pdu, uint8_t evt2) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param iSeqNum The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetISeqNum(Avtp_Gisf_t* pdu, uint8_t iSeqNum) {
+OPEN1722_INLINE void Avtp_Gisf_SetISeqNum(Avtp_Gisf_t *pdu, uint8_t iSeqNum)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_I_SEQ_NUM, iSeqNum);
 }
 
@@ -428,7 +458,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetISeqNum(Avtp_Gisf_t* pdu, uint8_t iSeqNum) {
  * @param pdu Pointer to an ACF_GISF message.
  * @param lineNumber The value to set.
  */
-OPEN1722_INLINE void Avtp_Gisf_SetLineNumber(Avtp_Gisf_t* pdu, uint16_t lineNumber) {
+OPEN1722_INLINE void Avtp_Gisf_SetLineNumber(Avtp_Gisf_t *pdu, uint16_t lineNumber)
+{
     SET_GISF_FIELD(AVTP_GISF_FIELD_LINE_NUMBER, lineNumber);
 }
 
@@ -438,7 +469,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetLineNumber(Avtp_Gisf_t* pdu, uint16_t lineNumb
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @return Pointer to ACF GISF frame payload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Gisf_GetPayload(const Avtp_Gisf_t* const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Gisf_GetPayload(const Avtp_Gisf_t *const pdu)
 {
     return pdu->payload;
 }
@@ -488,7 +519,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  * @return  Length of payload in bytes
  */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t* const pdu)
+OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t *const pdu)
 {
     uint8_t pad_length = Avtp_Gisf_GetPad(pdu);
     uint16_t acf_length_bytes = Avtp_Gisf_GetAcfMsgLengthInBytes(pdu);
@@ -500,7 +531,7 @@ OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t* const pdu
  *
  * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
  */
-OPEN1722_INLINE void Avtp_Gisf_Init(Avtp_Gisf_t* pdu)
+OPEN1722_INLINE void Avtp_Gisf_Init(Avtp_Gisf_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Gisf_t));
@@ -542,7 +573,7 @@ OPEN1722_INLINE void Avtp_Gisf_CreateAcfMessage(Avtp_Gisf_t *pdu, uint16_t image
  * @param bufferSize Size of the buffer containing the ACF GISF frame.
  * @return true if the ACF GISF frame is valid, false otherwise.
  */
-OPEN1722_INLINE bool Avtp_Gisf_IsValid(const Avtp_Gisf_t* const pdu, size_t bufferSize)
+OPEN1722_INLINE bool Avtp_Gisf_IsValid(const Avtp_Gisf_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
