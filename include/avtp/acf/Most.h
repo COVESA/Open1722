@@ -53,11 +53,10 @@ extern "C" {
 /** Length of ACF Most header. */
 #define AVTP_MOST_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
 
-#define GET_MOST_FIELD(field) \
+#define GET_MOST_FIELD(field)                                                                      \
     (Avtp_GetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (uint8_t *)pdu, field))
-#define SET_MOST_FIELD(field, value) \
+#define SET_MOST_FIELD(field, value)                                                               \
     (Avtp_SetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (uint8_t *)pdu, field, value))
-
 
 /** ACF Most PDU. */
 typedef struct {
@@ -66,7 +65,7 @@ typedef struct {
 } __attribute__((packed)) Avtp_Most_t;
 
 /** Fields of ACF Most PDU. */
-typedef enum  {
+typedef enum {
     /* ACF common header fields */
     AVTP_MOST_FIELD_ACF_MSG_TYPE = 0,
     AVTP_MOST_FIELD_ACF_MSG_LENGTH,
@@ -89,23 +88,22 @@ typedef enum  {
 /**
  * This table describes all the offsets of the ACF Most header fields.
  */
-static const Avtp_FieldDescriptor_t Avtp_MostFieldDesc[AVTP_MOST_FIELD_MAX] =
-    {
-        /* ACF common header fields */
-        [AVTP_MOST_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
-        [AVTP_MOST_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
-        /* ACF Most header fields */
-        [AVTP_MOST_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
-        [AVTP_MOST_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
-        [AVTP_MOST_FIELD_MOST_NET_ID] = {.quadlet = 0, .offset = 19, .bits = 5},
-        [AVTP_MOST_FIELD_RESERVED] = {.quadlet = 0, .offset = 24, .bits = 8},
-        [AVTP_MOST_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
-        [AVTP_MOST_FIELD_DEVICE_ID] = {.quadlet = 3, .offset = 0, .bits = 16},
-        [AVTP_MOST_FIELD_FBLOCK_ID] = {.quadlet = 3, .offset = 16, .bits = 8},
-        [AVTP_MOST_FIELD_INST_ID] = {.quadlet = 3, .offset = 24, .bits = 8},
-        [AVTP_MOST_FIELD_FUNC_ID] = {.quadlet = 4, .offset = 0, .bits = 12},
-        [AVTP_MOST_FIELD_OP_TYPE] = {.quadlet = 4, .offset = 12, .bits = 4},
-        [AVTP_MOST_FIELD_RESERVED_2] = {.quadlet = 4, .offset = 16, .bits = 16},
+static const Avtp_FieldDescriptor_t Avtp_MostFieldDesc[AVTP_MOST_FIELD_MAX] = {
+    /* ACF common header fields */
+    [AVTP_MOST_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_MOST_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
+    /* ACF Most header fields */
+    [AVTP_MOST_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
+    [AVTP_MOST_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_MOST_FIELD_MOST_NET_ID] = {.quadlet = 0, .offset = 19, .bits = 5},
+    [AVTP_MOST_FIELD_RESERVED] = {.quadlet = 0, .offset = 24, .bits = 8},
+    [AVTP_MOST_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_MOST_FIELD_DEVICE_ID] = {.quadlet = 3, .offset = 0, .bits = 16},
+    [AVTP_MOST_FIELD_FBLOCK_ID] = {.quadlet = 3, .offset = 16, .bits = 8},
+    [AVTP_MOST_FIELD_INST_ID] = {.quadlet = 3, .offset = 24, .bits = 8},
+    [AVTP_MOST_FIELD_FUNC_ID] = {.quadlet = 4, .offset = 0, .bits = 12},
+    [AVTP_MOST_FIELD_OP_TYPE] = {.quadlet = 4, .offset = 12, .bits = 4},
+    [AVTP_MOST_FIELD_RESERVED_2] = {.quadlet = 4, .offset = 16, .bits = 16},
 };
 
 /**
@@ -114,18 +112,20 @@ static const Avtp_FieldDescriptor_t Avtp_MostFieldDesc[AVTP_MOST_FIELD_MAX] =
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF message type field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Most_GetAcfMsgType(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE);
 }
 
 /**
  * Return the value of an an ACF message length field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF message length field.
  */
-OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t* const pdu) {
-    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t *const pdu)
+{
+    return (uint16_t)GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -134,58 +134,68 @@ OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLength(const Avtp_Most_t* const pdu)
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU padding field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetPad(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
+OPEN1722_INLINE uint8_t Avtp_Most_GetPad(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
 }
 
 /**
  * Return the value of an an ACF Most PDU MTV field as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU MTV field.
  */
-OPEN1722_INLINE bool Avtp_Most_IsMtv(const Avtp_Most_t* const pdu) {
-    return (bool) GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_Most_IsMtv(const Avtp_Most_t *const pdu)
+{
+    return (bool)GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
 }
 
 /**
- * Return the value of an an ACF Most PDU Most Net ID field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF Most PDU Most Net ID field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Most Net ID field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MOST_NET_ID);
+OPEN1722_INLINE uint8_t Avtp_Most_GetMostNetId(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_MOST_NET_ID);
 }
 
 /**
- * Return the value of an an ACF Most PDU Message Timestamp field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF Most PDU Message Timestamp field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Message Timestamp field.
  */
-OPEN1722_INLINE uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t* const pdu) {
-    return (uint64_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP);
+OPEN1722_INLINE uint64_t Avtp_Most_GetMessageTimestamp(const Avtp_Most_t *const pdu)
+{
+    return (uint64_t)GET_MOST_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP);
 }
 
 /**
- * Return the value of an an ACF Most PDU Device ID field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF Most PDU Device ID field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Device ID field.
  */
-OPEN1722_INLINE uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t* const pdu) {
-    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_DEVICE_ID);
+OPEN1722_INLINE uint16_t Avtp_Most_GetDeviceId(const Avtp_Most_t *const pdu)
+{
+    return (uint16_t)GET_MOST_FIELD(AVTP_MOST_FIELD_DEVICE_ID);
 }
 
 /**
- * Return the value of an an ACF Most PDU FBlock ID field as specified in the IEEE 1722 Specification.
+ * Return the value of an an ACF Most PDU FBlock ID field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU FBlock ID field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_FBLOCK_ID);
+OPEN1722_INLINE uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_FBLOCK_ID);
 }
 
 /**
@@ -194,8 +204,9 @@ OPEN1722_INLINE uint8_t Avtp_Most_GetFblockId(const Avtp_Most_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Inst ID field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetInstId(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_INST_ID);
+OPEN1722_INLINE uint8_t Avtp_Most_GetInstId(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_INST_ID);
 }
 
 /**
@@ -204,8 +215,9 @@ OPEN1722_INLINE uint8_t Avtp_Most_GetInstId(const Avtp_Most_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Func ID field.
  */
-OPEN1722_INLINE uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t* const pdu) {
-    return (uint16_t) GET_MOST_FIELD(AVTP_MOST_FIELD_FUNC_ID);
+OPEN1722_INLINE uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t *const pdu)
+{
+    return (uint16_t)GET_MOST_FIELD(AVTP_MOST_FIELD_FUNC_ID);
 }
 
 /**
@@ -214,8 +226,9 @@ OPEN1722_INLINE uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU Op Type field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetOpType(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Most_GetOpType(const Avtp_Most_t *const pdu)
+{
+    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE);
 }
 
 /**
@@ -224,7 +237,8 @@ OPEN1722_INLINE uint8_t Avtp_Most_GetOpType(const Avtp_Most_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetAcfMsgType(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetAcfMsgType(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -234,7 +248,8 @@ OPEN1722_INLINE void Avtp_Most_SetAcfMsgType(Avtp_Most_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF message length field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetAcfMsgLength(Avtp_Most_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Most_SetAcfMsgLength(Avtp_Most_t *pdu, uint16_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -244,7 +259,8 @@ OPEN1722_INLINE void Avtp_Most_SetAcfMsgLength(Avtp_Most_t* pdu, uint16_t value)
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU padding field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetPad(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetPad(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_PAD, value);
 }
 
@@ -254,27 +270,32 @@ OPEN1722_INLINE void Avtp_Most_SetPad(Avtp_Most_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param mtv Value to set the MTV bit to.
  */
-OPEN1722_INLINE void Avtp_Most_SetMtv(Avtp_Most_t* pdu, bool mtv) {
+OPEN1722_INLINE void Avtp_Most_SetMtv(Avtp_Most_t *pdu, bool mtv)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_MTV, mtv);
 }
 
 /**
- * Set the value of an an ACF Most PDU Most Net ID field as specified in the IEEE 1722 Specification.
+ * Set the value of an an ACF Most PDU Most Net ID field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Most Net ID field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetMostNetId(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetMostNetId(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_MOST_NET_ID, value);
 }
 
 /**
- * Set the value of an an ACF Most PDU Message Timestamp field as specified in the IEEE 1722 Specification.
+ * Set the value of an an ACF Most PDU Message Timestamp field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Message Timestamp field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetMessageTimestamp(Avtp_Most_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Most_SetMessageTimestamp(Avtp_Most_t *pdu, uint64_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_MESSAGE_TIMESTAMP, value);
 }
 
@@ -284,7 +305,8 @@ OPEN1722_INLINE void Avtp_Most_SetMessageTimestamp(Avtp_Most_t* pdu, uint64_t va
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Device ID field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetDeviceId(Avtp_Most_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Most_SetDeviceId(Avtp_Most_t *pdu, uint16_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_DEVICE_ID, value);
 }
 
@@ -294,7 +316,8 @@ OPEN1722_INLINE void Avtp_Most_SetDeviceId(Avtp_Most_t* pdu, uint16_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU FBlock ID field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetFblockId(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetFblockId(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_FBLOCK_ID, value);
 }
 
@@ -304,7 +327,8 @@ OPEN1722_INLINE void Avtp_Most_SetFblockId(Avtp_Most_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Inst ID field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetInstId(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetInstId(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_INST_ID, value);
 }
 
@@ -314,7 +338,8 @@ OPEN1722_INLINE void Avtp_Most_SetInstId(Avtp_Most_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Func ID field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetFuncId(Avtp_Most_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Most_SetFuncId(Avtp_Most_t *pdu, uint16_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_FUNC_ID, value);
 }
 
@@ -324,7 +349,8 @@ OPEN1722_INLINE void Avtp_Most_SetFuncId(Avtp_Most_t* pdu, uint16_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param value Value to set the ACF Most PDU Op Type field to.
  */
-OPEN1722_INLINE void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Most_SetOpType(Avtp_Most_t *pdu, uint8_t value)
+{
     SET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE, value);
 }
 
@@ -334,7 +360,7 @@ OPEN1722_INLINE void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Length of the ACF message in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLengthInBytes(const Avtp_Most_t* const pdu)
+OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLengthInBytes(const Avtp_Most_t *const pdu)
 {
     return (uint16_t)GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH) * 4;
 }
@@ -345,7 +371,7 @@ OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLengthInBytes(const Avtp_Most_t* con
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @return Pointer to ACF Most frame payload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Most_GetPayload(const Avtp_Most_t* const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Most_GetPayload(const Avtp_Most_t *const pdu)
 {
     return pdu->payload;
 }
@@ -394,7 +420,7 @@ OPEN1722_INLINE void Avtp_Most_SetPayloadLength(Avtp_Most_t *pdu, uint16_t paylo
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @return  Length of Most payload in bytes
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t* const pdu)
+OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t *const pdu)
 {
     uint8_t pad_length = Avtp_Most_GetPad(pdu);
     uint16_t acf_length_bytes = Avtp_Most_GetAcfMsgLengthInBytes(pdu);
@@ -406,9 +432,9 @@ OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t* const pdu)
  *
  * @param pdu Pointer to the first bit of a 1722 ACF Most PDU.
  */
-OPEN1722_INLINE void Avtp_Most_Init(Avtp_Most_t* pdu) {
-    if (pdu != NULL)
-    {
+OPEN1722_INLINE void Avtp_Most_Init(Avtp_Most_t *pdu)
+{
+    if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Most_t));
         Avtp_Most_SetAcfMsgType(pdu, AVTP_ACF_TYPE_MOST);
     }
@@ -430,8 +456,8 @@ OPEN1722_INLINE void Avtp_Most_Init(Avtp_Most_t* pdu) {
  */
 OPEN1722_INLINE void Avtp_Most_CreateAcfMessage(Avtp_Most_t *pdu, uint16_t device_id,
                                                 uint8_t fblock_id, uint8_t inst_id,
-                                                uint16_t func_id, uint8_t op_type,
-                                                uint8_t *payload, uint16_t payload_length)
+                                                uint16_t func_id, uint8_t op_type, uint8_t *payload,
+                                                uint16_t payload_length)
 {
     // Initialize the ACF Most header
     Avtp_Most_Init(pdu);
@@ -452,13 +478,13 @@ OPEN1722_INLINE void Avtp_Most_CreateAcfMessage(Avtp_Most_t *pdu, uint16_t devic
 
 /**
  * Checks if the ACF Most frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
+ * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @param bufferSize Size of the buffer containing the ACF Most frame.
  * @return true if the ACF Most frame is valid, false otherwise.
  */
-OPEN1722_INLINE bool Avtp_Most_IsValid(const Avtp_Most_t* const pdu, size_t bufferSize)
+OPEN1722_INLINE bool Avtp_Most_IsValid(const Avtp_Most_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
@@ -488,7 +514,6 @@ OPEN1722_INLINE bool Avtp_Most_IsValid(const Avtp_Most_t* const pdu, size_t buff
     }
     return true;
 }
-
 
 #ifdef __cplusplus
 }
