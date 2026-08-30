@@ -44,112 +44,117 @@ extern "C" {
 
 #define MAX_PDU_SIZE 1500
 
-static void most_init(void **state) {
+static void most_init(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t init_pdu[AVTP_MOST_HEADER_LEN];
 
     Avtp_Most_Init(NULL);
 
-    Avtp_Most_Init((Avtp_Most_t*)pdu);
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
     memset(init_pdu, 0, AVTP_MOST_HEADER_LEN);
     init_pdu[0] = AVTP_ACF_TYPE_MOST << 1;
     assert_memory_equal(init_pdu, pdu, AVTP_MOST_HEADER_LEN);
 }
 
-static void most_get_set_fields(void **state) {
+static void most_get_set_fields(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
-    
-    Avtp_Most_Init((Avtp_Most_t*)pdu);
 
-    Avtp_Most_SetAcfMsgType((Avtp_Most_t*)pdu, AVTP_ACF_TYPE_MOST);
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t*)pdu), AVTP_ACF_TYPE_MOST);
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
 
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t*)pdu, 120);
-    assert_int_equal(Avtp_Most_GetAcfMsgLength((Avtp_Most_t*)pdu), 120);
+    Avtp_Most_SetAcfMsgType((Avtp_Most_t *)pdu, AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
 
-    Avtp_Most_SetPad((Avtp_Most_t*)pdu, 1);
-    assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t*)pdu), 1);
+    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 120);
+    assert_int_equal(Avtp_Most_GetAcfMsgLength((Avtp_Most_t *)pdu), 120);
 
-    Avtp_Most_SetMtv((Avtp_Most_t*)pdu, true);
-    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 1);
+    Avtp_Most_SetPad((Avtp_Most_t *)pdu, 1);
+    assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t *)pdu), 1);
 
-    Avtp_Most_SetMtv((Avtp_Most_t*)pdu, false);
-    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 0);
+    Avtp_Most_SetMtv((Avtp_Most_t *)pdu, true);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t *)pdu), 1);
 
-    Avtp_Most_SetMostNetId((Avtp_Most_t*)pdu, 15);
-    assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t*)pdu), 15);
+    Avtp_Most_SetMtv((Avtp_Most_t *)pdu, false);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t *)pdu), 0);
 
-    Avtp_Most_SetMessageTimestamp((Avtp_Most_t*)pdu, 0x123456789ABCULL);
-    assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t*)pdu), 0x123456789ABCULL);
+    Avtp_Most_SetMostNetId((Avtp_Most_t *)pdu, 15);
+    assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t *)pdu), 15);
 
-    Avtp_Most_SetDeviceId((Avtp_Most_t*)pdu, 0x1234);
-    assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t*)pdu), 0x1234);
+    Avtp_Most_SetMessageTimestamp((Avtp_Most_t *)pdu, 0x123456789ABCULL);
+    assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t *)pdu), 0x123456789ABCULL);
 
-    Avtp_Most_SetFblockId((Avtp_Most_t*)pdu, 0xAB);
-    assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t*)pdu), 0xAB);
+    Avtp_Most_SetDeviceId((Avtp_Most_t *)pdu, 0x1234);
+    assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t *)pdu), 0x1234);
 
-    Avtp_Most_SetInstId((Avtp_Most_t*)pdu, 0x12);
-    assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t*)pdu), 0x12);
+    Avtp_Most_SetFblockId((Avtp_Most_t *)pdu, 0xAB);
+    assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t *)pdu), 0xAB);
 
-    Avtp_Most_SetFuncId((Avtp_Most_t*)pdu, 0x456);
-    assert_int_equal(Avtp_Most_GetFuncId((Avtp_Most_t*)pdu), 0x456);
+    Avtp_Most_SetInstId((Avtp_Most_t *)pdu, 0x12);
+    assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t *)pdu), 0x12);
 
-    Avtp_Most_SetOpType((Avtp_Most_t*)pdu, 0x0F);
-    assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t*)pdu), 0x0F);
+    Avtp_Most_SetFuncId((Avtp_Most_t *)pdu, 0x456);
+    assert_int_equal(Avtp_Most_GetFuncId((Avtp_Most_t *)pdu), 0x456);
+
+    Avtp_Most_SetOpType((Avtp_Most_t *)pdu, 0x0F);
+    assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t *)pdu), 0x0F);
 }
 
-static void most_is_valid(void **state) {
+static void most_is_valid(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
 
     // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
-    Avtp_Most_Init((Avtp_Most_t*)pdu);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 0);
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 0);
 
     memset(pdu, 0, MAX_PDU_SIZE);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 0);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 0);
 
-    Avtp_Most_Init((Avtp_Most_t*)pdu);
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t*)pdu, 8);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, 35), 1);
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
+    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 8);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, 35), 1);
 
-    Avtp_Most_Init((Avtp_Most_t*)pdu);
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t*)pdu, 8);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, 9), 0);
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
+    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 8);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, 9), 0);
 }
 
-static void most_create_message(void **state) {
+static void most_create_message(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
-    Avtp_Most_CreateAcfMessage((Avtp_Most_t*)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F,
-                               payload, sizeof(payload));
+    Avtp_Most_CreateAcfMessage((Avtp_Most_t *)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F, payload,
+                               sizeof(payload));
 
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t*)pdu), AVTP_ACF_TYPE_MOST);
-    assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t*)pdu), 0x1234);
-    assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t*)pdu), 0xAB);
-    assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t*)pdu), 0x12);
-    assert_int_equal(Avtp_Most_GetFuncId((Avtp_Most_t*)pdu), 0x456);
-    assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t*)pdu), 0x0F);
+    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t *)pdu), 0x1234);
+    assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t *)pdu), 0xAB);
+    assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t *)pdu), 0x12);
+    assert_int_equal(Avtp_Most_GetFuncId((Avtp_Most_t *)pdu), 0x456);
+    assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t *)pdu), 0x0F);
     assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
-    assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t*)pdu), 8);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t *)pdu), 8);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 1);
 }
 
-static void most_create_from_garbage(void **state) {
+static void most_create_from_garbage(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(pdu, 0xAA, MAX_PDU_SIZE);
-    Avtp_Most_CreateAcfMessage((Avtp_Most_t*)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F,
-                               payload, sizeof(payload));
+    Avtp_Most_CreateAcfMessage((Avtp_Most_t *)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F, payload,
+                               sizeof(payload));
 
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t*)pdu), AVTP_ACF_TYPE_MOST);
-    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 0);
-    assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t*)pdu), 0);
-    assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t*)pdu), 0);
+    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t *)pdu), 0);
+    assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t *)pdu), 0);
+    assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t *)pdu), 0);
     assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 1);
 }
 
 int main(void)
