@@ -35,11 +35,16 @@
 #pragma once
 #include "avtp/Inline.h"
 
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
 #include <string.h>
+#include <stdbool.h>
+#endif
 
+#include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
-#include "avtp/Utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +62,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_FLEXRAY_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_FlexRay_t;
+} __attribute__((packed)) Avtp_FlexRay_t;
 
 /** Fields of ACF FlexRay PDU. */
 typedef enum  {
@@ -143,8 +148,8 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPad(const Avtp_FlexRay_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
  * @returns Value of the ACF FlexRay PDU MTV field.
  */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetMtv(const Avtp_FlexRay_t* const pdu) {
-    return (uint8_t) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_FlexRay_IsMtv(const Avtp_FlexRay_t* const pdu) {
+    return (bool) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_MTV);
 }
 
 /**
@@ -173,8 +178,8 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetChan(const Avtp_FlexRay_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
  * @returns Value of the ACF FlexRay PDU STR field.
  */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetStr(const Avtp_FlexRay_t* const pdu) {
-    return (uint8_t) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_STR);
+OPEN1722_INLINE bool Avtp_FlexRay_IsStr(const Avtp_FlexRay_t* const pdu) {
+    return (bool) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_STR);
 }
 
 /**
@@ -183,8 +188,8 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetStr(const Avtp_FlexRay_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
  * @returns Value of the ACF FlexRay PDU SYN field.
  */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetSyn(const Avtp_FlexRay_t* const pdu) {
-    return (uint8_t) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_SYN);
+OPEN1722_INLINE bool Avtp_FlexRay_IsSyn(const Avtp_FlexRay_t* const pdu) {
+    return (bool) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_SYN);
 }
 
 /**
@@ -193,8 +198,8 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetSyn(const Avtp_FlexRay_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
  * @returns Value of the ACF FlexRay PDU PRE field.
  */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPre(const Avtp_FlexRay_t* const pdu) {
-    return (uint8_t) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PRE);
+OPEN1722_INLINE bool Avtp_FlexRay_IsPre(const Avtp_FlexRay_t* const pdu) {
+    return (bool) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PRE);
 }
 
 /**
@@ -203,8 +208,8 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPre(const Avtp_FlexRay_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
  * @returns Value of the ACF FlexRay PDU NFI field.
  */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetNfi(const Avtp_FlexRay_t* const pdu) {
-    return (uint8_t) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_NFI);
+OPEN1722_INLINE bool Avtp_FlexRay_IsNfi(const Avtp_FlexRay_t* const pdu) {
+    return (bool) GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_NFI);
 }
 
 /**
@@ -268,21 +273,13 @@ OPEN1722_INLINE void Avtp_FlexRay_SetPad(Avtp_FlexRay_t* pdu, uint8_t value) {
 }
 
 /**
- * Enable the MTV bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
+ * Set the MTV bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param mtv Value to set the MTV bit to.
  */
-OPEN1722_INLINE void Avtp_FlexRay_EnableMtv(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_MTV, 1);
-}
-
-/**
- * Disable the MTV bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- */
-OPEN1722_INLINE void Avtp_FlexRay_DisableMtv(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_MTV, 0);
+OPEN1722_INLINE void Avtp_FlexRay_SetMtv(Avtp_FlexRay_t* pdu, bool mtv) {
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_MTV, mtv);
 }
 
 /**
@@ -306,75 +303,43 @@ OPEN1722_INLINE void Avtp_FlexRay_SetChan(Avtp_FlexRay_t* pdu, uint8_t value) {
 }
 
 /**
- * Enable the STR bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
+ * Set the STR bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param str Value to set the STR bit to.
  */
-OPEN1722_INLINE void Avtp_FlexRay_EnableStr(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_STR, 1);
+OPEN1722_INLINE void Avtp_FlexRay_SetStr(Avtp_FlexRay_t* pdu, bool str) {
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_STR, str);
 }
 
 /**
- * Disable the STR bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
+ * Set the SYN bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param syn Value to set the SYN bit to.
  */
-OPEN1722_INLINE void Avtp_FlexRay_DisableStr(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_STR, 0);
+OPEN1722_INLINE void Avtp_FlexRay_SetSyn(Avtp_FlexRay_t* pdu, bool syn) {
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_SYN, syn);
 }
 
 /**
- * Enable the SYN bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
+ * Set the PRE bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param pre Value to set the PRE bit to.
  */
-OPEN1722_INLINE void Avtp_FlexRay_EnableSyn(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_SYN, 1);
+OPEN1722_INLINE void Avtp_FlexRay_SetPre(Avtp_FlexRay_t* pdu, bool pre) {
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PRE, pre);
 }
 
 /**
- * Disable the SYN bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
+ * Set the NFI bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param nfi Value to set the NFI bit to.
  */
-OPEN1722_INLINE void Avtp_FlexRay_DisableSyn(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_SYN, 0);
-}
-
-/**
- * Enable the PRE bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- */
-OPEN1722_INLINE void Avtp_FlexRay_EnablePre(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PRE, 1);
-}
-
-/**
- * Disable the PRE bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- */
-OPEN1722_INLINE void Avtp_FlexRay_DisablePre(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PRE, 0);
-}
-
-/**
- * Enable the NFI bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- */
-OPEN1722_INLINE void Avtp_FlexRay_EnableNfi(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_NFI, 1);
-}
-
-/**
- * Disable the NFI bit in an ACF FlexRay frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- */
-OPEN1722_INLINE void Avtp_FlexRay_DisableNfi(Avtp_FlexRay_t* pdu) {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_NFI, 0);
+OPEN1722_INLINE void Avtp_FlexRay_SetNfi(Avtp_FlexRay_t* pdu, bool nfi) {
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_NFI, nfi);
 }
 
 /**
@@ -408,14 +373,77 @@ OPEN1722_INLINE void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t* pdu, uint8_t value) {
 }
 
 /**
- * Checks if the ACF FlexRay frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ * Return the ACF message length in bytes.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- * @param bufferSize Size of the buffer containing the ACF FlexRay frame.
- * @return true if the ACF FlexRay frame is valid, false otherwise.
+ * @returns Length of the ACF message in bytes.
  */
-uint8_t Avtp_FlexRay_IsValid(const Avtp_FlexRay_t* const pdu, size_t bufferSize);
+OPEN1722_INLINE uint16_t Avtp_FlexRay_GetAcfMsgLengthInBytes(const Avtp_FlexRay_t* const pdu)
+{
+    return (uint16_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH) * 4;
+}
+
+/**
+ * Returns pointer to payload of an ACF FlexRay frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @return Pointer to ACF FlexRay frame payload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_FlexRay_GetPayload(const Avtp_FlexRay_t* const pdu)
+{
+    return pdu->payload;
+}
+
+/**
+ * Sets the FlexRay payload in an ACF FlexRay frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ */
+OPEN1722_INLINE void Avtp_FlexRay_SetPayload(Avtp_FlexRay_t *pdu, uint8_t *payload,
+                                             uint16_t payload_length)
+{
+    memcpy(pdu->payload, payload, payload_length);
+}
+
+/**
+ * Finalizes the ACF FlexRay frame. This function will set the length and pad
+ * fields while inserting the padded bytes. This will also set padding bytes to
+ * zero if the payload length is not a multiple of 4 to avoid leaking information.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param payload_length Length of the FlexRay frame payload.
+ */
+OPEN1722_INLINE void Avtp_FlexRay_SetPayloadLength(Avtp_FlexRay_t *pdu, uint16_t payload_length)
+{
+    uint16_t msgLenBytes = AVTP_FLEXRAY_HEADER_LEN + payload_length;
+    uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+    if (pad > 0) {
+        memset(pdu->payload + payload_length, 0, pad);
+    }
+    uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
+    Avtp_FlexRay_SetPad(pdu, pad);
+    Avtp_FlexRay_SetAcfMsgLength(pdu, msgLenQuadlets);
+}
+
+/**
+ * Returns the length of the FlexRay payload without the padding bytes and the
+ * header length of the encapsulating ACF Frame.
+ *
+ * Precondition: the caller must have validated the PDU with
+ * Avtp_FlexRay_IsValid(). This function performs no further bounds checking
+ * and assumes those invariants already hold.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @return  Length of FlexRay payload in bytes
+ */
+OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPayloadLength(const Avtp_FlexRay_t* const pdu)
+{
+    uint8_t pad_length = Avtp_FlexRay_GetPad(pdu);
+    uint16_t acf_length_bytes = Avtp_FlexRay_GetAcfMsgLengthInBytes(pdu);
+    return (uint8_t)(acf_length_bytes - AVTP_FLEXRAY_HEADER_LEN - pad_length);
+}
 
 /**
  * Initializes an ACF FlexRay PDU.
@@ -429,6 +457,78 @@ OPEN1722_INLINE void Avtp_FlexRay_Init(Avtp_FlexRay_t *pdu)
         memset(pdu, 0, sizeof(Avtp_FlexRay_t));
         Avtp_FlexRay_SetAcfMsgType(pdu, AVTP_ACF_TYPE_FLEXRAY);
     }
+}
+
+/**
+ * Copies the payload data, FR frame ID and cycle into the ACF FlexRay frame.
+ * This function will also set the length and pad fields while inserting the
+ * padded bytes.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param frame_id FR frame ID
+ * @param cycle Cycle number
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ */
+OPEN1722_INLINE void Avtp_FlexRay_CreateAcfMessage(Avtp_FlexRay_t *pdu, uint16_t frame_id,
+                                                   uint8_t cycle, uint8_t *payload,
+                                                   uint16_t payload_length)
+{
+    // Initialize the ACF FlexRay header
+    Avtp_FlexRay_Init(pdu);
+
+    // Set the FR frame ID and cycle
+    Avtp_FlexRay_SetFrFrameId(pdu, frame_id);
+    Avtp_FlexRay_SetCycle(pdu, cycle);
+
+    // Copy the payload into the FlexRay PDU
+    Avtp_FlexRay_SetPayload(pdu, payload, payload_length);
+
+    // Finalize the AVTP FlexRay Frame
+    Avtp_FlexRay_SetPayloadLength(pdu, payload_length);
+}
+
+/**
+ * Checks if the ACF FlexRay frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
+ * @param bufferSize Size of the buffer containing the ACF FlexRay frame.
+ * @return true if the ACF FlexRay frame is valid, false otherwise.
+ */
+OPEN1722_INLINE bool Avtp_FlexRay_IsValid(const Avtp_FlexRay_t* const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_FLEXRAY_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_FlexRay_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_FLEXRAY) {
+        return false;
+    }
+
+    // Avtp_FlexRay_GetAcfMsgLength returns quadlets. Convert the length field to octets.
+    uint16_t msg_length_bytes = (uint16_t)Avtp_FlexRay_GetAcfMsgLength(pdu) * 4;
+    if (msg_length_bytes > bufferSize) {
+        return false;
+    }
+
+    /* FlexRay payload-length invariant: the encoded message length must also
+     * accommodate header + declared padding so the payload computation in
+     * Avtp_FlexRay_GetPayloadLength() doesn't underflow. */
+    uint8_t pad_length = Avtp_FlexRay_GetPad(pdu);
+    uint16_t header_and_pad = (uint16_t)AVTP_FLEXRAY_HEADER_LEN + pad_length;
+    if (msg_length_bytes < header_and_pad) {
+        return false;
+    }
+    uint16_t payload_length = msg_length_bytes - header_and_pad;
+    if (payload_length > 254u) {
+        return false;
+    }
+    return true;
 }
 
 #ifdef __cplusplus
