@@ -63,7 +63,7 @@ typedef struct {
 } __attribute__((packed)) Avtp_Gpc_t;
 
 /** Fields of ACF GPC PDU. */
-typedef enum  {
+typedef enum {
 
     /* ACF common header fields */
     AVTP_GPC_FIELD_ACF_MSG_TYPE = 0,
@@ -79,13 +79,12 @@ typedef enum  {
 /**
  * This table maps all IEEE 1722 ACF GPC header fields to a descriptor.
  */
-static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] = {
     /* ACF common header fields */
-    [AVTP_GPC_FIELD_ACF_MSG_TYPE]       = { .quadlet = 0, .offset =  0, .bits = 7 },
-    [AVTP_GPC_FIELD_ACF_MSG_LENGTH]     = { .quadlet = 0, .offset =  7, .bits = 9 },
+    [AVTP_GPC_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_GPC_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
     /* ACF GPC header fields */
-    [AVTP_GPC_FIELD_GPC_MSG_ID]         = { .quadlet = 0, .offset =  16, .bits = 48 },
+    [AVTP_GPC_FIELD_GPC_MSG_ID] = {.quadlet = 0, .offset = 16, .bits = 48},
 };
 
 /**
@@ -94,8 +93,9 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] =
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @returns The value of the ACF Message Type Field.
  */
-OPEN1722_INLINE uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu) {
-    return (uint8_t) GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
+OPEN1722_INLINE uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t *const pdu)
+{
+    return (uint8_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -104,8 +104,9 @@ OPEN1722_INLINE uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @returns The value of the ACF Message Length Field.
  */
-OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu) {
-    return (uint16_t) GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t *const pdu)
+{
+    return (uint16_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
 }
 
 /**
@@ -114,7 +115,7 @@ OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @returns Length of the ACF message in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t* const pdu)
+OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t *const pdu)
 {
     return (uint16_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH) * 4;
 }
@@ -125,8 +126,9 @@ OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t* const
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @returns The value of the GPC Message ID Field.
  */
-OPEN1722_INLINE uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu) {
-    return (uint64_t) GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
+OPEN1722_INLINE uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t *const pdu)
+{
+    return (uint64_t)GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
 }
 
 /**
@@ -135,7 +137,8 @@ OPEN1722_INLINE uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @param value Value to set the ACF Message Type field to.
  */
-OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value) {
+OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t *pdu, uint8_t value)
+{
     SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE, value);
 }
 
@@ -145,7 +148,8 @@ OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t* pdu, uint8_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @param value Value to set the ACF Message Length field to.
  */
-OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t *pdu, uint16_t value)
+{
     SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH, value);
 }
 
@@ -155,7 +159,8 @@ OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t* pdu, uint16_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @param value Value to set the GPC Message ID field to.
  */
-OPEN1722_INLINE void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value) {
+OPEN1722_INLINE void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t *pdu, uint64_t value)
+{
     SET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID, value);
 }
 
@@ -165,7 +170,7 @@ OPEN1722_INLINE void Avtp_Gpc_SetGpcMsgId(Avtp_Gpc_t* pdu, uint64_t value) {
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
  * @return Pointer to ACF GPC frame payload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Gpc_GetPayload(const Avtp_Gpc_t* const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Gpc_GetPayload(const Avtp_Gpc_t *const pdu)
 {
     return pdu->payload;
 }
@@ -177,8 +182,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Gpc_GetPayload(const Avtp_Gpc_t* const pdu)
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload
  */
-OPEN1722_INLINE void Avtp_Gpc_SetPayload(Avtp_Gpc_t *pdu, uint8_t *payload,
-                                         uint16_t payload_length)
+OPEN1722_INLINE void Avtp_Gpc_SetPayload(Avtp_Gpc_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
     memcpy(pdu->payload, payload, payload_length);
 }
@@ -222,7 +226,8 @@ OPEN1722_INLINE void Avtp_Gpc_SetPayloadLength(Avtp_Gpc_t *pdu, uint16_t payload
  *
  * @param pdu Pointer to the first bit of a 1722 ACF GPC PDU.
  */
-OPEN1722_INLINE void Avtp_Gpc_Init(Avtp_Gpc_t* pdu) {
+OPEN1722_INLINE void Avtp_Gpc_Init(Avtp_Gpc_t *pdu)
+{
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Gpc_t));
         Avtp_Gpc_SetAcfMsgType(pdu, AVTP_ACF_TYPE_GPC);
@@ -256,13 +261,13 @@ OPEN1722_INLINE void Avtp_Gpc_CreateAcfMessage(Avtp_Gpc_t *pdu, uint64_t gpc_msg
 
 /**
  * Checks if the ACF Gpc frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of
+ * the buffer that contains the AVTP message. 2) if other format specific invariants are not upheld
  * @param pdu Pointer to the first bit of an 1722 ACF Gpc PDU.
  * @param bufferSize Size of the buffer containing the ACF Gpc frame.
  * @return true if the ACF Gpc frame is valid, false otherwise.
  */
-OPEN1722_INLINE bool Avtp_Gpc_IsValid(const Avtp_Gpc_t* const pdu, size_t bufferSize)
+OPEN1722_INLINE bool Avtp_Gpc_IsValid(const Avtp_Gpc_t *const pdu, size_t bufferSize)
 {
     if (pdu == NULL) {
         return false;
