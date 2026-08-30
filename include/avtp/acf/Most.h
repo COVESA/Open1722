@@ -35,18 +35,23 @@
 #pragma once
 #include "avtp/Inline.h"
 
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
 #include <string.h>
+#include <stdbool.h>
+#endif
 
+#include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
-#include "avtp/Utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /** Length of ACF Most header. */
-#define AVTP_MOST_HEADER_LEN (4 * AVTP_QUADLET_SIZE)
+#define AVTP_MOST_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
 
 #define GET_MOST_FIELD(field) \
     (Avtp_GetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (uint8_t *)pdu, field))
@@ -58,7 +63,7 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_MOST_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Most_t;
+} __attribute__((packed)) Avtp_Most_t;
 
 /** Fields of ACF Most PDU. */
 typedef enum  {
@@ -139,8 +144,8 @@ OPEN1722_INLINE uint8_t Avtp_Most_GetPad(const Avtp_Most_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @returns Value of the ACF Most PDU MTV field.
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetMtv(const Avtp_Most_t* const pdu) {
-    return (uint8_t) GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
+OPEN1722_INLINE bool Avtp_Most_IsMtv(const Avtp_Most_t* const pdu) {
+    return (bool) GET_MOST_FIELD(AVTP_MOST_FIELD_MTV);
 }
 
 /**
@@ -244,21 +249,13 @@ OPEN1722_INLINE void Avtp_Most_SetPad(Avtp_Most_t* pdu, uint8_t value) {
 }
 
 /**
- * Enable the MTV bit in an ACF Most frame as specified in the IEEE 1722 Specification.
- * 
- * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
- */
-OPEN1722_INLINE void Avtp_Most_EnableMtv(Avtp_Most_t* pdu) {
-    SET_MOST_FIELD(AVTP_MOST_FIELD_MTV, 1);
-}
-
-/**
- * Disable the MTV bit in an ACF Most frame as specified in the IEEE 1722 Specification.
+ * Set the MTV bit in an ACF Most frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param mtv Value to set the MTV bit to.
  */
-OPEN1722_INLINE void Avtp_Most_DisableMtv(Avtp_Most_t* pdu) {
-    SET_MOST_FIELD(AVTP_MOST_FIELD_MTV, 0);
+OPEN1722_INLINE void Avtp_Most_SetMtv(Avtp_Most_t* pdu, bool mtv) {
+    SET_MOST_FIELD(AVTP_MOST_FIELD_MTV, mtv);
 }
 
 /**
@@ -332,14 +329,77 @@ OPEN1722_INLINE void Avtp_Most_SetOpType(Avtp_Most_t* pdu, uint8_t value) {
 }
 
 /**
- * Checks if the ACF Most frame is valid by checking:
- *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
- *     2) if other format specific invariants are not upheld
+ * Return the ACF message length in bytes.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
- * @param bufferSize Size of the buffer containing the ACF Most frame.
- * @return true if the ACF Most frame is valid, false otherwise.
+ * @returns Length of the ACF message in bytes.
  */
-uint8_t Avtp_Most_IsValid(const Avtp_Most_t* const pdu, size_t bufferSize);
+OPEN1722_INLINE uint16_t Avtp_Most_GetAcfMsgLengthInBytes(const Avtp_Most_t* const pdu)
+{
+    return (uint16_t)GET_MOST_FIELD(AVTP_MOST_FIELD_ACF_MSG_LENGTH) * 4;
+}
+
+/**
+ * Returns pointer to payload of an ACF Most frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @return Pointer to ACF Most frame payload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Most_GetPayload(const Avtp_Most_t* const pdu)
+{
+    return pdu->payload;
+}
+
+/**
+ * Sets the Most payload in an ACF Most frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ */
+OPEN1722_INLINE void Avtp_Most_SetPayload(Avtp_Most_t *pdu, uint8_t *payload,
+                                          uint16_t payload_length)
+{
+    memcpy(pdu->payload, payload, payload_length);
+}
+
+/**
+ * Finalizes the ACF Most frame. This function will set the length and pad
+ * fields while inserting the padded bytes. This will also set padding bytes to
+ * zero if the payload length is not a multiple of 4 to avoid leaking information.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param payload_length Length of the Most frame payload.
+ */
+OPEN1722_INLINE void Avtp_Most_SetPayloadLength(Avtp_Most_t *pdu, uint16_t payload_length)
+{
+    uint16_t msgLenBytes = AVTP_MOST_HEADER_LEN + payload_length;
+    uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
+    if (pad > 0) {
+        memset(pdu->payload + payload_length, 0, pad);
+    }
+    uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
+    Avtp_Most_SetPad(pdu, pad);
+    Avtp_Most_SetAcfMsgLength(pdu, msgLenQuadlets);
+}
+
+/**
+ * Returns the length of the Most payload without the padding bytes and the
+ * header length of the encapsulating ACF Frame.
+ *
+ * Precondition: the caller must have validated the PDU with
+ * Avtp_Most_IsValid(). This function performs no further bounds checking
+ * and assumes those invariants already hold.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @return  Length of Most payload in bytes
+ */
+OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t* const pdu)
+{
+    uint8_t pad_length = Avtp_Most_GetPad(pdu);
+    uint16_t acf_length_bytes = Avtp_Most_GetAcfMsgLengthInBytes(pdu);
+    return (uint8_t)(acf_length_bytes - AVTP_MOST_HEADER_LEN - pad_length);
+}
 
 /**
  * Initializes an ACF Most PDU.
@@ -352,6 +412,81 @@ OPEN1722_INLINE void Avtp_Most_Init(Avtp_Most_t* pdu) {
         memset(pdu, 0, sizeof(Avtp_Most_t));
         Avtp_Most_SetAcfMsgType(pdu, AVTP_ACF_TYPE_MOST);
     }
+}
+
+/**
+ * Copies the payload data, device ID, FBlock ID, instance ID, function ID and
+ * op type into the ACF Most frame. This function will also set the length and
+ * pad fields while inserting the padded bytes.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param device_id Device ID
+ * @param fblock_id FBlock ID
+ * @param inst_id Instance ID
+ * @param func_id Function ID
+ * @param op_type Op type
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload.
+ */
+OPEN1722_INLINE void Avtp_Most_CreateAcfMessage(Avtp_Most_t *pdu, uint16_t device_id,
+                                                uint8_t fblock_id, uint8_t inst_id,
+                                                uint16_t func_id, uint8_t op_type,
+                                                uint8_t *payload, uint16_t payload_length)
+{
+    // Initialize the ACF Most header
+    Avtp_Most_Init(pdu);
+
+    // Set the device ID, FBlock ID, instance ID, function ID and op type
+    Avtp_Most_SetDeviceId(pdu, device_id);
+    Avtp_Most_SetFblockId(pdu, fblock_id);
+    Avtp_Most_SetInstId(pdu, inst_id);
+    Avtp_Most_SetFuncId(pdu, func_id);
+    Avtp_Most_SetOpType(pdu, op_type);
+
+    // Copy the payload into the Most PDU
+    Avtp_Most_SetPayload(pdu, payload, payload_length);
+
+    // Finalize the AVTP Most Frame
+    Avtp_Most_SetPayloadLength(pdu, payload_length);
+}
+
+/**
+ * Checks if the ACF Most frame is valid by checking:
+ *     1) if the length field of AVTP/ACF messages contains a value larger than the actual size of the buffer that contains the AVTP message.
+ *     2) if other format specific invariants are not upheld
+ * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
+ * @param bufferSize Size of the buffer containing the ACF Most frame.
+ * @return true if the ACF Most frame is valid, false otherwise.
+ */
+OPEN1722_INLINE bool Avtp_Most_IsValid(const Avtp_Most_t* const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_MOST_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Most_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_MOST) {
+        return false;
+    }
+
+    // Avtp_Most_GetAcfMsgLength returns quadlets. Convert the length field to octets.
+    uint16_t msg_length_bytes = (uint16_t)Avtp_Most_GetAcfMsgLength(pdu) * 4;
+    if (msg_length_bytes > bufferSize) {
+        return false;
+    }
+
+    /* The encoded message length must accommodate header + declared padding
+     * so the payload computation in Avtp_Most_GetPayloadLength() doesn't
+     * underflow. */
+    uint8_t pad_length = Avtp_Most_GetPad(pdu);
+    uint16_t header_and_pad = (uint16_t)AVTP_MOST_HEADER_LEN + pad_length;
+    if (msg_length_bytes < header_and_pad) {
+        return false;
+    }
+    return true;
 }
 
 

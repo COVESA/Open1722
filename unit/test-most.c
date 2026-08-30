@@ -70,11 +70,11 @@ static void most_get_set_fields(void **state) {
     Avtp_Most_SetPad((Avtp_Most_t*)pdu, 1);
     assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t*)pdu), 1);
 
-    Avtp_Most_EnableMtv((Avtp_Most_t*)pdu);
-    assert_int_equal(Avtp_Most_GetMtv((Avtp_Most_t*)pdu), 1);
+    Avtp_Most_SetMtv((Avtp_Most_t*)pdu, true);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 1);
 
-    Avtp_Most_DisableMtv((Avtp_Most_t*)pdu);
-    assert_int_equal(Avtp_Most_GetMtv((Avtp_Most_t*)pdu), 0);
+    Avtp_Most_SetMtv((Avtp_Most_t*)pdu, false);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 0);
 
     Avtp_Most_SetMostNetId((Avtp_Most_t*)pdu, 15);
     assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t*)pdu), 15);
@@ -101,8 +101,9 @@ static void most_get_set_fields(void **state) {
 static void most_is_valid(void **state) {
     uint8_t pdu[MAX_PDU_SIZE];
 
+    // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
     Avtp_Most_Init((Avtp_Most_t*)pdu);
-    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 0);
 
     memset(pdu, 0, MAX_PDU_SIZE);
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 0);
@@ -116,12 +117,49 @@ static void most_is_valid(void **state) {
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, 9), 0);
 }
 
+static void most_create_message(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    Avtp_Most_CreateAcfMessage((Avtp_Most_t*)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F,
+                               payload, sizeof(payload));
+
+    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t*)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t*)pdu), 0x1234);
+    assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t*)pdu), 0xAB);
+    assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t*)pdu), 0x12);
+    assert_int_equal(Avtp_Most_GetFuncId((Avtp_Most_t*)pdu), 0x456);
+    assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t*)pdu), 0x0F);
+    assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t*)pdu), 8);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 1);
+}
+
+static void most_create_from_garbage(void **state) {
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    // CreateAcfMessage must fully initialize the header even on garbage input.
+    memset(pdu, 0xAA, MAX_PDU_SIZE);
+    Avtp_Most_CreateAcfMessage((Avtp_Most_t*)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F,
+                               payload, sizeof(payload));
+
+    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t*)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t*)pdu), 0);
+    assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t*)pdu), 0);
+    assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t*)pdu), 0);
+    assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t*)pdu, MAX_PDU_SIZE), 1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(most_init),
         cmocka_unit_test(most_get_set_fields),
         cmocka_unit_test(most_is_valid),
+        cmocka_unit_test(most_create_message),
+        cmocka_unit_test(most_create_from_garbage),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
