@@ -74,8 +74,7 @@ static void vss_pad(void **state) {
     Avtp_Vss_Init(vss_pdu);
 
     for(int i = 1; i < 4; i++) {
-        int vss_length = AVTP_VSS_FIXED_HEADER_LEN + i;
-        Avtp_Vss_Pad(vss_pdu, vss_length);
+        Avtp_Vss_SetPayloadLength(vss_pdu, i);
 
         uint8_t vss_quadlets = Avtp_Vss_GetAcfMsgLength(vss_pdu);
         assert_int_equal(vss_quadlets, AVTP_VSS_FIXED_HEADER_LEN/4 + 1);
