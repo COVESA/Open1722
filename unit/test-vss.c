@@ -46,59 +46,60 @@ extern "C" {
 #include "avtp/acf/custom/Vss.h"
 #include "avtp/acf/AcfCommon.h"
 
-#define MAX_PDU_SIZE        1500
+#define MAX_PDU_SIZE 1500
 
-static void vss_init(void **state) {
+static void vss_init(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t init_pdu[AVTP_VSS_FIXED_HEADER_LEN];
 
     // Check if the function is initializing properly
-    Avtp_Vss_Init((Avtp_Vss_t*)pdu);
+    Avtp_Vss_Init((Avtp_Vss_t *)pdu);
     memset(init_pdu, 0, AVTP_VSS_FIXED_HEADER_LEN);
     init_pdu[0] = 0x42 << 1; // Setting ACF type as ACF_VSS
     assert_memory_equal(init_pdu, pdu, AVTP_VSS_FIXED_HEADER_LEN);
 
-    Avtp_AcfMsgType_t type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t*) pdu);
+    Avtp_AcfMsgType_t type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu);
     assert_int_equal(type, 0x42);
 }
 
-static void vss_pad(void **state) {
+static void vss_pad(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
     // Check if the function is initializing properly
     Avtp_Vss_Init(vss_pdu);
 
-    for(int i = 1; i < 4; i++) {
+    for (int i = 1; i < 4; i++) {
         Avtp_Vss_SetPayloadLength(vss_pdu, i);
 
         uint8_t vss_quadlets = Avtp_Vss_GetAcfMsgLength(vss_pdu);
-        assert_int_equal(vss_quadlets, AVTP_VSS_FIXED_HEADER_LEN/4 + 1);
+        assert_int_equal(vss_quadlets, AVTP_VSS_FIXED_HEADER_LEN / 4 + 1);
 
         uint8_t vss_pad = Avtp_Vss_GetPad(vss_pdu);
-        assert_int_equal(vss_pad, 4-i);
+        assert_int_equal(vss_pad, 4 - i);
     }
 }
 
-static void vss_static_path(void **state) {
+static void vss_static_path(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
-    VssPath_t path_id = {
-        .vss_static_id_path = 0x01020304
-    };
+    VssPath_t path_id = {.vss_static_id_path = 0x01020304};
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_STATIC_ID_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    uint8_t exp_static_id[] = {1,2,3,4};
-    assert_memory_equal(pdu+AVTP_VSS_FIXED_HEADER_LEN, exp_static_id, 4);
+    uint8_t exp_static_id[] = {1, 2, 3, 4};
+    assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN, exp_static_id, 4);
 
     VssPath_t get_path_id;
     Avtp_Vss_GetVssPath(vss_pdu, &get_path_id);
@@ -107,10 +108,11 @@ static void vss_static_path(void **state) {
     assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 4);
 }
 
-static void vss_interop_path(void **state) {
+static void vss_interop_path(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
 
@@ -124,7 +126,7 @@ static void vss_interop_path(void **state) {
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
     uint8_t get_path_len[] = {0, 13};
-    assert_memory_equal(pdu+AVTP_VSS_FIXED_HEADER_LEN, get_path_len, 2);
+    assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN, get_path_len, 2);
     assert_int_equal(Avtp_Vss_GetAddrMode(vss_pdu), VSS_INTEROP_MODE);
     assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 15);
 
@@ -134,13 +136,13 @@ static void vss_interop_path(void **state) {
     Avtp_Vss_GetVssPath(vss_pdu, &get_vss_path);
     assert_int_equal(get_vss_path.vss_interop_path.path_length, 13);
     assert_memory_equal(get_vss_path.vss_interop_path.path, path, 13);
-
 }
 
-static void vss_data_uint8(void **state) {
+static void vss_data_uint8(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -152,9 +154,7 @@ static void vss_data_uint8(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_uint8 = {
-        .data_uint8 = 0x05
-    };
+    VssData_t vss_data_uint8 = {.data_uint8 = 0x05};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT8);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_uint8);
     uint8_t mem[] = {5};
@@ -164,13 +164,13 @@ static void vss_data_uint8(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT8);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_uint8_get);
     assert_int_equal(vss_data_uint8_get.data_uint8, 0x05);
-
 }
 
-static void vss_data_int8(void **state) {
+static void vss_data_int8(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -182,25 +182,23 @@ static void vss_data_int8(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_int8 = {
-        .data_int8 = -0x05
-    };
+    VssData_t vss_data_int8 = {.data_int8 = -0x05};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT8);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_int8);
     int8_t mem[] = {-5};
-    assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, (uint8_t*) mem, 1);
+    assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, (uint8_t *)mem, 1);
 
     VssData_t vss_data_int8_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT8);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_int8_get);
     assert_int_equal(vss_data_int8_get.data_int8, -0x05);
-
 }
 
-static void vss_data_uint16(void **state) {
+static void vss_data_uint16(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -212,9 +210,7 @@ static void vss_data_uint16(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_uint16 = {
-        .data_uint16 = 0x0504
-    };
+    VssData_t vss_data_uint16 = {.data_uint16 = 0x0504};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT16);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_uint16);
     uint8_t mem[] = {5, 4};
@@ -224,13 +220,13 @@ static void vss_data_uint16(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT16);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_uint16_get);
     assert_int_equal(vss_data_uint16_get.data_uint16, 0x0504);
-
 }
 
-static void vss_data_int16(void **state) {
+static void vss_data_int16(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -242,9 +238,7 @@ static void vss_data_int16(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_int16 = {
-        .data_int16 = -0x0504
-    };
+    VssData_t vss_data_int16 = {.data_int16 = -0x0504};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT16);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_int16);
     uint8_t mem[] = {0xFA, 0xFC};
@@ -254,13 +248,13 @@ static void vss_data_int16(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT16);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_int16_get);
     assert_int_equal(vss_data_int16_get.data_int16, -0x0504);
-
 }
 
-static void vss_data_uint32(void **state) {
+static void vss_data_uint32(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -272,9 +266,7 @@ static void vss_data_uint32(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_uint32 = {
-        .data_uint32 = 0x05040302
-    };
+    VssData_t vss_data_uint32 = {.data_uint32 = 0x05040302};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT32);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_uint32);
     uint8_t mem[] = {5, 4, 3, 2};
@@ -284,13 +276,13 @@ static void vss_data_uint32(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT32);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_uint32_get);
     assert_int_equal(vss_data_uint32_get.data_uint32, 0x05040302);
-
 }
 
-static void vss_data_int32(void **state) {
+static void vss_data_int32(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -302,9 +294,7 @@ static void vss_data_int32(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_int32 = {
-        .data_int32 = -0x05040302
-    };
+    VssData_t vss_data_int32 = {.data_int32 = -0x05040302};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT32);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_int32);
     uint8_t mem[] = {0xFA, 0xFB, 0xFC, 0xFE};
@@ -316,10 +306,11 @@ static void vss_data_int32(void **state) {
     assert_int_equal(vss_data_int32_get.data_int32, -0x05040302);
 }
 
-static void vss_data_uint64(void **state) {
+static void vss_data_uint64(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -331,9 +322,7 @@ static void vss_data_uint64(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_uint64 = {
-        .data_uint64 = 0x0504030201060708
-    };
+    VssData_t vss_data_uint64 = {.data_uint64 = 0x0504030201060708};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT64);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_uint64);
     uint8_t mem[] = {5, 4, 3, 2, 1, 6, 7, 8};
@@ -344,13 +333,13 @@ static void vss_data_uint64(void **state) {
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_uint64_get);
     uint8_t mem_cpu[] = {8, 7, 6, 1, 2, 3, 4, 5};
     assert_memory_equal(&(vss_data_uint64_get.data_uint64), mem_cpu, 8);
-
 }
 
-static void vss_data_int64(void **state) {
+static void vss_data_int64(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -362,9 +351,7 @@ static void vss_data_int64(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_int64 = {
-        .data_int64 = -0x0504030201060708
-    };
+    VssData_t vss_data_int64 = {.data_int64 = -0x0504030201060708};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_INT64);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_int64);
     uint8_t mem[] = {0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xF9, 0xF8, 0xF8};
@@ -375,13 +362,13 @@ static void vss_data_int64(void **state) {
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_int64_get);
     uint8_t mem_cpu[] = {0xF8, 0xF8, 0xF9, 0xFE, 0xFD, 0xFC, 0xFB, 0xFA};
     assert_memory_equal(&(vss_data_int64_get.data_int64), mem_cpu, 8);
-
 }
 
-static void vss_data_bool(void **state) {
+static void vss_data_bool(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -393,9 +380,7 @@ static void vss_data_bool(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_bool = {
-        .data_bool = 0x01
-    };
+    VssData_t vss_data_bool = {.data_bool = 0x01};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_BOOL);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_bool);
     uint8_t mem[] = {1};
@@ -405,13 +390,13 @@ static void vss_data_bool(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_BOOL);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_bool_get);
     assert_int_equal(vss_data_bool_get.data_bool, 1);
-
 }
 
-static void vss_data_float(void **state) {
+static void vss_data_float(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -423,9 +408,7 @@ static void vss_data_float(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_float = {
-        .data_float = -1.2
-    };
+    VssData_t vss_data_float = {.data_float = -1.2};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_FLOAT);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_float);
     uint8_t mem[] = {0xbf, 0x99, 0x99, 0x9a};
@@ -435,13 +418,13 @@ static void vss_data_float(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_FLOAT);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_float_get);
     assert_float_equal(vss_data_float_get.data_float, -1.2, 0.5);
-
 }
 
-static void vss_data_double(void **state) {
+static void vss_data_double(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -453,9 +436,7 @@ static void vss_data_double(void **state) {
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetVssPath(vss_pdu, &path_id);
 
-    VssData_t vss_data_double = {
-        .data_double = -1.2
-    };
+    VssData_t vss_data_double = {.data_double = -1.2};
     Avtp_Vss_SetDatatype(vss_pdu, VSS_DOUBLE);
     Avtp_Vss_SetVssData(vss_pdu, &vss_data_double);
     uint8_t mem[] = {0xbf, 0xf3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33};
@@ -465,13 +446,13 @@ static void vss_data_double(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_DOUBLE);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_double_get);
     assert_float_equal(vss_data_double_get.data_double, -1.2, 0.1);
-
 }
 
-static void vss_data_string(void **state) {
+static void vss_data_string(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -497,9 +478,7 @@ static void vss_data_string(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, str_value, strlen(str_value));
 
     VssData_t vss_data_get;
-    VssDataString_t vss_data_string_get = {
-        .data = 0
-    };
+    VssDataString_t vss_data_string_get = {.data = 0};
     vss_data_get.data_string = &vss_data_string_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_STRING);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -510,10 +489,11 @@ static void vss_data_string(void **state) {
     assert_string_equal(vss_data_get.data_string->data, str_value);
 }
 
-static void vss_data_uint8_array(void **state) {
+static void vss_data_uint8_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -539,9 +519,7 @@ static void vss_data_uint8_array(void **state) {
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, uint8_arr_value, 5);
 
     VssData_t vss_data_get;
-    VssDataUint8Array_t vss_data_uint8_arr_get = {
-        .data = 0
-    };
+    VssDataUint8Array_t vss_data_uint8_arr_get = {.data = 0};
     vss_data_get.data_uint8_array = &vss_data_uint8_arr_get;
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT8_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
@@ -552,10 +530,11 @@ static void vss_data_uint8_array(void **state) {
     assert_memory_equal(vss_data_get.data_uint8_array->data, uint8_arr_value, 5);
 }
 
-static void vss_data_int8_array(void **state) {
+static void vss_data_int8_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -593,10 +572,11 @@ static void vss_data_int8_array(void **state) {
     assert_memory_equal(vss_data_get.data_int8_array->data, int8_arr_value, 5);
 }
 
-static void vss_data_uint16_array(void **state) {
+static void vss_data_uint16_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -629,16 +609,17 @@ static void vss_data_uint16_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT16_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_uint16_array->data_length, 10);
-    uint16_t uint16_arr_value_recv[vss_data_get.data_uint16_array->data_length/2];
+    uint16_t uint16_arr_value_recv[vss_data_get.data_uint16_array->data_length / 2];
     vss_data_uint16_arr_get.data = uint16_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_uint16_array->data, uint16_arr_value, 10);
 }
 
-static void vss_data_int16_array(void **state) {
+static void vss_data_int16_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -671,16 +652,17 @@ static void vss_data_int16_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT16_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_int16_array->data_length, 10);
-    int16_t int16_arr_value_recv[vss_data_get.data_int16_array->data_length/2];
+    int16_t int16_arr_value_recv[vss_data_get.data_int16_array->data_length / 2];
     vss_data_int16_arr_get.data = int16_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_int16_array->data, int16_arr_value, 10);
 }
 
-static void vss_data_uint32_array(void **state) {
+static void vss_data_uint32_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -713,16 +695,17 @@ static void vss_data_uint32_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT32_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_uint32_array->data_length, 20);
-    uint32_t uint32_arr_value_recv[vss_data_get.data_uint32_array->data_length/4];
+    uint32_t uint32_arr_value_recv[vss_data_get.data_uint32_array->data_length / 4];
     vss_data_uint32_arr_get.data = uint32_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_uint32_array->data, uint32_arr_value, 20);
 }
 
-static void vss_data_int32_array(void **state) {
+static void vss_data_int32_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -745,11 +728,8 @@ static void vss_data_int32_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 20};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0xff, 0xff, 0, 0,
-                            0xff, 0xfe, 0xff, 0,
-                            0xff, 0xfe, 0xfe, 0,
-                            0xff, 0xfe, 0xfd, 0,
-                            0xff, 0xfe, 0xfc, 0};
+    uint8_t arr_in_mem[] = {0xff, 0xff, 0,    0,    0xff, 0xfe, 0xff, 0,    0xff, 0xfe,
+                            0xfe, 0,    0xff, 0xfe, 0xfd, 0,    0xff, 0xfe, 0xfc, 0};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 20);
 
     VssData_t vss_data_get = {0};
@@ -759,16 +739,17 @@ static void vss_data_int32_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT32_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_int32_array->data_length, 20);
-    int32_t int32_arr_value_recv[vss_data_get.data_int32_array->data_length/4];
+    int32_t int32_arr_value_recv[vss_data_get.data_int32_array->data_length / 4];
     vss_data_int32_arr_get.data = int32_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_int32_array->data, int32_arr_value, 20);
 }
 
-static void vss_data_uint64_array(void **state) {
+static void vss_data_uint64_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -791,11 +772,8 @@ static void vss_data_uint64_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0, 0, 0, 0, 0, 1, 0, 0,
-                             0, 0, 0, 0, 0, 1, 1, 0,
-                             0, 0, 0, 0, 0, 1, 2, 0,
-                             0, 0, 0, 0, 0, 1, 3, 0,
-                             0, 0, 0, 0, 0, 1, 4, 0};
+    uint8_t arr_in_mem[] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+                            0, 1, 2, 0, 0, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 1, 4, 0};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 40);
 
     VssData_t vss_data_get = {0};
@@ -804,16 +782,17 @@ static void vss_data_uint64_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_UINT64_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_uint64_array->data_length, 40);
-    uint64_t uint64_arr_value_recv[vss_data_get.data_uint64_array->data_length/8];
+    uint64_t uint64_arr_value_recv[vss_data_get.data_uint64_array->data_length / 8];
     vss_data_uint64_arr_get.data = uint64_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_uint64_array->data, uint64_arr_value, 40);
 }
 
-static void vss_data_int64_array(void **state) {
+static void vss_data_int64_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -836,11 +815,11 @@ static void vss_data_int64_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0, 0,
-                             0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xff, 0,
-                             0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe, 0,
-                             0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfd, 0,
-                             0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfc, 0,};
+    uint8_t arr_in_mem[] = {
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0,    0,    0xff, 0xff, 0xff, 0xff, 0xff, 0xfe,
+        0xff, 0,    0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe, 0,    0xff, 0xff, 0xff, 0xff,
+        0xff, 0xfe, 0xfd, 0,    0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfc, 0,
+    };
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 40);
 
     VssData_t vss_data_get = {0};
@@ -851,16 +830,17 @@ static void vss_data_int64_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_INT64_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_int64_array->data_length, 40);
-    int64_t int64_arr_value_recv[vss_data_get.data_int64_array->data_length/8];
+    int64_t int64_arr_value_recv[vss_data_get.data_int64_array->data_length / 8];
     vss_data_int64_arr_get.data = int64_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_int64_array->data, int64_arr_value, 40);
 }
 
-static void vss_data_bool_array(void **state) {
+static void vss_data_bool_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -899,10 +879,11 @@ static void vss_data_bool_array(void **state) {
     assert_memory_equal(vss_data_get.data_bool_array->data, bool_arr_value, 5);
 }
 
-static void vss_data_float_array(void **state) {
+static void vss_data_float_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -925,11 +906,8 @@ static void vss_data_float_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 20};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0x3f, 0x99, 0x99, 0x9a,
-                             0xbf, 0x99, 0x99, 0x9a,
-                             0x3f, 0xa6, 0x66, 0x66,
-                             0xbf, 0xa6, 0x66, 0x66,
-                             0x3f, 0xc0, 0, 0, 0};
+    uint8_t arr_in_mem[] = {0x3f, 0x99, 0x99, 0x9a, 0xbf, 0x99, 0x99, 0x9a, 0x3f, 0xa6, 0x66,
+                            0x66, 0xbf, 0xa6, 0x66, 0x66, 0x3f, 0xc0, 0,    0,    0};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 20);
 
     VssData_t vss_data_get = {0};
@@ -940,16 +918,17 @@ static void vss_data_float_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_FLOAT_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_float_array->data_length, 20);
-    float float_arr_value_recv[vss_data_get.data_float_array->data_length/4];
+    float float_arr_value_recv[vss_data_get.data_float_array->data_length / 4];
     vss_data_float_arr_get.data = float_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_float_array->data, float_arr_value, 20);
 }
 
-static void vss_data_double_array(void **state) {
+static void vss_data_double_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -972,11 +951,10 @@ static void vss_data_double_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 40};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0x3f, 0xf3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33,
-                             0xbf, 0xf3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33,
-                             0x3f, 0xf4, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcd,
-                             0xbf, 0xf4, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcd,
-                             0x3f, 0xf8, 0, 0, 0, 0, 0, 0};
+    uint8_t arr_in_mem[] = {0x3f, 0xf3, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0xbf, 0xf3,
+                            0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x3f, 0xf4, 0xcc, 0xcc,
+                            0xcc, 0xcc, 0xcc, 0xcd, 0xbf, 0xf4, 0xcc, 0xcc, 0xcc, 0xcc,
+                            0xcc, 0xcd, 0x3f, 0xf8, 0,    0,    0,    0,    0,    0};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 40);
 
     VssData_t vss_data_get = {0};
@@ -985,16 +963,17 @@ static void vss_data_double_array(void **state) {
     assert_int_equal(Avtp_Vss_GetDatatype(vss_pdu), VSS_DOUBLE_ARRAY);
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_int_equal(vss_data_get.data_double_array->data_length, 40);
-    double double_arr_value_recv[vss_data_get.data_double_array->data_length/8];
+    double double_arr_value_recv[vss_data_get.data_double_array->data_length / 8];
     vss_data_double_arr_get.data = double_arr_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
     assert_memory_equal(vss_data_get.data_double_array->data, double_arr_value, 40);
 }
 
-static void vss_data_string_array(void **state) {
+static void vss_data_string_array(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
-    Avtp_Vss_t* vss_pdu = (Avtp_Vss_t*) pdu;
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
     Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
     char path[] = "Vehicle.Speed";
@@ -1019,8 +998,8 @@ static void vss_data_string_array(void **state) {
     vss_str3.data = str3;
     vss_str3.data_length = strlen(str3);
 
-    VssDataString_t* arr[] = {&vss_str1, &vss_str2, &vss_str3};
-    uint8_t buffer[strlen(str1) + strlen(str2) + strlen(str3)+2];
+    VssDataString_t *arr[] = {&vss_str1, &vss_str2, &vss_str3};
+    uint8_t buffer[strlen(str1) + strlen(str2) + strlen(str3) + 2];
     VssDataStringArray_t vss_str_array = {0};
     vss_str_array.data = buffer;
     Avtp_Vss_SerializeStringArray(&vss_str_array, arr, 3);
@@ -1032,9 +1011,8 @@ static void vss_data_string_array(void **state) {
     Avtp_Vss_SetVssData(vss_pdu, &data);
     uint8_t len_in_mem[] = {0, 23};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 15, len_in_mem, 2);
-    uint8_t arr_in_mem[] = {0x00, 0x05, 'H', 'e', 'l', 'l', 'o',
-                             0x00, 0x05, 'W', 'o', 'r', 'l', 'd',
-                             0x00, 0x07, 'T', 's', 'c', 'h', 'u', 's', 's'};
+    uint8_t arr_in_mem[] = {0x00, 0x05, 'H',  'e',  'l', 'l', 'o', 0x00, 0x05, 'W', 'o', 'r',
+                            'l',  'd',  0x00, 0x07, 'T', 's', 'c', 'h',  'u',  's', 's'};
     assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN + 17, arr_in_mem, 23);
 
     VssData_t vss_data_get = {0};
@@ -1049,13 +1027,10 @@ static void vss_data_string_array(void **state) {
     assert_memory_equal(vss_data_get.data_string_array->data, arr_in_mem, 23);
 
     assert_int_equal(Avtp_Vss_GetVSSDataStringArrayLength(vss_data_get.data_string_array), 3);
-    VssDataString_t strings[3] = {
-        {.data = 0},
-        {.data = 0},
-        {.data = 0}
-    };
-    VssDataString_t* strings_array[] = {&strings[0], &strings[1], &strings[2]};
-    Avtp_Vss_DeserializeStringArray(vss_data_get.data_string_array, (VssDataString_t**) &strings_array, 3);
+    VssDataString_t strings[3] = {{.data = 0}, {.data = 0}, {.data = 0}};
+    VssDataString_t *strings_array[] = {&strings[0], &strings[1], &strings[2]};
+    Avtp_Vss_DeserializeStringArray(vss_data_get.data_string_array,
+                                    (VssDataString_t **)&strings_array, 3);
 
     assert_int_equal(strings[0].data_length, 5);
     assert_int_equal(strings[1].data_length, 5);
@@ -1064,18 +1039,17 @@ static void vss_data_string_array(void **state) {
     char str1_recd[5];
     char str2_recd[5];
     char str3_recd[7];
-    strings[0].data = str1_recd,
-    strings[1].data = str2_recd,
-    strings[2].data = str3_recd,
+    strings[0].data = str1_recd, strings[1].data = str2_recd, strings[2].data = str3_recd,
 
-    Avtp_Vss_DeserializeStringArray(vss_data_get.data_string_array, (VssDataString_t**) &strings_array, 3);
+    Avtp_Vss_DeserializeStringArray(vss_data_get.data_string_array,
+                                    (VssDataString_t **)&strings_array, 3);
     assert_memory_equal(strings[0].data, str1, 5);
     assert_memory_equal(strings[1].data, str2, 5);
     assert_memory_equal(strings[2].data, str3, 7);
-
 }
 
-static void vss_data_string_array_malformed(void **state) {
+static void vss_data_string_array_malformed(void **state)
+{
     /* On-wire layout for a VSS string array is [u16 length][bytes ...]
      * pairs. Construct a 23-byte payload identical to the well-formed
      * fixture in vss_data_string_array, except the third length prefix
@@ -1091,9 +1065,8 @@ static void vss_data_string_array_malformed(void **state) {
      *     with the well-formed strings and leaves the third untouched.
      */
     uint8_t arr_in_mem[] = {
-        0x00, 0x05, 'H', 'e', 'l', 'l', 'o',
-        0x00, 0x05, 'W', 'o', 'r', 'l', 'd',
-        0x00, 0xAA, 'T', 's', 'c', 'h', 'u', 's', 's',
+        0x00, 0x05, 'H',  'e',  'l', 'l', 'o', 0x00, 0x05, 'W', 'o', 'r',
+        'l',  'd',  0x00, 0xAA, 'T', 's', 'c', 'h',  'u',  's', 's',
     };
 
     VssDataStringArray_t str_array = {0};
@@ -1106,10 +1079,13 @@ static void vss_data_string_array_malformed(void **state) {
     /* Deserialisation must fill only the first two entries. The third
      * struct stays at its initial state (data_length == 0). */
     char buf1[8] = {0}, buf2[8] = {0}, buf3[8] = {0};
-    VssDataString_t s1 = {0}; s1.data = buf1;
-    VssDataString_t s2 = {0}; s2.data = buf2;
-    VssDataString_t s3 = {0}; s3.data = buf3;
-    VssDataString_t* strings_array[] = {&s1, &s2, &s3};
+    VssDataString_t s1 = {0};
+    s1.data = buf1;
+    VssDataString_t s2 = {0};
+    s2.data = buf2;
+    VssDataString_t s3 = {0};
+    s3.data = buf3;
+    VssDataString_t *strings_array[] = {&s1, &s2, &s3};
 
     Avtp_Vss_DeserializeStringArray(&str_array, strings_array, 3);
 
@@ -1139,11 +1115,9 @@ static void vss_data_string_array_malformed(void **state) {
 /* Helper: build a VSS PDU with STATIC_ID path, given msg_quadlets, datatype,
  * and plant 0xFFFF as the on‑wire data_length followed by fill_data.
  * Available data bytes = msg_quadlets × 4 − 16 (header+path) − 2 (prefix). */
-static Avtp_Vss_t* vss_build_data_oob_pdu(uint8_t *buf, size_t buf_size,
-                                            uint8_t msg_quadlets,
-                                            Vss_Datatype_t datatype,
-                                            const uint8_t *fill_data,
-                                            uint16_t fill_len)
+static Avtp_Vss_t *vss_build_data_oob_pdu(uint8_t *buf, size_t buf_size, uint8_t msg_quadlets,
+                                          Vss_Datatype_t datatype, const uint8_t *fill_data,
+                                          uint16_t fill_len)
 {
     memset(buf, 0, buf_size);
     Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
@@ -1178,9 +1152,11 @@ static void vss_path_interop_oob(void **state)
     Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
     Avtp_Vss_SetAcfMsgLength(pdu, 5);
 
-    buf[12] = 0xFF; buf[13] = 0xFF;    /* wire path_length = 0xFFFF */
-    buf[14] = 'A';  buf[15] = 'B';     /* only 2 bytes of real path data
-                                         * (bytes 16‑17 are zero from memset) */
+    buf[12] = 0xFF;
+    buf[13] = 0xFF; /* wire path_length = 0xFFFF */
+    buf[14] = 'A';
+    buf[15] = 'B'; /* only 2 bytes of real path data
+                    * (bytes 16‑17 are zero from memset) */
 
     char path_buf[16];
     memset(path_buf, 0x5A, sizeof(path_buf));
@@ -1205,10 +1181,9 @@ static void vss_data_string_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_STRING, fill, sizeof(fill));
+    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_STRING, fill, sizeof(fill));
 
-    VssDataString_t str = { .data = NULL };
+    VssDataString_t str = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_string = &str;
@@ -1228,10 +1203,10 @@ static void vss_data_uint8_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_UINT8_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_UINT8_ARRAY, fill, sizeof(fill));
 
-    VssDataUint8Array_t arr = { .data = NULL };
+    VssDataUint8Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_uint8_array = &arr;
@@ -1250,10 +1225,10 @@ static void vss_data_int8_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_INT8_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_INT8_ARRAY, fill, sizeof(fill));
 
-    VssDataInt8Array_t arr = { .data = NULL };
+    VssDataInt8Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_int8_array = &arr;
@@ -1272,10 +1247,10 @@ static void vss_data_bool_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_BOOL_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_BOOL_ARRAY, fill, sizeof(fill));
 
-    VssDataBoolArray_t arr = { .data = NULL };
+    VssDataBoolArray_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_bool_array = &arr;
@@ -1296,10 +1271,10 @@ static void vss_data_string_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_STRING_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_STRING_ARRAY, fill, sizeof(fill));
 
-    VssDataStringArray_t arr = { .data = NULL };
+    VssDataStringArray_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_string_array = &arr;
@@ -1320,10 +1295,10 @@ static void vss_data_uint16_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_UINT16_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_UINT16_ARRAY, fill, sizeof(fill));
 
-    VssDataUint16Array_t arr = { .data = NULL };
+    VssDataUint16Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_uint16_array = &arr;
@@ -1345,10 +1320,10 @@ static void vss_data_int16_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_INT16_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_INT16_ARRAY, fill, sizeof(fill));
 
-    VssDataInt16Array_t arr = { .data = NULL };
+    VssDataInt16Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_int16_array = &arr;
@@ -1370,10 +1345,10 @@ static void vss_data_uint32_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_UINT32_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_UINT32_ARRAY, fill, sizeof(fill));
 
-    VssDataUint32Array_t arr = { .data = NULL };
+    VssDataUint32Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_uint32_array = &arr;
@@ -1393,10 +1368,10 @@ static void vss_data_int32_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_INT32_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_INT32_ARRAY, fill, sizeof(fill));
 
-    VssDataInt32Array_t arr = { .data = NULL };
+    VssDataInt32Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_int32_array = &arr;
@@ -1418,10 +1393,10 @@ static void vss_data_uint64_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
-                                               VSS_UINT64_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 7, VSS_UINT64_ARRAY, fill, sizeof(fill));
 
-    VssDataUint64Array_t arr = { .data = NULL };
+    VssDataUint64Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_uint64_array = &arr;
@@ -1441,10 +1416,10 @@ static void vss_data_int64_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
-                                               VSS_INT64_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 7, VSS_INT64_ARRAY, fill, sizeof(fill));
 
-    VssDataInt64Array_t arr = { .data = NULL };
+    VssDataInt64Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_int64_array = &arr;
@@ -1464,10 +1439,10 @@ static void vss_data_float_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 6,
-                                               VSS_FLOAT_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 6, VSS_FLOAT_ARRAY, fill, sizeof(fill));
 
-    VssDataFloatArray_t arr = { .data = NULL };
+    VssDataFloatArray_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_float_array = &arr;
@@ -1493,10 +1468,10 @@ static void vss_data_double_array_oob(void **state)
 {
     uint8_t buf[64];
     uint8_t fill[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    Avtp_Vss_t *pdu = vss_build_data_oob_pdu(buf, sizeof(buf), 7,
-                                               VSS_DOUBLE_ARRAY, fill, sizeof(fill));
+    Avtp_Vss_t *pdu =
+        vss_build_data_oob_pdu(buf, sizeof(buf), 7, VSS_DOUBLE_ARRAY, fill, sizeof(fill));
 
-    VssDataDoubleArray_t arr = { .data = NULL };
+    VssDataDoubleArray_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_double_array = &arr;
@@ -1522,9 +1497,8 @@ static void vss_data_double_array_oob(void **state)
  * msg_length allows.  CalcVssPathLength would return 0xFFFD + 2 = 0xFFFF
  * (65535 — no uint16_t wrap), pushing the computed data pointer 65547 bytes
  * past the PDU start — well beyond any plausible frame. */
-static Avtp_Vss_t* vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size,
-                                                uint8_t msg_quadlets,
-                                                Vss_Datatype_t datatype)
+static Avtp_Vss_t *vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size, uint8_t msg_quadlets,
+                                               Vss_Datatype_t datatype)
 {
     memset(buf, 0, buf_size);
     Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
@@ -1552,10 +1526,9 @@ static Avtp_Vss_t* vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size,
 static void vss_data_string_inflated_path_oob(void **state)
 {
     uint8_t buf[64];
-    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
-                                                    VSS_STRING);
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6, VSS_STRING);
 
-    VssDataString_t str = { .data = NULL };
+    VssDataString_t str = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_string = &str;
@@ -1570,13 +1543,12 @@ static void vss_data_string_inflated_path_oob(void **state)
 }
 
 /* Scalar VSS_UINT8: the raw dereference of *vss_data_ptr must be guarded
- * so that an out‑of‑frame data pointer is never read.  
+ * so that an out‑of‑frame data pointer is never read.
  * Correct behavior: Avtp_Vss_GetVssData is noop, pre‑set sentinel survives. */
 static void vss_data_uint8_inflated_path_oob(void **state)
 {
     uint8_t buf[64];
-    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
-                                                    VSS_UINT8);
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6, VSS_UINT8);
 
     VssData_t vd;
     memset(&vd, 0xAA, sizeof(vd));
@@ -1589,10 +1561,9 @@ static void vss_data_uint8_inflated_path_oob(void **state)
 static void vss_data_uint8_array_inflated_path_oob(void **state)
 {
     uint8_t buf[64];
-    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6,
-                                                    VSS_UINT8_ARRAY);
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 6, VSS_UINT8_ARRAY);
 
-    VssDataUint8Array_t arr = { .data = NULL };
+    VssDataUint8Array_t arr = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_uint8_array = &arr;
@@ -1616,17 +1587,17 @@ static void vss_data_static_id_truncated_oob(void **state)
     memset(buf, 0, sizeof(buf));
     Avtp_Vss_Init(pdu);
     Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
-    Avtp_Vss_SetAcfMsgLength(pdu, 3);  /* 12 bytes — header only */
+    Avtp_Vss_SetAcfMsgLength(pdu, 3); /* 12 bytes — header only */
     Avtp_Vss_SetDatatype(pdu, VSS_UINT8);
 
     VssData_t vd;
     memset(&vd, 0xAA, sizeof(vd));
-     Avtp_Vss_GetVssData(pdu, &vd);
+    Avtp_Vss_GetVssData(pdu, &vd);
     assert_int_equal(vd.data_uint8, 0xAA);
 }
 
-/* ACF msg_length == 0 means the declared PDU size is 0 bytes.  
- * This is testing for a regression: There used to be a 
+/* ACF msg_length == 0 means the declared PDU size is 0 bytes.
+ * This is testing for a regression: There used to be a
  * legacy bypass where the lentghts in ACF-VSS frames where trusted
  * when the ACF length was set to 0.
  * Correct behavior:: A zero‑msg‑length frame is treated as empty
@@ -1639,8 +1610,7 @@ static void vss_path_interop_zero_msg_length_oob(void **state)
 {
     uint8_t buf[64];
     /* msg_quadlets = 0 → declared PDU = 0 bytes */
-    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0,
-                                                    VSS_UINT8);
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0, VSS_UINT8);
 
     char path_buf[16];
     memset(path_buf, 0x5A, sizeof(path_buf));
@@ -1658,10 +1628,9 @@ static void vss_data_string_zero_msg_length_oob(void **state)
 {
     uint8_t buf[64];
     /* msg_quadlets = 0 → declared PDU = 0 bytes */
-    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0,
-                                                    VSS_STRING);
+    Avtp_Vss_t *pdu = vss_build_inflated_path_pdu(buf, sizeof(buf), 0, VSS_STRING);
 
-    VssDataString_t str = { .data = NULL };
+    VssDataString_t str = {.data = NULL};
     VssData_t vd;
     memset(&vd, 0, sizeof(vd));
     vd.data_string = &str;
