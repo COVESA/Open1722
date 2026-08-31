@@ -174,7 +174,7 @@ int main()
     Avtp_Tscf_SetVersion(&pdu.tscf, 0);
     Avtp_Tscf_SetSequenceNum(&pdu.tscf, 123);
     Avtp_Tscf_SetStreamId(&pdu.tscf, 0xAABBCCDDEEFF);
-    Avtp_Tscf_SetTv(&pdu.tscf, 1);
+    Avtp_Tscf_SetTv(&pdu.tscf, true);
     Avtp_Tscf_SetAvtpTimestamp(&pdu.tscf, 0x11223344);
 
     // Init CAN ACF message

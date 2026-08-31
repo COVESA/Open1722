@@ -40,6 +40,7 @@
 #include <linux/string.h>
 #else
 #include <string.h>
+#include <stdbool.h>
 #endif
 
 #include "avtp/Utils.h"
@@ -105,8 +106,8 @@ OPEN1722_INLINE uint8_t Avtp_Ntscf_GetSubtype(const Avtp_Ntscf_t* const pdu) {
  * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
  * @returns Value of the NTSCF PDU SV field.
  */
-OPEN1722_INLINE uint8_t Avtp_Ntscf_GetSv(const Avtp_Ntscf_t* const pdu) {
-    return (uint8_t) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV);
+OPEN1722_INLINE bool Avtp_Ntscf_IsSv(const Avtp_Ntscf_t* const pdu) {
+    return (bool) GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV);
 }
 
 /**
@@ -160,21 +161,13 @@ OPEN1722_INLINE void Avtp_Ntscf_SetSubtype(Avtp_Ntscf_t* pdu, uint8_t value) {
 }
 
 /**
- * Enable the SV bit in an ACF Ntscf frame as specified in the IEEE 1722 Specification.
+ * Set the SV bit in an ACF Ntscf frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
+ * @param sv Value to set the NTSCF PDU SV field to.
  */
-OPEN1722_INLINE void Avtp_Ntscf_EnableSv(Avtp_Ntscf_t* pdu) {
-    SET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV, 1);
-}
-
-/**
- * Disable the SV bit in an ACF Ntscf frame as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
- */
-OPEN1722_INLINE void Avtp_Ntscf_DisableSv(Avtp_Ntscf_t* pdu) {
-    SET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV, 0);
+OPEN1722_INLINE void Avtp_Ntscf_SetSv(Avtp_Ntscf_t* pdu, bool sv) {
+    SET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV, sv);
 }
 
 /**
@@ -225,7 +218,27 @@ OPEN1722_INLINE void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t* pdu, uint64_t value) {
  * @param bufferSize Size of the buffer containing the ACF Ntscf frame.
  * @return true if the ACF Ntscf frame is valid, false otherwise.
  */
-uint8_t Avtp_Ntscf_IsValid(const Avtp_Ntscf_t* const pdu, size_t bufferSize);
+OPEN1722_INLINE bool Avtp_Ntscf_IsValid(const Avtp_Ntscf_t* const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_NTSCF_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_Ntscf_GetSubtype(pdu) != AVTP_SUBTYPE_NTSCF) {
+        return false;
+    }
+
+    // Avtp_Ntscf_GetNtscfDataLength returns the payload length in octets.
+    if (Avtp_Ntscf_GetNtscfDataLength(pdu) > bufferSize) {
+        return false;
+    }
+
+    return true;
+}
 
 /**
  * Initializes a NTSCF PDU as specified in the IEEE 1722-2016 Specification.
@@ -237,7 +250,7 @@ OPEN1722_INLINE void Avtp_Ntscf_Init(Avtp_Ntscf_t* pdu) {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Ntscf_t));
         Avtp_Ntscf_SetSubtype(pdu, AVTP_SUBTYPE_NTSCF);
-        Avtp_Ntscf_EnableSv(pdu);
+        Avtp_Ntscf_SetSv(pdu, true);
     }
 }
 
