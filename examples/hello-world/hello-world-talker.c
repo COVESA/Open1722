@@ -49,17 +49,17 @@
 #include "avtp/acf/Gpc.h"
 #include "avtp/CommonHeader.h"
 
-#define MAX_PDU_SIZE                1500
-#define MAX_MSG_SIZE                100
-#define STREAM_ID                   0xAABBCCDDEEFF0001
-#define ARGPARSE_OPTION_MSG         500
-#define GPC_CODE                    256
+#define MAX_PDU_SIZE 1500
+#define MAX_MSG_SIZE 100
+#define STREAM_ID 0xAABBCCDDEEFF0001
+#define ARGPARSE_OPTION_MSG 500
+#define GPC_CODE 256
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static char message_string[MAX_MSG_SIZE] = "Hello World!\0";
 static uint8_t ip_addr[sizeof(struct in_addr)];
-static uint32_t udp_port=17220;
+static uint32_t udp_port = 17220;
 static int priority = -1;
 static uint8_t seq_num = 0;
 static uint32_t udp_seq_num = 0;
@@ -82,9 +82,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         strncpy(ifname, arg, sizeof(ifname) - 1);
         break;
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                &macaddr[0], &macaddr[1], &macaddr[2],
-                &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid MAC address\n");
             exit(EXIT_FAILURE);
@@ -112,21 +111,20 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp_option options[] = {
     {"tscf", 't', 0, 0, "Use TSCF"},
-    {"udp", 'u', 0, 0, "Use UDP" },
+    {"udp", 'u', 0, 0, "Use UDP"},
     {"message", ARGPARSE_OPTION_MSG, "MSG_STR", 0, "String message to send over IEEE 1722"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
-    { 0 }
-};
+    {0}};
 
-static struct argp argp = { options, parser, 0, 0};
+static struct argp argp = {options, parser, 0, 0};
 
-static int init_cf_pdu(uint8_t* pdu)
+static int init_cf_pdu(uint8_t *pdu)
 {
     int res;
     if (use_tscf) {
-        Avtp_Tscf_t* tscf_pdu = (Avtp_Tscf_t*) pdu;
+        Avtp_Tscf_t *tscf_pdu = (Avtp_Tscf_t *)pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
         Avtp_Tscf_SetTu(tscf_pdu, false);
@@ -134,7 +132,7 @@ static int init_cf_pdu(uint8_t* pdu)
         Avtp_Tscf_SetStreamId(tscf_pdu, STREAM_ID);
         res = AVTP_TSCF_HEADER_LEN;
     } else {
-        Avtp_Ntscf_t* ntscf_pdu = (Avtp_Ntscf_t*) pdu;
+        Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
         Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num++);
@@ -144,48 +142,48 @@ static int init_cf_pdu(uint8_t* pdu)
     return res;
 }
 
-static int update_pdu_length(uint8_t* pdu, uint64_t length)
+static int update_pdu_length(uint8_t *pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)pdu, payloadLen);
-
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)pdu, payloadLen);
     }
     return 0;
 }
 
-static int prepare_acf_packet(uint8_t* acf_pdu, uint64_t gpc_code,
-                          uint8_t* payload, uint16_t length) {
+static int prepare_acf_packet(uint8_t *acf_pdu, uint64_t gpc_code, uint8_t *payload,
+                              uint16_t length)
+{
 
-    Avtp_Gpc_t* pdu = (Avtp_Gpc_t*) acf_pdu;
+    Avtp_Gpc_t *pdu = (Avtp_Gpc_t *)acf_pdu;
 
     // Clear bits
     memset(pdu, 0, AVTP_GPC_HEADER_LEN);
-    uint8_t acf_length = (AVTP_GPC_HEADER_LEN + ++length)/4;
-    if (length % 4) acf_length++;
+    uint8_t acf_length = (AVTP_GPC_HEADER_LEN + ++length) / 4;
+    if (length % 4)
+        acf_length++;
 
     // Prepare ACF PDU for CAN
     Avtp_Gpc_Init(pdu);
     Avtp_Gpc_SetGpcMsgId(pdu, gpc_code);
     Avtp_Gpc_SetAcfMsgLength(pdu, acf_length);
-    memcpy(acf_pdu+AVTP_GPC_HEADER_LEN, payload, length);
-    memset(acf_pdu+AVTP_GPC_HEADER_LEN+length, 0, acf_length*4 - length);
+    memcpy(acf_pdu + AVTP_GPC_HEADER_LEN, payload, length);
+    memset(acf_pdu + AVTP_GPC_HEADER_LEN + length, 0, acf_length * 4 - length);
 
-    return acf_length*4;
+    return acf_length * 4;
 }
 
-static int update_cf_length(uint8_t* cf_pdu, uint64_t length)
+static int update_cf_length(uint8_t *cf_pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)cf_pdu, payloadLen);
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)cf_pdu, payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu, payloadLen);
-
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, payloadLen);
     }
     return 0;
 }
@@ -206,20 +204,21 @@ int main(int argc, char *argv[])
     // Setup the socket for sending to the destination
     if (use_udp) {
         fd = create_talker_socket_udp(priority);
-        if (fd < 0) return fd;
+        if (fd < 0)
+            return fd;
 
-        res = setup_udp_socket_address((struct in_addr*) ip_addr,
-                                       udp_port, &sk_udp_addr);
+        res = setup_udp_socket_address((struct in_addr *)ip_addr, udp_port, &sk_udp_addr);
     } else {
         fd = create_talker_socket(priority);
-        if (fd < 0) return fd;
-        res = setup_socket_address(fd, ifname, macaddr,
-                                   ETH_P_TSN, &sk_ll_addr);
+        if (fd < 0)
+            return fd;
+        res = setup_socket_address(fd, ifname, macaddr, ETH_P_TSN, &sk_ll_addr);
     }
-    if (res < 0) goto err;
+    if (res < 0)
+        goto err;
 
     // Sending loop
-    for(;;) {
+    for (;;) {
 
         // Pack into control formats
         uint8_t *cf_pdu;
@@ -228,9 +227,9 @@ int main(int argc, char *argv[])
 
         // Usage of UDP means the PDU needs an encapsulation number
         if (use_udp) {
-            Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *) pdu;
+            Avtp_Udp_t *udp_pdu = (Avtp_Udp_t *)pdu;
             Avtp_Udp_SetEncapsulationSeqNo(udp_pdu, udp_seq_num++);
-            pdu_length +=  sizeof(Avtp_Udp_t);
+            pdu_length += sizeof(Avtp_Udp_t);
         }
 
         // Create the CF packet first
@@ -242,10 +241,11 @@ int main(int argc, char *argv[])
         cf_length += res;
 
         // Creation of the ACF Packet
-        uint8_t* acf_pdu = pdu + pdu_length;
-        res = prepare_acf_packet(acf_pdu, gpc_code++, (uint8_t*)message_string,
+        uint8_t *acf_pdu = pdu + pdu_length;
+        res = prepare_acf_packet(acf_pdu, gpc_code++, (uint8_t *)message_string,
                                  strlen((char *)message_string));
-        if (res < 0) goto err;
+        if (res < 0)
+            goto err;
         pdu_length += res;
         cf_length += res;
 
@@ -254,11 +254,11 @@ int main(int argc, char *argv[])
             goto err;
 
         if (use_udp) {
-            res = sendto(fd, pdu, pdu_length, 0,
-                    (struct sockaddr *) &sk_udp_addr, sizeof(sk_udp_addr));
+            res = sendto(fd, pdu, pdu_length, 0, (struct sockaddr *)&sk_udp_addr,
+                         sizeof(sk_udp_addr));
         } else {
-            res = sendto(fd, pdu, pdu_length, 0,
-                         (struct sockaddr *) &sk_ll_addr, sizeof(sk_ll_addr));
+            res =
+                sendto(fd, pdu, pdu_length, 0, (struct sockaddr *)&sk_ll_addr, sizeof(sk_ll_addr));
         }
         if (res < 0) {
             perror("Failed to send data");
@@ -270,5 +270,4 @@ int main(int argc, char *argv[])
 err:
     close(fd);
     return 1;
-
 }
