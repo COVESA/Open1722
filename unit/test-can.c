@@ -334,7 +334,8 @@ static void can_brief_create_from_garbage(void **state)
     Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, payload, sizeof(payload),
                                    AVTP_CAN_CLASSIC);
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_CAN_BRIEF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu),
+                     AVTP_ACF_TYPE_CAN_BRIEF);
     assert_int_equal(Avtp_CanBrief_IsMtv((Avtp_CanBrief_t *)pdu), 0);
     assert_int_equal(Avtp_CanBrief_IsRtr((Avtp_CanBrief_t *)pdu), 0);
     assert_int_equal(Avtp_CanBrief_IsBrs((Avtp_CanBrief_t *)pdu), 0);

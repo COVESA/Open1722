@@ -419,7 +419,8 @@ OPEN1722_INLINE void Avtp_FlexRay_SetPayloadLength(Avtp_FlexRay_t *pdu, uint16_t
 OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPayloadLength(const Avtp_FlexRay_t *const pdu)
 {
     uint8_t pad_length = Avtp_FlexRay_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t acf_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_FLEXRAY_HEADER_LEN - pad_length);
 }
 
@@ -487,7 +488,8 @@ OPEN1722_INLINE bool Avtp_FlexRay_IsValid(const Avtp_FlexRay_t *const pdu, size_
         return false;
     }
 
-    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t msg_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

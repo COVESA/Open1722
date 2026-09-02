@@ -481,7 +481,8 @@ OPEN1722_INLINE void Avtp_Gbb_SetPayloadLength(Avtp_Gbb_t *pdu, uint16_t payload
 OPEN1722_INLINE uint8_t Avtp_Gbb_GetPayloadLength(const Avtp_Gbb_t *const pdu)
 {
     uint8_t pad_length = Avtp_Gbb_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t acf_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_GBB_HEADER_LEN - pad_length);
 }
 
@@ -550,7 +551,8 @@ OPEN1722_INLINE bool Avtp_Gbb_IsValid(const Avtp_Gbb_t *const pdu, size_t buffer
         return false;
     }
 
-    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t msg_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

@@ -366,7 +366,8 @@ static void Test_Abb_CreateAcfMessage(void **state)
 
     Avtp_Abb_CreateAcfMessage(abb, 0x5FF, true, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)abb), AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)abb),
+                     AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
     assert_int_equal(Avtp_Abb_GetByteBusId(abb), 0x5FF);
     assert_int_equal(Avtp_Abb_IsOp(abb), true);
     assert_int_equal(Avtp_Abb_GetTransactionNum(abb), 0xBF);
@@ -385,7 +386,8 @@ static void Test_Abb_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_Abb_CreateAcfMessage(abb, 0x5FF, true, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)abb), AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)abb),
+                     AVTP_ACF_TYPE_BYTE_BUS_BRIEF);
     assert_int_equal(Avtp_Abb_IsMtv(abb), false);
     assert_int_equal(Avtp_Abb_IsHs(abb), false);
     assert_int_equal(Avtp_Abb_IsCs(abb), false);

@@ -42,12 +42,13 @@
 extern "C" {
 #endif
 
-#define AVTP_ACF_COMMON_HEADER_LEN         (1 * AVTP_QUADLET_SIZE)
+#define AVTP_ACF_COMMON_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
-#define GET_ACF_COMMON_FIELD(field) \
-        (Avtp_GetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t*)pdu, field))
-#define SET_ACF_COMMON_FIELD(field, value) \
-        (Avtp_SetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t*)pdu, field, value))
+#define GET_ACF_COMMON_FIELD(field)                                                                \
+    (Avtp_GetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t *)pdu, field))
+#define SET_ACF_COMMON_FIELD(field, value)                                                         \
+    (Avtp_SetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t *)pdu, field,      \
+                   value))
 
 typedef struct {
     uint8_t header[AVTP_ACF_COMMON_HEADER_LEN];
@@ -58,32 +59,32 @@ typedef struct {
  * AVTP message types. See IEEE Std 1722-2025 table 22.
  */
 typedef enum {
-    AVTP_ACF_TYPE_FLEXRAY           = 0x0,
-    AVTP_ACF_TYPE_CAN               = 0x1,
-    AVTP_ACF_TYPE_CAN_BRIEF         = 0x2,
-    AVTP_ACF_TYPE_LIN               = 0x3,
-    AVTP_ACF_TYPE_MOST              = 0x4,
-    AVTP_ACF_TYPE_GPC               = 0x5,
-    AVTP_ACF_TYPE_SERIAL            = 0x6,
-    AVTP_ACF_TYPE_PARALLEL          = 0x7,
-    AVTP_ACF_TYPE_SENSOR            = 0x8,
-    AVTP_ACF_TYPE_SENSOR_BRIEF      = 0x9,
-    AVTP_ACF_TYPE_AECP              = 0x0A,
-    AVTP_ACF_TYPE_ANCILLARY         = 0x0B,
-    AVTP_ACF_TYPE_GISF              = 0x0C,
-    AVTP_ACF_TYPE_BYTE_BUS          = 0x0D,
-    AVTP_ACF_TYPE_BYTE_BUS_BRIEF    = 0x0E,
-    AVTP_ACF_TYPE_I2C               = 0x0F,
-    AVTP_ACF_TYPE_I2C_BRIEF         = 0x10,
-    AVTP_ACF_TYPE_CAN_XL            = 0x11,
-    AVTP_ACF_TYPE_CAN_XL_BRIEF      = 0x12,
-    AVTP_ACF_TYPE_CAN_V2            = 0x21,
-    AVTP_ACF_TYPE_CAN_BRIEF_V2      = 0x22,
-    AVTP_ACF_TYPE_LIN_V2            = 0x23,
-    AVTP_ACF_TYPE_CHECKSUM          = 0x76,
-    AVTP_ACF_TYPE_CRC               = 0x77,
-    AVTP_ACF_TYPE_USER_FIRST        = 0x78,
-    AVTP_ACF_TYPE_USER_LAST         = 0x7F,
+    AVTP_ACF_TYPE_FLEXRAY = 0x0,
+    AVTP_ACF_TYPE_CAN = 0x1,
+    AVTP_ACF_TYPE_CAN_BRIEF = 0x2,
+    AVTP_ACF_TYPE_LIN = 0x3,
+    AVTP_ACF_TYPE_MOST = 0x4,
+    AVTP_ACF_TYPE_GPC = 0x5,
+    AVTP_ACF_TYPE_SERIAL = 0x6,
+    AVTP_ACF_TYPE_PARALLEL = 0x7,
+    AVTP_ACF_TYPE_SENSOR = 0x8,
+    AVTP_ACF_TYPE_SENSOR_BRIEF = 0x9,
+    AVTP_ACF_TYPE_AECP = 0x0A,
+    AVTP_ACF_TYPE_ANCILLARY = 0x0B,
+    AVTP_ACF_TYPE_GISF = 0x0C,
+    AVTP_ACF_TYPE_BYTE_BUS = 0x0D,
+    AVTP_ACF_TYPE_BYTE_BUS_BRIEF = 0x0E,
+    AVTP_ACF_TYPE_I2C = 0x0F,
+    AVTP_ACF_TYPE_I2C_BRIEF = 0x10,
+    AVTP_ACF_TYPE_CAN_XL = 0x11,
+    AVTP_ACF_TYPE_CAN_XL_BRIEF = 0x12,
+    AVTP_ACF_TYPE_CAN_V2 = 0x21,
+    AVTP_ACF_TYPE_CAN_BRIEF_V2 = 0x22,
+    AVTP_ACF_TYPE_LIN_V2 = 0x23,
+    AVTP_ACF_TYPE_CHECKSUM = 0x76,
+    AVTP_ACF_TYPE_CRC = 0x77,
+    AVTP_ACF_TYPE_USER_FIRST = 0x78,
+    AVTP_ACF_TYPE_USER_LAST = 0x7F,
 } Avtp_AcfMsgType_t;
 
 /**
@@ -101,20 +102,16 @@ typedef enum {
 /**
  * This table maps all IEEE 1722 ACF common header fields to a descriptor.
  */
-static const Avtp_FieldDescriptor_t Avtp_AcfCommonFieldDesc[AVTP_ACF_COMMON_FIELD_MAX] =
-{
+static const Avtp_FieldDescriptor_t Avtp_AcfCommonFieldDesc[AVTP_ACF_COMMON_FIELD_MAX] = {
     /* ACF common header */
-    [AVTP_ACF_FIELD_ACF_MSG_TYPE]            = { .quadlet = 0, .offset = 0, .bits = 7 },
-    [AVTP_ACF_FIELD_ACF_MSG_LENGTH]          = { .quadlet = 0, .offset = 7, .bits = 9 },
+    [AVTP_ACF_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
+    [AVTP_ACF_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
 };
 
 /**
  * This enum defines the CAN variants supported by the ACF CAN PDU.
  */
-typedef enum {
-    AVTP_CAN_CLASSIC = 0,
-    AVTP_CAN_FD
-} Avtp_CanVariant_t;
+typedef enum { AVTP_CAN_CLASSIC = 0, AVTP_CAN_FD } Avtp_CanVariant_t;
 
 /**
  * Returns the value of an an ACF common header field as specified in the IEEE 1722 Specification.
@@ -123,40 +120,45 @@ typedef enum {
  * @param field Specifies the position of the data field to be read.
  * @returns Returns the field of the PDU.
  */
-OPEN1722_INLINE uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t* const pdu, Avtp_AcfCommonFields_t field) {
+OPEN1722_INLINE uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t *const pdu,
+                                                 Avtp_AcfCommonFields_t field)
+{
     return GET_ACF_COMMON_FIELD(field);
 }
 
-/** 
+/**
  * Returns the ACF message type field value.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message type field of the PDU.
  */
-OPEN1722_INLINE Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t* const pdu) {
+OPEN1722_INLINE Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu)
+{
     return (Avtp_AcfMsgType_t)GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE);
 }
 
-/** 
+/**
  * Returns the ACF message length field value.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message length field of the PDU.
  */
-OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* const pdu) {
-    return (uint16_t) GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
+OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t *const pdu)
+{
+    return (uint16_t)GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
 }
 
-/** 
+/**
  * Returns the ACF message length field value in bytes.
- * 
+ *
  * The ACF message length field is quadlet-encoded; this converts it to octets.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message length field of the PDU in bytes.
  */
-OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCommon_t* const pdu) {
-    return (uint16_t) (Avtp_AcfCommon_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE);
+OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCommon_t *const pdu)
+{
+    return (uint16_t)(Avtp_AcfCommon_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE);
 }
 
 /**
@@ -166,27 +168,31 @@ OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCom
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-OPEN1722_INLINE void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t* pdu, Avtp_AcfCommonFields_t field, uint64_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t *pdu, Avtp_AcfCommonFields_t field,
+                                             uint64_t value)
+{
     SET_ACF_COMMON_FIELD(field, value);
 }
 
 /**
  * Sets the ACF message type field value as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t* pdu, Avtp_AcfMsgType_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t *pdu, Avtp_AcfMsgType_t value)
+{
     SET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE, value);
 }
 
 /**
  * Sets the ACF message length field value as specified in the IEEE 1722 Specification.
- * 
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @param value Value to set the ACF message length field to.
  */
-OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgLength(Avtp_AcfCommon_t* pdu, uint16_t value) {
+OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgLength(Avtp_AcfCommon_t *pdu, uint16_t value)
+{
     SET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH, value);
 }
 
