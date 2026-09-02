@@ -363,7 +363,8 @@ static void Test_CanBriefV2_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x123, 0x0, payload, sizeof(payload), AVTP_CAN_CLASSIC);
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canV2),
+                     AVTP_ACF_TYPE_CAN_BRIEF_V2);
     assert_int_equal(Avtp_CanBriefV2_IsMtv(canV2), false);
     assert_int_equal(Avtp_CanBriefV2_IsRtr(canV2), false);
     assert_int_equal(Avtp_CanBriefV2_IsBrs(canV2), false);

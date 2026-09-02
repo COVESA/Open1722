@@ -91,8 +91,7 @@ void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const st
     uint8_t padSize = (AVTP_QUADLET_SIZE - ((AVTP_CAN_HEADER_LEN + cfd->len) % AVTP_QUADLET_SIZE)) %
                       AVTP_QUADLET_SIZE;
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)can_header,
-                                   (AVTP_CAN_HEADER_LEN + cfd->len + padSize) /
-                                       AVTP_QUADLET_SIZE);
+                                   (AVTP_CAN_HEADER_LEN + cfd->len + padSize) / AVTP_QUADLET_SIZE);
     Avtp_Can_SetPad(can_header, padSize);
 
     pr_debug("Prepared AVTP ACFCAN msg for can id 0x%08x, len %i\n",
@@ -111,7 +110,8 @@ void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const st
 void calculate_and_set_ntscf_size(ACFCANPdu_t *pdu)
 {
     // 1722 is a mess. Bytes, lukicly we have padded quadlets in can already....
-    uint16_t canandpadinbytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)&pdu->can);
+    uint16_t canandpadinbytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)&pdu->can);
     Avtp_Ntscf_SetNtscfDataLength(&pdu->ntscf, canandpadinbytes);
 }
 

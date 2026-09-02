@@ -45,8 +45,8 @@
 #include "avtp/acf/Gpc.h"
 #include "avtp/CommonHeader.h"
 
-#define MAX_PDU_SIZE                1500
-#define MAX_MSG_SIZE                100
+#define MAX_PDU_SIZE 1500
+#define MAX_MSG_SIZE 100
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -54,12 +54,11 @@ static uint8_t use_udp;
 static uint32_t udp_port = 17220;
 
 static struct argp_option options[] = {
-    {"udp", 'u', 0, 0, "Use UDP" },
+    {"udp", 'u', 0, 0, "Use UDP"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
-    { 0 }
-};
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -76,9 +75,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         strncpy(ifname, arg, sizeof(ifname) - 1);
         break;
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                &macaddr[0], &macaddr[1], &macaddr[2],
-                &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid MAC address\n");
             exit(EXIT_FAILURE);
@@ -89,7 +87,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser, 0, 0};
+static struct argp argp = {options, parser, 0, 0};
 
 int main(int argc, char *argv[])
 {
@@ -135,29 +133,29 @@ int main(int argc, char *argv[])
         }
 
         // Check if the packet is a control format packet (i.e. NTSCF or TSCF)
-        subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
-        if (subtype == AVTP_SUBTYPE_TSCF){
+        subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cf_pdu);
+        if (subtype == AVTP_SUBTYPE_TSCF) {
             proc_bytes += AVTP_TSCF_HEADER_LEN;
-            msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
+            msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t *)cf_pdu);
         } else {
             proc_bytes += AVTP_NTSCF_HEADER_LEN;
-            msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
+            msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu);
         }
 
         // Check if the control packet payload is a ACF GPC.
         acf_pdu = &pdu[proc_bytes];
-        acf_type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t*)acf_pdu);
+        acf_type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)acf_pdu);
         if (acf_type != AVTP_ACF_TYPE_GPC) {
-            fprintf(stderr, "ACF type mismatch: expected %"PRIu8", got %"PRIu8"\n",
+            fprintf(stderr, "ACF type mismatch: expected %" PRIu8 ", got %" PRIu8 "\n",
                     AVTP_ACF_TYPE_GPC, acf_type);
             continue;
         }
 
         // Parse the GPC Packet and print contents on the STDOUT
-        gpc_code = Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t*)acf_pdu);
-        acf_msg_length = Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t*)acf_pdu);
+        gpc_code = Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t *)acf_pdu);
+        acf_msg_length = Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)acf_pdu);
         if (acf_msg_length * 4 <= MAX_MSG_SIZE) {
-            recd_msg = (char *) acf_pdu + AVTP_GPC_HEADER_LEN;
+            recd_msg = (char *)acf_pdu + AVTP_GPC_HEADER_LEN;
             printf("%s : GPC Code %ld\n", recd_msg, gpc_code);
         }
     }
@@ -167,5 +165,4 @@ int main(int argc, char *argv[])
 err:
     close(sk_fd);
     return 1;
-
 }

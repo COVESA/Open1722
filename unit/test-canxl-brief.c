@@ -374,7 +374,8 @@ static void Test_CanXlBrief_CreateAcfMessage(void **state)
 
     Avtp_CanXlBrief_CreateAcfMessage(canxl, 0x5FF, 0xBFFFFFFFul, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl), AVTP_ACF_TYPE_CAN_XL_BRIEF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl),
+                     AVTP_ACF_TYPE_CAN_XL_BRIEF);
     assert_int_equal(Avtp_CanXlBrief_GetPriorityId(canxl), 0x5FF);
     assert_int_equal(Avtp_CanXlBrief_GetAcceptanceField(canxl), 0xBFFFFFFFul);
     assert_int_equal(Avtp_CanXlBrief_GetSdt(canxl), 0xBF);
@@ -399,7 +400,8 @@ static void Test_CanXlBrief_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_CanXlBrief_CreateAcfMessage(canxl, 0x5FF, 0x0, 0x0, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl), AVTP_ACF_TYPE_CAN_XL_BRIEF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl),
+                     AVTP_ACF_TYPE_CAN_XL_BRIEF);
     assert_int_equal(Avtp_CanXlBrief_IsMtv(canxl), false);
     assert_int_equal(Avtp_CanXlBrief_IsRrs(canxl), false);
     assert_int_equal(Avtp_CanXlBrief_IsSec(canxl), false);

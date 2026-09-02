@@ -461,7 +461,8 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
 OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t *const pdu)
 {
     uint8_t pad_length = Avtp_Gisf_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t acf_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint16_t)(acf_length_bytes - AVTP_GISF_HEADER_LEN - pad_length);
 }
 
@@ -526,7 +527,8 @@ OPEN1722_INLINE bool Avtp_Gisf_IsValid(const Avtp_Gisf_t *const pdu, size_t buff
         return false;
     }
 
-    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t msg_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

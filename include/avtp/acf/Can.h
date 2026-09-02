@@ -391,7 +391,8 @@ OPEN1722_INLINE void Avtp_Can_SetPayloadLength(Avtp_Can_t *can_pdu, uint16_t pay
 OPEN1722_INLINE uint8_t Avtp_Can_GetPayloadLength(const Avtp_Can_t *const pdu)
 {
     uint8_t pad_length = Avtp_Can_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t acf_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CAN_HEADER_LEN - pad_length);
 }
 
@@ -464,7 +465,8 @@ OPEN1722_INLINE bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t buffer
         return false;
     }
 
-    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    uint16_t msg_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }
