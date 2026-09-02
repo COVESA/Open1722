@@ -63,8 +63,7 @@ static void lin_get_set_fields(void **state)
 
     Avtp_Lin_Init((Avtp_Lin_t *)pdu);
 
-    Avtp_Lin_SetAcfMsgType((Avtp_Lin_t *)pdu, AVTP_ACF_TYPE_LIN);
-    assert_int_equal(Avtp_Lin_GetAcfMsgType((Avtp_Lin_t *)pdu), AVTP_ACF_TYPE_LIN);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_LIN);
 
     Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t *)pdu, 50);
     assert_int_equal(Avtp_Lin_GetAcfMsgLength((Avtp_Lin_t *)pdu), 50);
@@ -148,7 +147,7 @@ static void lin_create_from_garbage(void **state)
     Avtp_Lin_CreateAcfMessage((Avtp_Lin_t *)pdu, 7, 0x3F, 0x123456789ABCULL, payload,
                               sizeof(payload));
 
-    assert_int_equal(Avtp_Lin_GetAcfMsgType((Avtp_Lin_t *)pdu), AVTP_ACF_TYPE_LIN);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_LIN);
     assert_int_equal(Avtp_Lin_IsMtv((Avtp_Lin_t *)pdu), 0);
     assert_int_equal(Avtp_Lin_GetLinBusId((Avtp_Lin_t *)pdu), 7);
     assert_int_equal(Avtp_Lin_GetLinIdentifier((Avtp_Lin_t *)pdu), 0x3F);

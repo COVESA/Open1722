@@ -56,15 +56,6 @@ static void Test_Gbb_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_GetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
-    assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
-}
-
 static void Test_Gbb_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
@@ -225,16 +216,6 @@ static void Test_Gbb_GetAcfMsgLengthInBytes(void **state)
                             0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
     Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetAcfMsgLengthInBytes(gbb), 5 * 4);
-}
-
-static void Test_Gbb_SetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
-    Avtp_Gbb_Init(gbb);
-    Avtp_Gbb_SetAcfMsgType(gbb, AVTP_ACF_TYPE_BYTE_BUS);
-    assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
 }
 
 static void Test_Gbb_SetAcfMsgLength(void **state)
@@ -466,7 +447,7 @@ static void Test_Gbb_CreateAcfMessage(void **state)
 
     Avtp_Gbb_CreateAcfMessage(gbb, 0x5FF, true, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)gbb), AVTP_ACF_TYPE_BYTE_BUS);
     assert_int_equal(Avtp_Gbb_GetByteBusId(gbb), 0x5FF);
     assert_int_equal(Avtp_Gbb_IsOp(gbb), true);
     assert_int_equal(Avtp_Gbb_GetTransactionNum(gbb), 0xBF);
@@ -489,7 +470,7 @@ static void Test_Gbb_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_Gbb_CreateAcfMessage(gbb, 0x5FF, true, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gbb_GetAcfMsgType(gbb), AVTP_ACF_TYPE_BYTE_BUS);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)gbb), AVTP_ACF_TYPE_BYTE_BUS);
     assert_int_equal(Avtp_Gbb_IsMtv(gbb), false);
     assert_int_equal(Avtp_Gbb_IsHs(gbb), false);
     assert_int_equal(Avtp_Gbb_IsCs(gbb), false);
@@ -528,7 +509,6 @@ static void Test_Gbb_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gbb_Init),
-                                       cmocka_unit_test(Test_Gbb_GetAcfMsgType),
                                        cmocka_unit_test(Test_Gbb_GetAcfMsgLength),
                                        cmocka_unit_test(Test_Gbb_GetPad),
                                        cmocka_unit_test(Test_Gbb_IsMtv),
@@ -547,7 +527,6 @@ int main(void)
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength),
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_Gbb_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_Gbb_SetAcfMsgType),
                                        cmocka_unit_test(Test_Gbb_SetAcfMsgLength),
                                        cmocka_unit_test(Test_Gbb_SetMtv),
                                        cmocka_unit_test(Test_Gbb_SetByteBusId),

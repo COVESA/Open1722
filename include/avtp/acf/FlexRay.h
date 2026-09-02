@@ -111,17 +111,6 @@ static const Avtp_FieldDescriptor_t Avtp_FlexRayFieldDesc[AVTP_FLEXRAY_FIELD_MAX
 };
 
 /**
- * Return the value of an an ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- * @returns Value of the ACF message type field.
- */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetAcfMsgType(const Avtp_FlexRay_t *const pdu)
-{
-    return (uint8_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_TYPE);
-}
-
-/**
  * Return the value of an an ACF message length field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
@@ -129,7 +118,7 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetAcfMsgType(const Avtp_FlexRay_t *const p
  */
 OPEN1722_INLINE uint16_t Avtp_FlexRay_GetAcfMsgLength(const Avtp_FlexRay_t *const pdu)
 {
-    return (uint16_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH);
+    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
 }
 
 /**
@@ -260,17 +249,6 @@ OPEN1722_INLINE uint8_t Avtp_FlexRay_GetCycle(const Avtp_FlexRay_t *const pdu)
 }
 
 /**
- * Set the value of an an ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- * @param value Value to set the ACF message type field to.
- */
-OPEN1722_INLINE void Avtp_FlexRay_SetAcfMsgType(Avtp_FlexRay_t *pdu, uint8_t value)
-{
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_TYPE, value);
-}
-
-/**
  * Set the value of an an ACF message length field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
@@ -278,7 +256,7 @@ OPEN1722_INLINE void Avtp_FlexRay_SetAcfMsgType(Avtp_FlexRay_t *pdu, uint8_t val
  */
 OPEN1722_INLINE void Avtp_FlexRay_SetAcfMsgLength(Avtp_FlexRay_t *pdu, uint16_t value)
 {
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH, value);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -413,7 +391,7 @@ OPEN1722_INLINE void Avtp_FlexRay_SetCycle(Avtp_FlexRay_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE uint16_t Avtp_FlexRay_GetAcfMsgLengthInBytes(const Avtp_FlexRay_t *const pdu)
 {
-    return (uint16_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_ACF_MSG_LENGTH) * 4;
+    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
 }
 
 /**
@@ -487,7 +465,7 @@ OPEN1722_INLINE void Avtp_FlexRay_Init(Avtp_FlexRay_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_FlexRay_t));
-        Avtp_FlexRay_SetAcfMsgType(pdu, AVTP_ACF_TYPE_FLEXRAY);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_FLEXRAY);
     }
 }
 
@@ -538,7 +516,7 @@ OPEN1722_INLINE bool Avtp_FlexRay_IsValid(const Avtp_FlexRay_t *const pdu, size_
         return false;
     }
 
-    if (Avtp_FlexRay_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_FLEXRAY) {
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_FLEXRAY) {
         return false;
     }
 

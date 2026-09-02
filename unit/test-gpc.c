@@ -63,8 +63,7 @@ static void gpc_get_set_fields(void **state)
 
     Avtp_Gpc_Init((Avtp_Gpc_t *)pdu);
 
-    Avtp_Gpc_SetAcfMsgType((Avtp_Gpc_t *)pdu, AVTP_ACF_TYPE_GPC);
-    assert_int_equal(Avtp_Gpc_GetAcfMsgType((Avtp_Gpc_t *)pdu), AVTP_ACF_TYPE_GPC);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_GPC);
 
     Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t *)pdu, 200);
     assert_int_equal(Avtp_Gpc_GetAcfMsgLength((Avtp_Gpc_t *)pdu), 200);
@@ -100,7 +99,7 @@ static void gpc_create_message(void **state)
 
     Avtp_Gpc_CreateAcfMessage((Avtp_Gpc_t *)pdu, 0x456789ABCDEFULL, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gpc_GetAcfMsgType((Avtp_Gpc_t *)pdu), AVTP_ACF_TYPE_GPC);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_GPC);
     assert_int_equal(Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t *)pdu), 0x456789ABCDEFULL);
     assert_memory_equal(payload, pdu + AVTP_GPC_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Gpc_GetAcfMsgLengthInBytes((Avtp_Gpc_t *)pdu), 16);
@@ -116,7 +115,7 @@ static void gpc_create_from_garbage(void **state)
     memset(pdu, 0xAA, MAX_PDU_SIZE);
     Avtp_Gpc_CreateAcfMessage((Avtp_Gpc_t *)pdu, 0x456789ABCDEFULL, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gpc_GetAcfMsgType((Avtp_Gpc_t *)pdu), AVTP_ACF_TYPE_GPC);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_GPC);
     assert_int_equal(Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t *)pdu), 0x456789ABCDEFULL);
     assert_memory_equal(payload, pdu + AVTP_GPC_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t *)pdu, MAX_PDU_SIZE), 1);

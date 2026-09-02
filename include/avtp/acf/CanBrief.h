@@ -104,17 +104,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanBriefFieldDesc[AVTP_CAN_BRIEF_FIELD_
 };
 
 /**
- * Return the value of an an ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
- * @returns Value of the ACF message type field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t *const pdu)
-{
-    return (uint8_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_TYPE);
-}
-
-/**
  * Return the value of an an ACF message length field as specified in the IEEE 1722 Specification.
  * This returns the length in Quadlets as specified in the IEEE 1722 Specification.
  *
@@ -125,7 +114,7 @@ OPEN1722_INLINE uint8_t Avtp_CanBrief_GetAcfMsgType(const Avtp_CanBrief_t *const
  */
 OPEN1722_INLINE uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t *const pdu)
 {
-    return (uint16_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH);
+    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
 }
 
 /**
@@ -136,7 +125,7 @@ OPEN1722_INLINE uint16_t Avtp_CanBrief_GetAcfMsgLength(const Avtp_CanBrief_t *co
  */
 OPEN1722_INLINE uint16_t Avtp_CanBrief_GetAcfMsgLengthInBytes(const Avtp_CanBrief_t *const pdu)
 {
-    return (uint16_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH) * 4;
+    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
 }
 
 /**
@@ -247,17 +236,6 @@ OPEN1722_INLINE uint32_t Avtp_CanBrief_GetCanIdentifier(const Avtp_CanBrief_t *c
 }
 
 /**
- * Set the value of an an ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
- * @param value Value to set the ACF message type field to.
- */
-OPEN1722_INLINE void Avtp_CanBrief_SetAcfMsgType(Avtp_CanBrief_t *pdu, uint8_t value)
-{
-    SET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_TYPE, value);
-}
-
-/**
  * Set the value of an an ACF message length field as specified in the IEEE 1722 Specification.
  * Note: the size is in Quadlets as specified in the IEEE 1722 Specification.
  * You can use Avtp_CanBrief_SetPayloadLength to set length in bytes and automatically set the
@@ -268,7 +246,7 @@ OPEN1722_INLINE void Avtp_CanBrief_SetAcfMsgType(Avtp_CanBrief_t *pdu, uint8_t v
  */
 OPEN1722_INLINE void Avtp_CanBrief_SetAcfMsgLength(Avtp_CanBrief_t *pdu, uint16_t value)
 {
-    SET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_ACF_MSG_LENGTH, value);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -447,7 +425,7 @@ OPEN1722_INLINE void Avtp_CanBrief_Init(Avtp_CanBrief_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_CanBrief_t));
-        Avtp_CanBrief_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN_BRIEF);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_CAN_BRIEF);
     }
 }
 
@@ -503,7 +481,7 @@ OPEN1722_INLINE bool Avtp_CanBrief_IsValid(const Avtp_CanBrief_t *const pdu, siz
         return false;
     }
 
-    if (Avtp_CanBrief_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN_BRIEF) {
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_CAN_BRIEF) {
         return false;
     }
 

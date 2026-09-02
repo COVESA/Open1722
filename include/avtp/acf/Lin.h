@@ -95,17 +95,6 @@ static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] = {
 };
 
 /**
- * Returns the value of an an ACF Message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- * @returns The value of the ACF Message Type field.
- */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t *const pdu)
-{
-    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE);
-}
-
-/**
  * Returns the value of an an ACF Message Length field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
@@ -113,7 +102,7 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetAcfMsgType(const Avtp_Lin_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLength(const Avtp_Lin_t *const pdu)
 {
-    return (uint16_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH);
+    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
 }
 
 /**
@@ -175,17 +164,6 @@ OPEN1722_INLINE uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t *const pd
 }
 
 /**
- * Sets the value of an an ACF Message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- * @param value Value to set the ACF Message Type field to.
- */
-OPEN1722_INLINE void Avtp_Lin_SetAcfMsgType(Avtp_Lin_t *pdu, uint8_t value)
-{
-    SET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_TYPE, value);
-}
-
-/**
  * Sets the value of an an ACF Message Length field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
@@ -193,7 +171,7 @@ OPEN1722_INLINE void Avtp_Lin_SetAcfMsgType(Avtp_Lin_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE void Avtp_Lin_SetAcfMsgLength(Avtp_Lin_t *pdu, uint16_t value)
 {
-    SET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH, value);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -261,7 +239,7 @@ OPEN1722_INLINE void Avtp_Lin_SetMessageTimestamp(Avtp_Lin_t *pdu, uint64_t valu
  */
 OPEN1722_INLINE uint16_t Avtp_Lin_GetAcfMsgLengthInBytes(const Avtp_Lin_t *const pdu)
 {
-    return (uint16_t)GET_LIN_FIELD(AVTP_LIN_FIELD_ACF_MSG_LENGTH) * 4;
+    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
 }
 
 /**
@@ -336,7 +314,7 @@ OPEN1722_INLINE void Avtp_Lin_Init(Avtp_Lin_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Lin_t));
-        Avtp_Lin_SetAcfMsgType(pdu, AVTP_ACF_TYPE_LIN);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_LIN);
     }
 }
 
@@ -389,7 +367,7 @@ OPEN1722_INLINE bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t buffer
         return false;
     }
 
-    if (Avtp_Lin_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_LIN) {
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_LIN) {
         return false;
     }
 
