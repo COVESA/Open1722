@@ -169,7 +169,7 @@ static int prepare_acf_packet(uint8_t *acf_pdu, uint64_t gpc_code, uint8_t *payl
     // Prepare ACF PDU for CAN
     Avtp_Gpc_Init(pdu);
     Avtp_Gpc_SetGpcMsgId(pdu, gpc_code);
-    Avtp_Gpc_SetAcfMsgLength(pdu, acf_length);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, acf_length);
     memcpy(acf_pdu + AVTP_GPC_HEADER_LEN, payload, length);
     memset(acf_pdu + AVTP_GPC_HEADER_LEN + length, 0, acf_length * 4 - length);
 

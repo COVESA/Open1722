@@ -67,7 +67,7 @@ static const Avtp_FieldDescriptor_t Avtp_VssFieldDesc[AVTP_VSS_FIELD_MAX] = {
  * past the PDU start. */
 static uint16_t vss_read_clamped_length(const Avtp_Vss_t *pdu, const uint8_t *ptr)
 {
-    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
+    uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     uint32_t offset = (uint32_t)(ptr - (const uint8_t *)pdu);
 
     /* The 2‑byte length prefix must fit within the declared PDU. */
@@ -95,7 +95,7 @@ static uint16_t vss_read_clamped_length(const Avtp_Vss_t *pdu, const uint8_t *pt
  * frame.  */
 static uint16_t vss_get_clamped_path_length(const Avtp_Vss_t *pdu)
 {
-    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
+    uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     Vss_AddrMode_t mode = Avtp_Vss_GetAddrMode(pdu);
 
     if (mode == VSS_STATIC_ID_MODE) {
@@ -119,7 +119,7 @@ static uint16_t vss_get_clamped_path_length(const Avtp_Vss_t *pdu)
  * GetVssData when the data pointer sits at or past the frame end. */
 static bool vss_has_bytes(const Avtp_Vss_t *pdu, const uint8_t *ptr, uint16_t num_bytes)
 {
-    uint16_t declared = (uint16_t)Avtp_Vss_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE;
+    uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint32_t)(ptr - (const uint8_t *)pdu) + num_bytes <= declared;
 }
 
@@ -164,11 +164,6 @@ void Avtp_Vss_SetPayloadLength(Avtp_Vss_t *vss_pdu, uint16_t payload_length)
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_ACF_MSG_LENGTH,
                       (uint64_t)(padded_length / AVTP_QUADLET_SIZE));
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_PAD, padSize);
-}
-
-uint16_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t *const pdu)
-{
-    return (uint16_t)GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH);
 }
 
 uint8_t Avtp_Vss_GetPad(const Avtp_Vss_t *const pdu)
@@ -508,11 +503,6 @@ void Avtp_Vss_GetVssData(const Avtp_Vss_t *const pdu, VssData_t *val)
     default:
         break;
     }
-}
-
-void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t *pdu, uint16_t val)
-{
-    SET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH, val);
 }
 
 void Avtp_Vss_SetPad(Avtp_Vss_t *pdu, uint8_t val)

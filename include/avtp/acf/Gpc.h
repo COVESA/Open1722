@@ -88,28 +88,6 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] = {
 };
 
 /**
- * Return the value of the ACF Message Length Field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @returns The value of the ACF Message Length Field.
- */
-OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t *const pdu)
-{
-    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
-}
-
-/**
- * Return the ACF message length in bytes.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @returns Length of the ACF message in bytes.
- */
-OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t *const pdu)
-{
-    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
-}
-
-/**
  * Return the value of the GPC Message ID Field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
@@ -118,17 +96,6 @@ OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t *const
 OPEN1722_INLINE uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t *const pdu)
 {
     return (uint64_t)GET_GPC_FIELD(AVTP_GPC_FIELD_GPC_MSG_ID);
-}
-
-/**
- * Set the value of an ACF Message Length field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @param value Value to set the ACF Message Length field to.
- */
-OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t *pdu, uint16_t value)
-{
-    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -185,7 +152,7 @@ OPEN1722_INLINE void Avtp_Gpc_SetPayloadLength(Avtp_Gpc_t *pdu, uint16_t payload
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Gpc_SetAcfMsgLength(pdu, msgLenQuadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
 /*
@@ -259,8 +226,7 @@ OPEN1722_INLINE bool Avtp_Gpc_IsValid(const Avtp_Gpc_t *const pdu, size_t buffer
         return false;
     }
 
-    // Avtp_Gpc_GetAcfMsgLength returns quadlets. Convert the length field to octets.
-    uint16_t msg_length_bytes = (uint16_t)Avtp_Gpc_GetAcfMsgLength(pdu) * 4;
+    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

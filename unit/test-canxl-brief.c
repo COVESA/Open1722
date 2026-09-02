@@ -56,15 +56,6 @@ static void Test_CanXlBrief_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanXlBrief_GetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x24, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
-    assert_int_equal(Avtp_CanXlBrief_GetAcfMsgLength(canxl), 4);
-}
-
 static void Test_CanXlBrief_GetPad(void **state)
 {
     const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
@@ -189,26 +180,6 @@ static void Test_CanXlBrief_GetPayloadLength_NoPadding(void **state)
                             0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
     assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 4);
-}
-
-static void Test_CanXlBrief_GetAcfMsgLengthInBytes(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x24, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
-    assert_int_equal(Avtp_CanXlBrief_GetAcfMsgLengthInBytes(canxl), 5 * 4);
-}
-
-static void Test_CanXlBrief_SetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
-    Avtp_CanXlBrief_Init(canxl);
-    Avtp_CanXlBrief_SetAcfMsgLength(canxl, 5);
-    assert_int_equal(Avtp_CanXlBrief_GetAcfMsgLength(canxl), 5);
-    assert_int_equal(Avtp_CanXlBrief_GetAcfMsgLengthInBytes(canxl), 20);
 }
 
 static void Test_CanXlBrief_SetMtv(void **state)
@@ -465,7 +436,6 @@ static void Test_CanXlBrief_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanXlBrief_Init),
-                                       cmocka_unit_test(Test_CanXlBrief_GetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXlBrief_GetPad),
                                        cmocka_unit_test(Test_CanXlBrief_IsMtv),
                                        cmocka_unit_test(Test_CanXlBrief_GetCanBusId),
@@ -480,8 +450,6 @@ int main(void)
                                        cmocka_unit_test(Test_CanXlBrief_GetSegmentNum),
                                        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength),
                                        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_CanXlBrief_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_CanXlBrief_SetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXlBrief_SetMtv),
                                        cmocka_unit_test(Test_CanXlBrief_SetCanBusId),
                                        cmocka_unit_test(Test_CanXlBrief_SetVcid),

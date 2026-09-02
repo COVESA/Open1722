@@ -65,8 +65,8 @@ static void flexray_get_set_fields(void **state)
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
 
-    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 100);
-    assert_int_equal(Avtp_FlexRay_GetAcfMsgLength((Avtp_FlexRay_t *)pdu), 100);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 100);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 100);
 
     Avtp_FlexRay_SetPad((Avtp_FlexRay_t *)pdu, 2);
     assert_int_equal(Avtp_FlexRay_GetPad((Avtp_FlexRay_t *)pdu), 2);
@@ -126,23 +126,23 @@ static void flexray_is_valid(void **state)
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_FlexRay_Init((Avtp_FlexRay_t *)pdu);
-    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, MAX_PDU_SIZE), 1);
 
     memset(pdu, 0xFF, MAX_PDU_SIZE);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_FlexRay_Init((Avtp_FlexRay_t *)pdu);
-    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, 25), 1);
 
     Avtp_FlexRay_Init((Avtp_FlexRay_t *)pdu);
-    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, 9), 0);
 
     // FlexRay payload bound: > 254 bytes is invalid.
     Avtp_FlexRay_Init((Avtp_FlexRay_t *)pdu);
-    Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 68);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 68);
     assert_int_equal(Avtp_FlexRay_IsValid((Avtp_FlexRay_t *)pdu, MAX_PDU_SIZE), 0);
 }
 

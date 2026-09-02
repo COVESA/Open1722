@@ -65,8 +65,8 @@ static void lin_get_set_fields(void **state)
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_LIN);
 
-    Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t *)pdu, 50);
-    assert_int_equal(Avtp_Lin_GetAcfMsgLength((Avtp_Lin_t *)pdu), 50);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 50);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 50);
 
     Avtp_Lin_SetPad((Avtp_Lin_t *)pdu, 3);
     assert_int_equal(Avtp_Lin_GetPad((Avtp_Lin_t *)pdu), 3);
@@ -103,19 +103,19 @@ static void lin_is_valid(void **state)
     // Valid IEEE 1722 LIN Frame (Length 20, Buffer 25). AcfMsgLength=5
     // quadlets = 20 bytes; payload = 20 - 12 header = 8 bytes (LIN max).
     Avtp_Lin_Init((Avtp_Lin_t *)pdu);
-    Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t *)pdu, 5);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 5);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, 25), 1);
 
     // Invalid IEEE 1722 LIN Frame (Length 20 but buffer only 9!).
     Avtp_Lin_Init((Avtp_Lin_t *)pdu);
-    Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t *)pdu, 5);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 5);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, 9), 0);
 
     // LIN payload bound: a frame declaring a 12-byte payload is invalid
     // (LIN tops out at 8 bytes). AcfMsgLength=6 quadlets = 24 bytes;
     // payload = 24 - 12 header = 12 bytes.
     Avtp_Lin_Init((Avtp_Lin_t *)pdu);
-    Avtp_Lin_SetAcfMsgLength((Avtp_Lin_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, MAX_PDU_SIZE), 0);
 }
 
@@ -133,7 +133,7 @@ static void lin_create_message(void **state)
     assert_int_equal(Avtp_Lin_GetMessageTimestamp((Avtp_Lin_t *)pdu), 0x123456789ABCULL);
     assert_memory_equal(payload, pdu + AVTP_LIN_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Lin_GetPayloadLength((Avtp_Lin_t *)pdu), 8);
-    assert_int_equal(Avtp_Lin_GetAcfMsgLength((Avtp_Lin_t *)pdu), 5);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 5);
     assert_int_equal(Avtp_Lin_IsValid((Avtp_Lin_t *)pdu, MAX_PDU_SIZE), 1);
 }
 

@@ -55,17 +55,6 @@ static void Test_Gisf_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gisf_GetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x18, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-        0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-    };
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    assert_int_equal(Avtp_Gisf_GetAcfMsgLength(gisf), 5);
-}
-
 static void Test_Gisf_GetPad(void **state)
 {
     const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
@@ -229,28 +218,6 @@ static void Test_Gisf_GetPayloadLength_NoPadding(void **state)
     };
     Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
     assert_int_equal(Avtp_Gisf_GetPayloadLength(gisf), 4);
-}
-
-static void Test_Gisf_GetAcfMsgLengthInBytes(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x18, 0x06, 0xC0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
-        0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0xBF, 0xFF, 0x0, 0x0, 0x0, 0x0,
-    };
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    assert_int_equal(Avtp_Gisf_GetAcfMsgLengthInBytes(gisf), 6 * 4);
-}
-
-static void Test_Gisf_SetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    Avtp_Gisf_Init(gisf);
-    Avtp_Gisf_SetAcfMsgLength(gisf, 5);
-    assert_int_equal(Avtp_Gisf_GetAcfMsgLength(gisf), 5);
-    assert_int_equal(Avtp_Gisf_GetAcfMsgLengthInBytes(gisf), 20);
 }
 
 static void Test_Gisf_SetMtv(void **state)
@@ -521,7 +488,6 @@ static void Test_Gisf_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gisf_Init),
-                                       cmocka_unit_test(Test_Gisf_GetAcfMsgLength),
                                        cmocka_unit_test(Test_Gisf_GetPad),
                                        cmocka_unit_test(Test_Gisf_IsMtv),
                                        cmocka_unit_test(Test_Gisf_GetImageSensorId),
@@ -537,8 +503,6 @@ int main(void)
                                        cmocka_unit_test(Test_Gisf_GetLineNumber),
                                        cmocka_unit_test(Test_Gisf_GetPayloadLength),
                                        cmocka_unit_test(Test_Gisf_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_Gisf_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_Gisf_SetAcfMsgLength),
                                        cmocka_unit_test(Test_Gisf_SetMtv),
                                        cmocka_unit_test(Test_Gisf_SetImageSensorId),
                                        cmocka_unit_test(Test_Gisf_SetMessageTimestamp),

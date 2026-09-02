@@ -142,7 +142,7 @@ Getters return the natural C type for the field width - `uint8_t`,
 
 ```c
 OPEN1722_INLINE uint8_t  Avtp_Can_GetPad(const Avtp_Can_t *const pdu);
-OPEN1722_INLINE uint16_t Avtp_Can_GetAcfMsgLength(const Avtp_Can_t *const pdu);
+OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCommon_t *const pdu);
 OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t *const pdu);
 ```
 
@@ -247,7 +247,7 @@ The canonical set (CAN as reference):
           memset(can_pdu->payload + payload_length, 0, pad);
       uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
       Avtp_Can_SetPad(can_pdu, pad);
-      Avtp_Can_SetAcfMsgLength(can_pdu, msgLenQuadlets);
+      Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)can_pdu, msgLenQuadlets);
   }
   ```
 
@@ -261,9 +261,10 @@ The canonical set (CAN as reference):
   header fields (e.g. `mtv`, `message_timestamp`, `rtr`, `brs`, `esi`) *after*
   calling it.
 
-`SetAcfMsgLength` itself remains available for when you want to set the raw
-quadlet value directly; `SetPayloadLength` is the friendlier path that keeps the
-padding consistent for you.
+The raw quadlet-encoded `acf_msg_length` field can still be written directly
+via `Avtp_AcfCommon_SetAcfMsgLength` when you need it;
+`SetPayloadLength` is the friendlier path that keeps the padding consistent for
+you.
 
 ## Inline accessors & the shared library
 
@@ -484,26 +485,32 @@ described once in [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h):
 - `Avtp_AcfMsgType_t` - the enumeration of all ACF message types
   (`AVTP_ACF_TYPE_CAN`, `AVTP_ACF_TYPE_LIN`, …).
 - `Avtp_AcfCommon_GetAcfMsgType`, `Avtp_AcfCommon_SetAcfMsgType`,
-  `Avtp_AcfCommon_Get/SetAcfMsgLength` - accessors for the two shared fields,
-  typed against `Avtp_AcfMsgType_t`.
+  `Avtp_AcfCommon_Get/SetAcfMsgLength`,
+  `Avtp_AcfCommon_GetAcfMsgLengthInBytes` - accessors for the two shared
+  fields (the message type accessors are typed against
+  `Avtp_AcfMsgType_t`).
 
 Each concrete format defines its *own* field enum and descriptor table that
 *include* the two common fields, so the format's struct can be overlaid on the
 common header and its format-specific accessors stay self-contained.
 
 The two common fields are accessed through the generic `AcfCommon` accessors,
-never through per-format functions:
+never through per-format functions. Since every ACF format struct starts with
+the common header (one quadlet), casting the format PDU pointer to
+`Avtp_AcfCommon_t *` is always safe:
 
 - The `acf_msg_type` field has exactly one correct value per format, so there
   is **no per-format `Get/SetAcfMsgType`**. `Init` stamps the message type with
   `Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_<NAME>)`,
   and `IsValid` checks it with `Avtp_AcfCommon_GetAcfMsgType((const
-  Avtp_AcfCommon_t *)pdu)`. Since every ACF format struct starts with the
-  common header (one quadlet), casting the format PDU pointer to
-  `Avtp_AcfCommon_t *` is always safe.
-- The `acf_msg_length` field is a real variable field, so each format keeps
-  `GetAcfMsgLength`, `SetAcfMsgLength` and `GetAcfMsgLengthInBytes`, but they
-  are thin inline wrappers that delegate to `Avtp_AcfCommon_*`.
+  Avtp_AcfCommon_t *)pdu)`.
+- The `acf_msg_length` field is likewise accessed only through
+  `Avtp_AcfCommon_GetAcfMsgLength`, `SetAcfMsgLength` and
+  `Avtp_AcfCommon_GetAcfMsgLengthInBytes` - there are **no per-format
+  `Get/SetAcfMsgLength` or `GetAcfMsgLengthInBytes`** either. The per-format
+  convenience functions that deal in payload bytes (`SetPayloadLength`, and
+  `GetPayloadLength` where the format encodes enough information to recover
+  it) are where the raw quadlet-encoded length field is read or written.
 
 ## The field-access engine
 

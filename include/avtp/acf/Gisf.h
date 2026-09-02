@@ -116,45 +116,6 @@ static const Avtp_FieldDescriptor_t Avtp_GisfFieldDesc[AVTP_GISF_FIELD_MAX] = {
 };
 
 /**
- * Return the value of the ACF message length field as specified in the IEEE 1722 Specification.
- * This returns the length in Quadlets as specified in the IEEE 1722 Specification.
- *
- * You can use Avtp_Gisf_GetPayloadLength to get the length in bytes without padding.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
- * @returns Value of the ACF message length field.
- */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLength(const Avtp_Gisf_t *const pdu)
-{
-    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
-}
-
-/**
- * Return the ACF message length in bytes.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
- * @returns Length of the ACF message in bytes.
- */
-OPEN1722_INLINE uint16_t Avtp_Gisf_GetAcfMsgLengthInBytes(const Avtp_Gisf_t *const pdu)
-{
-    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
-}
-
-/**
- * Set the value of the ACF message length field as specified in the IEEE 1722 Specification.
- * Note: the size is in Quadlets as specified in the IEEE 1722 Specification.
- * You can use Avtp_Gisf_SetPayloadLength to set length in bytes and automatically set the
- * correct padding.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF GISF PDU.
- * @param value Value to set the ACF message length field to.
- */
-OPEN1722_INLINE void Avtp_Gisf_SetAcfMsgLength(Avtp_Gisf_t *pdu, uint16_t value)
-{
-    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
-}
-
-/**
  * Returns the pad field from an ACF_GISF message header.
  *
  * @param pdu Pointer to an ACF_GISF message.
@@ -483,7 +444,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
     Avtp_Gisf_SetPad(pdu, pad);
-    Avtp_Gisf_SetAcfMsgLength(pdu, msgLenQuadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
 /**
@@ -500,7 +461,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
 OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t *const pdu)
 {
     uint8_t pad_length = Avtp_Gisf_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_Gisf_GetAcfMsgLengthInBytes(pdu);
+    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint16_t)(acf_length_bytes - AVTP_GISF_HEADER_LEN - pad_length);
 }
 
@@ -565,8 +526,7 @@ OPEN1722_INLINE bool Avtp_Gisf_IsValid(const Avtp_Gisf_t *const pdu, size_t buff
         return false;
     }
 
-    // Avtp_Gisf_GetAcfMsgLength returns quadlets. Convert the length field to octets.
-    uint16_t msg_length_bytes = (uint16_t)Avtp_Gisf_GetAcfMsgLength(pdu) * 4;
+    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

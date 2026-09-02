@@ -93,29 +93,6 @@ static const Avtp_FieldDescriptor_t Avtp_SensorBriefFieldDesc[AVTP_SENSOR_BRIEF_
 };
 
 /**
- * Return the value of the ACF message length field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF SensorBrief PDU.
- * @returns Value of the ACF message length field.
- */
-OPEN1722_INLINE uint16_t Avtp_SensorBrief_GetAcfMsgLength(const Avtp_SensorBrief_t *const pdu)
-{
-    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
-}
-
-/**
- * Return the ACF message length in bytes.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF SensorBrief PDU.
- * @returns Length of the ACF message in bytes.
- */
-OPEN1722_INLINE uint16_t
-Avtp_SensorBrief_GetAcfMsgLengthInBytes(const Avtp_SensorBrief_t *const pdu)
-{
-    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
-}
-
-/**
  * Return the value of the ACF SensorBrief MTV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF SensorBrief PDU.
@@ -159,17 +136,6 @@ OPEN1722_INLINE uint8_t Avtp_SensorBrief_GetSz(const Avtp_SensorBrief_t *const p
 OPEN1722_INLINE uint8_t Avtp_SensorBrief_GetSensorGroup(const Avtp_SensorBrief_t *const pdu)
 {
     return (uint8_t)GET_SENSOR_BRIEF_FIELD(AVTP_SENSOR_BRIEF_FIELD_SENSOR_GROUP);
-}
-
-/**
- * Sets the value of the ACF message length field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF SensorBrief PDU.
- * @param value Value to set the ACF message length field to.
- */
-OPEN1722_INLINE void Avtp_SensorBrief_SetAcfMsgLength(Avtp_SensorBrief_t *pdu, uint16_t value)
-{
-    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -269,7 +235,7 @@ OPEN1722_INLINE void Avtp_SensorBrief_SetPayloadLength(Avtp_SensorBrief_t *pdu,
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_SensorBrief_SetAcfMsgLength(pdu, msgLenQuadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
 /**
@@ -362,8 +328,7 @@ OPEN1722_INLINE bool Avtp_SensorBrief_IsValid(const Avtp_SensorBrief_t *const pd
         return false;
     }
 
-    // Avtp_SensorBrief_GetAcfMsgLength returns quadlets. Convert the length field to octets.
-    uint16_t msg_length_bytes = (uint16_t)Avtp_SensorBrief_GetAcfMsgLength(pdu) * 4;
+    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

@@ -57,15 +57,6 @@ static void Test_CanXl_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanXl_GetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x22, 0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
-    assert_int_equal(Avtp_CanXl_GetAcfMsgLength(canxl), 6);
-}
-
 static void Test_CanXl_GetPad(void **state)
 {
     const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
@@ -209,26 +200,6 @@ static void Test_CanXl_GetPayloadLength_NoPadding(void **state)
                             0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
     assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 4);
-}
-
-static void Test_CanXl_GetAcfMsgLengthInBytes(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x22, 0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
-    assert_int_equal(Avtp_CanXl_GetAcfMsgLengthInBytes(canxl), 7 * 4);
-}
-
-static void Test_CanXl_SetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
-    Avtp_CanXl_Init(canxl);
-    Avtp_CanXl_SetAcfMsgLength(canxl, 5);
-    assert_int_equal(Avtp_CanXl_GetAcfMsgLength(canxl), 5);
-    assert_int_equal(Avtp_CanXl_GetAcfMsgLengthInBytes(canxl), 20);
 }
 
 static void Test_CanXl_SetMtv(void **state)
@@ -515,7 +486,6 @@ static void Test_CanXl_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanXl_Init),
-                                       cmocka_unit_test(Test_CanXl_GetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXl_GetPad),
                                        cmocka_unit_test(Test_CanXl_IsMtv),
                                        cmocka_unit_test(Test_CanXl_GetCanBusId),
@@ -531,8 +501,6 @@ int main(void)
                                        cmocka_unit_test(Test_CanXl_GetSegmentNum),
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength),
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_CanXl_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_CanXl_SetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXl_SetMtv),
                                        cmocka_unit_test(Test_CanXl_SetCanBusId),
                                        cmocka_unit_test(Test_CanXl_SetMessageTimestamp),

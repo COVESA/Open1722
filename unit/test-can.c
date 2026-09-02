@@ -154,12 +154,12 @@ static void can_is_valid(void **state)
     // Valid IEEE 1722 CAN Frame (Length 24, Buffer 25). AcfMsgLength=6
     // quadlets = 24 bytes; payload = 24 - 16 header = 8 bytes (classic max).
     Avtp_Can_Init((Avtp_Can_t *)pdu);
-    Avtp_Can_SetAcfMsgLength((Avtp_Can_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, 25), 1);
 
     // Invalid IEEE 1722 CAN Frame (Length 24 but buffer only 9!).
     Avtp_Can_Init((Avtp_Can_t *)pdu);
-    Avtp_Can_SetAcfMsgLength((Avtp_Can_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, 9), 0);
 
     // Classic CAN payload bound: a frame declaring a 12-byte payload as
@@ -229,7 +229,7 @@ static void can_brief_set_payload(void **state)
         uint16_t msgLenBytes = AVTP_CAN_BRIEF_HEADER_LEN + i;
         uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
         assert_int_equal(Avtp_CanBrief_GetPad((Avtp_CanBrief_t *)pdu), pad);
-        assert_int_equal(Avtp_CanBrief_GetAcfMsgLength((Avtp_CanBrief_t *)pdu),
+        assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu),
                          (msgLenBytes + pad) / 4);
     }
 }
@@ -263,12 +263,12 @@ static void can_brief_is_valid(void **state)
     // Valid IEEE 1722 CAN Brief Frame (Length 16, Buffer 17). AcfMsgLength=4
     // quadlets = 16 bytes; payload = 16 - 8 header = 8 bytes (classic max).
     Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
-    Avtp_CanBrief_SetAcfMsgLength((Avtp_CanBrief_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, 17), 1);
 
     // Invalid IEEE 1722 CAN Brief Frame (Length 16 but buffer only 9!).
     Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
-    Avtp_CanBrief_SetAcfMsgLength((Avtp_CanBrief_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, 9), 0);
 
     // Classic CAN payload bound: a frame declaring a 12-byte payload as

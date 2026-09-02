@@ -66,8 +66,8 @@ static void sensor_get_set_fields(void **state)
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_SENSOR);
 
-    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 80);
-    assert_int_equal(Avtp_Sensor_GetAcfMsgLength((Avtp_Sensor_t *)pdu), 80);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 80);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 80);
 
     Avtp_Sensor_SetMtv((Avtp_Sensor_t *)pdu, true);
     assert_int_equal(Avtp_Sensor_IsMtv((Avtp_Sensor_t *)pdu), 1);
@@ -112,13 +112,13 @@ static void sensor_is_valid(void **state)
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
     Avtp_Sensor_SetNumSensor((Avtp_Sensor_t *)pdu, 3);
     Avtp_Sensor_SetSz((Avtp_Sensor_t *)pdu, 2);
-    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
     Avtp_Sensor_SetNumSensor((Avtp_Sensor_t *)pdu, 3);
     Avtp_Sensor_SetSz((Avtp_Sensor_t *)pdu, 2);
-    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 6);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 6);
     assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 0);
 }
 
@@ -206,8 +206,8 @@ static void sensor_brief_get_set_fields(void **state)
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu),
                      AVTP_ACF_TYPE_SENSOR_BRIEF);
 
-    Avtp_SensorBrief_SetAcfMsgLength((Avtp_SensorBrief_t *)pdu, 5);
-    assert_int_equal(Avtp_SensorBrief_GetAcfMsgLength((Avtp_SensorBrief_t *)pdu), 5);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 5);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 5);
 
     Avtp_SensorBrief_SetMtv((Avtp_SensorBrief_t *)pdu, true);
     assert_int_equal(Avtp_SensorBrief_IsMtv((Avtp_SensorBrief_t *)pdu), 1);
@@ -245,7 +245,7 @@ static void sensor_brief_is_valid(void **state)
     Avtp_SensorBrief_Init((Avtp_SensorBrief_t *)pdu);
     Avtp_SensorBrief_SetNumSensor((Avtp_SensorBrief_t *)pdu, 3);
     Avtp_SensorBrief_SetSz((Avtp_SensorBrief_t *)pdu, 2);
-    Avtp_SensorBrief_SetAcfMsgLength((Avtp_SensorBrief_t *)pdu, 2);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 2);
     assert_int_equal(Avtp_SensorBrief_IsValid((Avtp_SensorBrief_t *)pdu, MAX_PDU_SIZE), 0);
 }
 

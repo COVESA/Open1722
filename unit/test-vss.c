@@ -70,7 +70,7 @@ static void vss_pad(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
 
     // Check if the function is initializing properly
     Avtp_Vss_Init(vss_pdu);
@@ -78,7 +78,7 @@ static void vss_pad(void **state)
     for (int i = 1; i < 4; i++) {
         Avtp_Vss_SetPayloadLength(vss_pdu, i);
 
-        uint8_t vss_quadlets = Avtp_Vss_GetAcfMsgLength(vss_pdu);
+        uint8_t vss_quadlets = Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu);
         assert_int_equal(vss_quadlets, AVTP_VSS_FIXED_HEADER_LEN / 4 + 1);
 
         uint8_t vss_pad = Avtp_Vss_GetPad(vss_pdu);
@@ -92,7 +92,7 @@ static void vss_static_path(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
 
     VssPath_t path_id = {.vss_static_id_path = 0x01020304};
     Avtp_Vss_SetAddrMode(vss_pdu, VSS_STATIC_ID_MODE);
@@ -114,7 +114,7 @@ static void vss_interop_path(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
 
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
@@ -144,7 +144,7 @@ static void vss_data_uint8(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -172,7 +172,7 @@ static void vss_data_int8(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -200,7 +200,7 @@ static void vss_data_uint16(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -228,7 +228,7 @@ static void vss_data_int16(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -256,7 +256,7 @@ static void vss_data_uint32(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -284,7 +284,7 @@ static void vss_data_int32(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -312,7 +312,7 @@ static void vss_data_uint64(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -341,7 +341,7 @@ static void vss_data_int64(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -370,7 +370,7 @@ static void vss_data_bool(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -398,7 +398,7 @@ static void vss_data_float(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -426,7 +426,7 @@ static void vss_data_double(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -454,7 +454,7 @@ static void vss_data_string(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -495,7 +495,7 @@ static void vss_data_uint8_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -536,7 +536,7 @@ static void vss_data_int8_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -578,7 +578,7 @@ static void vss_data_uint16_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -621,7 +621,7 @@ static void vss_data_int16_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -664,7 +664,7 @@ static void vss_data_uint32_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -707,7 +707,7 @@ static void vss_data_int32_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -751,7 +751,7 @@ static void vss_data_uint64_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -794,7 +794,7 @@ static void vss_data_int64_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -842,7 +842,7 @@ static void vss_data_bool_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -885,7 +885,7 @@ static void vss_data_float_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -930,7 +930,7 @@ static void vss_data_double_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -975,7 +975,7 @@ static void vss_data_string_array(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
     Avtp_Vss_Init(vss_pdu);
-    Avtp_Vss_SetAcfMsgLength(vss_pdu, 20);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 20);
     char path[] = "Vehicle.Speed";
     uint32_t path_length = strlen(path);
 
@@ -1123,7 +1123,7 @@ static Avtp_Vss_t *vss_build_data_oob_pdu(uint8_t *buf, size_t buf_size, uint8_t
     Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
     Avtp_Vss_Init(pdu);
     Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
-    Avtp_Vss_SetAcfMsgLength(pdu, msg_quadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msg_quadlets);
     Avtp_Vss_SetDatatype(pdu, datatype);
 
     /* Inflated wire data_length at offset 16 (payload start) */
@@ -1150,7 +1150,7 @@ static void vss_path_interop_oob(void **state)
      * 6 bytes available for path data after the length prefix. */
     Avtp_Vss_Init(pdu);
     Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
-    Avtp_Vss_SetAcfMsgLength(pdu, 5);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 5);
 
     buf[12] = 0xFF;
     buf[13] = 0xFF; /* wire path_length = 0xFFFF */
@@ -1504,7 +1504,7 @@ static Avtp_Vss_t *vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size, ui
     Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
     Avtp_Vss_Init(pdu);
     Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
-    Avtp_Vss_SetAcfMsgLength(pdu, msg_quadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msg_quadlets);
     Avtp_Vss_SetDatatype(pdu, datatype);
 
     /* Inflated path_length at offset 12 (INTEROP length prefix).
@@ -1587,7 +1587,7 @@ static void vss_data_static_id_truncated_oob(void **state)
     memset(buf, 0, sizeof(buf));
     Avtp_Vss_Init(pdu);
     Avtp_Vss_SetAddrMode(pdu, VSS_STATIC_ID_MODE);
-    Avtp_Vss_SetAcfMsgLength(pdu, 3); /* 12 bytes — header only */
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 3); /* 12 bytes — header only */
     Avtp_Vss_SetDatatype(pdu, VSS_UINT8);
 
     VssData_t vd;
