@@ -57,15 +57,6 @@ static void Test_CanXl_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanXl_GetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x22, 0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
-    assert_int_equal(Avtp_CanXl_GetAcfMsgType(canxl), AVTP_ACF_TYPE_CAN_XL);
-}
-
 static void Test_CanXl_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
@@ -227,16 +218,6 @@ static void Test_CanXl_GetAcfMsgLengthInBytes(void **state)
                             0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
     assert_int_equal(Avtp_CanXl_GetAcfMsgLengthInBytes(canxl), 7 * 4);
-}
-
-static void Test_CanXl_SetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
-    Avtp_CanXl_Init(canxl);
-    Avtp_CanXl_SetAcfMsgType(canxl, AVTP_ACF_TYPE_CAN_XL);
-    assert_int_equal(Avtp_CanXl_GetAcfMsgType(canxl), AVTP_ACF_TYPE_CAN_XL);
 }
 
 static void Test_CanXl_SetAcfMsgLength(void **state)
@@ -469,7 +450,7 @@ static void Test_CanXl_CreateAcfMessage(void **state)
 
     Avtp_CanXl_CreateAcfMessage(canxl, 0x5FF, 0xBFFFFFFFul, 0xBF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_CanXl_GetAcfMsgType(canxl), AVTP_ACF_TYPE_CAN_XL);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl), AVTP_ACF_TYPE_CAN_XL);
     assert_int_equal(Avtp_CanXl_GetPriorityId(canxl), 0x5FF);
     assert_int_equal(Avtp_CanXl_GetAcceptanceField(canxl), 0xBFFFFFFFul);
     assert_int_equal(Avtp_CanXl_GetSdt(canxl), 0xBF);
@@ -496,7 +477,7 @@ static void Test_CanXl_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_CanXl_CreateAcfMessage(canxl, 0x5FF, 0x0, 0x0, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_CanXl_GetAcfMsgType(canxl), AVTP_ACF_TYPE_CAN_XL);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canxl), AVTP_ACF_TYPE_CAN_XL);
     assert_int_equal(Avtp_CanXl_IsMtv(canxl), false);
     assert_int_equal(Avtp_CanXl_IsRrs(canxl), false);
     assert_int_equal(Avtp_CanXl_IsSec(canxl), false);
@@ -534,7 +515,6 @@ static void Test_CanXl_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanXl_Init),
-                                       cmocka_unit_test(Test_CanXl_GetAcfMsgType),
                                        cmocka_unit_test(Test_CanXl_GetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXl_GetPad),
                                        cmocka_unit_test(Test_CanXl_IsMtv),
@@ -552,7 +532,6 @@ int main(void)
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength),
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_CanXl_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_CanXl_SetAcfMsgType),
                                        cmocka_unit_test(Test_CanXl_SetAcfMsgLength),
                                        cmocka_unit_test(Test_CanXl_SetMtv),
                                        cmocka_unit_test(Test_CanXl_SetCanBusId),

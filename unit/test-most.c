@@ -63,8 +63,7 @@ static void most_get_set_fields(void **state)
 
     Avtp_Most_Init((Avtp_Most_t *)pdu);
 
-    Avtp_Most_SetAcfMsgType((Avtp_Most_t *)pdu, AVTP_ACF_TYPE_MOST);
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_MOST);
 
     Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 120);
     assert_int_equal(Avtp_Most_GetAcfMsgLength((Avtp_Most_t *)pdu), 120);
@@ -128,7 +127,7 @@ static void most_create_message(void **state)
     Avtp_Most_CreateAcfMessage((Avtp_Most_t *)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F, payload,
                                sizeof(payload));
 
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_MOST);
     assert_int_equal(Avtp_Most_GetDeviceId((Avtp_Most_t *)pdu), 0x1234);
     assert_int_equal(Avtp_Most_GetFblockId((Avtp_Most_t *)pdu), 0xAB);
     assert_int_equal(Avtp_Most_GetInstId((Avtp_Most_t *)pdu), 0x12);
@@ -149,7 +148,7 @@ static void most_create_from_garbage(void **state)
     Avtp_Most_CreateAcfMessage((Avtp_Most_t *)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F, payload,
                                sizeof(payload));
 
-    assert_int_equal(Avtp_Most_GetAcfMsgType((Avtp_Most_t *)pdu), AVTP_ACF_TYPE_MOST);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_MOST);
     assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t *)pdu), 0);
     assert_int_equal(Avtp_Most_GetMostNetId((Avtp_Most_t *)pdu), 0);
     assert_int_equal(Avtp_Most_GetMessageTimestamp((Avtp_Most_t *)pdu), 0);

@@ -88,17 +88,6 @@ static const Avtp_FieldDescriptor_t Avtp_GpcFieldDesc[AVTP_GPC_FIELD_MAX] = {
 };
 
 /**
- * Return the value of the ACF Message Type Field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @returns The value of the ACF Message Type Field.
- */
-OPEN1722_INLINE uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t *const pdu)
-{
-    return (uint8_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE);
-}
-
-/**
  * Return the value of the ACF Message Length Field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
@@ -106,7 +95,7 @@ OPEN1722_INLINE uint8_t Avtp_Gpc_GetAcfMsgType(const Avtp_Gpc_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t *const pdu)
 {
-    return (uint16_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH);
+    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
 }
 
 /**
@@ -117,7 +106,7 @@ OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLength(const Avtp_Gpc_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Gpc_GetAcfMsgLengthInBytes(const Avtp_Gpc_t *const pdu)
 {
-    return (uint16_t)GET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH) * 4;
+    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
 }
 
 /**
@@ -132,17 +121,6 @@ OPEN1722_INLINE uint64_t Avtp_Gpc_GetGpcMsgId(const Avtp_Gpc_t *const pdu)
 }
 
 /**
- * Set the value of an ACF Message Type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
- * @param value Value to set the ACF Message Type field to.
- */
-OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t *pdu, uint8_t value)
-{
-    SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_TYPE, value);
-}
-
-/**
  * Set the value of an ACF Message Length field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF GPC PDU.
@@ -150,7 +128,7 @@ OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgType(Avtp_Gpc_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE void Avtp_Gpc_SetAcfMsgLength(Avtp_Gpc_t *pdu, uint16_t value)
 {
-    SET_GPC_FIELD(AVTP_GPC_FIELD_ACF_MSG_LENGTH, value);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -230,7 +208,7 @@ OPEN1722_INLINE void Avtp_Gpc_Init(Avtp_Gpc_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Gpc_t));
-        Avtp_Gpc_SetAcfMsgType(pdu, AVTP_ACF_TYPE_GPC);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_GPC);
     }
 }
 
@@ -277,7 +255,7 @@ OPEN1722_INLINE bool Avtp_Gpc_IsValid(const Avtp_Gpc_t *const pdu, size_t buffer
         return false;
     }
 
-    if (Avtp_Gpc_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_GPC) {
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_GPC) {
         return false;
     }
 

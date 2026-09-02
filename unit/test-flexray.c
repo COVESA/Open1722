@@ -63,8 +63,7 @@ static void flexray_get_set_fields(void **state)
 
     Avtp_FlexRay_Init((Avtp_FlexRay_t *)pdu);
 
-    Avtp_FlexRay_SetAcfMsgType((Avtp_FlexRay_t *)pdu, AVTP_ACF_TYPE_FLEXRAY);
-    assert_int_equal(Avtp_FlexRay_GetAcfMsgType((Avtp_FlexRay_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
 
     Avtp_FlexRay_SetAcfMsgLength((Avtp_FlexRay_t *)pdu, 100);
     assert_int_equal(Avtp_FlexRay_GetAcfMsgLength((Avtp_FlexRay_t *)pdu), 100);
@@ -154,7 +153,7 @@ static void flexray_create_message(void **state)
 
     Avtp_FlexRay_CreateAcfMessage((Avtp_FlexRay_t *)pdu, 0x7FF, 63, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_FlexRay_GetAcfMsgType((Avtp_FlexRay_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
     assert_int_equal(Avtp_FlexRay_GetFrFrameId((Avtp_FlexRay_t *)pdu), 0x7FF);
     assert_int_equal(Avtp_FlexRay_GetCycle((Avtp_FlexRay_t *)pdu), 63);
     assert_memory_equal(payload, pdu + AVTP_FLEXRAY_HEADER_LEN, sizeof(payload));
@@ -171,7 +170,7 @@ static void flexray_create_from_garbage(void **state)
     memset(pdu, 0xAA, MAX_PDU_SIZE);
     Avtp_FlexRay_CreateAcfMessage((Avtp_FlexRay_t *)pdu, 0x123, 0x3F, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_FlexRay_GetAcfMsgType((Avtp_FlexRay_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_FLEXRAY);
     assert_int_equal(Avtp_FlexRay_IsMtv((Avtp_FlexRay_t *)pdu), 0);
     assert_int_equal(Avtp_FlexRay_IsStr((Avtp_FlexRay_t *)pdu), 0);
     assert_int_equal(Avtp_FlexRay_IsSyn((Avtp_FlexRay_t *)pdu), 0);

@@ -64,8 +64,7 @@ static void sensor_get_set_fields(void **state)
 
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
 
-    Avtp_Sensor_SetAcfMsgType((Avtp_Sensor_t *)pdu, AVTP_ACF_TYPE_SENSOR);
-    assert_int_equal(Avtp_Sensor_GetAcfMsgType((Avtp_Sensor_t *)pdu), AVTP_ACF_TYPE_SENSOR);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_SENSOR);
 
     Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 80);
     assert_int_equal(Avtp_Sensor_GetAcfMsgLength((Avtp_Sensor_t *)pdu), 80);
@@ -131,7 +130,7 @@ static void sensor_create_message(void **state)
     // 3 sensors * 2 octets each = 6 bytes of payload.
     Avtp_Sensor_CreateAcfMessage((Avtp_Sensor_t *)pdu, 3, 2, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Sensor_GetAcfMsgType((Avtp_Sensor_t *)pdu), AVTP_ACF_TYPE_SENSOR);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_SENSOR);
     assert_int_equal(Avtp_Sensor_GetNumSensor((Avtp_Sensor_t *)pdu), 3);
     assert_int_equal(Avtp_Sensor_GetSz((Avtp_Sensor_t *)pdu), 2);
     assert_int_equal(Avtp_Sensor_GetPayloadLength((Avtp_Sensor_t *)pdu), 6);
@@ -177,7 +176,7 @@ static void sensor_create_from_garbage(void **state)
     memset(pdu, 0xAA, MAX_PDU_SIZE);
     Avtp_Sensor_CreateAcfMessage((Avtp_Sensor_t *)pdu, 3, 2, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Sensor_GetAcfMsgType((Avtp_Sensor_t *)pdu), AVTP_ACF_TYPE_SENSOR);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_SENSOR);
     assert_int_equal(Avtp_Sensor_IsMtv((Avtp_Sensor_t *)pdu), 0);
     assert_int_equal(Avtp_Sensor_GetSensorGroup((Avtp_Sensor_t *)pdu), 0);
     assert_int_equal(Avtp_Sensor_GetMessageTimestamp((Avtp_Sensor_t *)pdu), 0);
@@ -204,8 +203,7 @@ static void sensor_brief_get_set_fields(void **state)
 
     Avtp_SensorBrief_Init((Avtp_SensorBrief_t *)pdu);
 
-    Avtp_SensorBrief_SetAcfMsgType((Avtp_SensorBrief_t *)pdu, AVTP_ACF_TYPE_SENSOR_BRIEF);
-    assert_int_equal(Avtp_SensorBrief_GetAcfMsgType((Avtp_SensorBrief_t *)pdu),
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu),
                      AVTP_ACF_TYPE_SENSOR_BRIEF);
 
     Avtp_SensorBrief_SetAcfMsgLength((Avtp_SensorBrief_t *)pdu, 5);
@@ -259,7 +257,7 @@ static void sensor_brief_create_message(void **state)
     // 3 sensors * 2 octets each = 6 bytes of payload.
     Avtp_SensorBrief_CreateAcfMessage((Avtp_SensorBrief_t *)pdu, 3, 2, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_SensorBrief_GetAcfMsgType((Avtp_SensorBrief_t *)pdu),
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu),
                      AVTP_ACF_TYPE_SENSOR_BRIEF);
     assert_int_equal(Avtp_SensorBrief_GetNumSensor((Avtp_SensorBrief_t *)pdu), 3);
     assert_int_equal(Avtp_SensorBrief_GetSz((Avtp_SensorBrief_t *)pdu), 2);

@@ -55,17 +55,6 @@ static void Test_Gisf_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gisf_GetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x18, 0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-        0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-    };
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    assert_int_equal(Avtp_Gisf_GetAcfMsgType(gisf), AVTP_ACF_TYPE_GISF);
-}
-
 static void Test_Gisf_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
@@ -251,16 +240,6 @@ static void Test_Gisf_GetAcfMsgLengthInBytes(void **state)
     };
     Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
     assert_int_equal(Avtp_Gisf_GetAcfMsgLengthInBytes(gisf), 6 * 4);
-}
-
-static void Test_Gisf_SetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    Avtp_Gisf_Init(gisf);
-    Avtp_Gisf_SetAcfMsgType(gisf, AVTP_ACF_TYPE_GISF);
-    assert_int_equal(Avtp_Gisf_GetAcfMsgType(gisf), AVTP_ACF_TYPE_GISF);
 }
 
 static void Test_Gisf_SetAcfMsgLength(void **state)
@@ -486,7 +465,7 @@ static void Test_Gisf_CreateAcfMessage(void **state)
 
     Avtp_Gisf_CreateAcfMessage(gisf, 0x5FF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gisf_GetAcfMsgType(gisf), AVTP_ACF_TYPE_GISF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)gisf), AVTP_ACF_TYPE_GISF);
     assert_int_equal(Avtp_Gisf_GetImageSensorId(gisf), 0x5FF);
     assert_memory_equal(payload, msg + AVTP_GISF_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Gisf_GetPayloadLength(gisf), 8);
@@ -504,7 +483,7 @@ static void Test_Gisf_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_Gisf_CreateAcfMessage(gisf, 0x5FF, payload, sizeof(payload));
 
-    assert_int_equal(Avtp_Gisf_GetAcfMsgType(gisf), AVTP_ACF_TYPE_GISF);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)gisf), AVTP_ACF_TYPE_GISF);
     assert_int_equal(Avtp_Gisf_IsMtv(gisf), false);
     assert_int_equal(Avtp_Gisf_IsEl(gisf), false);
     assert_int_equal(Avtp_Gisf_IsTl(gisf), false);
@@ -542,7 +521,6 @@ static void Test_Gisf_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gisf_Init),
-                                       cmocka_unit_test(Test_Gisf_GetAcfMsgType),
                                        cmocka_unit_test(Test_Gisf_GetAcfMsgLength),
                                        cmocka_unit_test(Test_Gisf_GetPad),
                                        cmocka_unit_test(Test_Gisf_IsMtv),
@@ -560,7 +538,6 @@ int main(void)
                                        cmocka_unit_test(Test_Gisf_GetPayloadLength),
                                        cmocka_unit_test(Test_Gisf_GetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_Gisf_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_Gisf_SetAcfMsgType),
                                        cmocka_unit_test(Test_Gisf_SetAcfMsgLength),
                                        cmocka_unit_test(Test_Gisf_SetMtv),
                                        cmocka_unit_test(Test_Gisf_SetImageSensorId),

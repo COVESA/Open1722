@@ -108,17 +108,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanBriefV2FieldDesc[AVTP_CAN_BRIEF_V2_F
 };
 
 /**
- * Return the value of the ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN Brief V2 PDU.
- * @returns Value of the ACF message type field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanBriefV2_GetAcfMsgType(const Avtp_CanBriefV2_t *const pdu)
-{
-    return (uint8_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_TYPE);
-}
-
-/**
  * Return the value of the ACF message length field as specified in the IEEE 1722 Specification.
  * This returns the length in Quadlets as specified in the IEEE 1722 Specification.
  *
@@ -129,7 +118,7 @@ OPEN1722_INLINE uint8_t Avtp_CanBriefV2_GetAcfMsgType(const Avtp_CanBriefV2_t *c
  */
 OPEN1722_INLINE uint16_t Avtp_CanBriefV2_GetAcfMsgLength(const Avtp_CanBriefV2_t *const pdu)
 {
-    return (uint16_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH);
+    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
 }
 
 /**
@@ -140,18 +129,7 @@ OPEN1722_INLINE uint16_t Avtp_CanBriefV2_GetAcfMsgLength(const Avtp_CanBriefV2_t
  */
 OPEN1722_INLINE uint16_t Avtp_CanBriefV2_GetAcfMsgLengthInBytes(const Avtp_CanBriefV2_t *const pdu)
 {
-    return (uint16_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH) * 4;
-}
-
-/**
- * Set the value of the ACF message type field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN Brief V2 PDU.
- * @param value Value to set the ACF message type field to.
- */
-OPEN1722_INLINE void Avtp_CanBriefV2_SetAcfMsgType(Avtp_CanBriefV2_t *pdu, uint8_t value)
-{
-    SET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_TYPE, value);
+    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
 }
 
 /**
@@ -165,7 +143,7 @@ OPEN1722_INLINE void Avtp_CanBriefV2_SetAcfMsgType(Avtp_CanBriefV2_t *pdu, uint8
  */
 OPEN1722_INLINE void Avtp_CanBriefV2_SetAcfMsgLength(Avtp_CanBriefV2_t *pdu, uint16_t value)
 {
-    SET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_ACF_MSG_LENGTH, value);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
 }
 
 /**
@@ -442,7 +420,7 @@ OPEN1722_INLINE void Avtp_CanBriefV2_Init(Avtp_CanBriefV2_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_CanBriefV2_t));
-        Avtp_CanBriefV2_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN_BRIEF_V2);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_CAN_BRIEF_V2);
     }
 }
 
@@ -501,7 +479,7 @@ OPEN1722_INLINE bool Avtp_CanBriefV2_IsValid(const Avtp_CanBriefV2_t *const pdu,
         return false;
     }
 
-    if (Avtp_CanBriefV2_GetAcfMsgType(pdu) != AVTP_ACF_TYPE_CAN_BRIEF_V2) {
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_CAN_BRIEF_V2) {
         return false;
     }
 

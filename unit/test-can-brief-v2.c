@@ -55,14 +55,6 @@ static void Test_CanBriefV2_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanBriefV2_GetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_CAN_BRIEF_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x44, 0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanBriefV2_t *canV2 = (Avtp_CanBriefV2_t *)msg;
-    assert_int_equal(Avtp_CanBriefV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
-}
-
 static void Test_CanBriefV2_GetAcfMsgLength(void **state)
 {
     const size_t msg_len = AVTP_CAN_BRIEF_V2_HEADER_LEN + 4;
@@ -165,16 +157,6 @@ static void Test_CanBriefV2_GetAcfMsgLengthInBytes(void **state)
     uint8_t msg[msg_len] = {0x44, 0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     Avtp_CanBriefV2_t *canV2 = (Avtp_CanBriefV2_t *)msg;
     assert_int_equal(Avtp_CanBriefV2_GetAcfMsgLengthInBytes(canV2), 3 * 4);
-}
-
-static void Test_CanBriefV2_SetAcfMsgType(void **state)
-{
-    const size_t msg_len = AVTP_CAN_BRIEF_V2_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_CanBriefV2_t *canV2 = (Avtp_CanBriefV2_t *)msg;
-    Avtp_CanBriefV2_Init(canV2);
-    Avtp_CanBriefV2_SetAcfMsgType(canV2, AVTP_ACF_TYPE_CAN_BRIEF_V2);
-    assert_int_equal(Avtp_CanBriefV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
 }
 
 static void Test_CanBriefV2_SetAcfMsgLength(void **state)
@@ -408,7 +390,7 @@ static void Test_CanBriefV2_CreateFromGarbage(void **state)
     memset(msg, 0xAA, msg_len);
     Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x123, 0x0, payload, sizeof(payload), AVTP_CAN_CLASSIC);
 
-    assert_int_equal(Avtp_CanBriefV2_GetAcfMsgType(canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canV2), AVTP_ACF_TYPE_CAN_BRIEF_V2);
     assert_int_equal(Avtp_CanBriefV2_IsMtv(canV2), false);
     assert_int_equal(Avtp_CanBriefV2_IsRtr(canV2), false);
     assert_int_equal(Avtp_CanBriefV2_IsBrs(canV2), false);
@@ -422,7 +404,6 @@ static void Test_CanBriefV2_CreateFromGarbage(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanBriefV2_Init),
-                                       cmocka_unit_test(Test_CanBriefV2_GetAcfMsgType),
                                        cmocka_unit_test(Test_CanBriefV2_GetAcfMsgLength),
                                        cmocka_unit_test(Test_CanBriefV2_GetPad),
                                        cmocka_unit_test(Test_CanBriefV2_IsMtv),
@@ -436,7 +417,6 @@ int main(void)
                                        cmocka_unit_test(Test_CanBriefV2_GetPayloadLength),
                                        cmocka_unit_test(Test_CanBriefV2_GetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_CanBriefV2_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_CanBriefV2_SetAcfMsgType),
                                        cmocka_unit_test(Test_CanBriefV2_SetAcfMsgLength),
                                        cmocka_unit_test(Test_CanBriefV2_SetMtv),
                                        cmocka_unit_test(Test_CanBriefV2_SetRtr),

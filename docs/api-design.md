@@ -446,7 +446,7 @@ OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Can_t));
-        Avtp_Can_SetAcfMsgType(pdu, AVTP_ACF_TYPE_CAN);
+        Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_CAN);
     }
 }
 ```
@@ -483,14 +483,27 @@ described once in [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h):
 - `Avtp_AcfCommon_t` - the common-header PDU struct.
 - `Avtp_AcfMsgType_t` - the enumeration of all ACF message types
   (`AVTP_ACF_TYPE_CAN`, `AVTP_ACF_TYPE_LIN`, …).
-- `Avtp_AcfCommon_Get/SetAcfMsgType`, `Get/SetAcfMsgLength` - accessors for the
-  two shared fields.
+- `Avtp_AcfCommon_GetAcfMsgType`, `Avtp_AcfCommon_SetAcfMsgType`,
+  `Avtp_AcfCommon_Get/SetAcfMsgLength` - accessors for the two shared fields,
+  typed against `Avtp_AcfMsgType_t`.
 
-Each concrete format then defines its *own* field enum and descriptor table that
-*include* the two common fields, so a format's accessors are self-contained and
-do not require the caller to mix in the common-header struct. That is why
-`Avtp_Can_GetAcfMsgType` exists even though the field is formally part of the
-ACF common header.
+Each concrete format defines its *own* field enum and descriptor table that
+*include* the two common fields, so the format's struct can be overlaid on the
+common header and its format-specific accessors stay self-contained.
+
+The two common fields are accessed through the generic `AcfCommon` accessors,
+never through per-format functions:
+
+- The `acf_msg_type` field has exactly one correct value per format, so there
+  is **no per-format `Get/SetAcfMsgType`**. `Init` stamps the message type with
+  `Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_<NAME>)`,
+  and `IsValid` checks it with `Avtp_AcfCommon_GetAcfMsgType((const
+  Avtp_AcfCommon_t *)pdu)`. Since every ACF format struct starts with the
+  common header (one quadlet), casting the format PDU pointer to
+  `Avtp_AcfCommon_t *` is always safe.
+- The `acf_msg_length` field is a real variable field, so each format keeps
+  `GetAcfMsgLength`, `SetAcfMsgLength` and `GetAcfMsgLengthInBytes`, but they
+  are thin inline wrappers that delegate to `Avtp_AcfCommon_*`.
 
 ## The field-access engine
 

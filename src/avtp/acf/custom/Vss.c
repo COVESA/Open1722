@@ -166,11 +166,6 @@ void Avtp_Vss_SetPayloadLength(Avtp_Vss_t *vss_pdu, uint16_t payload_length)
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_PAD, padSize);
 }
 
-Avtp_AcfMsgType_t Avtp_Vss_GetAcfMsgType(const Avtp_Vss_t *const pdu)
-{
-    return GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_TYPE);
-}
-
 uint16_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t *const pdu)
 {
     return (uint16_t)GET_FIELD(AVTP_VSS_FIELD_ACF_MSG_LENGTH);
@@ -513,11 +508,6 @@ void Avtp_Vss_GetVssData(const Avtp_Vss_t *const pdu, VssData_t *val)
     default:
         break;
     }
-}
-
-void Avtp_Vss_SetAcfMsgType(Avtp_Vss_t *pdu, Avtp_AcfMsgType_t val)
-{
-    SET_FIELD(AVTP_VSS_FIELD_ACF_MSG_TYPE, val);
 }
 
 void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t *pdu, uint16_t val)
