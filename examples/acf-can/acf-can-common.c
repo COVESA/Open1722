@@ -207,7 +207,7 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
         }
     }
 
-    return Avtp_Can_GetAcfMsgLength(pdu) * 4;
+    return Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)pdu);
 }
 
 int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu, int use_udp,
@@ -321,7 +321,7 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
 
         canid_t can_id = Avtp_Can_GetCanIdentifier((Avtp_Can_t *)acf_pdu);
         const uint8_t *can_payload = Avtp_Can_GetPayload((Avtp_Can_t *)acf_pdu);
-        uint16_t acf_msg_length = Avtp_Can_GetAcfMsgLength((Avtp_Can_t *)acf_pdu) * 4;
+        uint16_t acf_msg_length = Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)acf_pdu);
         uint16_t can_payload_length = Avtp_Can_GetPayloadLength((Avtp_Can_t *)acf_pdu);
         proc_bytes += acf_msg_length;
 

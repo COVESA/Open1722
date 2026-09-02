@@ -55,14 +55,6 @@ static void Test_Abb_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Abb_GetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1C, 0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
-    assert_int_equal(Avtp_Abb_GetAcfMsgLength(abb), 2);
-}
-
 static void Test_Abb_GetPad(void **state)
 {
     const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
@@ -181,25 +173,6 @@ static void Test_Abb_GetPayloadLength_NoPadding(void **state)
     uint8_t msg[msg_len] = {0x1C, 0x03, 0x0, 0x0, 0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
     Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
     assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 4);
-}
-
-static void Test_Abb_GetAcfMsgLengthInBytes(void **state)
-{
-    const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1C, 0x03, 0x0, 0x0, 0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
-    assert_int_equal(Avtp_Abb_GetAcfMsgLengthInBytes(abb), 3 * 4);
-}
-
-static void Test_Abb_SetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
-    Avtp_Abb_Init(abb);
-    Avtp_Abb_SetAcfMsgLength(abb, 5);
-    assert_int_equal(Avtp_Abb_GetAcfMsgLength(abb), 5);
-    assert_int_equal(Avtp_Abb_GetAcfMsgLengthInBytes(abb), 20);
 }
 
 static void Test_Abb_SetMtv(void **state)
@@ -450,7 +423,6 @@ static void Test_Abb_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Abb_Init),
-                                       cmocka_unit_test(Test_Abb_GetAcfMsgLength),
                                        cmocka_unit_test(Test_Abb_GetPad),
                                        cmocka_unit_test(Test_Abb_IsMtv),
                                        cmocka_unit_test(Test_Abb_GetByteBusId),
@@ -466,8 +438,6 @@ int main(void)
                                        cmocka_unit_test(Test_Abb_GetSegmentNum),
                                        cmocka_unit_test(Test_Abb_GetPayloadLength),
                                        cmocka_unit_test(Test_Abb_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_Abb_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_Abb_SetAcfMsgLength),
                                        cmocka_unit_test(Test_Abb_SetMtv),
                                        cmocka_unit_test(Test_Abb_SetByteBusId),
                                        cmocka_unit_test(Test_Abb_SetEvt),

@@ -65,8 +65,8 @@ static void gpc_get_set_fields(void **state)
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_GPC);
 
-    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t *)pdu, 200);
-    assert_int_equal(Avtp_Gpc_GetAcfMsgLength((Avtp_Gpc_t *)pdu), 200);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 200);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 200);
 
     Avtp_Gpc_SetGpcMsgId((Avtp_Gpc_t *)pdu, 0x456789ABCDEFULL);
     assert_int_equal(Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t *)pdu), 0x456789ABCDEFULL);
@@ -84,11 +84,11 @@ static void gpc_is_valid(void **state)
     assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_Gpc_Init((Avtp_Gpc_t *)pdu);
-    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t *)pdu, 20), 1);
 
     Avtp_Gpc_Init((Avtp_Gpc_t *)pdu);
-    Avtp_Gpc_SetAcfMsgLength((Avtp_Gpc_t *)pdu, 4);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 4);
     assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t *)pdu, 5), 0);
 }
 
@@ -102,7 +102,7 @@ static void gpc_create_message(void **state)
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_GPC);
     assert_int_equal(Avtp_Gpc_GetGpcMsgId((Avtp_Gpc_t *)pdu), 0x456789ABCDEFULL);
     assert_memory_equal(payload, pdu + AVTP_GPC_HEADER_LEN, sizeof(payload));
-    assert_int_equal(Avtp_Gpc_GetAcfMsgLengthInBytes((Avtp_Gpc_t *)pdu), 16);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)pdu), 16);
     assert_int_equal(Avtp_Gpc_IsValid((Avtp_Gpc_t *)pdu, MAX_PDU_SIZE), 1);
 }
 

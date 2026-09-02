@@ -110,45 +110,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanV2FieldDesc[AVTP_CAN_V2_FIELD_MAX] =
 };
 
 /**
- * Return the value of the ACF message length field as specified in the IEEE 1722 Specification.
- * This returns the length in Quadlets as specified in the IEEE 1722 Specification.
- *
- * You can use Avtp_CanV2_GetPayloadLength to get the length in bytes without padding.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN V2 PDU.
- * @returns Value of the ACF message length field.
- */
-OPEN1722_INLINE uint16_t Avtp_CanV2_GetAcfMsgLength(const Avtp_CanV2_t *const pdu)
-{
-    return Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu);
-}
-
-/**
- * Return the ACF message length in bytes.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN V2 PDU.
- * @returns Length of the ACF message in bytes.
- */
-OPEN1722_INLINE uint16_t Avtp_CanV2_GetAcfMsgLengthInBytes(const Avtp_CanV2_t *const pdu)
-{
-    return (uint16_t)Avtp_AcfCommon_GetAcfMsgLength((const Avtp_AcfCommon_t *)pdu) * 4;
-}
-
-/**
- * Set the value of the ACF message length field as specified in the IEEE 1722 Specification.
- * Note: the size is in Quadlets as specified in the IEEE 1722 Specification.
- * You can use Avtp_CanV2_SetPayloadLength to set length in bytes and automatically set the
- * correct padding.
- *
- * @param pdu Pointer to the first bit of a 1722 ACF CAN V2 PDU.
- * @param value Value to set the ACF message length field to.
- */
-OPEN1722_INLINE void Avtp_CanV2_SetAcfMsgLength(Avtp_CanV2_t *pdu, uint16_t value)
-{
-    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, value);
-}
-
-/**
  * Returns the pad field from an ACF_CAN_V2 message header.
  *
  * @param pdu Pointer to an ACF_CAN_V2 message.
@@ -410,7 +371,7 @@ OPEN1722_INLINE void Avtp_CanV2_SetPayloadLength(Avtp_CanV2_t *pdu, uint16_t pay
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
     Avtp_CanV2_SetPad(pdu, pad);
-    Avtp_CanV2_SetAcfMsgLength(pdu, msgLenQuadlets);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
 /**
@@ -429,7 +390,7 @@ OPEN1722_INLINE void Avtp_CanV2_SetPayloadLength(Avtp_CanV2_t *pdu, uint16_t pay
 OPEN1722_INLINE uint8_t Avtp_CanV2_GetPayloadLength(const Avtp_CanV2_t *const pdu)
 {
     uint8_t pad_length = Avtp_CanV2_GetPad(pdu);
-    uint16_t acf_length_bytes = Avtp_CanV2_GetAcfMsgLengthInBytes(pdu);
+    uint16_t acf_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CAN_V2_HEADER_LEN - pad_length);
 }
 
@@ -502,8 +463,7 @@ OPEN1722_INLINE bool Avtp_CanV2_IsValid(const Avtp_CanV2_t *const pdu, size_t bu
         return false;
     }
 
-    // Avtp_CanV2_GetAcfMsgLength returns quadlets. Convert the length field to octets.
-    uint16_t msg_length_bytes = (uint16_t)Avtp_CanV2_GetAcfMsgLength(pdu) * 4;
+    uint16_t msg_length_bytes = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     if (msg_length_bytes > bufferSize) {
         return false;
     }

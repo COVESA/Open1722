@@ -56,15 +56,6 @@ static void Test_Gbb_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gbb_GetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1A, 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
-    assert_int_equal(Avtp_Gbb_GetAcfMsgLength(gbb), 4);
-}
-
 static void Test_Gbb_GetPad(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
@@ -207,26 +198,6 @@ static void Test_Gbb_GetPayloadLength_NoPadding(void **state)
                             0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
     Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
     assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 4);
-}
-
-static void Test_Gbb_GetAcfMsgLengthInBytes(void **state)
-{
-    const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1A, 0x05, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0, 0x0, 0x0B, 0xFF, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
-    assert_int_equal(Avtp_Gbb_GetAcfMsgLengthInBytes(gbb), 5 * 4);
-}
-
-static void Test_Gbb_SetAcfMsgLength(void **state)
-{
-    const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0};
-    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
-    Avtp_Gbb_Init(gbb);
-    Avtp_Gbb_SetAcfMsgLength(gbb, 5);
-    assert_int_equal(Avtp_Gbb_GetAcfMsgLength(gbb), 5);
-    assert_int_equal(Avtp_Gbb_GetAcfMsgLengthInBytes(gbb), 20);
 }
 
 static void Test_Gbb_SetMtv(void **state)
@@ -509,7 +480,6 @@ static void Test_Gbb_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gbb_Init),
-                                       cmocka_unit_test(Test_Gbb_GetAcfMsgLength),
                                        cmocka_unit_test(Test_Gbb_GetPad),
                                        cmocka_unit_test(Test_Gbb_IsMtv),
                                        cmocka_unit_test(Test_Gbb_GetByteBusId),
@@ -526,8 +496,6 @@ int main(void)
                                        cmocka_unit_test(Test_Gbb_GetSegmentNum),
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength),
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_Gbb_GetAcfMsgLengthInBytes),
-                                       cmocka_unit_test(Test_Gbb_SetAcfMsgLength),
                                        cmocka_unit_test(Test_Gbb_SetMtv),
                                        cmocka_unit_test(Test_Gbb_SetByteBusId),
                                        cmocka_unit_test(Test_Gbb_SetMessageTimestamp),

@@ -242,7 +242,6 @@ void Avtp_Vss_SetField(Avtp_Vss_t *pdu, Avtp_VssFields_t field, uint64_t value);
 void Avtp_Vss_SetPayloadLength(Avtp_Vss_t *pdu, uint16_t payload_length);
 
 /* Getter and Setter Functions*/
-uint16_t Avtp_Vss_GetAcfMsgLength(const Avtp_Vss_t *const pdu);
 uint8_t Avtp_Vss_GetPad(const Avtp_Vss_t *const pdu);
 bool Avtp_Vss_IsMtv(const Avtp_Vss_t *const pdu);
 Vss_AddrMode_t Avtp_Vss_GetAddrMode(const Avtp_Vss_t *const pdu);
@@ -255,7 +254,6 @@ uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t *str_ar
 uint16_t Avtp_Vss_CalcVssPathLength(const Avtp_Vss_t *const pdu);
 void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t *const vss_data_string_array,
                                      VssDataString_t *strings[], uint16_t num_strings);
-void Avtp_Vss_SetAcfMsgLength(Avtp_Vss_t *pdu, uint16_t val);
 void Avtp_Vss_SetPad(Avtp_Vss_t *pdu, uint8_t val);
 void Avtp_Vss_SetMtv(Avtp_Vss_t *pdu, bool mtv);
 void Avtp_Vss_SetAddrMode(Avtp_Vss_t *pdu, Vss_AddrMode_t val);

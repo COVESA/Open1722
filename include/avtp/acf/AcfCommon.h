@@ -147,6 +147,18 @@ OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLength(const Avtp_AcfCommon_t* 
     return (uint16_t) GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_LENGTH);
 }
 
+/** 
+ * Returns the ACF message length field value in bytes.
+ * 
+ * The ACF message length field is quadlet-encoded; this converts it to octets.
+ * 
+ * @param pdu Pointer to the first bit of an 1722 ACF PDU.
+ * @returns Returns the ACF message length field of the PDU in bytes.
+ */
+OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCommon_t* const pdu) {
+    return (uint16_t) (Avtp_AcfCommon_GetAcfMsgLength(pdu) * AVTP_QUADLET_SIZE);
+}
+
 /**
  * Sets the value of an an ACF common header field as specified in the IEEE 1722 Specification.
  *

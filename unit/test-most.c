@@ -65,8 +65,8 @@ static void most_get_set_fields(void **state)
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_MOST);
 
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 120);
-    assert_int_equal(Avtp_Most_GetAcfMsgLength((Avtp_Most_t *)pdu), 120);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 120);
+    assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 120);
 
     Avtp_Most_SetPad((Avtp_Most_t *)pdu, 1);
     assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t *)pdu), 1);
@@ -111,11 +111,11 @@ static void most_is_valid(void **state)
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_Most_Init((Avtp_Most_t *)pdu);
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 8);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 8);
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, 35), 1);
 
     Avtp_Most_Init((Avtp_Most_t *)pdu);
-    Avtp_Most_SetAcfMsgLength((Avtp_Most_t *)pdu, 8);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 8);
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, 9), 0);
 }
 
