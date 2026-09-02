@@ -415,6 +415,17 @@ OPEN1722_INLINE bool Avtp_Sensor_IsValid(const Avtp_Sensor_t *const pdu, size_t 
         return false;
     }
 
+    /* The ACF length field must be consistent with the num_sensors and sz
+     * fields. The sensor_msg_payload is num_sensors * sz octets of data,
+     * zero-padded to an integer number of quadlets (see IEEE 1722 9.4.10),
+     * so the message length is header + padded payload. */
+    uint16_t data_len = Avtp_Sensor_GetPayloadLength(pdu);
+    uint16_t padded_len = (uint16_t)((data_len + 3u) & ~3u);
+    uint16_t expected_len = (uint16_t)AVTP_SENSOR_HEADER_LEN + padded_len;
+    if (msg_length_bytes != expected_len) {
+        return false;
+    }
+
     return true;
 }
 
