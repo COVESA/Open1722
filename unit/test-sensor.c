@@ -92,6 +92,7 @@ static void sensor_get_set_fields(void **state)
 static void sensor_is_valid(void **state)
 {
     uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[6] = {0, 1, 2, 3, 4, 5};
 
     // An Init-only PDU has AcfMsgLength == 0, so IsValid must reject it.
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
@@ -100,13 +101,26 @@ static void sensor_is_valid(void **state)
     memset(pdu, 0, MAX_PDU_SIZE);
     assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 0);
 
+    Avtp_Sensor_CreateAcfMessage((Avtp_Sensor_t *)pdu, 3, 2, payload, sizeof(payload));
+    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, 20), 1);
+
+    // Buffer smaller than the message length.
+    Avtp_Sensor_CreateAcfMessage((Avtp_Sensor_t *)pdu, 3, 2, payload, sizeof(payload));
+    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, 8), 0);
+
+    // AcfMsgLength inconsistent with num_sensors and sz.
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
-    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 5);
-    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, 25), 1);
+    Avtp_Sensor_SetNumSensor((Avtp_Sensor_t *)pdu, 3);
+    Avtp_Sensor_SetSz((Avtp_Sensor_t *)pdu, 2);
+    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 4);
+    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 0);
 
     Avtp_Sensor_Init((Avtp_Sensor_t *)pdu);
-    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 5);
-    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, 8), 0);
+    Avtp_Sensor_SetNumSensor((Avtp_Sensor_t *)pdu, 3);
+    Avtp_Sensor_SetSz((Avtp_Sensor_t *)pdu, 2);
+    Avtp_Sensor_SetAcfMsgLength((Avtp_Sensor_t *)pdu, 6);
+    assert_int_equal(Avtp_Sensor_IsValid((Avtp_Sensor_t *)pdu, MAX_PDU_SIZE), 0);
 }
 
 static void sensor_create_message(void **state)
@@ -227,6 +241,14 @@ static void sensor_brief_is_valid(void **state)
 
     Avtp_SensorBrief_CreateAcfMessage((Avtp_SensorBrief_t *)pdu, 3, 2, payload, sizeof(payload));
     assert_int_equal(Avtp_SensorBrief_IsValid((Avtp_SensorBrief_t *)pdu, MAX_PDU_SIZE), 1);
+    assert_int_equal(Avtp_SensorBrief_IsValid((Avtp_SensorBrief_t *)pdu, 12), 1);
+
+    // AcfMsgLength inconsistent with num_sensors and sz.
+    Avtp_SensorBrief_Init((Avtp_SensorBrief_t *)pdu);
+    Avtp_SensorBrief_SetNumSensor((Avtp_SensorBrief_t *)pdu, 3);
+    Avtp_SensorBrief_SetSz((Avtp_SensorBrief_t *)pdu, 2);
+    Avtp_SensorBrief_SetAcfMsgLength((Avtp_SensorBrief_t *)pdu, 2);
+    assert_int_equal(Avtp_SensorBrief_IsValid((Avtp_SensorBrief_t *)pdu, MAX_PDU_SIZE), 0);
 }
 
 static void sensor_brief_create_message(void **state)
