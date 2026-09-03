@@ -10,7 +10,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of COVESA, Intel Corporation nor the names of its
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -34,39 +34,38 @@
 #include "avtp/Utils.h"
 #include "avtp/CommonHeader.h"
 
-#define GET_FIELD(field) \
-        (Avtp_GetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (const uint8_t*)pdu, field))
-#define SET_FIELD(field, value) \
-        (Avtp_SetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (uint8_t*)pdu, field, value))
+#define GET_FIELD(field)                                                                           \
+    (Avtp_GetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (const uint8_t *)pdu, field))
+#define SET_FIELD(field, value)                                                                    \
+    (Avtp_SetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (uint8_t *)pdu, field, value))
 
-static const Avtp_FieldDescriptor_t fieldDescriptors[AVTP_H264_FIELD_MAX] =
-{
-    [AVTP_H264_FIELD_TIMESTAMP] = { .quadlet = 0, .offset = 0, .bits = 32 },
+static const Avtp_FieldDescriptor_t fieldDescriptors[AVTP_H264_FIELD_MAX] = {
+    [AVTP_H264_FIELD_TIMESTAMP] = {.quadlet = 0, .offset = 0, .bits = 32},
 };
 
-void Avtp_H264_Init(Avtp_H264_t* pdu)
+void Avtp_H264_Init(Avtp_H264_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_H264_t));
     }
 }
 
-uint64_t Avtp_H264_GetField(const Avtp_H264_t* const pdu, Avtp_H264Field_t field)
+uint64_t Avtp_H264_GetField(const Avtp_H264_t *const pdu, Avtp_H264Field_t field)
 {
     return GET_FIELD(field);
 }
 
-uint32_t Avtp_H264_GetTimestamp(const Avtp_H264_t* const pdu)
+uint32_t Avtp_H264_GetTimestamp(const Avtp_H264_t *const pdu)
 {
     return (uint32_t)GET_FIELD(AVTP_H264_FIELD_TIMESTAMP);
 }
 
-void Avtp_H264_SetField(Avtp_H264_t* pdu, Avtp_H264Field_t field, uint64_t value)
+void Avtp_H264_SetField(Avtp_H264_t *pdu, Avtp_H264Field_t field, uint64_t value)
 {
     SET_FIELD(field, value);
 }
 
-void Avtp_H264_SetTimestamp(Avtp_H264_t* pdu, uint32_t value)
+void Avtp_H264_SetTimestamp(Avtp_H264_t *pdu, uint32_t value)
 {
     SET_FIELD(AVTP_H264_FIELD_TIMESTAMP, value);
 }

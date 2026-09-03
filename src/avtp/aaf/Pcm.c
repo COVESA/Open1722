@@ -35,32 +35,31 @@
 #include "avtp/aaf/Pcm.h"
 #include "avtp/Utils.h"
 
-#define GET_FIELD(field) \
-        (Avtp_GetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (const uint8_t*)pdu, field))
-#define SET_FIELD(field, value) \
-        (Avtp_SetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (uint8_t*)pdu, field, value))
+#define GET_FIELD(field)                                                                           \
+    (Avtp_GetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu, field))
+#define SET_FIELD(field, value)                                                                    \
+    (Avtp_SetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, field, value))
 
-static const Avtp_FieldDescriptor_t Avtp_PcmFieldDesc[AVTP_PCM_FIELD_MAX] =
-{
-    [AVTP_PCM_FIELD_SUBTYPE]            = { .quadlet = 0, .offset =  0, .bits =  8 },
-    [AVTP_PCM_FIELD_SV]                 = { .quadlet = 0, .offset =  8, .bits =  1 },
-    [AVTP_PCM_FIELD_VERSION]            = { .quadlet = 0, .offset =  9, .bits =  3 },
-    [AVTP_PCM_FIELD_MR]                 = { .quadlet = 0, .offset = 12, .bits =  1 },
-    [AVTP_PCM_FIELD_TV]                 = { .quadlet = 0, .offset = 15, .bits =  1 },
-    [AVTP_PCM_FIELD_SEQUENCE_NUM]       = { .quadlet = 0, .offset = 16, .bits =  8 },
-    [AVTP_PCM_FIELD_TU]                 = { .quadlet = 0, .offset = 31, .bits =  1 },
-    [AVTP_PCM_FIELD_STREAM_ID]          = { .quadlet = 1, .offset =  0, .bits = 64 },
-    [AVTP_PCM_FIELD_AVTP_TIMESTAMP]     = { .quadlet = 3, .offset =  0, .bits = 32 },
-    [AVTP_PCM_FIELD_FORMAT]             = { .quadlet = 4, .offset =  0, .bits =  8 },
-    [AVTP_PCM_FIELD_NSR]                = { .quadlet = 4, .offset =  8, .bits =  4 },
-    [AVTP_PCM_FIELD_CHANNELS_PER_FRAME] = { .quadlet = 4, .offset = 14, .bits = 10 },
-    [AVTP_PCM_FIELD_BIT_DEPTH]          = { .quadlet = 4, .offset = 24, .bits =  8 },
-    [AVTP_PCM_FIELD_STREAM_DATA_LENGTH] = { .quadlet = 5, .offset =  0, .bits = 16 },
-    [AVTP_PCM_FIELD_SP]                 = { .quadlet = 5, .offset = 19, .bits =  1 },
-    [AVTP_PCM_FIELD_EVT]                = { .quadlet = 5, .offset = 20, .bits =  4 },
+static const Avtp_FieldDescriptor_t Avtp_PcmFieldDesc[AVTP_PCM_FIELD_MAX] = {
+    [AVTP_PCM_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+    [AVTP_PCM_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_PCM_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
+    [AVTP_PCM_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_PCM_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_PCM_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_PCM_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
+    [AVTP_PCM_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_PCM_FIELD_AVTP_TIMESTAMP] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_PCM_FIELD_FORMAT] = {.quadlet = 4, .offset = 0, .bits = 8},
+    [AVTP_PCM_FIELD_NSR] = {.quadlet = 4, .offset = 8, .bits = 4},
+    [AVTP_PCM_FIELD_CHANNELS_PER_FRAME] = {.quadlet = 4, .offset = 14, .bits = 10},
+    [AVTP_PCM_FIELD_BIT_DEPTH] = {.quadlet = 4, .offset = 24, .bits = 8},
+    [AVTP_PCM_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
+    [AVTP_PCM_FIELD_SP] = {.quadlet = 5, .offset = 19, .bits = 1},
+    [AVTP_PCM_FIELD_EVT] = {.quadlet = 5, .offset = 20, .bits = 4},
 };
 
-void Avtp_Pcm_Init(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_Init(Avtp_Pcm_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Pcm_t));
@@ -69,197 +68,197 @@ void Avtp_Pcm_Init(Avtp_Pcm_t* pdu)
     }
 }
 
-uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t* const pdu, Avtp_PcmFields_t field)
+uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
 {
     return GET_FIELD(field);
 }
 
-uint8_t Avtp_Pcm_GetSubtype(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetSubtype(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_SUBTYPE);
 }
 
-uint8_t Avtp_Pcm_GetSv(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetSv(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_SV);
 }
 
-uint8_t Avtp_Pcm_GetVersion(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetVersion(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_VERSION);
 }
 
-uint8_t Avtp_Pcm_GetMr(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetMr(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_MR);
 }
 
-uint8_t Avtp_Pcm_GetTv(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetTv(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_TV);
 }
 
-uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM);
 }
 
-uint8_t Avtp_Pcm_GetTu(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetTu(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_TU);
 }
 
-uint64_t Avtp_Pcm_GetStreamId(const Avtp_Pcm_t* const pdu)
+uint64_t Avtp_Pcm_GetStreamId(const Avtp_Pcm_t *const pdu)
 {
     return GET_FIELD(AVTP_PCM_FIELD_STREAM_ID);
 }
 
-uint32_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t* const pdu)
+uint32_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t *const pdu)
 {
     return (uint32_t)GET_FIELD(AVTP_PCM_FIELD_AVTP_TIMESTAMP);
 }
 
-Avtp_AafFormat_t Avtp_Pcm_GetFormat(const Avtp_Pcm_t* const pdu)
+Avtp_AafFormat_t Avtp_Pcm_GetFormat(const Avtp_Pcm_t *const pdu)
 {
     return (Avtp_AafFormat_t)GET_FIELD(AVTP_PCM_FIELD_FORMAT);
 }
 
-Avtp_AafNsr_t Avtp_Pcm_GetNsr(const Avtp_Pcm_t* const pdu)
+Avtp_AafNsr_t Avtp_Pcm_GetNsr(const Avtp_Pcm_t *const pdu)
 {
     return (Avtp_AafNsr_t)GET_FIELD(AVTP_PCM_FIELD_NSR);
 }
 
-uint16_t Avtp_Pcm_GetChannelsPerFrame(const Avtp_Pcm_t* const pdu)
+uint16_t Avtp_Pcm_GetChannelsPerFrame(const Avtp_Pcm_t *const pdu)
 {
     return (uint16_t)GET_FIELD(AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
 }
 
-uint8_t Avtp_Pcm_GetBitDepth(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetBitDepth(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_BIT_DEPTH);
 }
 
-uint16_t Avtp_Pcm_GetStreamDataLength(const Avtp_Pcm_t* const pdu)
+uint16_t Avtp_Pcm_GetStreamDataLength(const Avtp_Pcm_t *const pdu)
 {
     return (uint16_t)GET_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH);
 }
 
-Avtp_AafSp_t Avtp_Pcm_GetSp(const Avtp_Pcm_t* const pdu)
+Avtp_AafSp_t Avtp_Pcm_GetSp(const Avtp_Pcm_t *const pdu)
 {
     return (Avtp_AafSp_t)GET_FIELD(AVTP_PCM_FIELD_SP);
 }
 
-uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t* const pdu)
+uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_EVT);
 }
 
-void Avtp_Pcm_SetField(Avtp_Pcm_t* pdu, Avtp_PcmFields_t field, uint64_t value)
+void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
 {
     SET_FIELD(field, value);
 }
 
-void Avtp_Pcm_SetSubtype(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_SetSubtype(Avtp_Pcm_t *pdu, uint8_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_SUBTYPE, value);
 }
 
-void Avtp_Pcm_EnableSv(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_EnableSv(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_SV, 1);
 }
 
-void Avtp_Pcm_DisableSv(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_DisableSv(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_SV, 0);
 }
 
-void Avtp_Pcm_SetVersion(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_SetVersion(Avtp_Pcm_t *pdu, uint8_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_VERSION, value);
 }
 
-void Avtp_Pcm_EnableMr(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_EnableMr(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_MR, 1);
 }
 
-void Avtp_Pcm_DisableMr(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_DisableMr(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_MR, 0);
 }
 
-void Avtp_Pcm_EnableTv(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_EnableTv(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_TV, 1);
 }
 
-void Avtp_Pcm_DisableTv(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_DisableTv(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_TV, 0);
 }
 
-void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t *pdu, uint8_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM, value);
 }
 
-void Avtp_Pcm_EnableTu(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_EnableTu(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_TU, 1);
 }
 
-void Avtp_Pcm_DisableTu(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_DisableTu(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_TU, 0);
 }
 
-void Avtp_Pcm_SetStreamId(Avtp_Pcm_t* pdu, uint64_t value)
+void Avtp_Pcm_SetStreamId(Avtp_Pcm_t *pdu, uint64_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_STREAM_ID, value);
 }
 
-void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t* pdu, uint32_t value)
+void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t *pdu, uint32_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_AVTP_TIMESTAMP, value);
 }
 
-void Avtp_Pcm_SetFormat(Avtp_Pcm_t* pdu, Avtp_AafFormat_t value)
+void Avtp_Pcm_SetFormat(Avtp_Pcm_t *pdu, Avtp_AafFormat_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_FORMAT, value);
 }
 
-void Avtp_Pcm_SetNsr(Avtp_Pcm_t* pdu, Avtp_AafNsr_t value)
+void Avtp_Pcm_SetNsr(Avtp_Pcm_t *pdu, Avtp_AafNsr_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_NSR, value);
 }
 
-void Avtp_Pcm_SetChannelsPerFrame(Avtp_Pcm_t* pdu, uint16_t value)
+void Avtp_Pcm_SetChannelsPerFrame(Avtp_Pcm_t *pdu, uint16_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_CHANNELS_PER_FRAME, value);
 }
 
-void Avtp_Pcm_SetBitDepth(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_SetBitDepth(Avtp_Pcm_t *pdu, uint8_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_BIT_DEPTH, value);
 }
 
-void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t* pdu, uint16_t value)
+void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t *pdu, uint16_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH, value);
 }
 
-void Avtp_Pcm_EnableSp(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_EnableSp(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_SP, 1);
 }
 
-void Avtp_Pcm_DisableSp(Avtp_Pcm_t* pdu)
+void Avtp_Pcm_DisableSp(Avtp_Pcm_t *pdu)
 {
     SET_FIELD(AVTP_PCM_FIELD_SP, 0);
 }
 
-void Avtp_Pcm_SetEvt(Avtp_Pcm_t* pdu, uint8_t value)
+void Avtp_Pcm_SetEvt(Avtp_Pcm_t *pdu, uint8_t value)
 {
     SET_FIELD(AVTP_PCM_FIELD_EVT, value);
 }
@@ -268,23 +267,22 @@ void Avtp_Pcm_SetEvt(Avtp_Pcm_t* pdu, uint8_t value)
  * Legacy API (deprecated)
  *****************************************************************************/
 
-int avtp_aaf_pdu_get(const void * const pdu, Avtp_PcmFields_t field, uint64_t *val)
+int avtp_aaf_pdu_get(const void *const pdu, Avtp_PcmFields_t field, uint64_t *val)
 {
     if (pdu == NULL || val == NULL || field >= AVTP_PCM_FIELD_MAX) {
         return -EINVAL;
     } else {
-        *val = Avtp_Pcm_GetField((const Avtp_Pcm_t* const)pdu, field);
+        *val = Avtp_Pcm_GetField((const Avtp_Pcm_t *const)pdu, field);
         return 0;
     }
 }
 
-int avtp_aaf_pdu_set(void *pdu, Avtp_PcmFields_t field,
-                                uint64_t val)
+int avtp_aaf_pdu_set(void *pdu, Avtp_PcmFields_t field, uint64_t val)
 {
     if (pdu == NULL || field >= AVTP_PCM_FIELD_MAX) {
         return -EINVAL;
     } else {
-        Avtp_Pcm_SetField((Avtp_Pcm_t*)pdu, field, val);
+        Avtp_Pcm_SetField((Avtp_Pcm_t *)pdu, field, val);
         return 0;
     }
 }
