@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -46,13 +46,12 @@
 extern "C" {
 #endif
 
-#define AVTP_UDP_HEADER_LEN               (1 * AVTP_QUADLET_SIZE)
+#define AVTP_UDP_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
-#define GET_UDP_FIELD(field) \
-        (Avtp_GetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (const uint8_t*)pdu, field))
-#define SET_UDP_FIELD(field, value) \
-        (Avtp_SetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t*)pdu, field, value))
-
+#define GET_UDP_FIELD(field)                                                                       \
+    (Avtp_GetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (const uint8_t *)pdu, field))
+#define SET_UDP_FIELD(field, value)                                                                \
+    (Avtp_SetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t *)pdu, field, value))
 
 typedef struct {
     uint8_t header[AVTP_UDP_HEADER_LEN];
@@ -60,7 +59,7 @@ typedef struct {
 } Avtp_Udp_t;
 
 typedef enum {
-    
+
     /* Common AVTP UDP header */
     AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO,
 
@@ -73,7 +72,7 @@ typedef enum {
  */
 static const Avtp_FieldDescriptor_t Avtp_UdpFieldDesc[AVTP_UDP_FIELD_MAX] = {
 
-    [AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO]       = { .quadlet = 0, .offset = 0, .bits = 32 },
+    [AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO] = {.quadlet = 0, .offset = 0, .bits = 32},
 };
 
 /**
@@ -82,8 +81,9 @@ static const Avtp_FieldDescriptor_t Avtp_UdpFieldDesc[AVTP_UDP_FIELD_MAX] = {
  * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
  * @param value Pointer to location to store the value.
  */
-OPEN1722_INLINE uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const pdu) {
-    return (uint32_t) GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
+OPEN1722_INLINE uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t *const pdu)
+{
+    return (uint32_t)GET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO);
 }
 
 /**
@@ -92,16 +92,18 @@ OPEN1722_INLINE uint32_t Avtp_Udp_GetEncapsulationSeqNo(const Avtp_Udp_t* const 
  * @param pdu Pointer to the first bit of an 1722 AVTP UDP PDU.
  * @param value Pointer to location to store the value.
  */
-OPEN1722_INLINE void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t* pdu, uint32_t value) {
+OPEN1722_INLINE void Avtp_Udp_SetEncapsulationSeqNo(Avtp_Udp_t *pdu, uint32_t value)
+{
     SET_UDP_FIELD(AVTP_UDP_FIELD_ENCAPSULATION_SEQ_NO, value);
 }
 
 /**
  * Initializes a UDP PDU as specified in the IEEE 1722-2016 Specification.
  *
- * @param pdu Pointer to the first bit of an IEEE 1722 UDP PDU. 
+ * @param pdu Pointer to the first bit of an IEEE 1722 UDP PDU.
  */
-OPEN1722_INLINE void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
+OPEN1722_INLINE void Avtp_Udp_Init(Avtp_Udp_t *pdu)
+{
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Udp_t));
         Avtp_Udp_SetEncapsulationSeqNo(pdu, 0);
@@ -116,7 +118,8 @@ OPEN1722_INLINE void Avtp_Udp_Init(Avtp_Udp_t* pdu) {
  * @param value Pointer to location to store the value.
  * @returns This function returns the value of the field.
  */
-OPEN1722_INLINE uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_UdpFields_t field) {
+OPEN1722_INLINE uint64_t Avtp_Udp_GetField(const Avtp_Udp_t *const pdu, Avtp_UdpFields_t field)
+{
     return GET_UDP_FIELD(field);
 }
 
@@ -127,7 +130,8 @@ OPEN1722_INLINE uint64_t Avtp_Udp_GetField(const Avtp_Udp_t* const pdu, Avtp_Udp
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-OPEN1722_INLINE void Avtp_Udp_SetField(Avtp_Udp_t* pdu, Avtp_UdpFields_t field, uint64_t value) {
+OPEN1722_INLINE void Avtp_Udp_SetField(Avtp_Udp_t *pdu, Avtp_UdpFields_t field, uint64_t value)
+{
     SET_UDP_FIELD(field, value);
 }
 
