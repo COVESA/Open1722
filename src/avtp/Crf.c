@@ -36,7 +36,7 @@
 #include "avtp/CommonHeader.h"
 
 #define GET_FIELD(field) \
-        (Avtp_GetField(Avtp_CrfFieldDescriptors, AVTP_CRF_FIELD_MAX, (uint8_t*)pdu, field))
+        (Avtp_GetField(Avtp_CrfFieldDescriptors, AVTP_CRF_FIELD_MAX, (const uint8_t*)pdu, field))
 #define SET_FIELD(field, value) \
         (Avtp_SetField(Avtp_CrfFieldDescriptors, AVTP_CRF_FIELD_MAX, (uint8_t*)pdu, field, value))
 

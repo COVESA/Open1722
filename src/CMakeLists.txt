@@ -38,7 +38,7 @@ elseif(DEFINED ENV{ZEPHYR_BASE})
     target_link_libraries(${LIB_NAME} PRIVATE zephyr_interface)
 endif()
 target_compile_options(${LIB_NAME} PRIVATE
-    $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wconversion -Wsign-conversion>
+    $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wconversion -Wsign-conversion -Wcast-qual>
 )
 target_include_directories(${LIB_NAME} PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -52,7 +52,7 @@ elseif(DEFINED ENV{ZEPHYR_BASE})
     target_link_libraries(${LIB_NAME}custom PRIVATE zephyr_interface)
 endif()
 target_compile_options(${LIB_NAME}custom PRIVATE
-    $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wconversion -Wsign-conversion>
+    $<$<C_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wconversion -Wsign-conversion -Wcast-qual>
 )
 target_compile_options(${LIB_NAME}custom PRIVATE -Wall -Wextra -Wconversion -Wsign-conversion)
 target_include_directories(${LIB_NAME}custom PRIVATE

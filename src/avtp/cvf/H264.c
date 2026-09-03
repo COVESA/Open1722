@@ -35,7 +35,7 @@
 #include "avtp/CommonHeader.h"
 
 #define GET_FIELD(field) \
-        (Avtp_GetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (uint8_t*)pdu, field))
+        (Avtp_GetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (const uint8_t*)pdu, field))
 #define SET_FIELD(field, value) \
         (Avtp_SetField(fieldDescriptors, AVTP_H264_FIELD_MAX, (uint8_t*)pdu, field, value))
 

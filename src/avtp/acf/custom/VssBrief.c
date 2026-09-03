@@ -63,7 +63,7 @@ uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t* const vss_pdu,
                             Avtp_VssBriefFields_t field)
 {
     return Avtp_GetField(Avtp_VssBriefFieldDesc, AVTP_VSS_BRIEF_FIELD_MAX,
-                         (uint8_t *) vss_pdu, (uint8_t) field);
+                         (const uint8_t *) vss_pdu, (uint8_t) field);
 }
 
 void Avtp_VssBrief_SetField(Avtp_VssBrief_t* vss_pdu,

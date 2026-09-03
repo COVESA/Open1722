@@ -34,7 +34,7 @@
 #include "avtp/Utils.h"
 
 #define GET_FIELD(field) \
-        (Avtp_GetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, field))
+        (Avtp_GetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (const uint8_t*)pdu, field))
 #define SET_FIELD(field, value) \
         (Avtp_SetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, field, value))
 
@@ -60,7 +60,7 @@ static const Avtp_FieldDescriptor_t Avtp_AafFieldDesc[AVTP_AAF_FIELD_MAX] =
 
 uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t* const pdu, Avtp_AafFields_t field)
 {
-    return Avtp_GetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t*)pdu, (uint8_t) field);
+    return Avtp_GetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (const uint8_t*)pdu, (uint8_t) field);
 }
 
 uint8_t Avtp_Aaf_GetSubtype(const Avtp_Aaf_t* const pdu)
