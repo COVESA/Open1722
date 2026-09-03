@@ -45,7 +45,7 @@ extern "C" {
 #define AVTP_ACF_COMMON_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
 #define GET_ACF_COMMON_FIELD(field)                                                                \
-    (Avtp_GetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_ACF_COMMON_FIELD(field, value)                                                         \
     (Avtp_SetField(Avtp_AcfCommonFieldDesc, AVTP_ACF_COMMON_FIELD_MAX, (uint8_t *)pdu, field,      \
                    value))

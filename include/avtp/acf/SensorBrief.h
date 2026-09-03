@@ -54,7 +54,8 @@ extern "C" {
 #define AVTP_SENSOR_BRIEF_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
 #define GET_SENSOR_BRIEF_FIELD(field)                                                              \
-    (Avtp_GetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_BRIEF_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_BRIEF_FIELD_MAX, (const uint8_t *)pdu,   \
+                   field))
 #define SET_SENSOR_BRIEF_FIELD(field, value)                                                       \
     (Avtp_SetField(Avtp_SensorBriefFieldDesc, AVTP_SENSOR_BRIEF_FIELD_MAX, (uint8_t *)pdu, field,  \
                    value))

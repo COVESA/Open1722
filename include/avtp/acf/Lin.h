@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 #define GET_LIN_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_LIN_FIELD(field, value)                                                                \
     (Avtp_SetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t *)pdu, field, value))
 

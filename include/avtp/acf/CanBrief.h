@@ -52,7 +52,7 @@ extern "C" {
 #endif
 
 #define GET_CAN_BRIEF_FIELD(field)                                                                 \
-    (Avtp_GetField(Avtp_CanBriefFieldDesc, AVTP_CAN_BRIEF_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_CanBriefFieldDesc, AVTP_CAN_BRIEF_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_CAN_BRIEF_FIELD(field, value)                                                          \
     (Avtp_SetField(Avtp_CanBriefFieldDesc, AVTP_CAN_BRIEF_FIELD_MAX, (uint8_t *)pdu, field, value))
 

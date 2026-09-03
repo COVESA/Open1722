@@ -37,7 +37,7 @@
 #include "avtp/Defines.h"
 
 #define GET_FIELD(field)                                                                           \
-    (Avtp_GetField(Avtp_VssFieldDesc, AVTP_VSS_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_VssFieldDesc, AVTP_VSS_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_FIELD(field, value)                                                                    \
     (Avtp_SetField(Avtp_VssFieldDesc, AVTP_VSS_FIELD_MAX, (uint8_t *)pdu, field, value))
 

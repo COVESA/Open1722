@@ -53,7 +53,7 @@ extern "C" {
 #define AVTP_GPC_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
 #define GET_GPC_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_GPC_FIELD(field, value)                                                                \
     (Avtp_SetField(Avtp_GpcFieldDesc, AVTP_GPC_FIELD_MAX, (uint8_t *)pdu, field, value))
 

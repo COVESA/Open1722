@@ -49,7 +49,7 @@ extern "C" {
 #include "avtp/acf/AcfCommon.h"
 
 #define GET_GBB_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_GbbFieldDesc, AVTP_GBB_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_GbbFieldDesc, AVTP_GBB_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_GBB_FIELD(field, value)                                                                \
     (Avtp_SetField(Avtp_GbbFieldDesc, AVTP_GBB_FIELD_MAX, (uint8_t *)pdu, field, value))
 
