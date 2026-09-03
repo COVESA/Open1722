@@ -49,7 +49,7 @@ extern "C" {
 #define AVTP_UDP_HEADER_LEN               (1 * AVTP_QUADLET_SIZE)
 
 #define GET_UDP_FIELD(field) \
-        (Avtp_GetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t*)pdu, field))
+        (Avtp_GetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (const uint8_t*)pdu, field))
 #define SET_UDP_FIELD(field, value) \
         (Avtp_SetField(Avtp_UdpFieldDesc, AVTP_UDP_FIELD_MAX, (uint8_t*)pdu, field, value))
 
