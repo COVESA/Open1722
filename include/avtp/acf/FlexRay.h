@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 #define GET_FLEXRAY_FIELD(field)                                                                   \
-    (Avtp_GetField(Avtp_FlexRayFieldDesc, AVTP_FLEXRAY_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_FlexRayFieldDesc, AVTP_FLEXRAY_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_FLEXRAY_FIELD(field, value)                                                            \
     (Avtp_SetField(Avtp_FlexRayFieldDesc, AVTP_FLEXRAY_FIELD_MAX, (uint8_t *)pdu, field, value))
 

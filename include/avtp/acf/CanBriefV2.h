@@ -48,7 +48,8 @@ extern "C" {
 #include "avtp/acf/AcfCommon.h"
 
 #define GET_CAN_BRIEF_V2_FIELD(field)                                                              \
-    (Avtp_GetField(Avtp_CanBriefV2FieldDesc, AVTP_CAN_BRIEF_V2_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_CanBriefV2FieldDesc, AVTP_CAN_BRIEF_V2_FIELD_MAX, (const uint8_t *)pdu,    \
+                   field))
 #define SET_CAN_BRIEF_V2_FIELD(field, value)                                                       \
     (Avtp_SetField(Avtp_CanBriefV2FieldDesc, AVTP_CAN_BRIEF_V2_FIELD_MAX, (uint8_t *)pdu, field,   \
                    value))

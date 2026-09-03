@@ -54,7 +54,7 @@ extern "C" {
 #define AVTP_NTSCF_HEADER_LEN (3 * AVTP_QUADLET_SIZE)
 
 #define GET_NTSCF_FIELD(field)                                                                     \
-    (Avtp_GetField(Avtp_NtscfFieldDesc, AVTP_NTSCF_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_NtscfFieldDesc, AVTP_NTSCF_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_NTSCF_FIELD(field, value)                                                              \
     (Avtp_SetField(Avtp_NtscfFieldDesc, AVTP_NTSCF_FIELD_MAX, (uint8_t *)pdu, field, value))
 

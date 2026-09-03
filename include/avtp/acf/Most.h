@@ -54,7 +54,7 @@ extern "C" {
 #define AVTP_MOST_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
 
 #define GET_MOST_FIELD(field)                                                                      \
-    (Avtp_GetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_MOST_FIELD(field, value)                                                               \
     (Avtp_SetField(Avtp_MostFieldDesc, AVTP_MOST_FIELD_MAX, (uint8_t *)pdu, field, value))
 
