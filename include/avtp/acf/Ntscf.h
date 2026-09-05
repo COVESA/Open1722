@@ -67,6 +67,7 @@ typedef enum {
     AVTP_NTSCF_FIELD_SUBTYPE,
     AVTP_NTSCF_FIELD_SV,
     AVTP_NTSCF_FIELD_VERSION,
+    AVTP_NTSCF_FIELD_R,
     /* NTSCF header fields */
     AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH,
     AVTP_NTSCF_FIELD_SEQUENCE_NUM,
@@ -83,6 +84,7 @@ static const Avtp_FieldDescriptor_t Avtp_NtscfFieldDesc[AVTP_NTSCF_FIELD_MAX] = 
     [AVTP_NTSCF_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
     [AVTP_NTSCF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
     [AVTP_NTSCF_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
+    [AVTP_NTSCF_FIELD_R] = {.quadlet = 0, .offset = 12, .bits = 1},
     /* NTSCF header */
     [AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH] = {.quadlet = 0, .offset = 13, .bits = 11},
     [AVTP_NTSCF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 24, .bits = 8},

@@ -77,8 +77,10 @@ typedef enum {
     /* ACF ABB header fields */
     AVTP_ABB_FIELD_PAD,
     AVTP_ABB_FIELD_MTV,
+    AVTP_ABB_FIELD_RSV1,
     AVTP_ABB_FIELD_BYTE_BUS_ID,
     AVTP_ABB_FIELD_EVT,
+    AVTP_ABB_FIELD_RSV2,
     AVTP_ABB_FIELD_HS,
     AVTP_ABB_FIELD_CS,
     AVTP_ABB_FIELD_TRANSACTION_NUM,
@@ -101,8 +103,10 @@ static const Avtp_FieldDescriptor_t Avtp_AbbFieldDesc[AVTP_ABB_FIELD_MAX] = {
     /* ACF ABB header fields */
     [AVTP_ABB_FIELD_PAD] = {.quadlet = 0, .offset = 16, .bits = 2},
     [AVTP_ABB_FIELD_MTV] = {.quadlet = 0, .offset = 18, .bits = 1},
+    [AVTP_ABB_FIELD_RSV1] = {.quadlet = 0, .offset = 19, .bits = 2},
     [AVTP_ABB_FIELD_BYTE_BUS_ID] = {.quadlet = 0, .offset = 21, .bits = 11},
     [AVTP_ABB_FIELD_EVT] = {.quadlet = 1, .offset = 0, .bits = 4},
+    [AVTP_ABB_FIELD_RSV2] = {.quadlet = 1, .offset = 4, .bits = 2},
     [AVTP_ABB_FIELD_HS] = {.quadlet = 1, .offset = 6, .bits = 1},
     [AVTP_ABB_FIELD_CS] = {.quadlet = 1, .offset = 7, .bits = 1},
     [AVTP_ABB_FIELD_TRANSACTION_NUM] = {.quadlet = 1, .offset = 8, .bits = 8},

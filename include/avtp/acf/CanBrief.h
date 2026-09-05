@@ -77,7 +77,9 @@ typedef enum {
     AVTP_CAN_BRIEF_FIELD_BRS,
     AVTP_CAN_BRIEF_FIELD_FDF,
     AVTP_CAN_BRIEF_FIELD_ESI,
+    AVTP_CAN_BRIEF_FIELD_RSV1,
     AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID,
+    AVTP_CAN_BRIEF_FIELD_RSV2,
     AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER,
 
     /* Count number of fields for bound checks */
@@ -99,7 +101,9 @@ static const Avtp_FieldDescriptor_t Avtp_CanBriefFieldDesc[AVTP_CAN_BRIEF_FIELD_
     [AVTP_CAN_BRIEF_FIELD_BRS] = {.quadlet = 0, .offset = 21, .bits = 1},
     [AVTP_CAN_BRIEF_FIELD_FDF] = {.quadlet = 0, .offset = 22, .bits = 1},
     [AVTP_CAN_BRIEF_FIELD_ESI] = {.quadlet = 0, .offset = 23, .bits = 1},
+    [AVTP_CAN_BRIEF_FIELD_RSV1] = {.quadlet = 0, .offset = 24, .bits = 3},
     [AVTP_CAN_BRIEF_FIELD_CAN_BUS_ID] = {.quadlet = 0, .offset = 27, .bits = 5},
+    [AVTP_CAN_BRIEF_FIELD_RSV2] = {.quadlet = 1, .offset = 0, .bits = 3},
     [AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER] = {.quadlet = 1, .offset = 3, .bits = 29},
 };
 
