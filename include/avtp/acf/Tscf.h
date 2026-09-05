@@ -72,12 +72,16 @@ typedef enum {
 
     /* TSCF header fields */
     AVTP_TSCF_FIELD_MR,
+    AVTP_TSCF_FIELD_RSV,
     AVTP_TSCF_FIELD_TV,
     AVTP_TSCF_FIELD_SEQUENCE_NUM,
+    AVTP_TSCF_FIELD_RESERVED1,
     AVTP_TSCF_FIELD_TU,
     AVTP_TSCF_FIELD_STREAM_ID,
     AVTP_TSCF_FIELD_AVTP_TIMESTAMP,
+    AVTP_TSCF_FIELD_RESERVED2,
     AVTP_TSCF_FIELD_STREAM_DATA_LENGTH,
+    AVTP_TSCF_FIELD_RESERVED3,
 
     /* Count number of fields for bound checks */
     AVTP_TSCF_FIELD_MAX
@@ -93,12 +97,16 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] = {
     [AVTP_TSCF_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
     /* TSCF header*/
     [AVTP_TSCF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_TSCF_FIELD_RSV] = {.quadlet = 0, .offset = 13, .bits = 2},
     [AVTP_TSCF_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
     [AVTP_TSCF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_TSCF_FIELD_RESERVED1] = {.quadlet = 0, .offset = 24, .bits = 7},
     [AVTP_TSCF_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
     [AVTP_TSCF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
     [AVTP_TSCF_FIELD_AVTP_TIMESTAMP] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_RESERVED2] = {.quadlet = 4, .offset = 0, .bits = 32},
     [AVTP_TSCF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
+    [AVTP_TSCF_FIELD_RESERVED3] = {.quadlet = 5, .offset = 16, .bits = 16},
 };
 
 /**

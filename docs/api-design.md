@@ -351,8 +351,10 @@ typedef enum {
     AVTP_CAN_FIELD_BRS,
     AVTP_CAN_FIELD_FDF,
     AVTP_CAN_FIELD_ESI,
+    AVTP_CAN_FIELD_RSV1,
     AVTP_CAN_FIELD_CAN_BUS_ID,
     AVTP_CAN_FIELD_MESSAGE_TIMESTAMP,
+    AVTP_CAN_FIELD_RSV2,
     AVTP_CAN_FIELD_CAN_IDENTIFIER,
 
     /* Count number of fields for bound checks */
@@ -379,8 +381,10 @@ static const Avtp_FieldDescriptor_t Avtp_CanFieldDesc[AVTP_CAN_FIELD_MAX] = {
     [AVTP_CAN_FIELD_BRS]               = {.quadlet = 0, .offset = 21, .bits = 1},
     [AVTP_CAN_FIELD_FDF]               = {.quadlet = 0, .offset = 22, .bits = 1},
     [AVTP_CAN_FIELD_ESI]               = {.quadlet = 0, .offset = 23, .bits = 1},
+    [AVTP_CAN_FIELD_RSV1]              = {.quadlet = 0, .offset = 24, .bits = 3},
     [AVTP_CAN_FIELD_CAN_BUS_ID]        = {.quadlet = 0, .offset = 27, .bits = 5},
     [AVTP_CAN_FIELD_MESSAGE_TIMESTAMP] = {.quadlet = 1, .offset = 0,  .bits = 64},
+    [AVTP_CAN_FIELD_RSV2]              = {.quadlet = 3, .offset = 0,  .bits = 3},
     [AVTP_CAN_FIELD_CAN_IDENTIFIER]    = {.quadlet = 3, .offset = 3,  .bits = 29},
 };
 ```
@@ -389,6 +393,33 @@ Each entry gives the *quadlet* (0-based word index), the *offset* (bit position
 within that quadlet, counted from the most-significant bit) and the *bits*
 (field width). This table is the single source of truth for where every field
 lives; the accessors below never hard-code bit positions.
+
+### Reserved fields
+
+Reserved bits (`rsv`, `reserved`, `r` in the spec) are declared in the field
+enum and the descriptor table like any other field. The table must describe
+**every bit of the header exactly once - no holes and no overlaps** - so it
+stays the single source of truth for the whole layout. This also makes it easy
+to spot a forgotten or mis-sized reserved field during review.
+
+The naming mirrors the spec, and the case matters:
+
+| Spec calls it | Enum value | Notes |
+|---------------|------------|-------|
+| `rsv`         | `RSV`      | numbered `RSV1`, `RSV2`, … when several occur |
+| `reserved`    | `RESERVED` | numbered `RESERVED1`, `RESERVED2`, … when several occur |
+| `r`           | `R`        | e.g. GISF's 1-bit `r` that follows its 16-bit `RESERVED` |
+
+Reserved fields deliberately get **no** `Get`/`Set`/`Is` accessors. A compliant
+Talker keeps them zero (`Init` memsets the header, so they start zero) and a
+Listener must ignore their value, so there is no legitimate per-field use case.
+Code that needs to touch them anyway (test vectors, fuzzing, prototype formats)
+can reach them through the generic engine:
+
+```c
+uint64_t rsv = Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX,
+                             (uint8_t *)pdu, AVTP_CAN_FIELD_RSV1);
+```
 
 ### The GET/SET macros
 
@@ -603,10 +634,13 @@ this order and the template in
    `Avtp_<Format>_t` with `header[]` + `payload[0]`.
 3. Define the field enum `Avtp_<Format>Fields_t`, starting with the two common
    fields (`ACF_MSG_TYPE`, `ACF_MSG_LENGTH`) and ending with `..._FIELD_MAX`.
-4. Add the `static const` field descriptor table `Avtp_<Format>FieldDesc`.
+4. Add the `static const` field descriptor table `Avtp_<Format>FieldDesc`,
+   covering every header bit exactly once - reserved fields included, no holes
+   and no overlaps (see [Reserved fields](#reserved-fields)).
 5. Add the `GET_/SET_<FORMAT>_FIELD` macros.
 6. Add one `Get`/`Set` accessor per field (using `OPEN1722_INLINE`); single-bit
-   flags use `Is<Flag>` (returns `bool`) and `Set<Flag>(bool)`.
+   flags use `Is<Flag>` (returns `bool`) and `Set<Flag>(bool)`. Reserved fields
+   get no accessors (see [Reserved fields](#reserved-fields)).
 7. Add `Avtp_<Format>_Init` (zero + set the ACF message type).
 8. Add the convenience functions (`Get/SetPayload`, `SetPayloadLength`,
    `GetPayloadLength`, and `Create…` if a full-message builder makes sense).
