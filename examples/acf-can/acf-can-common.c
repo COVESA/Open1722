@@ -180,11 +180,10 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
     // Build the ACF CAN PDU (initializes the header, copies the payload and
     // finalizes the length/pad fields)
     if (can_variant == AVTP_CAN_FD)
-        AVTP_CAN(CreateAcfMessage)(pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length,
-                                  can_variant);
-    else
-        AVTP_CAN(CreateAcfMessage)(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
-                                  can_variant);
+        AVTP_CAN(CreateAcfMessage)
+    (pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length, can_variant);
+    else AVTP_CAN(CreateAcfMessage)(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
+                                    can_variant);
 
 #if (AVTP_CAN_API == AVTP_CAN_API_CANV2) || (AVTP_CAN_API == AVTP_CAN_API_CAN)
     // Set optional header fields after building the frame

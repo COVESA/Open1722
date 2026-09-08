@@ -45,18 +45,18 @@
 #include "avtp/acf/CanBrief.h"
 #include "avtp/acf/CanBriefV2.h"
 
-#define AVTP_CAN_API_CAN      1
-#define AVTP_CAN_API_CANV2    2
+#define AVTP_CAN_API_CAN 1
+#define AVTP_CAN_API_CANV2 2
 #define AVTP_CAN_API_CANBRIEF 3
 #define AVTP_CAN_API_CANBRIEFV2 4
 
-#define MAX_ETH_PDU_SIZE                1500
-#define MAX_CAN_FRAMES_IN_ACF           15
+#define MAX_ETH_PDU_SIZE 1500
+#define MAX_CAN_FRAMES_IN_ACF 15
 
 #ifdef __linux__
 typedef struct can_frame can_frame_t;
 typedef struct canfd_frame canfd_frame_t;
-#elif defined (__ZEPHYR__)
+#elif defined(__ZEPHYR__)
 typedef struct can_frame can_frame_t;
 typedef struct can_frame canfd_frame_t;
 #endif
@@ -92,7 +92,7 @@ typedef union {
  * @param can_variant CAN or CAN-FD
  * @returns CAN socket on success else the error
  */
-int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
+int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant);
 #endif
 
 /**
@@ -107,9 +107,8 @@ int setup_can_socket(const char* can_ifname, Avtp_CanVariant_t can_variant);
  * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
  * @return Number of CAN messages received
  */
-int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant,
-                int use_udp, uint64_t stream_id, uint8_t* exp_cf_seqnum,
-                uint32_t* exp_udp_seqnum);
+int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant, int use_udp,
+                uint64_t stream_id, uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
@@ -125,6 +124,6 @@ int avtp_to_can(uint8_t* pdu, frame_t* can_frames, Avtp_CanVariant_t can_variant
  * @param udp_seq_num: UDP Encapsulation sequence num.
  * @return Length of the PDU
  */
-int can_to_avtp(frame_t* can_frames, Avtp_CanVariant_t can_variant, uint8_t* pdu,
-                     int use_udp, int use_tscf, uint64_t stream_id,
-                     uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num);
+int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu, int use_udp,
+                int use_tscf, uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num,
+                uint32_t udp_seq_num);
