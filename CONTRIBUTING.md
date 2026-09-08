@@ -25,6 +25,37 @@ This is the typical workflow for preparing a pull request. A GitHub account is r
 
 This section includes general guidelines and recommendations for anyone interested in contributing to OPen1722.
 
+### Local style checks with pre-commit
+
+Before committing, run the automatic style checks to make sure the code formatting matches
+what CI enforces. The repository provides a [pre-commit](https://pre-commit.com) configuration
+that uses a pinned version of clang-format (18.1.8) - the same version used by the CI style
+workflow (see `.github/workflows/style.yml`).
+
+To set it up once per clone:
+
+```sh
+python3 -m pip install pre-commit   # or: sudo apt install pre-commit
+pre-commit install                  # activates the hook for this clone
+```
+
+After this, every `git commit` checks the staged `.c`/`.h` files:
+
+- `clang-format` reformats files in place and blocks the commit until the formatted
+  changes are staged again with `git add`,
+- basic hygiene hooks check for trailing whitespace, missing end-of-file newline and
+  unmerged merge-conflict markers.
+
+To run the checks without committing:
+
+```sh
+pre-commit run --all-files
+```
+
+Note that your local clang-format version does not matter - pre-commit installs the pinned
+18.1.8 binary in its own isolated environment. Other versions may disagree on edge cases
+(e.g. spacing after a cast).
+
 ### All contributions must follow COVESA contribution guidelines
 
 COVESA has defined [contribution guidelines](https://covesa.global/contribute).
@@ -76,7 +107,7 @@ Where {year} is the year the file was originally created. No need to update or a
 
 ### Additional licenses
 
-Not that _all_ Open1722 code is always available under BSD-3-Clause license. For some components - at the choice of the user - other _addtional_ licenses may apply. This is done to enable integration of Open1722 into ecosystems demanding other licenses.  
+Not that _all_ Open1722 code is always available under BSD-3-Clause license. For some components - at the choice of the user - other _addtional_ licenses may apply. This is done to enable integration of Open1722 into ecosystems demanding other licenses.
 
 As an example for components related to Linux Kernel integration you might see
 
