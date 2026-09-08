@@ -4,6 +4,7 @@ Following applications are available in this folder:
 - _acf-can-listener_: Parses received IEEE 1722 ACF frames and puts our the encapsulated CAN/CAN-FD frames onto the CAN bus
 - _acf-can-talker_: Creates IEEE 1722 ACF frames out of received CAN frames and sends them out on the network interface
 - _acf-can-bridge_: Combines the _acf-can-talker_ and _acf-can-listener_ to create a two way bridge between a CAN interface and an Ethernet network interface
+The names of the applications may differ based on the selected format for encapsulating CAN/CAN-FD frames. E.g., _acf_canv2-listener_ is the name of the listener application using the new IEEE 1722-2025 format for encapsulating CAN/CAN-FD frames.
 
 All these applications support IEEE 1722 over Ethernet (layer 2) as well as over UDP (layer 4). IEEE 1722-2025 specification includes multiple formats for encapsulating CAN/CAN-FD frames. The required format can be selected at compile time by defining the macro `AVTP_CAN_API` to one of the following values:
 - `AVTP_CAN_API_CAN`: For the original IEEE 1722-2016 format for encapsulating CAN/CAN-FD frames
