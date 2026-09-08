@@ -423,8 +423,8 @@ OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
  * @param payload_length Length of the payload.
  * @param can_variant Classic CAN or CAN-FD
  */
-OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id,
-                                               uint8_t *payload, uint16_t payload_length,
+OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id, uint8_t *payload,
+                                               uint16_t payload_length,
                                                Avtp_CanVariant_t can_variant)
 {
     // Initialize the ACF CAN header
