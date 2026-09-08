@@ -109,28 +109,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanBriefV2FieldDesc[AVTP_CAN_BRIEF_V2_F
 };
 
 /**
- * Returns the pad field from an ACF_CAN_BRIEF_V2 message header.
- *
- * @param pdu Pointer to an ACF_CAN_BRIEF_V2 message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanBriefV2_GetPad(const Avtp_CanBriefV2_t *const pdu)
-{
-    return (uint8_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_CAN_BRIEF_V2 message header.
- *
- * @param pdu Pointer to an ACF_CAN_BRIEF_V2 message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_CanBriefV2_SetPad(Avtp_CanBriefV2_t *pdu, uint8_t pad)
-{
-    SET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_CAN_BRIEF_V2 message header.
  *
  * @param pdu Pointer to an ACF_CAN_BRIEF_V2 message.
@@ -349,7 +327,7 @@ OPEN1722_INLINE void Avtp_CanBriefV2_SetPayloadLength(Avtp_CanBriefV2_t *pdu,
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_CanBriefV2_SetPad(pdu, pad);
+    SET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -368,7 +346,7 @@ OPEN1722_INLINE void Avtp_CanBriefV2_SetPayloadLength(Avtp_CanBriefV2_t *pdu,
  */
 OPEN1722_INLINE uint8_t Avtp_CanBriefV2_GetPayloadLength(const Avtp_CanBriefV2_t *const pdu)
 {
-    uint8_t pad_length = Avtp_CanBriefV2_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CAN_BRIEF_V2_HEADER_LEN - pad_length);
@@ -453,7 +431,7 @@ OPEN1722_INLINE bool Avtp_CanBriefV2_IsValid(const Avtp_CanBriefV2_t *const pdu,
      * bytes (selected by the FDF bit). The encoded message length must
      * also accommodate header + declared padding so the payload
      * computation in Avtp_CanBriefV2_GetPayloadLength() doesn't underflow. */
-    uint8_t pad_length = Avtp_CanBriefV2_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CAN_BRIEF_V2_FIELD(AVTP_CAN_BRIEF_V2_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_CAN_BRIEF_V2_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

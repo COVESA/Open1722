@@ -124,28 +124,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanXlBriefFieldDesc[AVTP_CANXL_BRIEF_FI
 };
 
 /**
- * Returns the pad field from an ACF_CAN_XL_BRIEF message header.
- *
- * @param pdu Pointer to an ACF_CAN_XL_BRIEF message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetPad(const Avtp_CanXlBrief_t *const pdu)
-{
-    return (uint8_t)GET_CANXL_BRIEF_FIELD(AVTP_CANXL_BRIEF_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_CAN_XL_BRIEF message header.
- *
- * @param pdu Pointer to an ACF_CAN_XL_BRIEF message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_CanXlBrief_SetPad(Avtp_CanXlBrief_t *pdu, uint8_t pad)
-{
-    SET_CANXL_BRIEF_FIELD(AVTP_CANXL_BRIEF_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_CAN_XL_BRIEF message header.
  *
  * @param pdu Pointer to an ACF_CAN_XL_BRIEF message.
@@ -431,7 +409,7 @@ OPEN1722_INLINE void Avtp_CanXlBrief_SetPayloadLength(Avtp_CanXlBrief_t *pdu,
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_CanXlBrief_SetPad(pdu, pad);
+    SET_CANXL_BRIEF_FIELD(AVTP_CANXL_BRIEF_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -448,7 +426,7 @@ OPEN1722_INLINE void Avtp_CanXlBrief_SetPayloadLength(Avtp_CanXlBrief_t *pdu,
  */
 OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetPayloadLength(const Avtp_CanXlBrief_t *const pdu)
 {
-    uint8_t pad_length = Avtp_CanXlBrief_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CANXL_BRIEF_FIELD(AVTP_CANXL_BRIEF_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CANXL_BRIEF_HEADER_LEN - pad_length);
@@ -528,7 +506,7 @@ OPEN1722_INLINE bool Avtp_CanXlBrief_IsValid(const Avtp_CanXlBrief_t *const pdu,
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_CanXlBrief_GetPayloadLength()
      * doesn't underflow. */
-    uint8_t pad_length = Avtp_CanXlBrief_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CANXL_BRIEF_FIELD(AVTP_CANXL_BRIEF_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_CANXL_BRIEF_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

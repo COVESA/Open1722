@@ -95,17 +95,6 @@ static const Avtp_FieldDescriptor_t Avtp_LinFieldDesc[AVTP_LIN_FIELD_MAX] = {
 };
 
 /**
- * Returns the value of an an ACF Lin PDU Pad field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- * @returns The value of the ACF Lin PDU Pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_Lin_GetPad(const Avtp_Lin_t *const pdu)
-{
-    return (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
-}
-
-/**
  * Returns the value of an an ACF Lin PDU MTV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
@@ -150,17 +139,6 @@ OPEN1722_INLINE uint8_t Avtp_Lin_GetLinIdentifier(const Avtp_Lin_t *const pdu)
 OPEN1722_INLINE uint64_t Avtp_Lin_GetMessageTimestamp(const Avtp_Lin_t *const pdu)
 {
     return (uint64_t)GET_LIN_FIELD(AVTP_LIN_FIELD_MESSAGE_TIMESTAMP);
-}
-
-/**
- * Sets the value of an an ACF Lin PDU Pad field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Lin PDU.
- * @param value Value to set the ACF Lin PDU Pad field to.
- */
-OPEN1722_INLINE void Avtp_Lin_SetPad(Avtp_Lin_t *pdu, uint8_t value)
-{
-    SET_LIN_FIELD(AVTP_LIN_FIELD_PAD, value);
 }
 
 /**
@@ -249,7 +227,8 @@ OPEN1722_INLINE void Avtp_Lin_SetPayloadLength(Avtp_Lin_t *lin_pdu, uint16_t pay
         memset(lin_pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Lin_SetPad(lin_pdu, pad);
+    Avtp_SetField(Avtp_LinFieldDesc, AVTP_LIN_FIELD_MAX, (uint8_t *)lin_pdu, AVTP_LIN_FIELD_PAD,
+                  pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)lin_pdu, msgLenQuadlets);
 }
 
@@ -267,7 +246,7 @@ OPEN1722_INLINE void Avtp_Lin_SetPayloadLength(Avtp_Lin_t *lin_pdu, uint16_t pay
  */
 OPEN1722_INLINE uint8_t Avtp_Lin_GetPayloadLength(const Avtp_Lin_t *const pdu)
 {
-    uint8_t pad_length = Avtp_Lin_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_LIN_HEADER_LEN - pad_length);
@@ -348,7 +327,7 @@ OPEN1722_INLINE bool Avtp_Lin_IsValid(const Avtp_Lin_t *const pdu, size_t buffer
     /* LIN payload-length invariant: the encoded message length must also
      * accommodate header + declared padding so the payload computation in
      * Avtp_Lin_GetPayloadLength() doesn't underflow. */
-    uint8_t pad_length = Avtp_Lin_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_LIN_FIELD(AVTP_LIN_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_LIN_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

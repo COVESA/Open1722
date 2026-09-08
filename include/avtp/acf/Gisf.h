@@ -124,28 +124,6 @@ static const Avtp_FieldDescriptor_t Avtp_GisfFieldDesc[AVTP_GISF_FIELD_MAX] = {
 };
 
 /**
- * Returns the pad field from an ACF_GISF message header.
- *
- * @param pdu Pointer to an ACF_GISF message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_Gisf_GetPad(const Avtp_Gisf_t *const pdu)
-{
-    return (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_GISF message header.
- *
- * @param pdu Pointer to an ACF_GISF message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_Gisf_SetPad(Avtp_Gisf_t *pdu, uint8_t pad)
-{
-    SET_GISF_FIELD(AVTP_GISF_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_GISF message header.
  *
  * @param pdu Pointer to an ACF_GISF message.
@@ -451,7 +429,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Gisf_SetPad(pdu, pad);
+    SET_GISF_FIELD(AVTP_GISF_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -468,7 +446,7 @@ OPEN1722_INLINE void Avtp_Gisf_SetPayloadLength(Avtp_Gisf_t *pdu, uint16_t paylo
  */
 OPEN1722_INLINE uint16_t Avtp_Gisf_GetPayloadLength(const Avtp_Gisf_t *const pdu)
 {
-    uint8_t pad_length = Avtp_Gisf_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint16_t)(acf_length_bytes - AVTP_GISF_HEADER_LEN - pad_length);
@@ -544,7 +522,7 @@ OPEN1722_INLINE bool Avtp_Gisf_IsValid(const Avtp_Gisf_t *const pdu, size_t buff
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_Gisf_GetPayloadLength() doesn't
      * underflow. */
-    uint8_t pad_length = Avtp_Gisf_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_GISF_FIELD(AVTP_GISF_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_GISF_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

@@ -81,7 +81,7 @@ static void vss_pad(void **state)
         uint8_t vss_quadlets = Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu);
         assert_int_equal(vss_quadlets, AVTP_VSS_FIXED_HEADER_LEN / 4 + 1);
 
-        uint8_t vss_pad = Avtp_Vss_GetPad(vss_pdu);
+        uint8_t vss_pad = (uint8_t)Avtp_Vss_GetField(vss_pdu, AVTP_VSS_FIELD_PAD);
         assert_int_equal(vss_pad, 4 - i);
     }
 }

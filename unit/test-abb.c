@@ -55,14 +55,6 @@ static void Test_Abb_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Abb_GetPad(void **state)
-{
-    const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x1C, 0x02, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
-    assert_int_equal(Avtp_Abb_GetPad(abb), 3);
-}
-
 static void Test_Abb_IsMtv(void **state)
 {
     const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
@@ -425,7 +417,6 @@ static void Test_Abb_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Abb_Init),
-                                       cmocka_unit_test(Test_Abb_GetPad),
                                        cmocka_unit_test(Test_Abb_IsMtv),
                                        cmocka_unit_test(Test_Abb_GetByteBusId),
                                        cmocka_unit_test(Test_Abb_GetEvt),

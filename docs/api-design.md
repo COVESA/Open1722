@@ -43,11 +43,16 @@ For example, the ACF CAN header contains the fields `pad`, `mtv`, `rtr`, `eff`,
 Those exact names reappear in the API:
 
 ```c
-Avtp_Can_GetPad(pdu);
+Avtp_Can_GetCanBusId(pdu);
 Avtp_Can_IsMtv(pdu);
 Avtp_Can_GetCanIdentifier(pdu);
 Avtp_Can_SetMessageTimestamp(pdu, value);
 ```
+
+The one systematic exception is the `pad` field: it is *derived* (fully determined
+by the payload length), so it has no `Avtp_Can_GetPad`/`Avtp_Can_SetPad`
+accessors. It is written for you by `SetPayloadLength` (see
+[Convenience functions](#convenience-functions)).
 
 There is no "rename for taste" step. If the spec calls a field `eff`, the
 function is `Avtp_Can_IsEff`, not `Avtp_Can_GetExtendedFrameFormat`.
@@ -141,7 +146,7 @@ Getters return the natural C type for the field width - `uint8_t`,
 `uint16_t`, `uint32_t` or `uint64_t`:
 
 ```c
-OPEN1722_INLINE uint8_t  Avtp_Can_GetPad(const Avtp_Can_t *const pdu);
+OPEN1722_INLINE uint8_t  Avtp_Can_GetCanBusId(const Avtp_Can_t *const pdu);
 OPEN1722_INLINE uint16_t Avtp_AcfCommon_GetAcfMsgLengthInBytes(const Avtp_AcfCommon_t *const pdu);
 OPEN1722_INLINE uint64_t Avtp_Can_GetMessageTimestamp(const Avtp_Can_t *const pdu);
 ```
@@ -246,7 +251,7 @@ The canonical set (CAN as reference):
       if (pad > 0)
           memset(can_pdu->payload + payload_length, 0, pad);
       uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-      Avtp_Can_SetPad(can_pdu, pad);
+      SET_CAN_FIELD(AVTP_CAN_FIELD_PAD, pad);
       Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)can_pdu, msgLenQuadlets);
   }
   ```
@@ -419,6 +424,23 @@ can reach them through the generic engine:
 ```c
 uint64_t rsv = Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX,
                              (uint8_t *)pdu, AVTP_CAN_FIELD_RSV1);
+```
+
+### The derived `pad` field
+
+Like reserved fields, the `pad` field gets **no** `Get`/`Set` accessors - but for
+a different reason. `pad` is *derived*: its value is fully determined by the
+payload length (how many zero bytes are needed to reach a whole quadlet), so
+writing it by hand can only desynchronise the header. It is written by the
+convenience function `Avtp_<Format>_SetPayloadLength` (and therefore by
+`Avtp_<Format>_CreateAcfMessage`), and read back by `GetPayloadLength` and
+`IsValid`, all through the `SET_<FORMAT>_FIELD`/`GET_<FORMAT>_FIELD` macros. Code
+that needs raw access anyway (test vectors, fuzzing) can reach it through the
+generic engine, exactly like a reserved field:
+
+```c
+uint64_t pad = Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX,
+                             (uint8_t *)pdu, AVTP_CAN_FIELD_PAD);
 ```
 
 ### The GET/SET macros

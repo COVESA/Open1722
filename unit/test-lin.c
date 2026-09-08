@@ -68,9 +68,6 @@ static void lin_get_set_fields(void **state)
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 50);
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 50);
 
-    Avtp_Lin_SetPad((Avtp_Lin_t *)pdu, 3);
-    assert_int_equal(Avtp_Lin_GetPad((Avtp_Lin_t *)pdu), 3);
-
     Avtp_Lin_SetMtv((Avtp_Lin_t *)pdu, true);
     assert_int_equal(Avtp_Lin_IsMtv((Avtp_Lin_t *)pdu), 1);
 

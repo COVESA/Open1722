@@ -107,17 +107,6 @@ static const Avtp_FieldDescriptor_t Avtp_MostFieldDesc[AVTP_MOST_FIELD_MAX] = {
 };
 
 /**
- * Return the value of an an ACF Most PDU padding field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
- * @returns Value of the ACF Most PDU padding field.
- */
-OPEN1722_INLINE uint8_t Avtp_Most_GetPad(const Avtp_Most_t *const pdu)
-{
-    return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
-}
-
-/**
  * Return the value of an an ACF Most PDU MTV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
@@ -207,17 +196,6 @@ OPEN1722_INLINE uint16_t Avtp_Most_GetFuncId(const Avtp_Most_t *const pdu)
 OPEN1722_INLINE uint8_t Avtp_Most_GetOpType(const Avtp_Most_t *const pdu)
 {
     return (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_OP_TYPE);
-}
-
-/**
- * Set the value of an an ACF Most PDU padding field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
- * @param value Value to set the ACF Most PDU padding field to.
- */
-OPEN1722_INLINE void Avtp_Most_SetPad(Avtp_Most_t *pdu, uint8_t value)
-{
-    SET_MOST_FIELD(AVTP_MOST_FIELD_PAD, value);
 }
 
 /**
@@ -350,7 +328,7 @@ OPEN1722_INLINE void Avtp_Most_SetPayloadLength(Avtp_Most_t *pdu, uint16_t paylo
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Most_SetPad(pdu, pad);
+    SET_MOST_FIELD(AVTP_MOST_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -367,7 +345,7 @@ OPEN1722_INLINE void Avtp_Most_SetPayloadLength(Avtp_Most_t *pdu, uint16_t paylo
  */
 OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t *const pdu)
 {
-    uint8_t pad_length = Avtp_Most_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_MOST_HEADER_LEN - pad_length);
@@ -453,7 +431,7 @@ OPEN1722_INLINE bool Avtp_Most_IsValid(const Avtp_Most_t *const pdu, size_t buff
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_Most_GetPayloadLength() doesn't
      * underflow. */
-    uint8_t pad_length = Avtp_Most_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_MOST_FIELD(AVTP_MOST_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_MOST_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

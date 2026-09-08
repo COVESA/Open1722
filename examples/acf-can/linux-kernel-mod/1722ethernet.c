@@ -92,7 +92,8 @@ void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const st
                       AVTP_QUADLET_SIZE;
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)can_header,
                                    (AVTP_CAN_HEADER_LEN + cfd->len + padSize) / AVTP_QUADLET_SIZE);
-    Avtp_Can_SetPad(can_header, padSize);
+    Avtp_SetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX, (uint8_t *)can_header, AVTP_CAN_FIELD_PAD,
+                  padSize);
 
     pr_debug("Prepared AVTP ACFCAN msg for can id 0x%08x, len %i\n",
              Avtp_Can_GetCanIdentifier(can_header), cfd->len);
@@ -132,10 +133,11 @@ int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
     // Prepare ethernet
     struct sk_buff *skb_eth;
     struct canfd_frame *cfd = (struct canfd_frame *)skb_can->data;
+    uint8_t pad = (uint8_t)Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX,
+                                         (const uint8_t *)&pdu.can, AVTP_CAN_FIELD_PAD);
 
     // Allocate a socket buffer
-    skb_eth = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cfd->len + Avtp_Can_GetPad(&pdu.can),
-                        GFP_KERNEL);
+    skb_eth = alloc_skb(ETH_HLEN + sizeof(ACFCANPdu_t) + cfd->len + pad, GFP_KERNEL);
     pr_debug("ACFCAN: Allocating skb for ethernet frame: 0x%p\n", (void *)skb_eth->data);
     if (!skb_eth) {
         printk(KERN_ERR "Failed to allocate skb\n");
@@ -148,8 +150,8 @@ int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
     data = skb_put(skb_eth, cfd->len);                   // Add payload data
     memcpy(data, (uint8_t *)cfd->data, cfd->len);        // Fill payload with avtp +  acf-can header
 
-    data = skb_put(skb_eth, Avtp_Can_GetPad(&pdu.can)); // Add payload data
-    memset(data, 0, Avtp_Can_GetPad(&pdu.can));
+    data = skb_put(skb_eth, pad); // Add padding data
+    memset(data, 0, pad);
 
     // Set up the Ethernet header
     struct ethhdr *eth = (struct ethhdr *)skb_push(skb_eth, sizeof(struct ethhdr));
@@ -266,6 +268,8 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
     }
 
     bool is_fd = Avtp_Can_IsFdf(can);
+    uint8_t pad = (uint8_t)Avtp_GetField(Avtp_CanFieldDesc, AVTP_CAN_FIELD_MAX,
+                                         (const uint8_t *)can, AVTP_CAN_FIELD_PAD);
     struct sk_buff *can_skb;
     struct can_frame *cf;
     struct canfd_frame *cfd;
@@ -307,9 +311,9 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
         if (Avtp_Can_IsEsi(can)) {
             cfd->flags |= CANFD_ESI;
         }
-        cfd->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
+        cfd->len = msg_length - AVTP_CAN_HEADER_LEN - pad;
     } else {
-        cf->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
+        cf->len = msg_length - AVTP_CAN_HEADER_LEN - pad;
     }
 
     if (is_fd && cfd->len > CANFD_MAX_DLEN) {

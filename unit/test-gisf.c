@@ -55,17 +55,6 @@ static void Test_Gisf_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_Gisf_GetPad(void **state)
-{
-    const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {
-        0x18, 0x06, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-        0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-    };
-    Avtp_Gisf_t *gisf = (Avtp_Gisf_t *)msg;
-    assert_int_equal(Avtp_Gisf_GetPad(gisf), 3);
-}
-
 static void Test_Gisf_IsMtv(void **state)
 {
     const size_t msg_len = AVTP_GISF_HEADER_LEN + 4;
@@ -488,7 +477,6 @@ static void Test_Gisf_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_Gisf_Init),
-                                       cmocka_unit_test(Test_Gisf_GetPad),
                                        cmocka_unit_test(Test_Gisf_IsMtv),
                                        cmocka_unit_test(Test_Gisf_GetImageSensorId),
                                        cmocka_unit_test(Test_Gisf_GetMessageTimestamp),

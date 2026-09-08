@@ -68,9 +68,6 @@ static void most_get_set_fields(void **state)
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 120);
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 120);
 
-    Avtp_Most_SetPad((Avtp_Most_t *)pdu, 1);
-    assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t *)pdu), 1);
-
     Avtp_Most_SetMtv((Avtp_Most_t *)pdu, true);
     assert_int_equal(Avtp_Most_IsMtv((Avtp_Most_t *)pdu), 1);
 

@@ -108,17 +108,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanBriefFieldDesc[AVTP_CAN_BRIEF_FIELD_
 };
 
 /**
- * Return the value of an an ACF padding field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
- * @returns Value of the ACF padding field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanBrief_GetPad(const Avtp_CanBrief_t *const pdu)
-{
-    return (uint8_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
-}
-
-/**
  * Return the value of an an ACF CAN Brief PDU MTV field as specified in the IEEE 1722
  * Specification.
  *
@@ -212,17 +201,6 @@ OPEN1722_INLINE uint8_t Avtp_CanBrief_GetCanBusId(const Avtp_CanBrief_t *const p
 OPEN1722_INLINE uint32_t Avtp_CanBrief_GetCanIdentifier(const Avtp_CanBrief_t *const pdu)
 {
     return (uint32_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_CAN_IDENTIFIER);
-}
-
-/**
- * Set the value of an an ACF padding field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF CAN Brief PDU.
- * @param value Value to set the ACF padding field to.
- */
-OPEN1722_INLINE void Avtp_CanBrief_SetPad(Avtp_CanBrief_t *pdu, uint8_t value)
-{
-    SET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD, value);
 }
 
 /**
@@ -357,7 +335,8 @@ OPEN1722_INLINE void Avtp_CanBrief_SetPayloadLength(Avtp_CanBrief_t *can_pdu,
         memset(can_pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_CanBrief_SetPad(can_pdu, pad);
+    Avtp_SetField(Avtp_CanBriefFieldDesc, AVTP_CAN_BRIEF_FIELD_MAX, (uint8_t *)can_pdu,
+                  AVTP_CAN_BRIEF_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)can_pdu, msgLenQuadlets);
 }
 
@@ -376,7 +355,7 @@ OPEN1722_INLINE void Avtp_CanBrief_SetPayloadLength(Avtp_CanBrief_t *can_pdu,
  */
 OPEN1722_INLINE uint8_t Avtp_CanBrief_GetPayloadLength(const Avtp_CanBrief_t *const pdu)
 {
-    uint8_t pad_length = Avtp_CanBrief_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CAN_BRIEF_HEADER_LEN - pad_length);
@@ -461,7 +440,7 @@ OPEN1722_INLINE bool Avtp_CanBrief_IsValid(const Avtp_CanBrief_t *const pdu, siz
      * bytes (selected by the FDF bit). The encoded message length must
      * also accommodate header + declared padding so the payload
      * computation in Avtp_CanBrief_GetPayloadLength() doesn't underflow. */
-    uint8_t pad_length = Avtp_CanBrief_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CAN_BRIEF_FIELD(AVTP_CAN_BRIEF_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_CAN_BRIEF_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;
