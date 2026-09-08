@@ -41,6 +41,14 @@
 #endif
 
 #include "avtp/acf/Can.h"
+#include "avtp/acf/CanV2.h"
+#include "avtp/acf/CanBrief.h"
+#include "avtp/acf/CanBriefV2.h"
+
+#define AVTP_CAN_API_CAN      1
+#define AVTP_CAN_API_CANV2    2
+#define AVTP_CAN_API_CANBRIEF 3
+#define AVTP_CAN_API_CANBRIEFV2 4
 
 #define MAX_ETH_PDU_SIZE                1500
 #define MAX_CAN_FRAMES_IN_ACF           15
@@ -51,6 +59,20 @@ typedef struct canfd_frame canfd_frame_t;
 #elif defined (__ZEPHYR__)
 typedef struct can_frame can_frame_t;
 typedef struct can_frame canfd_frame_t;
+#endif
+
+#ifndef AVTP_CAN_API
+#define AVTP_CAN_API AVTP_CAN_API_CAN
+#endif
+
+#if AVTP_CAN_API == AVTP_CAN_API_CAN
+#define AVTP_CAN(t) Avtp_Can_##t
+#elif AVTP_CAN_API == AVTP_CAN_API_CANV2
+#define AVTP_CAN(t) Avtp_CanV2_##t
+#elif AVTP_CAN_API == AVTP_CAN_API_CANBRIEF
+#define AVTP_CAN(t) Avtp_CanBrief_##t
+#elif AVTP_CAN_API == AVTP_CAN_API_CANBRIEFV2
+#define AVTP_CAN(t) Avtp_CanBriefV2_##t
 #endif
 
 /* CAN CC/FD frame union */
