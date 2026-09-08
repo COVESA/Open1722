@@ -417,34 +417,34 @@ OPEN1722_INLINE void Avtp_Can_Init(Avtp_Can_t *pdu)
  * Copies the payload data and CAN frame ID into the ACF CAN frame. This function will
  * also set the length and pad fields while inserting the padded bytes.
  *
- * @param can_pdu Pointer to the first bit of an 1722 ACF CAN PDU.
+ * @param pdu Pointer to the first bit of an 1722 ACF CAN PDU.
  * @param frame_id ID of the CAN frame
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload.
  * @param can_variant Classic CAN or CAN-FD
  */
-OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *can_pdu, uint32_t frame_id,
+OPEN1722_INLINE void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id,
                                                uint8_t *payload, uint16_t payload_length,
                                                Avtp_CanVariant_t can_variant)
 {
     // Initialize the ACF CAN header
-    Avtp_Can_Init(can_pdu);
+    Avtp_Can_Init(pdu);
 
     // Copy the payload into the CAN PDU
-    Avtp_Can_SetPayload(can_pdu, payload, payload_length);
+    Avtp_Can_SetPayload(pdu, payload, payload_length);
 
     // Set the Frame ID and CAN variant
     if (frame_id > 0x7ff) {
-        Avtp_Can_SetEff(can_pdu, true);
+        Avtp_Can_SetEff(pdu, true);
     }
 
-    Avtp_Can_SetCanIdentifier(can_pdu, frame_id);
+    Avtp_Can_SetCanIdentifier(pdu, frame_id);
     if (can_variant == AVTP_CAN_FD) {
-        Avtp_Can_SetFdf(can_pdu, true);
+        Avtp_Can_SetFdf(pdu, true);
     }
 
     // Finalize the AVTP CAN Frame
-    Avtp_Can_SetPayloadLength(can_pdu, payload_length);
+    Avtp_Can_SetPayloadLength(pdu, payload_length);
 }
 
 /**

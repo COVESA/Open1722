@@ -287,17 +287,17 @@ static void Test_CanBriefV2_CreateAcfMessage(void **state)
     uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_CanBriefV2_Init(canV2);
-    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x7ff, 0x5FF, payload, sizeof(payload),
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x7ff, payload, sizeof(payload),
                                      AVTP_CAN_CLASSIC);
 
     assert_int_equal(Avtp_CanBriefV2_GetCanIdentifier(canV2), 0x7ff);
-    assert_int_equal(Avtp_CanBriefV2_GetCanBusId(canV2), 0x5FF);
+    assert_int_equal(Avtp_CanBriefV2_GetCanBusId(canV2), 0x0);
     assert_int_equal(Avtp_CanBriefV2_IsEff(canV2), false);
     assert_memory_equal(payload, msg + AVTP_CAN_BRIEF_V2_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_CanBriefV2_GetPayloadLength(canV2), 8);
 
     // Extended Frame IDs set the EFF flag
-    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x800, 0x5FF, payload, sizeof(payload),
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x800, payload, sizeof(payload),
                                      AVTP_CAN_CLASSIC);
     assert_int_equal(Avtp_CanBriefV2_GetCanIdentifier(canV2), 0x800);
     assert_int_equal(Avtp_CanBriefV2_IsEff(canV2), true);
@@ -318,7 +318,7 @@ static void Test_CanBriefV2_IsValid(void **state)
     {
         uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
         Avtp_CanBriefV2_Init(canV2);
-        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, 0x0, payload, sizeof(payload),
+        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, payload, sizeof(payload),
                                          AVTP_CAN_CLASSIC);
         assert_int_equal(Avtp_CanBriefV2_IsValid(canV2, msg_len), 1);
     }
@@ -331,7 +331,7 @@ static void Test_CanBriefV2_IsValid(void **state)
     {
         uint8_t too_big[12] = {0};
         Avtp_CanBriefV2_Init(canV2);
-        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, 0x0, too_big, sizeof(too_big),
+        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, too_big, sizeof(too_big),
                                          AVTP_CAN_CLASSIC);
         assert_int_equal(Avtp_CanBriefV2_IsValid(canV2, msg_len), 0);
     }
@@ -340,13 +340,13 @@ static void Test_CanBriefV2_IsValid(void **state)
     {
         uint8_t fd_max[64] = {0};
         Avtp_CanBriefV2_Init(canV2);
-        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, 0x0, fd_max, sizeof(fd_max), AVTP_CAN_FD);
+        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, fd_max, sizeof(fd_max), AVTP_CAN_FD);
         assert_int_equal(Avtp_CanBriefV2_IsValid(canV2, msg_len), 1);
     }
     {
         uint8_t fd_too_big[68] = {0};
         Avtp_CanBriefV2_Init(canV2);
-        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, 0x0, fd_too_big, sizeof(fd_too_big),
+        Avtp_CanBriefV2_CreateAcfMessage(canV2, frame_id, fd_too_big, sizeof(fd_too_big),
                                          AVTP_CAN_FD);
         assert_int_equal(Avtp_CanBriefV2_IsValid(canV2, msg_len), 0);
     }
@@ -361,7 +361,7 @@ static void Test_CanBriefV2_CreateFromGarbage(void **state)
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(msg, 0xAA, msg_len);
-    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x123, 0x0, payload, sizeof(payload), AVTP_CAN_CLASSIC);
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x123, payload, sizeof(payload), AVTP_CAN_CLASSIC);
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)canV2),
                      AVTP_ACF_TYPE_CAN_BRIEF_V2);

@@ -388,19 +388,17 @@ OPEN1722_INLINE void Avtp_CanBriefV2_Init(Avtp_CanBriefV2_t *pdu)
 }
 
 /**
- * Copies the payload data, CAN frame ID and CAN bus ID into the ACF CAN Brief V2 frame. This
- * function will also set the length and pad fields while inserting the padded bytes.
+ * Copies the payload data and CAN frame ID into the ACF CAN Brief V2 frame. This function will
+ * also set the length and pad fields while inserting the padded bytes.
  *
  * @param pdu Pointer to the first bit of a 1722 ACF CAN Brief V2 PDU.
  * @param frame_id ID of the CAN frame
- * @param can_bus_id CAN bus ID
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload.
  * @param can_variant Classic CAN or CAN-FD
  */
 OPEN1722_INLINE void Avtp_CanBriefV2_CreateAcfMessage(Avtp_CanBriefV2_t *pdu, uint32_t frame_id,
-                                                      uint16_t can_bus_id, uint8_t *payload,
-                                                      uint16_t payload_length,
+                                                      uint8_t *payload, uint16_t payload_length,
                                                       Avtp_CanVariant_t can_variant)
 {
     // Initialize the ACF CAN Brief V2 header
@@ -409,13 +407,12 @@ OPEN1722_INLINE void Avtp_CanBriefV2_CreateAcfMessage(Avtp_CanBriefV2_t *pdu, ui
     // Copy the payload into the CAN PDU
     Avtp_CanBriefV2_SetPayload(pdu, payload, payload_length);
 
-    // Set the Frame ID, bus ID and CAN variant
+    // Set the Frame ID and CAN variant
     if (frame_id > 0x7ff) {
         Avtp_CanBriefV2_SetEff(pdu, true);
     }
 
     Avtp_CanBriefV2_SetCanIdentifier(pdu, frame_id);
-    Avtp_CanBriefV2_SetCanBusId(pdu, can_bus_id);
     if (can_variant == AVTP_CAN_FD) {
         Avtp_CanBriefV2_SetFdf(pdu, true);
     }
