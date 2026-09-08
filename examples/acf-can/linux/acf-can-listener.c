@@ -42,10 +42,10 @@
 #include "common/common.h"
 #include "acf-can-common.h"
 
-#define ARGPARSE_CAN_FD_OPTION          500
-#define ARGPARSE_CAN_IF_OPTION          501
-#define ARGPARSE_LISTENER_ID_OPTION     503
-#define STREAM_ID                       0xAABBCCDDEEFF0001
+#define ARGPARSE_CAN_FD_OPTION 500
+#define ARGPARSE_CAN_IF_OPTION 501
+#define ARGPARSE_LISTENER_ID_OPTION 503
+#define STREAM_ID 0xAABBCCDDEEFF0001
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -56,7 +56,7 @@ static char can_ifname[IFNAMSIZ];
 static uint64_t listener_stream_id = STREAM_ID;
 
 static char doc[] =
-        "\nacf-can-listener -- a program to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
+    "\nacf-can-listener -- a program to receive CAN messages from a remote CAN bus over Ethernet using Open1722.\
         \vEXAMPLES\n\
         acf-can-listener -i eth0 -d aa:bb:cc:dd:ee:ff --canif can1\n\
         \t(tunnel Open1722 CAN messages received from eth0 to can1)\n\
@@ -64,15 +64,14 @@ static char doc[] =
         \t(tunnel Open1722 CAN messages received over UDP from port 17220 to can1)";
 
 static struct argp_option options[] = {
-    {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)" },
+    {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)"},
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"canif", ARGPARSE_CAN_IF_OPTION, "CAN_IF", 0, "CAN interface"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
     {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
     {"stream-id", ARGPARSE_LISTENER_ID_OPTION, "STREAM_ID", 0, "Stream ID for listener stream"},
-    { 0 }
-};
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -95,9 +94,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         strncpy(ifname, arg, sizeof(ifname) - 1);
         break;
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                &macaddr[0], &macaddr[1], &macaddr[2],
-                &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid MAC address\n");
             exit(EXIT_FAILURE);
@@ -115,7 +113,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser, NULL, doc};
+static struct argp argp = {options, parser, NULL, doc};
 
 int main(int argc, char *argv[])
 {
@@ -133,11 +131,11 @@ int main(int argc, char *argv[])
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
     // Print current configuration
     printf("acf-can-listener configuration:\n");
-    if(can_variant == AVTP_CAN_CLASSIC)
+    if (can_variant == AVTP_CAN_CLASSIC)
         printf("\tUsing Classic CAN interface: %s\n", can_ifname);
-    else if(can_variant == AVTP_CAN_FD)
+    else if (can_variant == AVTP_CAN_FD)
         printf("\tUsing CAN FD interface: %s\n", can_ifname);
-    if(use_udp) {
+    if (use_udp) {
         printf("\tUsing UDP\n");
         printf("\tListening port: %d\n", udp_port);
     } else {
@@ -158,10 +156,11 @@ int main(int argc, char *argv[])
 
     // Open a CAN socket for reading frames
     can_socket = setup_can_socket(can_ifname, can_variant);
-    if (can_socket < 0) goto err;
+    if (can_socket < 0)
+        goto err;
 
     // Start an infinite loop to keep converting AVTP frames to CAN frames
-    for(;;) {
+    for (;;) {
 
         pdu_length = recv(fd, pdu, MAX_ETH_PDU_SIZE, 0);
         if (pdu_length < 0 || pdu_length > MAX_ETH_PDU_SIZE) {
@@ -169,8 +168,8 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp,
-                             listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
+        num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp, listener_stream_id,
+                                   &exp_cf_seqnum, &exp_udp_seqnum);
         if (num_can_msgs < 0) {
             continue;
         }
@@ -184,8 +183,7 @@ int main(int argc, char *argv[])
             else if (can_variant == AVTP_CAN_CLASSIC)
                 res = write(can_socket, &can_frames[i].cc, sizeof(struct can_frame));
 
-            if(res < 0)
-            {
+            if (res < 0) {
                 perror("Failed to write to CAN bus");
                 continue;
             }
@@ -197,5 +195,4 @@ int main(int argc, char *argv[])
 err:
     close(fd);
     return 1;
-
 }
