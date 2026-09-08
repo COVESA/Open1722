@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        # Match the CI style check: C/H files only. Uses the pinned
+        # clang-format 18.1.8, same version as .github/workflows/style.yml.
+        files: '\.(c|h)$'
+        args: [--style=file]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: mixed-line-ending
