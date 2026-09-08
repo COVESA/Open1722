@@ -43,12 +43,6 @@
 #include <pthread.h>
 
 #include "common/common.h"
-#include "avtp/Udp.h"
-#include "avtp/acf/Ntscf.h"
-#include "avtp/acf/Tscf.h"
-#include "avtp/acf/AcfCommon.h"
-#include "avtp/acf/Can.h"
-#include "avtp/CommonHeader.h"
 #include "acf-can-common.h"
 
 #define ARGPARSE_CAN_FD_OPTION      500
