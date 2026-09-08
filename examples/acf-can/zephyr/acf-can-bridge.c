@@ -72,7 +72,7 @@ static uint64_t talker_stream_id;
 static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
 
 int eth_socket = 0;
-struct sockaddr* dest_addr;
+struct sockaddr *dest_addr;
 struct sockaddr_ll sk_ll_addr;
 struct sockaddr_in sk_udp_addr;
 const struct device *const can_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
@@ -87,15 +87,14 @@ K_THREAD_STACK_DEFINE(avtp_to_can_stack, THREAD_STACK_SIZE);
 static int init_can_dev()
 {
     int ret;
-    if  (!device_is_ready(can_dev)) {
+    if (!device_is_ready(can_dev)) {
         printf("CAN: Device %s not ready.\n", can_dev->name);
         return -1;
     }
-    ret = can_start (can_dev);
+    ret = can_start(can_dev);
     if (ret != 0) {
         printf("Error starting CAN controller [%d]", ret);
-    }
-    else {
+    } else {
         printf("Starting CAN controller [%d]\n", ret);
     }
 
@@ -107,20 +106,20 @@ static int init_can_dev()
 static int init_can_rx()
 {
     // This is a generic receive filter that will accept all frames
-    struct can_filter rx_filter={.id=1,.mask=0,.flags=0};
+    struct can_filter rx_filter = {.id = 1, .mask = 0, .flags = 0};
     int filter_id;
     filter_id = can_add_rx_filter_msgq(can_dev, &rx_msgq, &rx_filter);
-    if(filter_id == -ENOSPC) {
+    if (filter_id == -ENOSPC) {
         printf("ENOSPC: there are no free filters\n");
     }
-        if(filter_id == -ENOTSUP) {
+    if (filter_id == -ENOTSUP) {
         printf("ENOTSUP: the requested filter type is not supported\n");
     }
     return filter_id;
 }
 
-static void iface_up_handler(struct net_mgmt_event_callback *cb,
-                 uint64_t mgmt_event, struct net_if *iface)
+static void iface_up_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event,
+                             struct net_if *iface)
 {
     if (mgmt_event == NET_EVENT_IF_UP) {
         k_sem_give(&iface_up);
@@ -135,8 +134,7 @@ static void wait_for_interface(void)
         return;
     }
 
-    net_mgmt_init_event_callback(&iface_up_cb, iface_up_handler,
-                     NET_EVENT_IF_UP);
+    net_mgmt_init_event_callback(&iface_up_cb, iface_up_handler, NET_EVENT_IF_UP);
     net_mgmt_add_event_callback(&iface_up_cb);
 
     // Wait for the interface to come up.
@@ -145,12 +143,13 @@ static void wait_for_interface(void)
     net_mgmt_del_event_callback(&iface_up_cb);
 }
 
-static int create_listener_socket_udp(uint32_t udp_port) {
+static int create_listener_socket_udp(uint32_t udp_port)
+{
 
     int fd, res;
     struct sockaddr_in sk_addr;
 
-    //create a UDP socket
+    // create a UDP socket
     fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (fd < 0) {
         perror("Failed to open socket");
@@ -158,12 +157,12 @@ static int create_listener_socket_udp(uint32_t udp_port) {
     }
 
     // Initialize the socket
-    memset((char *) &sk_addr, 0, sizeof(sk_addr));
+    memset((char *)&sk_addr, 0, sizeof(sk_addr));
     sk_addr.sin_family = AF_INET;
     sk_addr.sin_port = htons(udp_port);
     sk_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    res = bind(fd, (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+    res = bind(fd, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
     if (res < 0) {
         perror("Couldn't bind() to port");
         close(fd);
@@ -173,7 +172,7 @@ static int create_listener_socket_udp(uint32_t udp_port) {
     return fd;
 }
 
-static int create_listener_socket(uint8_t* macaddr, int protocol)
+static int create_listener_socket(uint8_t *macaddr, int protocol)
 {
     int fd, res;
     struct sockaddr_ll sk_addr = {0};
@@ -188,7 +187,7 @@ static int create_listener_socket(uint8_t* macaddr, int protocol)
     sk_addr.sll_ifindex = net_if_get_by_iface(net_if_get_default());
     memcpy(&sk_addr.sll_addr, macaddr, NET_ETH_ADDR_LEN);
 
-    res = bind(fd, (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+    res = bind(fd, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
     if (res < 0) {
         perror("Couldn't bind() to interface");
         goto err;
@@ -201,7 +200,8 @@ err:
     return -1;
 }
 
-void can_to_avtp_runnable(void* p1, void* p2, void* p3) {
+void can_to_avtp_runnable(void *p1, void *p2, void *p3)
+{
 
     uint8_t cf_seq_num = 0;
     uint32_t udp_seq_num = 0;
@@ -221,14 +221,14 @@ void can_to_avtp_runnable(void* p1, void* p2, void* p3) {
         }
         sk_udp_addr.sin_addr = ip_addr;
         sk_udp_addr.sin_port = htons(udp_send_port);
-        dest_addr = (struct sockaddr*) &sk_udp_addr;
+        dest_addr = (struct sockaddr *)&sk_udp_addr;
     } else {
         sk_ll_addr.sll_family = AF_PACKET;
         sk_ll_addr.sll_protocol = htons(ETH_P_TSN);
         sk_ll_addr.sll_halen = NET_ETH_ADDR_LEN;
         sk_ll_addr.sll_ifindex = net_if_get_by_iface(net_if_get_default());
         memcpy(sk_ll_addr.sll_addr, macaddr, NET_ETH_ADDR_LEN);
-        dest_addr = (struct sockaddr*) &sk_ll_addr;
+        dest_addr = (struct sockaddr *)&sk_ll_addr;
     }
 
     if (!eth_socket) {
@@ -237,7 +237,7 @@ void can_to_avtp_runnable(void* p1, void* p2, void* p3) {
     }
 
     // Start an infinite loop to keep converting CAN frames to AVTP frames
-    for(;;) {
+    for (;;) {
 
         // Read acf_num_msgs number of CAN frames from the CAN socket
         int i = 0;
@@ -254,16 +254,16 @@ void can_to_avtp_runnable(void* p1, void* p2, void* p3) {
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_variant, pdu, use_udp, use_tscf,
-                                    talker_stream_id, num_acf_msgs, cf_seq_num++, udp_seq_num++);
+        pdu_length = can_to_avtp(can_frames, can_variant, pdu, use_udp, use_tscf, talker_stream_id,
+                                 num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out over Ethernet
         if (use_udp) {
-            res = sendto(eth_socket, pdu, pdu_length, 0,
-                    (struct sockaddr *) dest_addr, sizeof(struct sockaddr_in));
+            res = sendto(eth_socket, pdu, pdu_length, 0, (struct sockaddr *)dest_addr,
+                         sizeof(struct sockaddr_in));
         } else {
-            res = sendto(eth_socket, pdu, pdu_length, 0,
-                         (struct sockaddr *) dest_addr, sizeof(struct sockaddr_ll));
+            res = sendto(eth_socket, pdu, pdu_length, 0, (struct sockaddr *)dest_addr,
+                         sizeof(struct sockaddr_ll));
         }
         if (res < 0) {
             perror("Failed to send data");
@@ -273,7 +273,8 @@ void can_to_avtp_runnable(void* p1, void* p2, void* p3) {
     return;
 }
 
-void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
+void avtp_to_can_runnable(void *p1, void *p2, void *p3)
+{
 
     uint16_t pdu_length = 0;
     int8_t num_can_msgs = 0;
@@ -295,7 +296,7 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
     fds[0].events = POLLIN;
 
     // Start an infinite loop to keep converting AVTP frames to CAN frames
-    for(;;) {
+    for (;;) {
         // Wait for data with a timeout (e.g., 500ms)
         ret = poll(fds, 1, 500);
 
@@ -317,8 +318,8 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
                 continue;
             }
 
-            num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp,
-                                listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
+            num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp, listener_stream_id,
+                                       &exp_cf_seqnum, &exp_udp_seqnum);
             if (num_can_msgs <= 0) {
                 continue;
             }
@@ -328,8 +329,7 @@ void avtp_to_can_runnable(void* p1, void* p2, void* p3) {
             for (int8_t i = 0; i < num_can_msgs; i++) {
                 int res;
                 res = can_send(can_dev, &(can_frames[i].cc), K_NO_WAIT, NULL, NULL);
-                if(res < 0)
-                {
+                if (res < 0) {
                     perror("Failed to write to CAN bus");
                 }
             }
@@ -353,43 +353,43 @@ int main(void)
 
     // Print current configuration
     printf("acf-can-bridge configuration:\n");
-    if(use_tscf)
-        printf("\tUsing TSCF\n");
+    if (use_tscf)
+        printf("\tUsing TSCF v0\n");
     else
-        printf("\tUsing NTSCF\n");
-    if(can_variant == AVTP_CAN_CLASSIC)
+        printf("\tUsing NTSCF v0\n");
+    if (can_variant == AVTP_CAN_CLASSIC)
         printf("\tUsing Classic CAN\n");
-    else if(can_variant == AVTP_CAN_FD)
+    else if (can_variant == AVTP_CAN_FD)
         printf("\tUsing CAN FD\n");
-    if(use_udp) {
+    if (use_udp) {
         printf("\tUsing UDP\n");
         printf("\tDestination IP: %s, Send port: %d, listening port: %d\n",
-                CONFIG_ACF_CAN_BRIDGE_SEND_IP_ADDR, udp_send_port, udp_listen_port);
+               CONFIG_ACF_CAN_BRIDGE_SEND_IP_ADDR, udp_send_port, udp_listen_port);
     } else {
         printf("\tUsing Ethernet\n");
         res = sscanf(CONFIG_ACF_CAN_BRIDGE_SEND_MAC_ADDR, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                &macaddr[0], &macaddr[1], &macaddr[2],
-                &macaddr[3], &macaddr[4], &macaddr[5]);
+                     &macaddr[0], &macaddr[1], &macaddr[2], &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid MAC address\n");
             exit(EXIT_FAILURE);
         }
-        printf("\tDestination MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", macaddr[0], macaddr[1], macaddr[2],
-                                                        macaddr[3], macaddr[4], macaddr[5]);
+        printf("\tDestination MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", macaddr[0], macaddr[1],
+               macaddr[2], macaddr[3], macaddr[4], macaddr[5]);
     }
-    printf("\tListener Stream ID: 0x%"PRIx64", Talker Stream ID: 0x%"PRIx64"\n", listener_stream_id, talker_stream_id);
+    printf("\tListener Stream ID: 0x%" PRIx64 ", Talker Stream ID: 0x%" PRIx64 "\n",
+           listener_stream_id, talker_stream_id);
     printf("\tNumber of ACF messages per AVTP frame in talker stream: %d\n", num_acf_msgs);
 
     // Open a CAN socket for reading frames
     // init CAN Dev
     res = init_can_dev();
-    if (res < 0){
+    if (res < 0) {
         printf("Failed to init CAN device\n");
         return -1;
     }
     // init CAN RX
     res = init_can_rx();
-    if (res < 0){
+    if (res < 0) {
         return -1;
     }
 
@@ -403,22 +403,20 @@ int main(void)
     } else {
         eth_socket = create_listener_socket(macaddr, ETH_P_TSN);
     }
-    if (eth_socket < 0) return -1;
+    if (eth_socket < 0)
+        return -1;
 
     k_tid_t t_id;
     t_id = k_thread_create(&avtp_to_can_thread, avtp_to_can_stack,
-                    K_THREAD_STACK_SIZEOF(avtp_to_can_stack),
-                    avtp_to_can_runnable, NULL, NULL, NULL,
-                    THREAD_PRIORITY_AVTP_TO_CAN, 0, K_NO_WAIT);
+                           K_THREAD_STACK_SIZEOF(avtp_to_can_stack), avtp_to_can_runnable, NULL,
+                           NULL, NULL, THREAD_PRIORITY_AVTP_TO_CAN, 0, K_NO_WAIT);
     k_thread_name_set(t_id, "avtp_to_can_thread");
     t_id = k_thread_create(&can_to_avtp_thread, can_to_avtp_stack,
-                    K_THREAD_STACK_SIZEOF(can_to_avtp_stack),
-                    can_to_avtp_runnable, NULL, NULL, NULL,
-                    THREAD_PRIORITY_CAN_TO_AVTP, 0, K_NO_WAIT);
+                           K_THREAD_STACK_SIZEOF(can_to_avtp_stack), can_to_avtp_runnable, NULL,
+                           NULL, NULL, THREAD_PRIORITY_CAN_TO_AVTP, 0, K_NO_WAIT);
     k_thread_name_set(t_id, "can_to_avtp_thread");
 
     printf("Main thread going to sleep\n");
     k_sleep(K_FOREVER);
     return 1;
 }
-

@@ -5,8 +5,15 @@ Following applications are available in this folder:
 - _acf-can-talker_: Creates IEEE 1722 ACF frames out of received CAN frames and sends them out on the network interface
 - _acf-can-bridge_: Combines the _acf-can-talker_ and _acf-can-listener_ to create a two way bridge between a CAN interface and an Ethernet network interface
 
-All these applications support IEEE 1722 over Ethernet (layer 2) as well as over UDP (layer 4).
-These applications can be used along with Linux CAN utilities. On Ubuntu/Debian Linux distributions, these utilities can be installed using the package manager `apt install can-utils`
+All these applications support IEEE 1722 over Ethernet (layer 2) as well as over UDP (layer 4). IEEE 1722-2025 specification includes multiple formats for encapsulating CAN/CAN-FD frames. The required format can be selected at compile time by defining the macro `AVTP_CAN_API` to one of the following values:
+- `AVTP_CAN_API_CAN`: For the original IEEE 1722-2016 format for encapsulating CAN/CAN-FD frames
+- `AVTP_CAN_API_CAN_BRIEF`: For the brief format of IEEE 1722-2016 for encapsulating CAN/CAN-FD frames
+- `AVTP_CAN_API_CANV2`: For the new IEEE 1722-2025 format for encapsulating CAN/CAN-FD frames
+- `AVTP_CAN_API_CAN_BRIEFV2`: For the new brief format of IEEE 1722-2025 for encapsulating CAN/CAN-FD frames
+
+The chosen format has to match between the talker and listener applications. The build system builds the applications using ACF CAN (_acf-can-listener_, _acf-can-talker_, _acf-can-bridge_) and ACF CANV2 (_acf-can-talker-canv2_, _acf-can-listener-canv2_, _acf-can-bridge-canv2_) formats. User can extend the build system to build the applications using other formats as well.
+
+The built applications can be used along with Linux CAN utilities. On Ubuntu/Debian Linux distributions, these utilities can be installed using the package manager `apt install can-utils`
 
 ## acf-can-talker
 _acf-can-talker_ receives frames on a (virtual) CAN interface and sends out the corresponding IEEE 1722 ACF messages. The parameters for its usage are as follows:

@@ -70,7 +70,7 @@ static char doc[] =
          \t(tunnel transactions from vcan1 interface using UDP)";
 
 static struct argp_option options[] = {
-    {"tscf", 't', 0, 0, "Use TSCF (Default: NTSCF)"},
+    {"tscf", 't', 0, 0, "Use TSCF v0 (Default: NTSCF v0)"},
     {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)"},
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
@@ -158,9 +158,9 @@ int main(int argc, char *argv[])
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
     printf("acf-talker-configuration:\n");
     if (use_tscf)
-        printf("\tUsing TSCF\n");
+        printf("\tUsing TSCF v0\n");
     else
-        printf("\tUsing NTSCF\n");
+        printf("\tUsing NTSCF v0\n");
     if (can_variant == AVTP_CAN_CLASSIC)
         printf("\tUsing Classic CAN interface: %s\n", can_ifname);
     else if (can_variant == AVTP_CAN_FD)
