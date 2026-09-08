@@ -73,6 +73,8 @@ typedef struct can_frame canfd_frame_t;
 #define AVTP_CAN(t) Avtp_CanBrief_##t
 #elif AVTP_CAN_API == AVTP_CAN_API_CANBRIEFV2
 #define AVTP_CAN(t) Avtp_CanBriefV2_##t
+#else
+#error "Invalid AVTP_CAN_API value."
 #endif
 
 /* CAN CC/FD frame union */

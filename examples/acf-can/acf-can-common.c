@@ -191,10 +191,10 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
     clock_gettime(CLOCK_REALTIME, &now);
     AVTP_CAN(SetMessageTimestamp)(pdu, (uint64_t)now.tv_nsec + (uint64_t)(now.tv_sec * 1e9));
     AVTP_CAN(SetMtv)(pdu, true);
+#endif
     if (can_id & CAN_RTR_FLAG) {
         AVTP_CAN(SetRtr)(pdu, true);
     }
-#endif
 
     if (can_variant == AVTP_CAN_FD) {
         if (frame->fd.flags & CANFD_BRS) {

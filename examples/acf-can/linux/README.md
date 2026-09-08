@@ -7,9 +7,9 @@ Following applications are available in this folder:
 
 All these applications support IEEE 1722 over Ethernet (layer 2) as well as over UDP (layer 4). IEEE 1722-2025 specification includes multiple formats for encapsulating CAN/CAN-FD frames. The required format can be selected at compile time by defining the macro `AVTP_CAN_API` to one of the following values:
 - `AVTP_CAN_API_CAN`: For the original IEEE 1722-2016 format for encapsulating CAN/CAN-FD frames
-- `AVTP_CAN_API_CAN_BRIEF`: For the brief format of IEEE 1722-2016 for encapsulating CAN/CAN-FD frames
+- `AVTP_CAN_API_CANBRIEF`: For the brief format of IEEE 1722-2016 for encapsulating CAN/CAN-FD frames
 - `AVTP_CAN_API_CANV2`: For the new IEEE 1722-2025 format for encapsulating CAN/CAN-FD frames
-- `AVTP_CAN_API_CAN_BRIEFV2`: For the new brief format of IEEE 1722-2025 for encapsulating CAN/CAN-FD frames
+- `AVTP_CAN_API_CANBRIEFV2`: For the new brief format of IEEE 1722-2025 for encapsulating CAN/CAN-FD frames
 
 The chosen format has to match between the talker and listener applications. The build system builds the applications using ACF CAN (_acf-can-listener_, _acf-can-talker_, _acf-can-bridge_) and ACF CANV2 (_acf-can-talker-canv2_, _acf-can-listener-canv2_, _acf-can-bridge-canv2_) formats. User can extend the build system to build the applications using other formats as well.
 
