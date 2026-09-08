@@ -287,8 +287,7 @@ static void Test_CanBriefV2_CreateAcfMessage(void **state)
     uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     Avtp_CanBriefV2_Init(canV2);
-    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x7ff, payload, sizeof(payload),
-                                     AVTP_CAN_CLASSIC);
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x7ff, payload, sizeof(payload), AVTP_CAN_CLASSIC);
 
     assert_int_equal(Avtp_CanBriefV2_GetCanIdentifier(canV2), 0x7ff);
     assert_int_equal(Avtp_CanBriefV2_GetCanBusId(canV2), 0x0);
@@ -297,8 +296,7 @@ static void Test_CanBriefV2_CreateAcfMessage(void **state)
     assert_int_equal(Avtp_CanBriefV2_GetPayloadLength(canV2), 8);
 
     // Extended Frame IDs set the EFF flag
-    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x800, payload, sizeof(payload),
-                                     AVTP_CAN_CLASSIC);
+    Avtp_CanBriefV2_CreateAcfMessage(canV2, 0x800, payload, sizeof(payload), AVTP_CAN_CLASSIC);
     assert_int_equal(Avtp_CanBriefV2_GetCanIdentifier(canV2), 0x800);
     assert_int_equal(Avtp_CanBriefV2_IsEff(canV2), true);
 }
