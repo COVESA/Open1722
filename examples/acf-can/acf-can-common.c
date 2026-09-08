@@ -115,17 +115,6 @@ int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant)
 }
 #endif
 
-static int is_valid_acf_packet(uint8_t *acf_pdu)
-{
-    Avtp_AcfCommon_t *pdu = (Avtp_AcfCommon_t *)acf_pdu;
-    uint8_t acf_msg_type = Avtp_AcfCommon_GetAcfMsgType(pdu);
-    if (acf_msg_type != AVTP_ACF_TYPE_CAN) {
-        return 0;
-    }
-
-    return 1;
-}
-
 static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, int use_tscf, int seq_num)
 {
     int res;
@@ -305,10 +294,6 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
 
         acf_pdu = &pdu[proc_bytes];
 
-        if (!is_valid_acf_packet(acf_pdu)) {
-            return -1;
-        }
-
         /* Verify the CAN-specific invariants now that the ACF message
          * type is confirmed: the encoded message length must fit the
          * remaining buffer, and the resulting payload size must match
@@ -331,7 +316,7 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
             LOG_ERR("Error: Number of CAN frames in ACF exceeds maximum allowed.\n");
             return -1;
         }
-        frame_t *frame = &(can_frames[i++]);
+        frame_t *frame = &(can_frames[i]);
 
         // Handle EFF Flag
         if (AVTP_CAN(IsEff)((AVTP_CAN(t) *)acf_pdu)) {
@@ -374,6 +359,8 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
 #endif
             memcpy(frame->cc.data, can_payload, can_payload_length);
         }
+
+        i++;
     }
 
     return i;
