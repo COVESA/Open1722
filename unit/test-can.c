@@ -94,7 +94,7 @@ static void can_set_payload(void **state)
     // Set payload and check for EFF
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               AVTP_CAN_CLASSIC);
-    assert_int_equal(htonl(set_frame_id), (uint32_t)*((int *)pdu + 3));
+    assert_int_equal(htonl(set_frame_id), *((uint32_t *)pdu + 3));
     assert_memory_equal(set_payload, pdu + 16, CAN_PAYLOAD_SIZE);
     assert_int_equal(0x0, *(pdu + 2) & 0x08); // Check EFF
 
@@ -102,7 +102,7 @@ static void can_set_payload(void **state)
     set_frame_id = 0x800;
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               AVTP_CAN_CLASSIC);
-    assert_int_equal(htonl(set_frame_id), (uint32_t)*((int *)pdu + 3));
+    assert_int_equal(htonl(set_frame_id), *((uint32_t *)pdu + 3));
     assert_int_equal(0x8, *(pdu + 2) & 0x08); // Check EFF
 
     // Check padding bytes and length field
