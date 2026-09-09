@@ -12,7 +12,7 @@ All these applications support IEEE 1722 over Ethernet (layer 2) as well as over
 - `AVTP_CAN_API_CANV2`: For the new IEEE 1722-2025 format for encapsulating CAN/CAN-FD frames
 - `AVTP_CAN_API_CANBRIEFV2`: For the new brief format of IEEE 1722-2025 for encapsulating CAN/CAN-FD frames
 
-The chosen format has to match between the talker and listener applications. The build system builds the applications using ACF CAN (_acf-can-listener_, _acf-can-talker_, _acf-can-bridge_) and ACF CANV2 (_acf-can-talker-canv2_, _acf-can-listener-canv2_, _acf-can-bridge-canv2_) formats. User can extend the build system to build the applications using other formats as well.
+The chosen format has to match between the talker and listener applications. The build system builds the applications using all available formats for the listener, talker and bridge applications. User can extend the build system to build the applications using other formats as well.
 
 The built applications can be used along with Linux CAN utilities. On Ubuntu/Debian Linux distributions, these utilities can be installed using the package manager `apt install can-utils`
 
