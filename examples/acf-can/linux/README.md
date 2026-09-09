@@ -33,13 +33,13 @@ Ethernet using Open1722.
   -n, --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
                              UDP)
       --stream-id=STREAM_ID  Stream ID for talker stream
-  -t, --tscf                 Use TSCF (Default: NTSCF)
+  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
   -u, --udp                  Use UDP (Default: Ethernet)
   -?, --help                 Give this help list
       --usage                Give a short usage message
 ```
 
-## acf-can-listener 
+## acf-can-listener
 _acf-can-listener_ receives IEEE 1722 ACF messages and puts out the corresponding CAN frames on a (virtual) CAN interface. The parameters for its usage are as follows:
 
 ```
@@ -78,7 +78,7 @@ acf-can-bridge -- a program for bridging a CAN interface with an Ethernet interf
   -p, --udp-port=UDP_PORT    UDP Port to listen on (if UDP)
       --talker-stream-id=STREAM_ID
                              Stream ID for talker stream
-  -t, --tscf                 Use TSCF
+  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
   -u, --udp                  Use UDP
   -?, --help                 Give this help list
       --usage                Give a short usage message
@@ -127,7 +127,7 @@ $ ./acf-can-listener -u -p 17220 --canif vcan1
 
 Alternatively, if Ethernet is directly used:
 ```
-$ ./acf-can-listener --dst-addr aa:bb:cc:dd:ee:ff -i eth0 --canif vcan0
+$ ./acf-can-listener --dst-addr aa:bb:cc:dd:ee:ff -i eth0 --canif vcan1
 ```
 
 #### Receive CAN traffic
@@ -151,5 +151,3 @@ $ ./acf-can-bridge --dst-addr aa:bb:cc:dd:ee:ff -i eth0 --canif vcan0
 ```
 - Execute wireshark and capture Ethernet packets on _eth0_.
 - (Optional) You could also use the _acf-can-talker_ to generate IEEE 1722 ACF frames on _eth0_, which will then be sent as CAN frames on _vcan0_.
-
-
