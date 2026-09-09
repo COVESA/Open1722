@@ -123,6 +123,36 @@ static bool vss_has_bytes(const Avtp_Vss_t *pdu, const uint8_t *ptr, uint16_t nu
     return (uint32_t)(ptr - (const uint8_t *)pdu) + num_bytes <= declared;
 }
 
+/* Deliberately shallow envelope check.  All getters clamp their reads to the
+ * declared ACF message length, so once that declared length is known to fit
+ * within the actual buffer (`bufferSize`) no getter can overread it.  The
+ * variable-length path/payload structure is not walked here; a frame that
+ * passes this check may still be internally inconsistent and the getters
+ * clamp such inconsistencies. */
+bool Avtp_Vss_IsValid(const Avtp_Vss_t *const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    /* Nothing may be read from the PDU before the buffer size is known to
+     * cover the fixed header, which all field reads stay within. */
+    if (bufferSize < AVTP_VSS_FIXED_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_AcfCommon_GetAcfMsgType((const Avtp_AcfCommon_t *)pdu) != AVTP_ACF_TYPE_VSS) {
+        return false;
+    }
+
+    uint16_t msg_length_bytes =
+        Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    if (msg_length_bytes < AVTP_VSS_FIXED_HEADER_LEN || msg_length_bytes > bufferSize) {
+        return false;
+    }
+    return true;
+}
+
 void Avtp_Vss_Init(Avtp_Vss_t *vss_pdu)
 {
 

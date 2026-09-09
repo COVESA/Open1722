@@ -37,6 +37,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "avtp/Defines.h"
 #include "avtp/acf/AcfCommon.h"
@@ -248,7 +249,65 @@ Vss_AddrMode_t Avtp_Vss_GetAddrMode(const Avtp_Vss_t *const pdu);
 Vss_OpCode_t Avtp_Vss_GetOpCode(const Avtp_Vss_t *const pdu);
 Vss_Datatype_t Avtp_Vss_GetDatatype(const Avtp_Vss_t *const pdu);
 uint64_t Avtp_Vss_GetMessageTimestamp(const Avtp_Vss_t *const pdu);
+
+/**
+ * Checks the envelope of an ACF VSS PDU against the actual buffer that
+ * contains it. This is a deliberately shallow check: it verifies the ACF
+ * message type, that the buffer can hold the fixed header, and that the
+ * declared ACF message length (an attacker-influenced field) fits within
+ * the actual buffer.
+ *
+ * `IsValid` does NOT walk the variable-length path and payload structure.
+ * A frame that passes it may still be semantically inconsistent (e.g. a
+ * path or data length prefix that exceeds the declared message length);
+ * the accessors clamp such values rather than trusting them.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
+ * @param bufferSize Size of the buffer containing the ACF VSS frame.
+ * @return true if the frame envelope is valid and every accessor can be
+ *         called without overreading the buffer, false otherwise.
+ */
+bool Avtp_Vss_IsValid(const Avtp_Vss_t *const pdu, size_t bufferSize);
+
+/**
+ * Parses the VSS path out of an ACF VSS PDU.
+ *
+ * Preconditions:
+ *  - When the PDU holds untrusted (e.g. network-received) data, validate it
+ *    first with Avtp_Vss_IsValid() so no accessor can overread the buffer.
+ *  - In VSS_INTEROP_MODE, val->vss_interop_path.path must point to writable
+ *    memory. The maximum number of bytes written is
+ *    (declared ACF message length - AVTP_VSS_FIXED_HEADER_LEN - 2), and
+ *    val->vss_interop_path.path_length is set to that clamped copy length.
+ *  - In VSS_STATIC_ID_MODE, val->vss_static_id_path receives the static ID.
+ *
+ * A truncated or internally inconsistent path is clamped: path_length
+ * reflects only the bytes actually copied.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
+ * @param val Pointer to the VSS path struct to fill.
+ */
 void Avtp_Vss_GetVssPath(const Avtp_Vss_t *const pdu, VssPath_t *val);
+
+/**
+ * Parses the VSS data out of an ACF VSS PDU.
+ *
+ * Preconditions:
+ *  - When the PDU holds untrusted (e.g. network-received) data, validate it
+ *    first with Avtp_Vss_IsValid() so no accessor can overread the buffer.
+ *  - For string and array datatypes, the matching pointer member of the
+ *    val union (e.g. val->data_string) must point to a writable
+ *    VssDataString_t / VssData*Array_t struct whose `data` member is either
+ *    NULL (copy skipped, only the length is reported) or points to writable
+ *    memory large enough for the clamped data length.
+ *  - For scalar datatypes the corresponding scalar member receives the value.
+ *
+ * Missing data leaves the target member unchanged; truncated data is
+ * clamped to the bytes actually present. Getters never overread.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
+ * @param val Pointer to the VSS data union to fill.
+ */
 void Avtp_Vss_GetVssData(const Avtp_Vss_t *const pdu, VssData_t *val);
 uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t *str_array);
 uint16_t Avtp_Vss_CalcVssPathLength(const Avtp_Vss_t *const pdu);

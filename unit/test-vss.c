@@ -1644,11 +1644,144 @@ static void vss_data_string_zero_msg_length_oob(void **state)
     assert_int_equal((uint8_t)out[0], 0x5A);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Avtp_Vss_IsValid tests
+ *
+ * IsValid is a deliberately shallow envelope check: it guarantees that the
+ * declared ACF message length fits the actual buffer, so no getter can
+ * overread.  It does NOT verify that the variable-length path/payload is
+ * semantically well-formed.  The regression scenario is a frame declaring
+ * 511 quadlets (2044 bytes) that is physically much shorter.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+static void vss_is_valid_null(void **state)
+{
+    assert_false(Avtp_Vss_IsValid(NULL, 2044));
+}
+
+static void vss_is_valid_buffer_too_small(void **state)
+{
+    uint8_t buf[AVTP_VSS_FIXED_HEADER_LEN];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+
+    /* The fixed header must be fully covered before any field is read. */
+    assert_false(Avtp_Vss_IsValid(pdu, 0));
+    assert_false(Avtp_Vss_IsValid(pdu, AVTP_VSS_FIXED_HEADER_LEN - 1));
+}
+
+static void vss_is_valid_wrong_acf_type(void **state)
+{
+    uint8_t buf[2044];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_CAN);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 3);
+
+    assert_false(Avtp_Vss_IsValid(pdu, sizeof(buf)));
+}
+
+static void vss_is_valid_declared_larger_than_buffer(void **state)
+{
+    /* Regression scenario from the listener report: declared length is the
+     * 9-bit maximum (511 quadlets = 2044 bytes) but the actual buffer is
+     * far smaller.  Clamping inside the getters alone cannot know the real
+     * size, so IsValid must reject the frame up front. */
+    uint8_t buf[2044];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 511);
+
+    assert_false(Avtp_Vss_IsValid(pdu, 100));
+    assert_false(Avtp_Vss_IsValid(pdu, AVTP_VSS_FIXED_HEADER_LEN));
+    assert_false(Avtp_Vss_IsValid(pdu, 2043));
+    /* With a buffer that really is 2044 bytes the same frame is fine. */
+    assert_true(Avtp_Vss_IsValid(pdu, 2044));
+}
+
+static void vss_is_valid_declared_smaller_than_header(void **state)
+{
+    uint8_t buf[2044];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+
+    /* 0, 1 and 2 quadlets all declare fewer than the fixed header bytes. */
+    for (uint16_t quadlets = 0; quadlets <= 2; quadlets++) {
+        Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, quadlets);
+        assert_false(Avtp_Vss_IsValid(pdu, sizeof(buf)));
+    }
+}
+
+static void vss_is_valid_header_only_frame(void **state)
+{
+    uint8_t buf[AVTP_VSS_FIXED_HEADER_LEN];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu,
+                                   AVTP_VSS_FIXED_HEADER_LEN / AVTP_QUADLET_SIZE);
+
+    /* Smallest frame that still passes: declared == buffer == header. */
+    assert_true(Avtp_Vss_IsValid(pdu, sizeof(buf)));
+    assert_false(Avtp_Vss_IsValid(pdu, sizeof(buf) - 1));
+}
+
+/* A valid full frame (talker-built, interop path + float data) must pass
+ * IsValid exactly when the buffer covers the declared length, and the
+ * getters must then decode it without any further surprises. */
+static void vss_is_valid_roundtrip(void **state)
+{
+    uint8_t buf[MAX_PDU_SIZE];
+    Avtp_Vss_t *pdu = (Avtp_Vss_t *)buf;
+    memset(buf, 0, sizeof(buf));
+    Avtp_Vss_Init(pdu);
+    Avtp_Vss_SetAddrMode(pdu, VSS_INTEROP_MODE);
+
+    char path[] = "Vehicle.Speed";
+    VssPath_t path_id = {0};
+    path_id.vss_interop_path.path = path;
+    path_id.vss_interop_path.path_length = (uint16_t)strlen(path);
+    Avtp_Vss_SetVssPath(pdu, &path_id);
+
+    VssData_t data = {.data_float = 12.5f};
+    Avtp_Vss_SetDatatype(pdu, VSS_FLOAT);
+    Avtp_Vss_SetVssData(pdu, &data);
+    Avtp_Vss_SetPayloadLength(pdu, (uint16_t)(2 + strlen(path) + sizeof(float)));
+
+    uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)pdu);
+    assert_true(Avtp_Vss_IsValid(pdu, declared));
+    assert_true(Avtp_Vss_IsValid(pdu, 2044));
+    /* One byte short of the declared length must fail. */
+    assert_false(Avtp_Vss_IsValid(pdu, declared - 1));
+
+    char path_out[32];
+    VssPath_t get_path = {0};
+    get_path.vss_interop_path.path = path_out;
+    Avtp_Vss_GetVssPath(pdu, &get_path);
+    assert_int_equal(get_path.vss_interop_path.path_length, strlen(path));
+    assert_memory_equal(path_out, path, strlen(path));
+
+    VssData_t get_data;
+    Avtp_Vss_GetVssData(pdu, &get_data);
+    assert_float_equal(get_data.data_float, 12.5, 0.001);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(vss_init),
         cmocka_unit_test(vss_pad),
+        cmocka_unit_test(vss_is_valid_null),
+        cmocka_unit_test(vss_is_valid_buffer_too_small),
+        cmocka_unit_test(vss_is_valid_wrong_acf_type),
+        cmocka_unit_test(vss_is_valid_declared_larger_than_buffer),
+        cmocka_unit_test(vss_is_valid_declared_smaller_than_header),
+        cmocka_unit_test(vss_is_valid_header_only_frame),
+        cmocka_unit_test(vss_is_valid_roundtrip),
         cmocka_unit_test(vss_static_path),
         cmocka_unit_test(vss_interop_path),
         cmocka_unit_test(vss_data_uint8),

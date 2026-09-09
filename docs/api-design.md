@@ -36,7 +36,7 @@ reading either half of this document.
 Function, type and field names are taken directly from the IEEE 1722
 specification. The guiding idea is: **if you have read and understood the spec,
 you can use Open1722 directly** - the mapping from a spec field to the
-corresponding API call is mechanical. 
+corresponding API call is mechanical.
 
 For example, the ACF CAN header contains the fields `pad`, `mtv`, `rtr`, `eff`,
 `brs`, `fdf`, `esi`, `can_bus_id`, `message_timestamp` and `can_identifier`.
@@ -221,8 +221,10 @@ if (Avtp_Can_IsValid(pdu, buffer_size)) {
 
 > **General rule, with exceptions.** This assume-valid model is the norm. Where
 > it does not hold - because a format's validity check would be expensive or
-> complex - the accessors perform their own bounds checking instead. See
-> [Exceptions to the rules](#exceptions-to-the-rules).
+> complex - the accessors perform their own bounds checking instead. VSS is
+> such an exception: its `IsValid` covers buffer containment but deliberately
+> not semantic validity, so its accessors stay self-checking even after
+> validation. See [Exceptions to the rules](#exceptions-to-the-rules).
 
 ## Convenience functions
 
@@ -489,6 +491,9 @@ A format provides an `IsValid` function as an inline accessor in its header. It
 checks (1) that the length field is contained within the actual buffer, and (2)
 any format-specific invariants. See
 [Accessor semantics & the safety contract](#accessor-semantics--the-safety-contract).
+The one exception is the custom VSS format, whose non-inline `IsValid` checks
+containment only (not the variable-length path/payload structure) - see
+[Exceptions to the rules](#exceptions-to-the-rules).
 
 ```c
 bool Avtp_Can_IsValid(const Avtp_Can_t *const pdu, size_t bufferSize);
@@ -610,10 +615,20 @@ IEEE 1722 standard and which carries variable-length, length-prefixed data.
 
 For VSS:
 
-- A cheap `IsValid` is not practical - verifying a VSS frame would require
-  walking variable-length paths and payloads. So VSS accessors instead perform
-  their own bounds checking, clamping reads against the *declared* message
-  length so a malformed frame cannot cause an overread.
+- VSS offers an `IsValid` function, but deliberately as a *shallow* check.
+  `Avtp_Vss_IsValid(pdu, bufferSize)` verifies the frame envelope only -
+  correct ACF message type, a buffer that covers the fixed header, and a
+  declared message length of at least the fixed header that also fits the
+  actual `bufferSize`. That makes the buffer-containment half of the safety
+  contract hold: after `IsValid` returns true, no VSS accessor can overread
+  the buffer. `IsValid` does **not** walk the variable-length path and
+  payload structure, so `true` does not mean the frame is semantically
+  well-formed.
+- VSS accessors therefore remain self-checking: reads are clamped against the
+  *declared* message length, and truncated or internally inconsistent fields
+  (e.g. a path or data length prefix that exceeds the declared message)
+  no-op or return conservative values instead of trusting the wire data. The
+  remaining validation lives in the getters, not in `IsValid`.
 - Because of that complexity, VSS accessors are implemented in the `.c` file
   (non-inline) rather than as inline header functions.
 
