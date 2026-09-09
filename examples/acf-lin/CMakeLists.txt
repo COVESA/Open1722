@@ -27,46 +27,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
+add_executable(acf-lin-talker EXCLUDE_FROM_ALL acf-lin-talker.c)
+target_link_libraries(acf-lin-talker open1722 open1722examples)
+target_include_directories(acf-lin-talker PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-add_library(open1722examples STATIC "common/common.c")
-target_include_directories(open1722examples PRIVATE
-    $<INSTALL_INTERFACE:include>
-    ${CMAKE_CURRENT_SOURCE_DIR})
-if (DEFINED ENV{ZEPHYR_BASE})
-    add_dependencies(open1722examples zephyr_generated_headers)
-    target_link_libraries(open1722examples PRIVATE zephyr_interface)
-endif()
-add_dependencies(examples open1722examples)
+add_executable(acf-lin-listener EXCLUDE_FROM_ALL acf-lin-listener.c)
+target_link_libraries(acf-lin-listener open1722 open1722examples)
+target_include_directories(acf-lin-listener PUBLIC ${CMAKE_SOURCE_DIR}/include ../)
 
-# These examples can be also built for Zephyr
-add_subdirectory(acf-can)
+add_dependencies(examples acf-lin-talker acf-lin-listener)
 
-# These examples are currently exclusively for Linux
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    execute_process(
-    COMMAND ldd --version
-    OUTPUT_VARIABLE LDD_OUT
-    ERROR_VARIABLE LDD_ERROR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    message(STATUS "LDD version err: ${LDD_ERROR}")
-    message(STATUS "LDD version out: ${LDD_OUT}")
-
-    ## MUSL ldd will output to stderr, while glibc ldd will output to stdout
-    if ("${LDD_ERROR}" MATCHES "musl")
-        message(STATUS "musl detected via ldd — linking argp")
-        target_link_libraries(open1722examples /usr/lib/libargp.a)
-    else()
-        message(STATUS "musl not detected via ldd — not linking argp")
-    endif()
-
-    add_subdirectory(aaf)
-    add_subdirectory(acf-lin)
-    add_subdirectory(crf)
-    add_subdirectory(cvf)
-    add_subdirectory(hello-world)
-    add_subdirectory(acf-vss)
-endif()
-
-
+install(TARGETS
+    acf-lin-talker
+    acf-lin-listener
+    RUNTIME DESTINATION bin
+    OPTIONAL)
