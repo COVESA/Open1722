@@ -45,8 +45,8 @@
 #include "avtp/acf/custom/Vss.h"
 #include "avtp/CommonHeader.h"
 
-#define MAX_PDU_SIZE                1500
-#define MAX_MSG_SIZE                100
+#define MAX_PDU_SIZE 1500
+#define MAX_MSG_SIZE 100
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -57,9 +57,8 @@ static struct argp_option options[] = {
     {"port", 'p', "UDP_PORT", 0, "UDP Port to listen on if UDP enabled"},
     {"udp", 'u', 0, 0, "Use UDP"},
     {"dst-mac-address", 0, 0, OPTION_DOC, "Stream destination MAC address (If Ethernet)"},
-    {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)" },
-    { 0 }
-};
+    {"ifname", 0, 0, OPTION_DOC, "Network interface (If Ethernet)"},
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -78,19 +77,17 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     case ARGP_KEY_ARG:
 
-        if(state->argc < 2){
+        if (state->argc < 2) {
             argp_usage(state);
         }
 
-        if(!use_udp){
+        if (!use_udp) {
 
             strncpy(ifname, arg, sizeof(ifname) - 1);
 
-            if(state->next < state->argc)
-            {
-                res = sscanf(state->argv[state->next], "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                        &macaddr[0], &macaddr[1], &macaddr[2],
-                        &macaddr[3], &macaddr[4], &macaddr[5]);
+            if (state->next < state->argc) {
+                res = sscanf(state->argv[state->next], "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0],
+                             &macaddr[1], &macaddr[2], &macaddr[3], &macaddr[4], &macaddr[5]);
                 if (res != 6) {
                     fprintf(stderr, "Invalid MAC address\n\n");
                     argp_usage(state);
@@ -107,15 +104,14 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static char args_doc[] = "[ifname] dst-mac-address";
 
-static struct argp argp = { options, parser, args_doc, 0};
+static struct argp argp = {options, parser, args_doc, 0};
 
 int main(int argc, char *argv[])
 {
     int sk_fd, res;
     uint64_t proc_bytes = 0, msg_proc_bytes = 0;
     uint32_t udp_seq_num;
-    uint16_t msg_length, acf_msg_length;
-    uint8_t subtype, acf_type;
+    uint8_t subtype;
     uint64_t flag;
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu;
@@ -152,19 +148,23 @@ int main(int argc, char *argv[])
         }
 
         // Check if the packet is a control format packet (i.e. NTSCF or TSCF)
-        subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)cf_pdu);
-        if (subtype == AVTP_SUBTYPE_TSCF){
+        subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cf_pdu);
+        if (subtype == AVTP_SUBTYPE_TSCF) {
             proc_bytes += AVTP_TSCF_HEADER_LEN;
-            msg_length = Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t*)cf_pdu);
         } else {
             proc_bytes += AVTP_NTSCF_HEADER_LEN;
-            msg_length = Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t*)cf_pdu);
         }
 
-        // Check if the control packet payload is a ACF GPC.
+        // Ignore frames that do not even contain the parsed headers
+        if ((uint64_t)res < proc_bytes) {
+            continue;
+        }
+
+        // Check if the control packet payload is an ACF VSS GPC. The declared
+        // ACF message length is untrusted, so only accept the message when it
+        // actually fits the number of bytes received (recv() return value).
         acf_pdu = &pdu[proc_bytes];
-        acf_type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t*)acf_pdu);
-        if (acf_type != AVTP_ACF_TYPE_VSS) {
+        if (!Avtp_Vss_IsValid((Avtp_Vss_t *)acf_pdu, (size_t)((uint64_t)res - proc_bytes))) {
             // Ignore further processing.
             continue;
         }
@@ -172,26 +172,29 @@ int main(int argc, char *argv[])
         // Parse the VSS Packet and print contents on the STDOUT
         Vss_AddrMode_t addrMode;
         VssPath_t path;
-        addrMode = Avtp_Vss_GetAddrMode((Avtp_Vss_t*)acf_pdu);
-        Avtp_Vss_GetVssPath((Avtp_Vss_t*)acf_pdu, &path);
+        // A received frame is at most MAX_PDU_SIZE bytes (bounded by recv()
+        // above), and IsValid() guarantees the declared message length fits
+        // that, so this buffer is always large enough for the clamped path.
+        char interop_path_storage[MAX_PDU_SIZE];
+        addrMode = Avtp_Vss_GetAddrMode((Avtp_Vss_t *)acf_pdu);
+        path.vss_interop_path.path = interop_path_storage;
+        Avtp_Vss_GetVssPath((Avtp_Vss_t *)acf_pdu, &path);
 
         if (addrMode == VSS_INTEROP_MODE) {
-            char path_string[path.vss_interop_path.path_length+1];
-            memset(path_string, '\0', path.vss_interop_path.path_length+1);
+            char path_string[path.vss_interop_path.path_length + 1];
+            memset(path_string, '\0', path.vss_interop_path.path_length + 1);
             memcpy(path_string, path.vss_interop_path.path, path.vss_interop_path.path_length);
             printf("VSS Path: %s, ", path_string);
         } else if (addrMode == VSS_STATIC_ID_MODE) {
             printf("VSS Path: %d, ", path.vss_static_id_path);
         }
 
-        VssData_t data;
-        Vss_Datatype_t dt = Avtp_Vss_GetDatatype((Avtp_Vss_t*)acf_pdu);
-        Avtp_Vss_GetVssData((Avtp_Vss_t*)acf_pdu, &data);
-
+        Vss_Datatype_t dt = Avtp_Vss_GetDatatype((Avtp_Vss_t *)acf_pdu);
         if (dt == VSS_FLOAT) {
+            VssData_t data;
+            Avtp_Vss_GetVssData((Avtp_Vss_t *)acf_pdu, &data);
             printf("VSS Value: %f\n", data.data_float);
         }
-
     }
 
     return 0;
@@ -199,5 +202,4 @@ int main(int argc, char *argv[])
 err:
     close(sk_fd);
     return 1;
-
 }
