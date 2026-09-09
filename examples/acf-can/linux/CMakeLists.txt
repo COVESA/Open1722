@@ -54,8 +54,40 @@ target_compile_definitions(acf-canv2-bridge PRIVATE AVTP_CAN_API=AVTP_CAN_API_CA
 target_link_libraries(acf-canv2-bridge open1722 open1722examples)
 target_include_directories(acf-canv2-bridge PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
 
+add_executable(acf-can-brief-talker EXCLUDE_FROM_ALL acf-can-talker.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-talker PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEF)
+target_link_libraries(acf-can-brief-talker open1722 open1722examples)
+target_include_directories(acf-can-brief-talker PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
+add_executable(acf-can-brief-listener EXCLUDE_FROM_ALL acf-can-listener.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-listener PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEF)
+target_link_libraries(acf-can-brief-listener open1722 open1722examples)
+target_include_directories(acf-can-brief-listener PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
+add_executable(acf-can-brief-bridge EXCLUDE_FROM_ALL acf-can-bridge.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-bridge PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEF)
+target_link_libraries(acf-can-brief-bridge open1722 open1722examples)
+target_include_directories(acf-can-brief-bridge PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
+add_executable(acf-can-brief-v2-talker EXCLUDE_FROM_ALL acf-can-talker.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-v2-talker PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEFV2)
+target_link_libraries(acf-can-brief-v2-talker open1722 open1722examples)
+target_include_directories(acf-can-brief-v2-talker PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
+add_executable(acf-can-brief-v2-listener EXCLUDE_FROM_ALL acf-can-listener.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-v2-listener PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEFV2)
+target_link_libraries(acf-can-brief-v2-listener open1722 open1722examples)
+target_include_directories(acf-can-brief-v2-listener PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
+add_executable(acf-can-brief-v2-bridge EXCLUDE_FROM_ALL acf-can-bridge.c ../acf-can-common.c)
+target_compile_definitions(acf-can-brief-v2-bridge PRIVATE AVTP_CAN_API=AVTP_CAN_API_CANBRIEFV2)
+target_link_libraries(acf-can-brief-v2-bridge open1722 open1722examples)
+target_include_directories(acf-can-brief-v2-bridge PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
+
 add_dependencies(examples acf-can-talker acf-can-listener acf-can-bridge 
-                acf-canv2-talker acf-canv2-listener acf-canv2-bridge)
+                acf-canv2-talker acf-canv2-listener acf-canv2-bridge
+                acf-can-brief-talker acf-can-brief-listener acf-can-brief-bridge
+                acf-can-brief-v2-talker acf-can-brief-v2-listener acf-can-brief-v2-bridge)
 
 install(TARGETS
     acf-can-listener
@@ -64,5 +96,11 @@ install(TARGETS
     acf-canv2-listener
     acf-canv2-talker
     acf-canv2-bridge
+    acf-can-brief-listener
+    acf-can-brief-talker
+    acf-can-brief-bridge
+    acf-can-brief-v2-listener
+    acf-can-brief-v2-talker
+    acf-can-brief-v2-bridge
     RUNTIME DESTINATION bin
     OPTIONAL)
