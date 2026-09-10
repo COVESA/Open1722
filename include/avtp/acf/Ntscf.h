@@ -103,17 +103,6 @@ OPEN1722_INLINE bool Avtp_Ntscf_IsSv(const Avtp_Ntscf_t *const pdu)
 }
 
 /**
- * Return the value of an an NTSCF PDU version field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
- * @returns Value of the NTSCF PDU version field.
- */
-OPEN1722_INLINE uint8_t Avtp_Ntscf_GetVersion(const Avtp_Ntscf_t *const pdu)
-{
-    return (uint8_t)GET_NTSCF_FIELD(AVTP_NTSCF_FIELD_VERSION);
-}
-
-/**
  * Return the value of an an NTSCF PDU Ntscf Data Length field as specified in the IEEE 1722
  * Specification.
  *
@@ -157,17 +146,6 @@ OPEN1722_INLINE uint64_t Avtp_Ntscf_GetStreamId(const Avtp_Ntscf_t *const pdu)
 OPEN1722_INLINE void Avtp_Ntscf_SetSv(Avtp_Ntscf_t *pdu, bool sv)
 {
     SET_NTSCF_FIELD(AVTP_NTSCF_FIELD_SV, sv);
-}
-
-/**
- * Set the value of an an NTSCF PDU version field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF Ntscf PDU.
- * @param value Value to set the NTSCF PDU version field to.
- */
-OPEN1722_INLINE void Avtp_Ntscf_SetVersion(Avtp_Ntscf_t *pdu, uint8_t value)
-{
-    SET_NTSCF_FIELD(AVTP_NTSCF_FIELD_VERSION, value);
 }
 
 /**

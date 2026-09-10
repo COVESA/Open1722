@@ -149,7 +149,6 @@ void Avtp_Rvf_Init(Avtp_Rvf_t *pdu);
 uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfField_t field);
 
 uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t *const pdu);
-uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t *const pdu);
 uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t *const pdu);
 uint8_t Avtp_Rvf_GetTv(const Avtp_Rvf_t *const pdu);
 uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t *const pdu);
@@ -177,7 +176,6 @@ void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfField_t field, uint64_t value);
 
 void Avtp_Rvf_EnableSv(Avtp_Rvf_t *pdu);
 void Avtp_Rvf_DisableSv(Avtp_Rvf_t *pdu);
-void Avtp_Rvf_SetVersion(Avtp_Rvf_t *pdu, uint8_t value);
 void Avtp_Rvf_EnableMr(Avtp_Rvf_t *pdu);
 void Avtp_Rvf_DisableMr(Avtp_Rvf_t *pdu);
 void Avtp_Rvf_EnableTv(Avtp_Rvf_t *pdu);

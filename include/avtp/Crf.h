@@ -85,7 +85,6 @@ void Avtp_Crf_Init(Avtp_Crf_t *pdu);
 uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfField_t field);
 
 uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetVersion(const Avtp_Crf_t *const pdu);
 uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t *const pdu);
 uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t *const pdu);
 uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t *const pdu);
@@ -101,7 +100,6 @@ void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfField_t field, uint64_t value);
 
 void Avtp_Crf_EnableSv(Avtp_Crf_t *pdu);
 void Avtp_Crf_DisableSv(Avtp_Crf_t *pdu);
-void Avtp_Crf_SetVersion(Avtp_Crf_t *pdu, uint8_t value);
 void Avtp_Crf_EnableMr(Avtp_Crf_t *pdu);
 void Avtp_Crf_DisableMr(Avtp_Crf_t *pdu);
 void Avtp_Crf_EnableFs(Avtp_Crf_t *pdu);

@@ -49,7 +49,7 @@
 void prepare_ntscf_header(Avtp_Ntscf_t *ntscf_header, struct acfcan_cfg *cfg)
 {
     Avtp_Ntscf_Init(ntscf_header);
-    Avtp_Ntscf_SetVersion(ntscf_header, 0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ntscf_header, 0);
     Avtp_Ntscf_SetSequenceNum(ntscf_header, cfg->sequenceNum++); // This can't be right. Increase?
     Avtp_Ntscf_SetStreamId(ntscf_header, cfg->tx_streamid);
 }

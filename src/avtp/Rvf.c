@@ -98,11 +98,6 @@ uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t *const pdu)
     return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_SV);
 }
 
-uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_VERSION);
-}
-
 uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_MR);
@@ -226,11 +221,6 @@ void Avtp_Rvf_EnableSv(Avtp_Rvf_t *pdu)
 void Avtp_Rvf_DisableSv(Avtp_Rvf_t *pdu)
 {
     SET_FIELD(AVTP_RVF_FIELD_SV, 0);
-}
-
-void Avtp_Rvf_SetVersion(Avtp_Rvf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_RVF_FIELD_VERSION, value);
 }
 
 void Avtp_Rvf_EnableMr(Avtp_Rvf_t *pdu)

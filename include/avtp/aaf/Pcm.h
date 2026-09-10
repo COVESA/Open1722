@@ -114,7 +114,6 @@ void Avtp_Pcm_Init(Avtp_Pcm_t *pdu);
 uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field);
 
 uint8_t Avtp_Pcm_GetSv(const Avtp_Pcm_t *const pdu);
-uint8_t Avtp_Pcm_GetVersion(const Avtp_Pcm_t *const pdu);
 uint8_t Avtp_Pcm_GetMr(const Avtp_Pcm_t *const pdu);
 uint8_t Avtp_Pcm_GetTv(const Avtp_Pcm_t *const pdu);
 uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t *const pdu);
@@ -142,7 +141,6 @@ void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value);
 
 void Avtp_Pcm_EnableSv(Avtp_Pcm_t *pdu);
 void Avtp_Pcm_DisableSv(Avtp_Pcm_t *pdu);
-void Avtp_Pcm_SetVersion(Avtp_Pcm_t *pdu, uint8_t value);
 void Avtp_Pcm_EnableMr(Avtp_Pcm_t *pdu);
 void Avtp_Pcm_DisableMr(Avtp_Pcm_t *pdu);
 void Avtp_Pcm_EnableTv(Avtp_Pcm_t *pdu);

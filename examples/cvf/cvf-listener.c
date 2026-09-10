@@ -168,7 +168,7 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf)
         return false;
     }
 
-    uint8_t version = Avtp_Cvf_GetVersion(cvf);
+    uint8_t version = Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)cvf);
     if (version != 0) {
         fprintf(stderr, "Version mismatch: expected %u, got %" PRIu8 "\n", 0, version);
         return false;
