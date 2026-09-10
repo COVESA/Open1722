@@ -68,11 +68,6 @@ uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t *const pdu)
     return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SV);
 }
 
-uint8_t Avtp_Aaf_GetVersion(const Avtp_Aaf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_VERSION);
-}
-
 uint8_t Avtp_Aaf_GetMr(const Avtp_Aaf_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_MR);
@@ -141,11 +136,6 @@ void Avtp_Aaf_EnableSv(Avtp_Aaf_t *pdu)
 void Avtp_Aaf_DisableSv(Avtp_Aaf_t *pdu)
 {
     SET_FIELD(AVTP_AAF_FIELD_SV, 0);
-}
-
-void Avtp_Aaf_SetVersion(Avtp_Aaf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_AAF_FIELD_VERSION, value);
 }
 
 void Avtp_Aaf_EnableMr(Avtp_Aaf_t *pdu)

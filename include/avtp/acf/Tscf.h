@@ -121,17 +121,6 @@ OPEN1722_INLINE bool Avtp_Tscf_IsSv(const Avtp_Tscf_t *const pdu)
 }
 
 /**
- * Return the value of an an TSCF PDU version field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
- * @returns Value of the TSCF PDU version field.
- */
-OPEN1722_INLINE uint8_t Avtp_Tscf_GetVersion(const Avtp_Tscf_t *const pdu)
-{
-    return (uint8_t)GET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION);
-}
-
-/**
  * Return the value of an an TSCF PDU MR field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
@@ -220,17 +209,6 @@ OPEN1722_INLINE uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t *const 
 OPEN1722_INLINE void Avtp_Tscf_SetSv(Avtp_Tscf_t *pdu, bool sv)
 {
     SET_TSCF_FIELD(AVTP_TSCF_FIELD_SV, sv);
-}
-
-/**
- * Set the value of an an TSCF PDU version field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
- * @param value Value to set the TSCF PDU version field to.
- */
-OPEN1722_INLINE void Avtp_Tscf_SetVersion(Avtp_Tscf_t *pdu, uint8_t value)
-{
-    SET_TSCF_FIELD(AVTP_TSCF_FIELD_VERSION, value);
 }
 
 /**

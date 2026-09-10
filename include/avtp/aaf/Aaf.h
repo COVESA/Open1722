@@ -82,7 +82,6 @@ typedef enum {
 uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t *const pdu, Avtp_AafFields_t field);
 
 uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t *const pdu);
-uint8_t Avtp_Aaf_GetVersion(const Avtp_Aaf_t *const pdu);
 uint8_t Avtp_Aaf_GetMr(const Avtp_Aaf_t *const pdu);
 uint8_t Avtp_Aaf_GetTv(const Avtp_Aaf_t *const pdu);
 uint8_t Avtp_Aaf_GetSequenceNum(const Avtp_Aaf_t *const pdu);
@@ -106,7 +105,6 @@ void Avtp_Aaf_SetField(Avtp_Aaf_t *pdu, Avtp_AafFields_t field, uint64_t value);
 
 void Avtp_Aaf_EnableSv(Avtp_Aaf_t *pdu);
 void Avtp_Aaf_DisableSv(Avtp_Aaf_t *pdu);
-void Avtp_Aaf_SetVersion(Avtp_Aaf_t *pdu, uint8_t value);
 void Avtp_Aaf_EnableMr(Avtp_Aaf_t *pdu);
 void Avtp_Aaf_DisableMr(Avtp_Aaf_t *pdu);
 void Avtp_Aaf_EnableTv(Avtp_Aaf_t *pdu);

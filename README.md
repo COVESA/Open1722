@@ -171,7 +171,7 @@ int main()
 
     // Init TSCF header
     Avtp_Tscf_Init(&pdu.tscf);
-    Avtp_Tscf_SetVersion(&pdu.tscf, 0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)&pdu.tscf, 0);
     Avtp_Tscf_SetSequenceNum(&pdu.tscf, 123);
     Avtp_Tscf_SetStreamId(&pdu.tscf, 0xAABBCCDDEEFF);
     Avtp_Tscf_SetTv(&pdu.tscf, true);
