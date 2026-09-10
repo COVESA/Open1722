@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define AVTP_CRF_HEADER_LEN     (5 * AVTP_QUADLET_SIZE)
+#define AVTP_CRF_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
 
 typedef struct Avtp_Cvf {
     uint8_t header[AVTP_CRF_HEADER_LEN];
@@ -46,19 +46,19 @@ typedef struct Avtp_Cvf {
 } Avtp_Crf_t;
 
 /* CRF 'type' field values. */
-#define AVTP_CRF_TYPE_USER			0x00
-#define AVTP_CRF_TYPE_AUDIO_SAMPLE		0x01
-#define AVTP_CRF_TYPE_VIDEO_FRAME		0x02
-#define AVTP_CRF_TYPE_VIDEO_LINE		0x03
-#define AVTP_CRF_TYPE_MACHINE_CYCLE		0x04
+#define AVTP_CRF_TYPE_USER 0x00
+#define AVTP_CRF_TYPE_AUDIO_SAMPLE 0x01
+#define AVTP_CRF_TYPE_VIDEO_FRAME 0x02
+#define AVTP_CRF_TYPE_VIDEO_LINE 0x03
+#define AVTP_CRF_TYPE_MACHINE_CYCLE 0x04
 
 /* CRF 'pull' field values. */
-#define AVTP_CRF_PULL_MULT_BY_1			0x00
-#define AVTP_CRF_PULL_MULT_BY_1_OVER_1_001	0x01
-#define AVTP_CRF_PULL_MULT_BY_1_001		0x02
-#define AVTP_CRF_PULL_MULT_BY_24_OVER_25	0x03
-#define AVTP_CRF_PULL_MULT_BY_25_OVER_24	0x04
-#define AVTP_CRF_PULL_MULT_BY_1_OVER_8		0x05
+#define AVTP_CRF_PULL_MULT_BY_1 0x00
+#define AVTP_CRF_PULL_MULT_BY_1_OVER_1_001 0x01
+#define AVTP_CRF_PULL_MULT_BY_1_001 0x02
+#define AVTP_CRF_PULL_MULT_BY_24_OVER_25 0x03
+#define AVTP_CRF_PULL_MULT_BY_25_OVER_24 0x04
+#define AVTP_CRF_PULL_MULT_BY_1_OVER_8 0x05
 
 typedef enum Avtp_CrfField {
     /* CRF header fields */
@@ -78,60 +78,58 @@ typedef enum Avtp_CrfField {
     AVTP_CRF_FIELD_TIMESTAMP_INTERVAL,
     /* Count number of fields for bound checks */
     AVTP_CRF_FIELD_MAX,
-}Avtp_CrfField_t;
+} Avtp_CrfField_t;
 
-void Avtp_Crf_Init(Avtp_Crf_t* pdu);
+void Avtp_Crf_Init(Avtp_Crf_t *pdu);
 
-uint64_t Avtp_Crf_GetField(const Avtp_Crf_t* const pdu, Avtp_CrfField_t field);
+uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfField_t field);
 
-uint8_t Avtp_Crf_GetSubtype(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetVersion(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetType(const Avtp_Crf_t* const pdu);
-uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t* const pdu);
-uint8_t Avtp_Crf_GetPull(const Avtp_Crf_t* const pdu);
-uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t* const pdu);
-uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t* const pdu);
-uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t* const pdu);
+uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetVersion(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetType(const Avtp_Crf_t *const pdu);
+uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t *const pdu);
+uint8_t Avtp_Crf_GetPull(const Avtp_Crf_t *const pdu);
+uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t *const pdu);
+uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t *const pdu);
+uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const pdu);
 
-void Avtp_Crf_SetField(Avtp_Crf_t* pdu, Avtp_CrfField_t field, uint64_t value);
+void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfField_t field, uint64_t value);
 
-void Avtp_Crf_SetSubtype(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_EnableSv(Avtp_Crf_t* pdu);
-void Avtp_Crf_DisableSv(Avtp_Crf_t* pdu);
-void Avtp_Crf_SetVersion(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_EnableMr(Avtp_Crf_t* pdu);
-void Avtp_Crf_DisableMr(Avtp_Crf_t* pdu);
-void Avtp_Crf_EnableFs(Avtp_Crf_t* pdu);
-void Avtp_Crf_DisableFs(Avtp_Crf_t* pdu);
-void Avtp_Crf_EnableTu(Avtp_Crf_t* pdu);
-void Avtp_Crf_DisableTu(Avtp_Crf_t* pdu);
-void Avtp_Crf_SetSequenceNum(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetType(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetStreamId(Avtp_Crf_t* pdu, uint64_t value);
-void Avtp_Crf_SetPull(Avtp_Crf_t* pdu, uint8_t value);
-void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t* pdu, uint32_t value);
-void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t* pdu, uint16_t value);
-void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t* pdu, uint16_t value);
+void Avtp_Crf_EnableSv(Avtp_Crf_t *pdu);
+void Avtp_Crf_DisableSv(Avtp_Crf_t *pdu);
+void Avtp_Crf_SetVersion(Avtp_Crf_t *pdu, uint8_t value);
+void Avtp_Crf_EnableMr(Avtp_Crf_t *pdu);
+void Avtp_Crf_DisableMr(Avtp_Crf_t *pdu);
+void Avtp_Crf_EnableFs(Avtp_Crf_t *pdu);
+void Avtp_Crf_DisableFs(Avtp_Crf_t *pdu);
+void Avtp_Crf_EnableTu(Avtp_Crf_t *pdu);
+void Avtp_Crf_DisableTu(Avtp_Crf_t *pdu);
+void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint8_t value);
+void Avtp_Crf_SetType(Avtp_Crf_t *pdu, uint8_t value);
+void Avtp_Crf_SetStreamId(Avtp_Crf_t *pdu, uint64_t value);
+void Avtp_Crf_SetPull(Avtp_Crf_t *pdu, uint8_t value);
+void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t *pdu, uint32_t value);
+void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t *pdu, uint16_t value);
+void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t value);
 
 /******************************************************************************
  * Legacy API (deprecated)
  *****************************************************************************/
 
-#define AVTP_CRF_FIELD_SEQ_NUM          AVTP_CRF_FIELD_SEQUENCE_NUM
-#define AVTP_CRF_FIELD_BASE_FREQ        AVTP_CRF_FIELD_BASE_FREQUENCY
-#define AVTP_CRF_FIELD_CRF_DATA_LEN     AVTP_CRF_FIELD_CRF_DATA_LENGTH
+#define AVTP_CRF_FIELD_SEQ_NUM AVTP_CRF_FIELD_SEQUENCE_NUM
+#define AVTP_CRF_FIELD_BASE_FREQ AVTP_CRF_FIELD_BASE_FREQUENCY
+#define AVTP_CRF_FIELD_CRF_DATA_LEN AVTP_CRF_FIELD_CRF_DATA_LENGTH
 
 struct avtp_crf_pdu {
     uint32_t subtype_data;
     uint64_t stream_id;
     uint64_t packet_info;
     uint64_t crf_data[0];
-} __attribute__ ((__packed__));
+} __attribute__((__packed__));
 
 /**
  * @deprecated
@@ -144,7 +142,7 @@ struct avtp_crf_pdu {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_crf_pdu_get(const void * const pdu, Avtp_CrfField_t field, uint64_t *val);
+int avtp_crf_pdu_get(const void *const pdu, Avtp_CrfField_t field, uint64_t *val);
 
 /**
  * @deprecated

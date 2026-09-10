@@ -66,7 +66,7 @@ void Avtp_Cvf_Init(Avtp_Cvf_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Cvf_t));
-        Avtp_Cvf_SetField(pdu, AVTP_CVF_FIELD_SUBTYPE, AVTP_SUBTYPE_CVF);
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CVF);
         Avtp_Cvf_SetField(pdu, AVTP_CVF_FIELD_FORMAT, AVTP_CVF_FORMAT_RFC);
         Avtp_Cvf_EnableSv(pdu);
     }
@@ -75,11 +75,6 @@ void Avtp_Cvf_Init(Avtp_Cvf_t *pdu)
 uint64_t Avtp_Cvf_GetField(const Avtp_Cvf_t *const pdu, Avtp_CvfField_t field)
 {
     return GET_FIELD(field);
-}
-
-uint8_t Avtp_Cvf_GetSubtype(const Avtp_Cvf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_CVF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Cvf_GetSv(const Avtp_Cvf_t *const pdu)
@@ -155,11 +150,6 @@ uint8_t Avtp_Cvf_GetEvt(const Avtp_Cvf_t *const pdu)
 void Avtp_Cvf_SetField(Avtp_Cvf_t *pdu, Avtp_CvfField_t field, uint64_t value)
 {
     SET_FIELD(field, value);
-}
-
-void Avtp_Cvf_SetSubtype(Avtp_Cvf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_CVF_FIELD_SUBTYPE, value);
 }
 
 void Avtp_Cvf_EnableSv(Avtp_Cvf_t *pdu)

@@ -65,7 +65,7 @@ void Avtp_Crf_Init(Avtp_Crf_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Crf_t));
-        Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SUBTYPE, AVTP_SUBTYPE_CRF);
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CRF);
         Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SV, 1);
     }
 }
@@ -73,11 +73,6 @@ void Avtp_Crf_Init(Avtp_Crf_t *pdu)
 uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfField_t field)
 {
     return GET_FIELD(field);
-}
-
-uint8_t Avtp_Crf_GetSubtype(const Avtp_Crf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_CRF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t *const pdu)
@@ -143,11 +138,6 @@ uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const pdu)
 void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfField_t field, uint64_t value)
 {
     SET_FIELD(field, value);
-}
-
-void Avtp_Crf_SetSubtype(Avtp_Crf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_CRF_FIELD_SUBTYPE, value);
 }
 
 void Avtp_Crf_EnableSv(Avtp_Crf_t *pdu)
