@@ -36,7 +36,7 @@ reading either half of this document.
 Function, type and field names are taken directly from the IEEE 1722
 specification. The guiding idea is: **if you have read and understood the spec,
 you can use Open1722 directly** - the mapping from a spec field to the
-corresponding API call is mechanical. 
+corresponding API call is mechanical.
 
 For example, the ACF CAN header contains the fields `pad`, `mtv`, `rtr`, `eff`,
 `brs`, `fdf`, `esi`, `can_bus_id`, `message_timestamp` and `can_identifier`.
@@ -152,11 +152,15 @@ Single-bit flag fields are booleans and return `bool` (via `Is<Flag>`):
 OPEN1722_INLINE bool Avtp_Can_IsMtv(const Avtp_Can_t *const pdu);
 ```
 
-Fields that represent an enumeration of named values (most notably the ACF
-message type) return the corresponding typed enum rather than a bare integer:
+Fields whose wire domain is open - reserved, user-range or custom values are
+possible - are returned as the raw integer type even if a named enum exists for
+the standardized values. The ACF message type is the canonical example: the
+7-bit field can carry third-party values that `Avtp_AcfMsgType_t` cannot
+express, so the accessors deal in `uint8_t` and the enum merely documents the
+standardized types:
 
 ```c
-Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu);
+OPEN1722_INLINE uint8_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu);
 ```
 
 ## The PDU struct in memory
@@ -513,13 +517,14 @@ ACF formats share a *common header* whose two fields - `acf_msg_type` and
 described once in [`AcfCommon.h`](../include/avtp/acf/AcfCommon.h):
 
 - `Avtp_AcfCommon_t` - the common-header PDU struct.
-- `Avtp_AcfMsgType_t` - the enumeration of all ACF message types
-  (`AVTP_ACF_TYPE_CAN`, `AVTP_ACF_TYPE_LIN`, …).
+- `Avtp_AcfMsgType_t` - the standardized ACF message types
+  (`AVTP_ACF_TYPE_CAN`, `AVTP_ACF_TYPE_LIN`, …). The enum is for
+  documentation only; the wire field is an open 7-bit domain.
 - `Avtp_AcfCommon_GetAcfMsgType`, `Avtp_AcfCommon_SetAcfMsgType`,
   `Avtp_AcfCommon_Get/SetAcfMsgLength`,
   `Avtp_AcfCommon_GetAcfMsgLengthInBytes` - accessors for the two shared
-  fields (the message type accessors are typed against
-  `Avtp_AcfMsgType_t`).
+  fields. The message type accessors use raw `uint8_t` so reserved,
+  user-range and custom message types can be read and written.
 
 Each concrete format defines its *own* field enum and descriptor table that
 *include* the two common fields, so the format's struct can be overlaid on the

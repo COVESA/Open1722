@@ -57,6 +57,10 @@ typedef struct {
 
 /**
  * AVTP message types. See IEEE Std 1722-2025 table 22.
+ *
+ * This enum documents the standardized ACF message types only. The wire field
+ * is an open 7-bit domain that may also carry reserved, user-range or custom
+ * values not listed here.
  */
 typedef enum {
     AVTP_ACF_TYPE_FLEXRAY = 0x0,
@@ -129,12 +133,16 @@ OPEN1722_INLINE uint64_t Avtp_AcfCommon_GetField(const Avtp_AcfCommon_t *const p
 /**
  * Returns the ACF message type field value.
  *
+ * The ACF message type is an open 7-bit field: it can carry reserved,
+ * user-range and custom (non-standard) values besides the standardized ones
+ * listed in Avtp_AcfMsgType_t. The raw field is therefore returned as uint8_t.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @returns Returns the ACF message type field of the PDU.
  */
-OPEN1722_INLINE Avtp_AcfMsgType_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_AcfCommon_GetAcfMsgType(const Avtp_AcfCommon_t *const pdu)
 {
-    return (Avtp_AcfMsgType_t)GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE);
+    return (uint8_t)GET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE);
 }
 
 /**
@@ -177,10 +185,14 @@ OPEN1722_INLINE void Avtp_AcfCommon_SetField(Avtp_AcfCommon_t *pdu, Avtp_AcfComm
 /**
  * Sets the ACF message type field value as specified in the IEEE 1722 Specification.
  *
+ * The value is a raw 7-bit field and may be a reserved, user-range or custom
+ * (non-standard) ACF message type in addition to the standardized values listed
+ * in Avtp_AcfMsgType_t.
+ *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.
  * @param value Value to set the ACF message type field to.
  */
-OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t *pdu, Avtp_AcfMsgType_t value)
+OPEN1722_INLINE void Avtp_AcfCommon_SetAcfMsgType(Avtp_AcfCommon_t *pdu, uint8_t value)
 {
     SET_ACF_COMMON_FIELD(AVTP_ACF_FIELD_ACF_MSG_TYPE, value);
 }

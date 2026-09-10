@@ -60,7 +60,7 @@ static void vss_init(void **state)
     init_pdu[0] = 0x42 << 1; // Setting ACF type as ACF_VSS
     assert_memory_equal(init_pdu, pdu, AVTP_VSS_FIXED_HEADER_LEN);
 
-    Avtp_AcfMsgType_t type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu);
+    uint8_t type = Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu);
     assert_int_equal(type, 0x42);
 }
 
