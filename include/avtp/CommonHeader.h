@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-#define AVTP_COMMON_HEADER_LEN             (1 * AVTP_QUADLET_SIZE)
+#define AVTP_COMMON_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
 typedef struct {
     uint8_t header[AVTP_COMMON_HEADER_LEN];
@@ -53,7 +53,7 @@ typedef struct {
  * Enumeration over all IEEE 1722 header fields. The naming convention used is
  * AVTP_<MSG_TYPE>_FIELD_<FIELD_NAME>.
  */
-typedef enum Avtp_CommonHeaderField{
+typedef enum Avtp_CommonHeaderField {
     /* Common AVTP header fields */
     AVTP_COMMON_HEADER_FIELD_SUBTYPE = 0,
     AVTP_COMMON_HEADER_FIELD_H,
@@ -64,26 +64,26 @@ typedef enum Avtp_CommonHeaderField{
 } Avtp_CommonHeaderField_t;
 
 typedef enum {
-    AVTP_SUBTYPE_61883_IIDC        = 0x0,
-    AVTP_SUBTYPE_MMA_STREAM        = 0x1,
-    AVTP_SUBTYPE_AAF               = 0x2,
-    AVTP_SUBTYPE_CVF               = 0x3,
-    AVTP_SUBTYPE_CRF               = 0x4,
-    AVTP_SUBTYPE_TSCF              = 0x5,
-    AVTP_SUBTYPE_SVF               = 0x6,
-    AVTP_SUBTYPE_RVF               = 0x7,
-    AVTP_SUBTYPE_AEF_CONTINUOUS    = 0x6E,
-    AVTP_SUBTYPE_VSF_STREAM        = 0x6F,
-    AVTP_SUBTYPE_EF_STREAM         = 0x7F,
-    AVTP_SUBTYPE_NTSCF             = 0x82,
-    AVTP_SUBTYPE_ESCF              = 0xEC,
-    AVTP_SUBTYPE_EECF              = 0xED,
-    AVTP_SUBTYPE_AEF_DISCRETE      = 0xEE,
-    AVTP_SUBTYPE_ADP               = 0xFA,
-    AVTP_SUBTYPE_AECP              = 0xFB,
-    AVTP_SUBTYPE_ACMP              = 0xFC,
-    AVTP_SUBTYPE_MAAP              = 0xFE,
-    AVTP_SUBTYPE_EF_CONTROL        = 0xFF,
+    AVTP_SUBTYPE_61883_IIDC = 0x0,
+    AVTP_SUBTYPE_MMA_STREAM = 0x1,
+    AVTP_SUBTYPE_AAF = 0x2,
+    AVTP_SUBTYPE_CVF = 0x3,
+    AVTP_SUBTYPE_CRF = 0x4,
+    AVTP_SUBTYPE_TSCF = 0x5,
+    AVTP_SUBTYPE_SVF = 0x6,
+    AVTP_SUBTYPE_RVF = 0x7,
+    AVTP_SUBTYPE_AEF_CONTINUOUS = 0x6E,
+    AVTP_SUBTYPE_VSF_STREAM = 0x6F,
+    AVTP_SUBTYPE_EF_STREAM = 0x7F,
+    AVTP_SUBTYPE_NTSCF = 0x82,
+    AVTP_SUBTYPE_ESCF = 0xEC,
+    AVTP_SUBTYPE_EECF = 0xED,
+    AVTP_SUBTYPE_AEF_DISCRETE = 0xEE,
+    AVTP_SUBTYPE_ADP = 0xFA,
+    AVTP_SUBTYPE_AECP = 0xFB,
+    AVTP_SUBTYPE_ACMP = 0xFC,
+    AVTP_SUBTYPE_MAAP = 0xFE,
+    AVTP_SUBTYPE_EF_CONTROL = 0xFF,
 } Avtp_AvtpSubtype_t;
 
 /**
@@ -93,22 +93,26 @@ typedef enum {
  * @param field Specifies the position of the data field to be read
  * @returns This function the value of the specified PDU field
  */
-uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t* const pdu, Avtp_CommonHeaderField_t field);
+uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t *const pdu,
+                                    Avtp_CommonHeaderField_t field);
 
 /**
  * Returns the subtype field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t* const pdu);
+uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t *const pdu);
 
 /**
- * Returns the header specific field of the AVTP common header.
+ * Returns the h (header specific) bit of the AVTP common header. The meaning of this bit is defined
+ * by the header/format: the common stream header (4.7.4) and common control header (4.7.5) define
+ * it as sv (stream_id valid), while formats using the alternative header (4.7.6) define it
+ * themselves or leave it reserved.
  */
-uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t* const pdu);
+uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t *const pdu);
 
 /**
  * Returns the version field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t* const pdu);
+uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t *const pdu);
 
 /**
  * Sets the value of an an AVTP common header field as specified in the IEEE 1722 Specification.
@@ -117,22 +121,24 @@ uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t* const pdu);
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-void Avtp_CommonHeader_SetField(Avtp_CommonHeader_t* pdu, Avtp_CommonHeaderField_t field, uint64_t value);
+void Avtp_CommonHeader_SetField(Avtp_CommonHeader_t *pdu, Avtp_CommonHeaderField_t field,
+                                uint64_t value);
 
 /**
  * Set the subtype field of the AVTP common header.
  */
-void Avtp_CommonHeader_SetSubtype(Avtp_CommonHeader_t* pdu, uint8_t value);
+void Avtp_CommonHeader_SetSubtype(Avtp_CommonHeader_t *pdu, uint8_t value);
 
 /**
- * Set the header specific field of the AVTP common header.
+ * Sets the h (header specific) bit of the AVTP common header. See Avtp_CommonHeader_GetH for the
+ * definition of this bit.
  */
-void Avtp_CommonHeader_SetH(Avtp_CommonHeader_t* pdu, uint8_t value);
+void Avtp_CommonHeader_SetH(Avtp_CommonHeader_t *pdu, uint8_t value);
 
 /**
  * Set the version field of the AVTP common header.
  */
-void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t* pdu, uint8_t value);
+void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t *pdu, uint8_t value);
 
 /******************************************************************************
  * Legacy API (deprecated)
@@ -141,7 +147,7 @@ void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t* pdu, uint8_t value);
 struct avtp_common_pdu {
     uint32_t subtype_data;
     uint8_t pdu_specific[0];
-} __attribute__ ((__packed__));
+} __attribute__((__packed__));
 
 struct avtp_stream_pdu {
     uint32_t subtype_data;
@@ -150,11 +156,11 @@ struct avtp_stream_pdu {
     uint32_t format_specific;
     uint32_t packet_info;
     uint8_t avtp_payload[0];
-} __attribute__ ((__packed__));
+} __attribute__((__packed__));
 
-#define AVTP_FIELD_SUBTYPE      (AVTP_COMMON_HEADER_FIELD_SUBTYPE)
-#define AVTP_FIELD_VERSION      (AVTP_COMMON_HEADER_FIELD_VERSION)
-#define AVTP_FIELD_MAX          (AVTP_COMMON_HEADER_FIELD_MAX)
+#define AVTP_FIELD_SUBTYPE (AVTP_COMMON_HEADER_FIELD_SUBTYPE)
+#define AVTP_FIELD_VERSION (AVTP_COMMON_HEADER_FIELD_VERSION)
+#define AVTP_FIELD_MAX (AVTP_COMMON_HEADER_FIELD_MAX)
 
 /* Get value from Common AVTPDU field.
  * @pdu: Pointer to PDU struct.
@@ -165,8 +171,8 @@ struct avtp_stream_pdu {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_pdu_get(const struct avtp_common_pdu * const pdu, Avtp_CommonHeaderField_t field,
-                                uint32_t *val);
+int avtp_pdu_get(const struct avtp_common_pdu *const pdu, Avtp_CommonHeaderField_t field,
+                 uint32_t *val);
 
 /* Set value from Common AVTPDU field.
  * @pdu: Pointer to PDU struct.
@@ -177,8 +183,7 @@ int avtp_pdu_get(const struct avtp_common_pdu * const pdu, Avtp_CommonHeaderFiel
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_pdu_set(struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field,
-                                uint32_t val);
+int avtp_pdu_set(struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field, uint32_t val);
 
 #ifdef __cplusplus
 }
