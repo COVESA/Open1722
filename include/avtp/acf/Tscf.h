@@ -110,17 +110,6 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] = {
 };
 
 /**
- * Return the value of an an TSCF PDU subtype field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
- * @returns Value of the TSCF PDU subtype field.
- */
-OPEN1722_INLINE uint8_t Avtp_Tscf_GetSubtype(const Avtp_Tscf_t *const pdu)
-{
-    return (uint8_t)GET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE);
-}
-
-/**
  * Return the value of an an TSCF PDU SV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
@@ -220,17 +209,6 @@ OPEN1722_INLINE uint32_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t *const pdu
 OPEN1722_INLINE uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t *const pdu)
 {
     return (uint16_t)GET_TSCF_FIELD(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
-}
-
-/**
- * Set the value of an an TSCF PDU subtype field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.
- * @param value Value to set the TSCF PDU subtype field to.
- */
-OPEN1722_INLINE void Avtp_Tscf_SetSubtype(Avtp_Tscf_t *pdu, uint8_t value)
-{
-    SET_TSCF_FIELD(AVTP_TSCF_FIELD_SUBTYPE, value);
 }
 
 /**
@@ -352,7 +330,7 @@ OPEN1722_INLINE bool Avtp_Tscf_IsValid(const Avtp_Tscf_t *const pdu, size_t buff
         return false;
     }
 
-    if (Avtp_Tscf_GetSubtype(pdu) != AVTP_SUBTYPE_TSCF) {
+    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_TSCF) {
         return false;
     }
 
@@ -374,7 +352,7 @@ OPEN1722_INLINE void Avtp_Tscf_Init(Avtp_Tscf_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Tscf_t));
-        Avtp_Tscf_SetSubtype(pdu, AVTP_SUBTYPE_TSCF);
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_TSCF);
         Avtp_Tscf_SetSv(pdu, true);
     }
 }

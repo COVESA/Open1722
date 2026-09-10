@@ -62,13 +62,13 @@ typedef enum Avtp_RvfField {
     AVTP_RVF_FIELD_ACTIVE_PIXELS,
     AVTP_RVF_FIELD_TOTAL_LINES,
     AVTP_RVF_FIELD_STREAM_DATA_LENGTH,
-    AVTP_RVF_FIELD_AP,                     // Active pixels
+    AVTP_RVF_FIELD_AP, // Active pixels
     AVTP_RVF_FIELD_RESERVED_3,
-    AVTP_RVF_FIELD_F,                      // Field
-    AVTP_RVF_FIELD_EF,                     // End frame
+    AVTP_RVF_FIELD_F,  // Field
+    AVTP_RVF_FIELD_EF, // End frame
     AVTP_RVF_FIELD_EVT,
-    AVTP_RVF_FIELD_PD,                     // Pull-down
-    AVTP_RVF_FIELD_I,                      // Interlaced
+    AVTP_RVF_FIELD_PD, // Pull-down
+    AVTP_RVF_FIELD_I,  // Interlaced
     AVTP_RVF_FIELD_RESERVED_4,
     AVTP_RVF_FIELD_RESERVED_5,
     AVTP_RVF_FIELD_PIXEL_DEPTH,
@@ -77,154 +77,152 @@ typedef enum Avtp_RvfField {
     AVTP_RVF_FIELD_COLORSPACE,
     AVTP_RVF_FIELD_NUM_LINES,
     AVTP_RVF_FIELD_RESERVED_6,
-    AVTP_RVF_FIELD_I_SEQ_NUM,              // Intra-line sequence number
+    AVTP_RVF_FIELD_I_SEQ_NUM, // Intra-line sequence number
     AVTP_RVF_FIELD_LINE_NUMBER,
     /* Count number of fields for bound checks */
     AVTP_RVF_FIELD_MAX
 } Avtp_RvfField_t;
 
 typedef enum Avtp_RvfPixelDepth {
-    AVTP_RVF_PIXEL_DEPTH_8              = 0x01,
-    AVTP_RVF_PIXEL_DEPTH_10             = 0x02,
-    AVTP_RVF_PIXEL_DEPTH_12             = 0x03,
-    AVTP_RVF_PIXEL_DEPTH_16             = 0x04,
-    AVTP_RVF_PIXEL_DEPTH_USER           = 0x0F
+    AVTP_RVF_PIXEL_DEPTH_8 = 0x01,
+    AVTP_RVF_PIXEL_DEPTH_10 = 0x02,
+    AVTP_RVF_PIXEL_DEPTH_12 = 0x03,
+    AVTP_RVF_PIXEL_DEPTH_16 = 0x04,
+    AVTP_RVF_PIXEL_DEPTH_USER = 0x0F
 } Avtp_RvfPixelDepth_t;
 
 typedef enum Avtp_RvfPixelFormat {
-    AVTP_RVF_PIXEL_FORMAT_MONO          = 0x00,
-    AVTP_RVF_PIXEL_FORMAT_411           = 0x01,
-    AVTP_RVF_PIXEL_FORMAT_420           = 0x02,
-    AVTP_RVF_PIXEL_FORMAT_422           = 0x03,
-    AVTP_RVF_PIXEL_FORMAT_444           = 0x04,
-    AVTP_RVF_PIXEL_FORMAT_4224          = 0x06,
-    AVTP_RVF_PIXEL_FORMAT_4444          = 0x07,
-    AVTP_RVF_PIXEL_FORMAT_BAYER_GRBG    = 0x08,
-    AVTP_RVF_PIXEL_FORMAT_BAYER_RGGB    = 0x09,
-    AVTP_RVF_PIXEL_FORMAT_BAYER_BGGR    = 0x0A,
-    AVTP_RVF_PIXEL_FORMAT_BAYER_GBRG    = 0x0B,
-    AVTP_RVF_PIXEL_FORMAT_USER          = 0x0F
+    AVTP_RVF_PIXEL_FORMAT_MONO = 0x00,
+    AVTP_RVF_PIXEL_FORMAT_411 = 0x01,
+    AVTP_RVF_PIXEL_FORMAT_420 = 0x02,
+    AVTP_RVF_PIXEL_FORMAT_422 = 0x03,
+    AVTP_RVF_PIXEL_FORMAT_444 = 0x04,
+    AVTP_RVF_PIXEL_FORMAT_4224 = 0x06,
+    AVTP_RVF_PIXEL_FORMAT_4444 = 0x07,
+    AVTP_RVF_PIXEL_FORMAT_BAYER_GRBG = 0x08,
+    AVTP_RVF_PIXEL_FORMAT_BAYER_RGGB = 0x09,
+    AVTP_RVF_PIXEL_FORMAT_BAYER_BGGR = 0x0A,
+    AVTP_RVF_PIXEL_FORMAT_BAYER_GBRG = 0x0B,
+    AVTP_RVF_PIXEL_FORMAT_USER = 0x0F
 } Avtp_RvfPixelFormat_t;
 
 typedef enum Avtp_RvfFrameRate {
-    AVTP_RVF_FRAME_RATE_1               = 0x01,
-    AVTP_RVF_FRAME_RATE_2               = 0x02,
-    AVTP_RVF_FRAME_RATE_5               = 0x03,
-    AVTP_RVF_FRAME_RATE_10              = 0x10,
-    AVTP_RVF_FRAME_RATE_15              = 0x11,
-    AVTP_RVF_FRAME_RATE_20              = 0x12,
-    AVTP_RVF_FRAME_RATE_24              = 0x13,
-    AVTP_RVF_FRAME_RATE_25              = 0x14,
-    AVTP_RVF_FRAME_RATE_30              = 0x15,
-    AVTP_RVF_FRAME_RATE_48              = 0x16,
-    AVTP_RVF_FRAME_RATE_50              = 0x17,
-    AVTP_RVF_FRAME_RATE_60              = 0x18,
-    AVTP_RVF_FRAME_RATE_72              = 0x19,
-    AVTP_RVF_FRAME_RATE_85              = 0x1A,
-    AVTP_RVF_FRAME_RATE_100             = 0x30,
-    AVTP_RVF_FRAME_RATE_120             = 0x31,
-    AVTP_RVF_FRAME_RATE_150             = 0x32,
-    AVTP_RVF_FRAME_RATE_200             = 0x33,
-    AVTP_RVF_FRAME_RATE_240             = 0x34,
-    AVTP_RVF_FRAME_RATE_300             = 0x35,
-    AVTP_RVF_FRAME_RATE_USER            = 0x0F
+    AVTP_RVF_FRAME_RATE_1 = 0x01,
+    AVTP_RVF_FRAME_RATE_2 = 0x02,
+    AVTP_RVF_FRAME_RATE_5 = 0x03,
+    AVTP_RVF_FRAME_RATE_10 = 0x10,
+    AVTP_RVF_FRAME_RATE_15 = 0x11,
+    AVTP_RVF_FRAME_RATE_20 = 0x12,
+    AVTP_RVF_FRAME_RATE_24 = 0x13,
+    AVTP_RVF_FRAME_RATE_25 = 0x14,
+    AVTP_RVF_FRAME_RATE_30 = 0x15,
+    AVTP_RVF_FRAME_RATE_48 = 0x16,
+    AVTP_RVF_FRAME_RATE_50 = 0x17,
+    AVTP_RVF_FRAME_RATE_60 = 0x18,
+    AVTP_RVF_FRAME_RATE_72 = 0x19,
+    AVTP_RVF_FRAME_RATE_85 = 0x1A,
+    AVTP_RVF_FRAME_RATE_100 = 0x30,
+    AVTP_RVF_FRAME_RATE_120 = 0x31,
+    AVTP_RVF_FRAME_RATE_150 = 0x32,
+    AVTP_RVF_FRAME_RATE_200 = 0x33,
+    AVTP_RVF_FRAME_RATE_240 = 0x34,
+    AVTP_RVF_FRAME_RATE_300 = 0x35,
+    AVTP_RVF_FRAME_RATE_USER = 0x0F
 } Avtp_RvfFrameRate_t;
 
 /* RVF 'colorspace' field values. */
 typedef enum Avtp_RvfColorspace {
-    AVTP_RVF_COLORSPACE_YCbCr           = 0x01,
-    AVTP_RVF_COLORSPACE_SRGB            = 0x02,
-    AVTP_RVF_COLORSPACE_YCgCo           = 0x03,
-    AVTP_RVF_COLORSPACE_GRAY            = 0x04,
-    AVTP_RVF_COLORSPACE_XYZ             = 0x05,
-    AVTP_RVF_COLORSPACE_YCM             = 0x06,
-    AVTP_RVF_COLORSPACE_BT_601          = 0x07,
-    AVTP_RVF_COLORSPACE_BT_709          = 0x08,
-    AVTP_RVF_COLORSPACE_ITU_BT          = 0x09,
-    AVTP_RVF_COLORSPACE_USER            = 0x0F
+    AVTP_RVF_COLORSPACE_YCbCr = 0x01,
+    AVTP_RVF_COLORSPACE_SRGB = 0x02,
+    AVTP_RVF_COLORSPACE_YCgCo = 0x03,
+    AVTP_RVF_COLORSPACE_GRAY = 0x04,
+    AVTP_RVF_COLORSPACE_XYZ = 0x05,
+    AVTP_RVF_COLORSPACE_YCM = 0x06,
+    AVTP_RVF_COLORSPACE_BT_601 = 0x07,
+    AVTP_RVF_COLORSPACE_BT_709 = 0x08,
+    AVTP_RVF_COLORSPACE_ITU_BT = 0x09,
+    AVTP_RVF_COLORSPACE_USER = 0x0F
 } Avtp_RvfColorspace_t;
 
-void Avtp_Rvf_Init(Avtp_Rvf_t* pdu);
+void Avtp_Rvf_Init(Avtp_Rvf_t *pdu);
 
-uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t* const pdu, Avtp_RvfField_t field);
+uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfField_t field);
 
-uint8_t Avtp_Rvf_GetSubtype(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetTv(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetTu(const Avtp_Rvf_t* const pdu);
-uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t* const pdu);
-uint32_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t* const pdu);
-uint16_t Avtp_Rvf_GetActivePixels(const Avtp_Rvf_t* const pdu);
-uint16_t Avtp_Rvf_GetTotalLines(const Avtp_Rvf_t* const pdu);
-uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetAp(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetF(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetEf(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetPd(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetI(const Avtp_Rvf_t* const pdu);
-Avtp_RvfPixelDepth_t Avtp_Rvf_GetPixelDepth(const Avtp_Rvf_t* const pdu);
-Avtp_RvfPixelFormat_t Avtp_Rvf_GetPixelFormat(const Avtp_Rvf_t* const pdu);
-Avtp_RvfFrameRate_t Avtp_Rvf_GetFrameRate(const Avtp_Rvf_t* const pdu);
-Avtp_RvfColorspace_t Avtp_Rvf_GetColorspace(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetNumLines(const Avtp_Rvf_t* const pdu);
-uint8_t Avtp_Rvf_GetISeqNum(const Avtp_Rvf_t* const pdu);
-uint16_t Avtp_Rvf_GetLineNumber(const Avtp_Rvf_t* const pdu);
+uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetVersion(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetMr(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetTv(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetTu(const Avtp_Rvf_t *const pdu);
+uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t *const pdu);
+uint32_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t *const pdu);
+uint16_t Avtp_Rvf_GetActivePixels(const Avtp_Rvf_t *const pdu);
+uint16_t Avtp_Rvf_GetTotalLines(const Avtp_Rvf_t *const pdu);
+uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetAp(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetF(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetEf(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetPd(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetI(const Avtp_Rvf_t *const pdu);
+Avtp_RvfPixelDepth_t Avtp_Rvf_GetPixelDepth(const Avtp_Rvf_t *const pdu);
+Avtp_RvfPixelFormat_t Avtp_Rvf_GetPixelFormat(const Avtp_Rvf_t *const pdu);
+Avtp_RvfFrameRate_t Avtp_Rvf_GetFrameRate(const Avtp_Rvf_t *const pdu);
+Avtp_RvfColorspace_t Avtp_Rvf_GetColorspace(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetNumLines(const Avtp_Rvf_t *const pdu);
+uint8_t Avtp_Rvf_GetISeqNum(const Avtp_Rvf_t *const pdu);
+uint16_t Avtp_Rvf_GetLineNumber(const Avtp_Rvf_t *const pdu);
 
-void Avtp_Rvf_SetField(Avtp_Rvf_t* pdu, Avtp_RvfField_t field, uint64_t value);
+void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfField_t field, uint64_t value);
 
-void Avtp_Rvf_SetSubtype(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_EnableSv(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableSv(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_SetVersion(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_EnableMr(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableMr(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_EnableTv(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableTv(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_SetSequenceNum(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_EnableTu(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableTu(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_SetStreamId(Avtp_Rvf_t* pdu, uint64_t value);
-void Avtp_Rvf_SetAvtpTimestamp(Avtp_Rvf_t* pdu, uint32_t value);
-void Avtp_Rvf_SetActivePixels(Avtp_Rvf_t* pdu, uint16_t value);
-void Avtp_Rvf_SetTotalLines(Avtp_Rvf_t* pdu, uint16_t value);
-void Avtp_Rvf_SetStreamDataLength(Avtp_Rvf_t* pdu, uint16_t value);
-void Avtp_Rvf_EnableAp(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableAp(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_EnableF(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableF(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_EnableEf(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableEf(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_SetEvt(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_EnablePd(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisablePd(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_EnableI(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_DisableI(Avtp_Rvf_t* pdu);
-void Avtp_Rvf_SetPixelDepth(Avtp_Rvf_t* pdu, Avtp_RvfPixelDepth_t value);
-void Avtp_Rvf_SetPixelFormat(Avtp_Rvf_t* pdu, Avtp_RvfPixelFormat_t value);
-void Avtp_Rvf_SetFrameRate(Avtp_Rvf_t* pdu, Avtp_RvfFrameRate_t value);
-void Avtp_Rvf_SetColorspace(Avtp_Rvf_t* pdu, Avtp_RvfColorspace_t value);
-void Avtp_Rvf_SetNumLines(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_SetISeqNum(Avtp_Rvf_t* pdu, uint8_t value);
-void Avtp_Rvf_SetLineNumber(Avtp_Rvf_t* pdu, uint16_t value);
+void Avtp_Rvf_EnableSv(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableSv(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_SetVersion(Avtp_Rvf_t *pdu, uint8_t value);
+void Avtp_Rvf_EnableMr(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableMr(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_EnableTv(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableTv(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_SetSequenceNum(Avtp_Rvf_t *pdu, uint8_t value);
+void Avtp_Rvf_EnableTu(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableTu(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_SetStreamId(Avtp_Rvf_t *pdu, uint64_t value);
+void Avtp_Rvf_SetAvtpTimestamp(Avtp_Rvf_t *pdu, uint32_t value);
+void Avtp_Rvf_SetActivePixels(Avtp_Rvf_t *pdu, uint16_t value);
+void Avtp_Rvf_SetTotalLines(Avtp_Rvf_t *pdu, uint16_t value);
+void Avtp_Rvf_SetStreamDataLength(Avtp_Rvf_t *pdu, uint16_t value);
+void Avtp_Rvf_EnableAp(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableAp(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_EnableF(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableF(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_EnableEf(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableEf(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_SetEvt(Avtp_Rvf_t *pdu, uint8_t value);
+void Avtp_Rvf_EnablePd(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisablePd(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_EnableI(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_DisableI(Avtp_Rvf_t *pdu);
+void Avtp_Rvf_SetPixelDepth(Avtp_Rvf_t *pdu, Avtp_RvfPixelDepth_t value);
+void Avtp_Rvf_SetPixelFormat(Avtp_Rvf_t *pdu, Avtp_RvfPixelFormat_t value);
+void Avtp_Rvf_SetFrameRate(Avtp_Rvf_t *pdu, Avtp_RvfFrameRate_t value);
+void Avtp_Rvf_SetColorspace(Avtp_Rvf_t *pdu, Avtp_RvfColorspace_t value);
+void Avtp_Rvf_SetNumLines(Avtp_Rvf_t *pdu, uint8_t value);
+void Avtp_Rvf_SetISeqNum(Avtp_Rvf_t *pdu, uint8_t value);
+void Avtp_Rvf_SetLineNumber(Avtp_Rvf_t *pdu, uint16_t value);
 
 /******************************************************************************
  * Legacy API (deprecated)
  *****************************************************************************/
 
-#define AVTP_RVF_FIELD_SEQ_NUM          (AVTP_RVF_FIELD_SEQUENCE_NUM)
-#define AVTP_RVF_FIELD_TIMESTAMP        (AVTP_RVF_FIELD_AVTP_TIMESTAMP)
-#define AVTP_RVF_FIELD_STREAM_DATA_LEN  (AVTP_RVF_FIELD_STREAM_DATA_LENGTH)
-#define AVTP_RVF_FIELD_RAW_PIXEL_DEPTH  (AVTP_RVF_FIELD_PIXEL_DEPTH)
+#define AVTP_RVF_FIELD_SEQ_NUM (AVTP_RVF_FIELD_SEQUENCE_NUM)
+#define AVTP_RVF_FIELD_TIMESTAMP (AVTP_RVF_FIELD_AVTP_TIMESTAMP)
+#define AVTP_RVF_FIELD_STREAM_DATA_LEN (AVTP_RVF_FIELD_STREAM_DATA_LENGTH)
+#define AVTP_RVF_FIELD_RAW_PIXEL_DEPTH (AVTP_RVF_FIELD_PIXEL_DEPTH)
 #define AVTP_RVF_FIELD_RAW_PIXEL_FORMAT (AVTP_RVF_FIELD_PIXEL_FORMAT)
-#define AVTP_RVF_FIELD_RAW_FRAME_RATE   (AVTP_RVF_FIELD_FRAME_RATE)
-#define AVTP_RVF_FIELD_RAW_COLORSPACE   (AVTP_RVF_FIELD_COLORSPACE)
-#define AVTP_RVF_FIELD_RAW_NUM_LINES    (AVTP_RVF_FIELD_NUM_LINES)
-#define AVTP_RVF_FIELD_RAW_I_SEQ_NUM    (AVTP_RVF_FIELD_I_SEQ_NUM)
-#define AVTP_RVF_FIELD_RAW_LINE_NUMBER  (AVTP_RVF_FIELD_LINE_NUMBER)
+#define AVTP_RVF_FIELD_RAW_FRAME_RATE (AVTP_RVF_FIELD_FRAME_RATE)
+#define AVTP_RVF_FIELD_RAW_COLORSPACE (AVTP_RVF_FIELD_COLORSPACE)
+#define AVTP_RVF_FIELD_RAW_NUM_LINES (AVTP_RVF_FIELD_NUM_LINES)
+#define AVTP_RVF_FIELD_RAW_I_SEQ_NUM (AVTP_RVF_FIELD_I_SEQ_NUM)
+#define AVTP_RVF_FIELD_RAW_LINE_NUMBER (AVTP_RVF_FIELD_LINE_NUMBER)
 
 struct avtp_rvf_payload {
     uint64_t raw_header;
@@ -242,7 +240,7 @@ struct avtp_rvf_payload {
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_rvf_pdu_get(const void* const pdu, Avtp_RvfField_t field, uint64_t* val);
+int avtp_rvf_pdu_get(const void *const pdu, Avtp_RvfField_t field, uint64_t *val);
 
 /**
  * @deprecated
@@ -255,7 +253,7 @@ int avtp_rvf_pdu_get(const void* const pdu, Avtp_RvfField_t field, uint64_t* val
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_rvf_pdu_set(void* pdu, Avtp_RvfField_t field, uint64_t val);
+int avtp_rvf_pdu_set(void *pdu, Avtp_RvfField_t field, uint64_t val);
 
 /**
  * @deprecated
@@ -268,7 +266,7 @@ int avtp_rvf_pdu_set(void* pdu, Avtp_RvfField_t field, uint64_t val);
  *    0: Success.
  *    -EINVAL: If any argument is invalid.
  */
-int avtp_rvf_pdu_init(void* pdu);
+int avtp_rvf_pdu_init(void *pdu);
 
 #ifdef __cplusplus
 }

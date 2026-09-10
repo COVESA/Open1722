@@ -63,11 +63,6 @@ uint64_t Avtp_Aaf_GetField(const Avtp_Aaf_t *const pdu, Avtp_AafFields_t field)
                          (uint8_t)field);
 }
 
-uint8_t Avtp_Aaf_GetSubtype(const Avtp_Aaf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SUBTYPE);
-}
-
 uint8_t Avtp_Aaf_GetSv(const Avtp_Aaf_t *const pdu)
 {
     return (uint8_t)GET_FIELD(AVTP_AAF_FIELD_SV);
@@ -136,11 +131,6 @@ uint8_t Avtp_Aaf_GetEvt(const Avtp_Aaf_t *const pdu)
 void Avtp_Aaf_SetField(Avtp_Aaf_t *pdu, Avtp_AafFields_t field, uint64_t value)
 {
     Avtp_SetField(Avtp_AafFieldDesc, AVTP_AAF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
-}
-
-void Avtp_Aaf_SetSubtype(Avtp_Aaf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_AAF_FIELD_SUBTYPE, value);
 }
 
 void Avtp_Aaf_EnableSv(Avtp_Aaf_t *pdu)

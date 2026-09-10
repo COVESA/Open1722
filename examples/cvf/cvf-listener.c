@@ -77,11 +77,11 @@
 #include "avtp/CommonHeader.h"
 #include "common/common.h"
 
-#define STREAM_ID				0xAABBCCDDEEFF0001
-#define DATA_LEN				1400
-#define AVTP_H264_HEADER_LEN	(sizeof(Avtp_H264_t))
-#define AVTP_FULL_HEADER_LEN	(sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
-#define MAX_PDU_SIZE			(AVTP_FULL_HEADER_LEN + DATA_LEN)
+#define STREAM_ID 0xAABBCCDDEEFF0001
+#define DATA_LEN 1400
+#define AVTP_H264_HEADER_LEN (sizeof(Avtp_H264_t))
+#define AVTP_FULL_HEADER_LEN (sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
+#define MAX_PDU_SIZE (AVTP_FULL_HEADER_LEN + DATA_LEN)
 
 struct nal_entry {
     STAILQ_ENTRY(nal_entry) entries;
@@ -97,10 +97,9 @@ static uint8_t macaddr[ETH_ALEN];
 static uint8_t expected_seq;
 
 static struct argp_option options[] = {
-    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address" },
-    {"ifname", 'i', "IFNAME", 0, "Network Interface" },
-    { 0 }
-};
+    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address"},
+    {"ifname", 'i', "IFNAME", 0, "Network Interface"},
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -108,9 +107,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                    &macaddr[0], &macaddr[1], &macaddr[2],
-                    &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid address\n");
             exit(EXIT_FAILURE);
@@ -125,10 +123,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser };
+static struct argp argp = {options, parser};
 
-static int schedule_nal(int fd, struct timespec *tspec, uint8_t *nal,
-                                ssize_t len)
+static int schedule_nal(int fd, struct timespec *tspec, uint8_t *nal, ssize_t len)
 {
     struct nal_entry *entry;
 
@@ -162,61 +159,61 @@ static int schedule_nal(int fd, struct timespec *tspec, uint8_t *nal,
     return 0;
 }
 
-static bool is_valid_packet(Avtp_Cvf_t* cvf)
+static bool is_valid_packet(Avtp_Cvf_t *cvf)
 {
-    uint8_t subtype = Avtp_Cvf_GetSubtype(cvf);
+    uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cvf);
     if (subtype != AVTP_SUBTYPE_CVF) {
-        fprintf(stderr, "Subtype mismatch: expected %u, got %"PRIu8"\n",
-                AVTP_SUBTYPE_CVF, subtype);
+        fprintf(stderr, "Subtype mismatch: expected %u, got %" PRIu8 "\n", AVTP_SUBTYPE_CVF,
+                subtype);
         return false;
     }
 
     uint8_t version = Avtp_Cvf_GetVersion(cvf);
     if (version != 0) {
-        fprintf(stderr, "Version mismatch: expected %u, got %"PRIu8"\n", 0,
-                version);
+        fprintf(stderr, "Version mismatch: expected %u, got %" PRIu8 "\n", 0, version);
         return false;
     }
 
     uint8_t tv = Avtp_Cvf_GetTv(cvf);
     if (tv != 1) {
-        fprintf(stderr, "tv mismatch: expected %u, got %"PRIu8"\n", 1, tv);
+        fprintf(stderr, "tv mismatch: expected %u, got %" PRIu8 "\n", 1, tv);
         return false;
     }
 
     uint64_t stream_id = Avtp_Cvf_GetStreamId(cvf);
     if (stream_id != STREAM_ID) {
-        fprintf(stderr, "Stream ID mismatch: expected %lu, got %lu\n",
-                STREAM_ID, stream_id);
+        fprintf(stderr, "Stream ID mismatch: expected %lu, got %lu\n", STREAM_ID, stream_id);
         return false;
     }
 
     uint8_t sequence_num = Avtp_Cvf_GetSequenceNum(cvf);
     if (sequence_num != expected_seq) {
-        fprintf(stderr, "Sequence number mismatch: expected %"PRIu8", "
-                "got %"PRIu8"\n", expected_seq, sequence_num);
+        fprintf(stderr,
+                "Sequence number mismatch: expected %" PRIu8 ", "
+                "got %" PRIu8 "\n",
+                expected_seq, sequence_num);
         expected_seq = sequence_num;
     }
     expected_seq++;
 
     uint8_t format = Avtp_Cvf_GetFormat(cvf);
     if (format != AVTP_CVF_FORMAT_RFC) {
-        fprintf(stderr, "Format mismatch: expected %"PRIu8", got %"PRIu8"\n",
-                    AVTP_CVF_FORMAT_RFC, format);
+        fprintf(stderr, "Format mismatch: expected %" PRIu8 ", got %" PRIu8 "\n",
+                AVTP_CVF_FORMAT_RFC, format);
         return false;
     }
 
     uint8_t format_subtype = Avtp_Cvf_GetFormatSubtype(cvf);
     if (format_subtype != AVTP_CVF_FORMAT_SUBTYPE_H264) {
-        fprintf(stderr, "Format mismatch: expected %"PRIu8", got %"PRIu8"\n",
-                    AVTP_CVF_FORMAT_SUBTYPE_H264, format_subtype);
+        fprintf(stderr, "Format mismatch: expected %" PRIu8 ", got %" PRIu8 "\n",
+                AVTP_CVF_FORMAT_SUBTYPE_H264, format_subtype);
         return false;
     }
 
     return true;
 }
 
-static uint16_t get_h264_data_len(Avtp_Cvf_t* cvf)
+static uint16_t get_h264_data_len(Avtp_Cvf_t *cvf)
 {
     uint16_t stream_data_len = Avtp_Cvf_GetStreamDataLength(cvf);
     return stream_data_len - AVTP_H264_HEADER_LEN;
@@ -229,9 +226,9 @@ static int new_packet(int sk_fd, int timer_fd)
     uint16_t h264_data_len;
     uint32_t avtp_time;
     struct timespec tspec;
-    Avtp_Cvf_t* cvf = alloca(MAX_PDU_SIZE);
-    Avtp_H264_t* h264Header = (Avtp_H264_t*)(&cvf->payload);
-    uint8_t* h264Payload = (uint8_t*)(&h264Header->payload);
+    Avtp_Cvf_t *cvf = alloca(MAX_PDU_SIZE);
+    Avtp_H264_t *h264Header = (Avtp_H264_t *)(&cvf->payload);
+    uint8_t *h264Payload = (uint8_t *)(&h264Header->payload);
 
     memset(cvf, 1, MAX_PDU_SIZE);
 

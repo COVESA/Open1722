@@ -36,7 +36,7 @@ reading either half of this document.
 Function, type and field names are taken directly from the IEEE 1722
 specification. The guiding idea is: **if you have read and understood the spec,
 you can use Open1722 directly** - the mapping from a spec field to the
-corresponding API call is mechanical. 
+corresponding API call is mechanical.
 
 For example, the ACF CAN header contains the fields `pad`, `mtv`, `rtr`, `eff`,
 `brs`, `fdf`, `esi`, `can_bus_id`, `message_timestamp` and `can_identifier`.
@@ -439,7 +439,9 @@ enclosing function scope (the accessors below use exactly that name).
 ### Accessors
 
 One getter and one setter per field, implemented as thin inline wrappers around
-the macros:
+the macros, except for fields shared by every format - the ACF common fields
+and the AVTP common header's `subtype` - which are accessed through the shared
+`Avtp_AcfCommon_*` / `Avtp_CommonHeader_*` functions instead:
 
 ```c
 OPEN1722_INLINE uint8_t Avtp_Can_GetCanBusId(const Avtp_Can_t *const pdu)
@@ -505,6 +507,27 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id,
                                uint8_t *payload, uint16_t payload_length,
                                Avtp_CanVariant_t can_variant);
 ```
+
+## The AVTP common header & subtype
+
+Every AVTP PDU starts with the common header described in
+[`CommonHeader.h`](../include/avtp/CommonHeader.h) - `subtype`, `h` and
+`version` - and `Avtp_CommonHeader_Get/SetSubtype` are its accessors. Because
+every format struct begins with that header, a format PDU pointer can be cast to
+`Avtp_CommonHeader_t *` to read or write the subtype.
+
+As with the ACF message type, the subtype has exactly one correct value per
+format, so there are **no per-format `Get/SetSubtype` functions**:
+
+- `Init` stamps the subtype with
+  `Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_<NAME>)`.
+- `IsValid` checks it with
+  `Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu)`.
+
+Each format still declares `AVTP_<FORMAT>_FIELD_SUBTYPE` in its field enum and
+descriptor table, so the generic `Avtp_<Format>_Get/SetField` path and the
+"every bit described exactly once" rule continue to hold; only the convenience
+accessors are omitted.
 
 ## ACF layering & the common header
 
@@ -640,7 +663,10 @@ this order and the template in
 5. Add the `GET_/SET_<FORMAT>_FIELD` macros.
 6. Add one `Get`/`Set` accessor per field (using `OPEN1722_INLINE`); single-bit
    flags use `Is<Flag>` (returns `bool`) and `Set<Flag>(bool)`. Reserved fields
-   get no accessors (see [Reserved fields](#reserved-fields)).
+   get no accessors (see [Reserved fields](#reserved-fields)), and neither do
+   the shared common-header fields (see
+   [The AVTP common header & subtype](#the-avtp-common-header--subtype) and
+   [ACF layering & the common header](#acf-layering--the-common-header)).
 7. Add `Avtp_<Format>_Init` (zero + set the ACF message type).
 8. Add the convenience functions (`Get/SetPayload`, `SetPayloadLength`,
    `GetPayloadLength`, and `Create…` if a full-message builder makes sense).

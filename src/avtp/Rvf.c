@@ -83,7 +83,7 @@ void Avtp_Rvf_Init(Avtp_Rvf_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Rvf_t));
-        Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_SUBTYPE, AVTP_SUBTYPE_RVF);
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_RVF);
         Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_SV, 1);
     }
 }
@@ -91,11 +91,6 @@ void Avtp_Rvf_Init(Avtp_Rvf_t *pdu)
 uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfField_t field)
 {
     return GET_FIELD(field);
-}
-
-uint8_t Avtp_Rvf_GetSubtype(const Avtp_Rvf_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_RVF_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Rvf_GetSv(const Avtp_Rvf_t *const pdu)
@@ -221,11 +216,6 @@ uint16_t Avtp_Rvf_GetLineNumber(const Avtp_Rvf_t *const pdu)
 void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfField_t field, uint64_t value)
 {
     SET_FIELD(field, value);
-}
-
-void Avtp_Rvf_SetSubtype(Avtp_Rvf_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_RVF_FIELD_SUBTYPE, value);
 }
 
 void Avtp_Rvf_EnableSv(Avtp_Rvf_t *pdu)

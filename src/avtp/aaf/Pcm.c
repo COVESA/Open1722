@@ -63,7 +63,7 @@ void Avtp_Pcm_Init(Avtp_Pcm_t *pdu)
 {
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_Pcm_t));
-        Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_SUBTYPE, AVTP_SUBTYPE_AAF);
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_AAF);
         Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_SV, 1);
     }
 }
@@ -71,11 +71,6 @@ void Avtp_Pcm_Init(Avtp_Pcm_t *pdu)
 uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
 {
     return GET_FIELD(field);
-}
-
-uint8_t Avtp_Pcm_GetSubtype(const Avtp_Pcm_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_PCM_FIELD_SUBTYPE);
 }
 
 uint8_t Avtp_Pcm_GetSv(const Avtp_Pcm_t *const pdu)
@@ -156,11 +151,6 @@ uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t *const pdu)
 void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
 {
     SET_FIELD(field, value);
-}
-
-void Avtp_Pcm_SetSubtype(Avtp_Pcm_t *pdu, uint8_t value)
-{
-    SET_FIELD(AVTP_PCM_FIELD_SUBTYPE, value);
 }
 
 void Avtp_Pcm_EnableSv(Avtp_Pcm_t *pdu)
