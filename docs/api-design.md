@@ -508,18 +508,19 @@ void Avtp_Can_CreateAcfMessage(Avtp_Can_t *pdu, uint32_t frame_id,
                                Avtp_CanVariant_t can_variant);
 ```
 
-## The AVTP common header: subtype & version
+## The AVTP common header
 
 Every AVTP PDU starts with the common header described in
 [`CommonHeader.h`](../include/avtp/CommonHeader.h) - `subtype`, `h` and
-`version`. `Avtp_CommonHeader_Get/SetSubtype` and
-`Avtp_CommonHeader_Get/SetVersion` are its accessors. Because every format
-struct begins with that header, a format PDU pointer can be cast to
-`Avtp_CommonHeader_t *` to read or write these fields.
+`version`. Because every format struct begins with that header, a format PDU
+pointer can be cast to `Avtp_CommonHeader_t *` to read or write these fields.
+
+### subtype and version
 
 As with the ACF message type, `subtype` and `version` each have exactly one
 correct value, so there are **no per-format `Get/SetSubtype` or `Get/SetVersion`
-functions**:
+functions**. They are accessed through `Avtp_CommonHeader_Get/SetSubtype` and
+`Avtp_CommonHeader_Get/SetVersion`:
 
 - `Init` stamps the subtype with
   `Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_<NAME>)`.
@@ -529,9 +530,21 @@ functions**:
 Each format still declares `AVTP_<FORMAT>_FIELD_SUBTYPE` and
 `AVTP_<FORMAT>_FIELD_VERSION` in its field enum and descriptor table, so the
 generic `Avtp_<Format>_Get/SetField` path and the "every bit described exactly
-once" rule continue to hold; only the convenience accessors are omitted. The
-remaining common-header bit, `h` (spelled `sv` in the stream formats), still
-uses per-format accessors.
+once" rule continue to hold; only the convenience accessors are omitted.
+
+### h (header specific)
+
+Unlike `subtype` and `version`, `h` is explicitly header-specific: its meaning
+is defined by the header/format (IEEE 1722-2025, 4.7.3.3). The common stream
+header (4.7.4) and common control header (4.7.5) define it as `sv`
+(stream_id valid), but formats using the alternative header (4.7.6) define it
+themselves or leave it reserved.
+
+Format modules therefore keep their own semantic accessors wherever the format
+defines the bit - e.g. AAF/CVF/TSCF/RVF (`GetSv`/`EnableSv`/`DisableSv`) and
+CRF/NTSCF (`IsSv`/`SetSv`), even though the latter two use the alternative
+header. `Avtp_CommonHeader_GetH`/`SetH` remains the generic accessor for the raw
+bit, for formats that redefine it or reserve it.
 
 ## ACF layering & the common header
 
@@ -669,7 +682,7 @@ this order and the template in
    flags use `Is<Flag>` (returns `bool`) and `Set<Flag>(bool)`. Reserved fields
    get no accessors (see [Reserved fields](#reserved-fields)), and neither do
    the shared common-header fields (see
-   [The AVTP common header](#the-avtp-common-header-subtype--version) and
+   [The AVTP common header](#the-avtp-common-header) and
    [ACF layering & the common header](#acf-layering--the-common-header)).
 7. Add `Avtp_<Format>_Init` (zero + set the ACF message type).
 8. Add the convenience functions (`Get/SetPayload`, `SetPayloadLength`,
