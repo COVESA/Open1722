@@ -56,15 +56,6 @@ static void Test_CanXlBrief_Init(void **state)
     assert_memory_equal(msg, expected_msg, msg_len);
 }
 
-static void Test_CanXlBrief_GetPad(void **state)
-{
-    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
-    uint8_t msg[msg_len] = {0x24, 0x04, 0xC0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                            0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
-    assert_int_equal(Avtp_CanXlBrief_GetPad(canxl), 3);
-}
-
 static void Test_CanXlBrief_IsMtv(void **state)
 {
     const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
@@ -438,7 +429,6 @@ static void Test_CanXlBrief_IsValid(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanXlBrief_Init),
-                                       cmocka_unit_test(Test_CanXlBrief_GetPad),
                                        cmocka_unit_test(Test_CanXlBrief_IsMtv),
                                        cmocka_unit_test(Test_CanXlBrief_GetCanBusId),
                                        cmocka_unit_test(Test_CanXlBrief_GetVcid),

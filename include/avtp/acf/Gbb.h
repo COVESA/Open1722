@@ -120,28 +120,6 @@ static const Avtp_FieldDescriptor_t Avtp_GbbFieldDesc[AVTP_GBB_FIELD_MAX] = {
 };
 
 /**
- * Returns the pad field from an ACF_GBB message header.
- *
- * @param pdu Pointer to an ACF_GBB message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_Gbb_GetPad(const Avtp_Gbb_t *const pdu)
-{
-    return (uint8_t)GET_GBB_FIELD(AVTP_GBB_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_GBB message header.
- *
- * @param pdu Pointer to an ACF_GBB message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_Gbb_SetPad(Avtp_Gbb_t *pdu, uint8_t pad)
-{
-    SET_GBB_FIELD(AVTP_GBB_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_GBB message header.
  *
  * @param pdu Pointer to an ACF_GBB message.
@@ -467,7 +445,7 @@ OPEN1722_INLINE void Avtp_Gbb_SetPayloadLength(Avtp_Gbb_t *pdu, uint16_t payload
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Gbb_SetPad(pdu, pad);
+    SET_GBB_FIELD(AVTP_GBB_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -484,7 +462,7 @@ OPEN1722_INLINE void Avtp_Gbb_SetPayloadLength(Avtp_Gbb_t *pdu, uint16_t payload
  */
 OPEN1722_INLINE uint8_t Avtp_Gbb_GetPayloadLength(const Avtp_Gbb_t *const pdu)
 {
-    uint8_t pad_length = Avtp_Gbb_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_GBB_FIELD(AVTP_GBB_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_GBB_HEADER_LEN - pad_length);
@@ -564,7 +542,7 @@ OPEN1722_INLINE bool Avtp_Gbb_IsValid(const Avtp_Gbb_t *const pdu, size_t buffer
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_Gbb_GetPayloadLength() doesn't
      * underflow. */
-    uint8_t pad_length = Avtp_Gbb_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_GBB_FIELD(AVTP_GBB_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_GBB_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

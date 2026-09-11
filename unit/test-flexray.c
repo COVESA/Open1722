@@ -68,9 +68,6 @@ static void flexray_get_set_fields(void **state)
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, 100);
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu), 100);
 
-    Avtp_FlexRay_SetPad((Avtp_FlexRay_t *)pdu, 2);
-    assert_int_equal(Avtp_FlexRay_GetPad((Avtp_FlexRay_t *)pdu), 2);
-
     Avtp_FlexRay_SetMtv((Avtp_FlexRay_t *)pdu, true);
     assert_int_equal(Avtp_FlexRay_IsMtv((Avtp_FlexRay_t *)pdu), 1);
 

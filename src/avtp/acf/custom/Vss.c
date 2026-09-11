@@ -196,11 +196,6 @@ void Avtp_Vss_SetPayloadLength(Avtp_Vss_t *vss_pdu, uint16_t payload_length)
     Avtp_Vss_SetField(vss_pdu, AVTP_VSS_FIELD_PAD, padSize);
 }
 
-uint8_t Avtp_Vss_GetPad(const Avtp_Vss_t *const pdu)
-{
-    return (uint8_t)GET_FIELD(AVTP_VSS_FIELD_PAD);
-}
-
 bool Avtp_Vss_IsMtv(const Avtp_Vss_t *const pdu)
 {
     return (bool)GET_FIELD(AVTP_VSS_FIELD_MTV);
@@ -533,11 +528,6 @@ void Avtp_Vss_GetVssData(const Avtp_Vss_t *const pdu, VssData_t *val)
     default:
         break;
     }
-}
-
-void Avtp_Vss_SetPad(Avtp_Vss_t *pdu, uint8_t val)
-{
-    SET_FIELD(AVTP_VSS_FIELD_PAD, val);
 }
 
 void Avtp_Vss_SetMtv(Avtp_Vss_t *pdu, bool mtv)

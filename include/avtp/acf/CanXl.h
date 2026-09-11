@@ -124,28 +124,6 @@ static const Avtp_FieldDescriptor_t Avtp_CanXlFieldDesc[AVTP_CANXL_FIELD_MAX] = 
 };
 
 /**
- * Returns the pad field from an ACF_CANXL message header.
- *
- * @param pdu Pointer to an ACF_CANXL message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_CanXl_GetPad(const Avtp_CanXl_t *const pdu)
-{
-    return (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_CANXL message header.
- *
- * @param pdu Pointer to an ACF_CANXL message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_CanXl_SetPad(Avtp_CanXl_t *pdu, uint8_t pad)
-{
-    SET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_CANXL message header.
  *
  * @param pdu Pointer to an ACF_CANXL message.
@@ -450,7 +428,7 @@ OPEN1722_INLINE void Avtp_CanXl_SetPayloadLength(Avtp_CanXl_t *pdu, uint16_t pay
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_CanXl_SetPad(pdu, pad);
+    SET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -467,7 +445,7 @@ OPEN1722_INLINE void Avtp_CanXl_SetPayloadLength(Avtp_CanXl_t *pdu, uint16_t pay
  */
 OPEN1722_INLINE uint8_t Avtp_CanXl_GetPayloadLength(const Avtp_CanXl_t *const pdu)
 {
-    uint8_t pad_length = Avtp_CanXl_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_CANXL_HEADER_LEN - pad_length);
@@ -547,7 +525,7 @@ OPEN1722_INLINE bool Avtp_CanXl_IsValid(const Avtp_CanXl_t *const pdu, size_t bu
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_CanXl_GetPayloadLength() doesn't
      * underflow. */
-    uint8_t pad_length = Avtp_CanXl_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_CANXL_FIELD(AVTP_CANXL_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_CANXL_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

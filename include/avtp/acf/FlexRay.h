@@ -111,18 +111,6 @@ static const Avtp_FieldDescriptor_t Avtp_FlexRayFieldDesc[AVTP_FLEXRAY_FIELD_MAX
 };
 
 /**
- * Return the value of an an ACF FlexRay PDU padding field as specified in the IEEE 1722
- * Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- * @returns Value of the ACF FlexRay PDU padding field.
- */
-OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPad(const Avtp_FlexRay_t *const pdu)
-{
-    return (uint8_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PAD);
-}
-
-/**
  * Return the value of an an ACF FlexRay PDU MTV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
@@ -235,17 +223,6 @@ OPEN1722_INLINE uint16_t Avtp_FlexRay_GetFrFrameId(const Avtp_FlexRay_t *const p
 OPEN1722_INLINE uint8_t Avtp_FlexRay_GetCycle(const Avtp_FlexRay_t *const pdu)
 {
     return (uint8_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_CYCLE);
-}
-
-/**
- * Set the value of an an ACF FlexRay PDU padding field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 ACF FlexRay PDU.
- * @param value Value to set the ACF FlexRay PDU padding field to.
- */
-OPEN1722_INLINE void Avtp_FlexRay_SetPad(Avtp_FlexRay_t *pdu, uint8_t value)
-{
-    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PAD, value);
 }
 
 /**
@@ -401,7 +378,7 @@ OPEN1722_INLINE void Avtp_FlexRay_SetPayloadLength(Avtp_FlexRay_t *pdu, uint16_t
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_FlexRay_SetPad(pdu, pad);
+    SET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -418,7 +395,7 @@ OPEN1722_INLINE void Avtp_FlexRay_SetPayloadLength(Avtp_FlexRay_t *pdu, uint16_t
  */
 OPEN1722_INLINE uint8_t Avtp_FlexRay_GetPayloadLength(const Avtp_FlexRay_t *const pdu)
 {
-    uint8_t pad_length = Avtp_FlexRay_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_FLEXRAY_HEADER_LEN - pad_length);
@@ -497,7 +474,7 @@ OPEN1722_INLINE bool Avtp_FlexRay_IsValid(const Avtp_FlexRay_t *const pdu, size_
     /* FlexRay payload-length invariant: the encoded message length must also
      * accommodate header + declared padding so the payload computation in
      * Avtp_FlexRay_GetPayloadLength() doesn't underflow. */
-    uint8_t pad_length = Avtp_FlexRay_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_FLEXRAY_FIELD(AVTP_FLEXRAY_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_FLEXRAY_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;

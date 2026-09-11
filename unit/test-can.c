@@ -94,7 +94,7 @@ static void can_set_payload(void **state)
     // Set payload and check for EFF
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               AVTP_CAN_CLASSIC);
-    assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
+    assert_int_equal(htonl(set_frame_id), *((uint32_t *)pdu + 3));
     assert_memory_equal(set_payload, pdu + 16, CAN_PAYLOAD_SIZE);
     assert_int_equal(0x0, *(pdu + 2) & 0x08); // Check EFF
 
@@ -102,7 +102,7 @@ static void can_set_payload(void **state)
     set_frame_id = 0x800;
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               AVTP_CAN_CLASSIC);
-    assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
+    assert_int_equal(htonl(set_frame_id), *((uint32_t *)pdu + 3));
     assert_int_equal(0x8, *(pdu + 2) & 0x08); // Check EFF
 
     // Check padding bytes and length field
@@ -228,7 +228,9 @@ static void can_brief_set_payload(void **state)
 
         uint16_t msgLenBytes = AVTP_CAN_BRIEF_HEADER_LEN + i;
         uint8_t pad = (uint8_t)(4 - (msgLenBytes % 4)) % 4;
-        assert_int_equal(Avtp_CanBrief_GetPad((Avtp_CanBrief_t *)pdu), pad);
+        assert_int_equal(Avtp_GetField(Avtp_CanBriefFieldDesc, AVTP_CAN_BRIEF_FIELD_MAX,
+                                       (const uint8_t *)pdu, AVTP_CAN_BRIEF_FIELD_PAD),
+                         pad);
         assert_int_equal(Avtp_AcfCommon_GetAcfMsgLength((Avtp_AcfCommon_t *)pdu),
                          (msgLenBytes + pad) / 4);
     }

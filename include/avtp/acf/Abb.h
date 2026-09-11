@@ -118,28 +118,6 @@ static const Avtp_FieldDescriptor_t Avtp_AbbFieldDesc[AVTP_ABB_FIELD_MAX] = {
 };
 
 /**
- * Returns the pad field from an ACF_ABB message header.
- *
- * @param pdu Pointer to an ACF_ABB message.
- * @returns The value of the pad field.
- */
-OPEN1722_INLINE uint8_t Avtp_Abb_GetPad(const Avtp_Abb_t *const pdu)
-{
-    return (uint8_t)GET_ABB_FIELD(AVTP_ABB_FIELD_PAD);
-}
-
-/**
- * Sets the pad field in an ACF_ABB message header.
- *
- * @param pdu Pointer to an ACF_ABB message.
- * @param pad The value to set.
- */
-OPEN1722_INLINE void Avtp_Abb_SetPad(Avtp_Abb_t *pdu, uint8_t pad)
-{
-    SET_ABB_FIELD(AVTP_ABB_FIELD_PAD, pad);
-}
-
-/**
  * Returns the message timestamp valid flag (mtv) from an ACF_ABB message header.
  *
  * @param pdu Pointer to an ACF_ABB message.
@@ -443,7 +421,7 @@ OPEN1722_INLINE void Avtp_Abb_SetPayloadLength(Avtp_Abb_t *pdu, uint16_t payload
         memset(pdu->payload + payload_length, 0, pad);
     }
     uint16_t msgLenQuadlets = (uint16_t)((msgLenBytes + pad) / 4);
-    Avtp_Abb_SetPad(pdu, pad);
+    SET_ABB_FIELD(AVTP_ABB_FIELD_PAD, pad);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, msgLenQuadlets);
 }
 
@@ -460,7 +438,7 @@ OPEN1722_INLINE void Avtp_Abb_SetPayloadLength(Avtp_Abb_t *pdu, uint16_t payload
  */
 OPEN1722_INLINE uint8_t Avtp_Abb_GetPayloadLength(const Avtp_Abb_t *const pdu)
 {
-    uint8_t pad_length = Avtp_Abb_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_ABB_FIELD(AVTP_ABB_FIELD_PAD);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
     return (uint8_t)(acf_length_bytes - AVTP_ABB_HEADER_LEN - pad_length);
@@ -541,7 +519,7 @@ OPEN1722_INLINE bool Avtp_Abb_IsValid(const Avtp_Abb_t *const pdu, size_t buffer
     /* The encoded message length must accommodate header + declared padding
      * so the payload computation in Avtp_Abb_GetPayloadLength() doesn't
      * underflow. */
-    uint8_t pad_length = Avtp_Abb_GetPad(pdu);
+    uint8_t pad_length = (uint8_t)GET_ABB_FIELD(AVTP_ABB_FIELD_PAD);
     uint16_t header_and_pad = (uint16_t)AVTP_ABB_HEADER_LEN + pad_length;
     if (msg_length_bytes < header_and_pad) {
         return false;
