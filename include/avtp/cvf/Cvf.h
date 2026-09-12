@@ -75,7 +75,8 @@ typedef enum Avtp_CvfFormat { AVTP_CVF_FORMAT_RFC = 0x2 } Avtp_CvfFormat_t;
 typedef enum Avtp_CvfFormatSubtype {
     AVTP_CVF_FORMAT_SUBTYPE_MJPEG = 0x0,
     AVTP_CVF_FORMAT_SUBTYPE_H264 = 0x1,
-    AVTP_CVF_FORMAT_SUBTYPE_JPEG2000 = 0x2
+    AVTP_CVF_FORMAT_SUBTYPE_JPEG2000 = 0x2,
+    AVTP_CVF_FORMAT_SUBTYPE_H265 = 0x3
 } Avtp_CvfFormatSubtype_t;
 
 void Avtp_Cvf_Init(Avtp_Cvf_t *pdu);
