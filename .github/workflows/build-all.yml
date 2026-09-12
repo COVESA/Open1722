@@ -7,11 +7,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
     - name: Install dependencies
       run: sudo apt update && sudo apt install -y meson libcmocka0 libcmocka-dev lcov
     - name: Run build_all.sh script
