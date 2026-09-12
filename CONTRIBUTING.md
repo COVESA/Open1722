@@ -29,8 +29,8 @@ This section includes general guidelines and recommendations for anyone interest
 
 Before committing, run the automatic style checks to make sure the code formatting matches
 what CI enforces. The repository provides a [pre-commit](https://pre-commit.com) configuration
-that uses a pinned version of clang-format (18.1.8) - the same version used by the CI style
-workflow (see `.github/workflows/style.yml`).
+that uses a pinned version of clang-format (18.1.8). CI runs the same pre-commit configuration
+on changed files (see `.github/workflows/style.yml`).
 
 To set it up once per clone:
 
