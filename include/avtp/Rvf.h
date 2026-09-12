@@ -127,7 +127,7 @@ typedef enum Avtp_RvfFrameRate {
     AVTP_RVF_FRAME_RATE_200 = 0x33,
     AVTP_RVF_FRAME_RATE_240 = 0x34,
     AVTP_RVF_FRAME_RATE_300 = 0x35,
-    AVTP_RVF_FRAME_RATE_USER = 0x0F
+    AVTP_RVF_FRAME_RATE_USER = 0xFF
 } Avtp_RvfFrameRate_t;
 
 /* RVF 'colorspace' field values. */
