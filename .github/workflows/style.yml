@@ -29,23 +29,22 @@ jobs:
         files: "${{ env.files }}"
         licenses: "${{ env.licenses }}"
 
-  format:
-    name: Check formatting
+  pre-commit:
+    name: Run pre-commit
 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
-    - name: Install clang-format
-      run: sudo apt update && sudo apt install -y clang-format
-    - name: Check formatting of changed C/H files
-      run: |
-        changed=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD \
-                  | grep -E '\.(c|h)$' || true)
-        if [ -n "$changed" ]; then
-          echo "Checking format for: $changed"
-          clang-format --dry-run --Werror $changed
-        else
-          echo "No C/H files changed — skipping format check"
-        fi
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+    - name: Install pre-commit
+      run: python -m pip install pre-commit
+    - name: Run pre-commit on changed files
+      run: pre-commit run --show-diff-on-failure --color=always --from-ref origin/${{ github.base_ref }} --to-ref HEAD
