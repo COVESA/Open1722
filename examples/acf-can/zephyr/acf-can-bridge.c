@@ -69,7 +69,7 @@ static uint32_t udp_send_port = CONFIG_ACF_CAN_BRIDGE_SEND_UDP_PORT;
 static uint8_t num_acf_msgs = CONFIG_ACF_CAN_BRIDGE_NUM_ACF_MSGS;
 static uint64_t listener_stream_id;
 static uint64_t talker_stream_id;
-static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
+static bool can_fd = false;
 
 int eth_socket = 0;
 struct sockaddr *dest_addr;
@@ -254,7 +254,7 @@ void can_to_avtp_runnable(void *p1, void *p2, void *p3)
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_variant, pdu, use_udp, use_tscf, talker_stream_id,
+        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, use_tscf, talker_stream_id,
                                  num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out over Ethernet
@@ -318,7 +318,7 @@ void avtp_to_can_runnable(void *p1, void *p2, void *p3)
                 continue;
             }
 
-            num_can_msgs = avtp_to_can(pdu, can_frames, can_variant, use_udp, listener_stream_id,
+            num_can_msgs = avtp_to_can(pdu, can_frames, can_fd, use_udp, listener_stream_id,
                                        &exp_cf_seqnum, &exp_udp_seqnum);
             if (num_can_msgs <= 0) {
                 continue;
@@ -357,10 +357,10 @@ int main(void)
         printf("\tUsing TSCF v0\n");
     else
         printf("\tUsing NTSCF v0\n");
-    if (can_variant == AVTP_CAN_CLASSIC)
-        printf("\tUsing Classic CAN\n");
-    else if (can_variant == AVTP_CAN_FD)
+    if (can_fd)
         printf("\tUsing CAN FD\n");
+    else
+        printf("\tUsing Classic CAN\n");
     if (use_udp) {
         printf("\tUsing UDP\n");
         printf("\tDestination IP: %s, Send port: %d, listening port: %d\n",

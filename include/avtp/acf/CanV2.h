@@ -416,11 +416,11 @@ OPEN1722_INLINE void Avtp_CanV2_Init(Avtp_CanV2_t *pdu)
  * @param frame_id ID of the CAN frame
  * @param payload Pointer to the payload byte array
  * @param payload_length Length of the payload.
- * @param can_variant Classic CAN or CAN-FD
+ * @param fdf CAN-FD format flag
  */
 OPEN1722_INLINE void Avtp_CanV2_CreateAcfMessage(Avtp_CanV2_t *pdu, uint32_t frame_id,
                                                  uint8_t *payload, uint16_t payload_length,
-                                                 Avtp_CanVariant_t can_variant)
+                                                 bool fdf)
 {
     // Initialize the ACF CAN V2 header
     Avtp_CanV2_Init(pdu);
@@ -428,15 +428,13 @@ OPEN1722_INLINE void Avtp_CanV2_CreateAcfMessage(Avtp_CanV2_t *pdu, uint32_t fra
     // Copy the payload into the CAN PDU
     Avtp_CanV2_SetPayload(pdu, payload, payload_length);
 
-    // Set the Frame ID and CAN variant
+    // Set the Frame ID and CAN-FD flag
     if (frame_id > 0x7ff) {
         Avtp_CanV2_SetEff(pdu, true);
     }
 
     Avtp_CanV2_SetCanIdentifier(pdu, frame_id);
-    if (can_variant == AVTP_CAN_FD) {
-        Avtp_CanV2_SetFdf(pdu, true);
-    }
+    Avtp_CanV2_SetFdf(pdu, fdf);
 
     // Finalize the AVTP CAN Frame
     Avtp_CanV2_SetPayloadLength(pdu, payload_length);

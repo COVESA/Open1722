@@ -78,7 +78,7 @@ typedef uint32_t canid_t;
 #endif
 
 #ifdef __linux__
-int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant)
+int setup_can_socket(const char *can_ifname, bool can_fd)
 {
 
     int can_socket, res;
@@ -99,7 +99,7 @@ int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant)
     can_addr.can_family = AF_CAN;
     can_addr.can_ifindex = ifr.ifr_ifindex;
 
-    if (can_variant == AVTP_CAN_FD) {
+    if (can_fd) {
         int enable_canfx = 1;
         setsockopt(can_socket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enable_canfx, sizeof(enable_canfx));
     }
@@ -149,7 +149,7 @@ static int update_cf_length(uint8_t *cf_pdu, uint64_t length, int use_tscf)
     return 0;
 }
 
-static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_t can_variant)
+static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, bool can_fd)
 {
 
     canid_t can_id;
@@ -159,20 +159,20 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
 
     // Set required CAN Flags
 #ifdef __linux__
-    can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.can_id : (*frame).cc.can_id;
-    can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.len : (*frame).cc.len;
+    can_id = can_fd ? (*frame).fd.can_id : (*frame).cc.can_id;
+    can_payload_length = can_fd ? (*frame).fd.len : (*frame).cc.len;
 #elif defined(__ZEPHYR__)
-    can_id = (can_variant == AVTP_CAN_FD) ? (*frame).fd.id : (*frame).cc.id;
-    can_payload_length = (can_variant == AVTP_CAN_FD) ? (*frame).fd.dlc : (*frame).cc.dlc;
+    can_id = can_fd ? (*frame).fd.id : (*frame).cc.id;
+    can_payload_length = can_fd ? (*frame).fd.dlc : (*frame).cc.dlc;
 #endif
 
     // Build the ACF CAN PDU (initializes the header, copies the payload and
     // finalizes the length/pad fields)
-    if (can_variant == AVTP_CAN_FD)
+    if (can_fd)
         AVTP_CAN(CreateAcfMessage)
-    (pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length, can_variant);
+    (pdu, can_id & CAN_EFF_MASK, frame->fd.data, can_payload_length, can_fd);
     else AVTP_CAN(CreateAcfMessage)(pdu, can_id & CAN_EFF_MASK, frame->cc.data, can_payload_length,
-                                    can_variant);
+                                    can_fd);
 
 #if (AVTP_CAN_API == AVTP_CAN_API_CANV2) || (AVTP_CAN_API == AVTP_CAN_API_CAN)
     // Set optional header fields after building the frame
@@ -185,7 +185,7 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
         AVTP_CAN(SetRtr)(pdu, true);
     }
 
-    if (can_variant == AVTP_CAN_FD) {
+    if (can_fd) {
         if (frame->fd.flags & CANFD_BRS) {
             AVTP_CAN(SetBrs)(pdu, true);
         }
@@ -200,9 +200,8 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, Avtp_CanVariant_
     return Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)pdu);
 }
 
-int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu, int use_udp,
-                int use_tscf, uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num,
-                uint32_t udp_seq_num)
+int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int use_tscf,
+                uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num)
 {
 
     // Pack into control formats
@@ -226,7 +225,7 @@ int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu
     int i = 0;
     while (i < num_acf_msgs) {
         uint8_t *acf_pdu = pdu + pdu_length;
-        res = prepare_acf_packet(acf_pdu, &(can_frames[i]), can_variant);
+        res = prepare_acf_packet(acf_pdu, &(can_frames[i]), can_fd);
         pdu_length += res;
         cf_length += res;
         i++;
@@ -238,8 +237,8 @@ int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu
     return pdu_length;
 }
 
-int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant, int use_udp,
-                uint64_t stream_id, uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
+int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
+                uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
 {
 
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, seq_num, i = 0;
@@ -331,7 +330,7 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
             can_id |= CAN_RTR_FLAG;
         }
 
-        if (can_variant == AVTP_CAN_FD) {
+        if (can_fd) {
             if (AVTP_CAN(IsBrs)((AVTP_CAN(t) *)acf_pdu)) {
                 frame->fd.flags |= CANFD_BRS;
             }

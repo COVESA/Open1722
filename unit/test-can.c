@@ -93,7 +93,7 @@ static void can_set_payload(void **state)
 
     // Set payload and check for EFF
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
-                              AVTP_CAN_CLASSIC);
+                              false);
     assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
     assert_memory_equal(set_payload, pdu + 16, CAN_PAYLOAD_SIZE);
     assert_int_equal(0x0, *(pdu + 2) & 0x08); // Check EFF
@@ -101,7 +101,7 @@ static void can_set_payload(void **state)
     // Check EFF for extended Frame IDs
     set_frame_id = 0x800;
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
-                              AVTP_CAN_CLASSIC);
+                              false);
     assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
     assert_int_equal(0x8, *(pdu + 2) & 0x08); // Check EFF
 
@@ -110,8 +110,7 @@ static void can_set_payload(void **state)
     for (int i = 0; i < CAN_PAYLOAD_SIZE; i++) {
         memset(pdu, 0, MAX_PDU_SIZE);
         Avtp_Can_Init((Avtp_Can_t *)pdu);
-        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, i,
-                                  AVTP_CAN_CLASSIC);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, i, false);
         assert_memory_equal(set_payload, pdu + 16, i);
         assert_memory_equal(zero_array, pdu + 16 + i, CAN_PAYLOAD_SIZE - i);
 
@@ -142,8 +141,7 @@ static void can_is_valid(void **state)
     {
         uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
         Avtp_Can_Init((Avtp_Can_t *)pdu);
-        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, payload, sizeof(payload),
-                                  AVTP_CAN_CLASSIC);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, payload, sizeof(payload), false);
         assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, MAX_PDU_SIZE), 1);
     }
 
@@ -169,8 +167,7 @@ static void can_is_valid(void **state)
     {
         uint8_t too_big[12] = {0};
         Avtp_Can_Init((Avtp_Can_t *)pdu);
-        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, too_big, sizeof(too_big),
-                                  AVTP_CAN_CLASSIC);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, too_big, sizeof(too_big), false);
         assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, MAX_PDU_SIZE), 0);
     }
 
@@ -179,14 +176,14 @@ static void can_is_valid(void **state)
     {
         uint8_t fd_max[64] = {0};
         Avtp_Can_Init((Avtp_Can_t *)pdu);
-        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, fd_max, sizeof(fd_max), AVTP_CAN_FD);
+        Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, fd_max, sizeof(fd_max), true);
         assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, MAX_PDU_SIZE), 1);
     }
     {
         uint8_t fd_too_big[68] = {0};
         Avtp_Can_Init((Avtp_Can_t *)pdu);
         Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, fd_too_big, sizeof(fd_too_big),
-                                  AVTP_CAN_FD);
+                                  true);
         assert_int_equal(Avtp_Can_IsValid((Avtp_Can_t *)pdu, MAX_PDU_SIZE), 0);
     }
 }
@@ -203,7 +200,7 @@ static void can_brief_set_payload(void **state)
 
     // Set payload and check for EFF
     Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, set_frame_id, set_payload,
-                                   CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
+                                   CAN_PAYLOAD_SIZE, false);
     assert_int_equal(Avtp_CanBrief_GetCanIdentifier((Avtp_CanBrief_t *)pdu), set_frame_id);
     assert_int_equal(Avtp_CanBrief_IsEff((Avtp_CanBrief_t *)pdu), 0);
     assert_memory_equal(set_payload, pdu + AVTP_CAN_BRIEF_HEADER_LEN, CAN_PAYLOAD_SIZE);
@@ -212,7 +209,7 @@ static void can_brief_set_payload(void **state)
     // Check EFF for extended Frame IDs
     set_frame_id = 0x800;
     Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, set_frame_id, set_payload,
-                                   CAN_PAYLOAD_SIZE, AVTP_CAN_CLASSIC);
+                                   CAN_PAYLOAD_SIZE, false);
     assert_int_equal(Avtp_CanBrief_GetCanIdentifier((Avtp_CanBrief_t *)pdu), set_frame_id);
     assert_int_equal(Avtp_CanBrief_IsEff((Avtp_CanBrief_t *)pdu), 1);
 
@@ -221,8 +218,7 @@ static void can_brief_set_payload(void **state)
     for (int i = 0; i < CAN_PAYLOAD_SIZE; i++) {
         memset(pdu, 0, MAX_PDU_SIZE);
         Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
-        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, set_frame_id, set_payload, i,
-                                       AVTP_CAN_CLASSIC);
+        Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, set_frame_id, set_payload, i, false);
         assert_memory_equal(set_payload, pdu + AVTP_CAN_BRIEF_HEADER_LEN, i);
         assert_memory_equal(zero_array, pdu + AVTP_CAN_BRIEF_HEADER_LEN + i, CAN_PAYLOAD_SIZE - i);
 
@@ -252,7 +248,7 @@ static void can_brief_is_valid(void **state)
         uint8_t payload[8] = {0, 1, 2, 3, 4, 5, 6, 7};
         Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
         Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, payload, sizeof(payload),
-                                       AVTP_CAN_CLASSIC);
+                                       false);
         assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, MAX_PDU_SIZE), 1);
     }
 
@@ -277,7 +273,7 @@ static void can_brief_is_valid(void **state)
         uint8_t too_big[12] = {0};
         Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
         Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, too_big, sizeof(too_big),
-                                       AVTP_CAN_CLASSIC);
+                                       false);
         assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, MAX_PDU_SIZE), 0);
     }
 
@@ -287,14 +283,14 @@ static void can_brief_is_valid(void **state)
         uint8_t fd_max[64] = {0};
         Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
         Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, fd_max, sizeof(fd_max),
-                                       AVTP_CAN_FD);
+                                       true);
         assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, MAX_PDU_SIZE), 1);
     }
     {
         uint8_t fd_too_big[68] = {0};
         Avtp_CanBrief_Init((Avtp_CanBrief_t *)pdu);
         Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, fd_too_big,
-                                       sizeof(fd_too_big), AVTP_CAN_FD);
+                                       sizeof(fd_too_big), true);
         assert_int_equal(Avtp_CanBrief_IsValid((Avtp_CanBrief_t *)pdu, MAX_PDU_SIZE), 0);
     }
 }
@@ -308,8 +304,7 @@ static void can_create_from_garbage(void **state)
 
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(pdu, 0xAA, MAX_PDU_SIZE);
-    Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, payload, sizeof(payload),
-                              AVTP_CAN_CLASSIC);
+    Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, frame_id, payload, sizeof(payload), false);
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_CAN);
     assert_int_equal(Avtp_Can_IsMtv((Avtp_Can_t *)pdu), 0);
@@ -332,7 +327,7 @@ static void can_brief_create_from_garbage(void **state)
     // CreateAcfMessage must fully initialize the header even on garbage input.
     memset(pdu, 0xAA, MAX_PDU_SIZE);
     Avtp_CanBrief_CreateAcfMessage((Avtp_CanBrief_t *)pdu, frame_id, payload, sizeof(payload),
-                                   AVTP_CAN_CLASSIC);
+                                   false);
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu),
                      AVTP_ACF_TYPE_CAN_BRIEF);

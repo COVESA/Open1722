@@ -115,11 +115,6 @@ static const Avtp_FieldDescriptor_t Avtp_AcfCommonFieldDesc[AVTP_ACF_COMMON_FIEL
 };
 
 /**
- * This enum defines the CAN variants supported by the ACF CAN PDU.
- */
-typedef enum { AVTP_CAN_CLASSIC = 0, AVTP_CAN_FD } Avtp_CanVariant_t;
-
-/**
  * Returns the value of an an ACF common header field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF PDU.

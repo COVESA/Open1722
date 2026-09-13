@@ -55,7 +55,7 @@ static uint32_t udp_port = 17220;
 static int priority = -1;
 static uint8_t use_tscf = 0;
 static uint8_t use_udp = 0;
-static Avtp_CanVariant_t can_variant = AVTP_CAN_CLASSIC;
+static bool can_fd = false;
 static uint8_t num_acf_msgs = 1;
 static char can_ifname[IFNAMSIZ];
 static uint64_t talker_stream_id = STREAM_ID;
@@ -100,7 +100,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
         }
         break;
     case ARGPARSE_CAN_FD_OPTION:
-        can_variant = AVTP_CAN_FD;
+        can_fd = true;
         break;
     case ARGPARSE_CAN_IF_OPTION:
         strncpy(can_ifname, arg, sizeof(can_ifname) - 1);
@@ -161,10 +161,10 @@ int main(int argc, char *argv[])
         printf("\tUsing TSCF v0\n");
     else
         printf("\tUsing NTSCF v0\n");
-    if (can_variant == AVTP_CAN_CLASSIC)
-        printf("\tUsing Classic CAN interface: %s\n", can_ifname);
-    else if (can_variant == AVTP_CAN_FD)
+    if (can_fd)
         printf("\tUsing CAN FD interface: %s\n", can_ifname);
+    else
+        printf("\tUsing Classic CAN interface: %s\n", can_ifname);
     if (use_udp) {
         printf("\tUsing UDP\n");
         printf("\tDestination IP: %s, Send port: %d\n", ip_addr_str, udp_port);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
         goto err;
 
     // Open a CAN socket for reading frames
-    can_socket = setup_can_socket(can_ifname, can_variant);
+    can_socket = setup_can_socket(can_ifname, can_fd);
     if (can_socket < 0)
         goto err;
 
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
         while (i < num_acf_msgs) {
             // Get payload -- will 'spin' here until we get the requested number
             //                of CAN frames.
-            if (can_variant == AVTP_CAN_FD) {
+            if (can_fd) {
                 res = read(can_socket, &(can_frames[i].fd), sizeof(struct canfd_frame));
             } else {
                 res = read(can_socket, &(can_frames[i].cc), sizeof(struct can_frame));
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_variant, pdu, use_udp, use_tscf, talker_stream_id,
+        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, use_tscf, talker_stream_id,
                                  num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out

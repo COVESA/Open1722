@@ -91,10 +91,10 @@ typedef union {
  * Creates a CAN socket.
  *
  * @param can_ifname Pointer to the first bit of an 1722 AVTP PDU.
- * @param can_variant CAN or CAN-FD
+ * @param can_fd true: CAN-FD, false: Classic CAN
  * @returns CAN socket on success else the error
  */
-int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant);
+int setup_can_socket(const char *can_ifname, bool can_fd);
 #endif
 
 /**
@@ -102,21 +102,21 @@ int setup_can_socket(const char *can_ifname, Avtp_CanVariant_t can_variant);
  *
  * @param pdu: Start of the AVTP Frame
  * @param can_frames: Array of CAM Frames to be recovered from AVTP Frames
- * @param can_variant: AVTP_CAN_CLASSIC or AVTP_CAN_FD
+ * @param can_fd true: CAN-FD, false: Classic CAN
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param stream_id: AVTP stream ID of interest
  * @param exp_cf_seqnum: Expected Control format sequence num.
  * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
  * @return Number of CAN messages received
  */
-int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant, int use_udp,
-                uint64_t stream_id, uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
+int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
+                uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
  *
  * @param can_frames: Array of CAM Frames to be translated to AVTP Frames
- * @param can_variant: AVTP_CAN_CLASSIC or AVTP_CAN_FD
+ * @param can_fd true: CAN-FD, false: Classic CAN
  * @param pdu: Start of AVTP Frame
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param use_tscf 1: TSCF, 0: NTSCF
@@ -126,6 +126,5 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, Avtp_CanVariant_t can_variant
  * @param udp_seq_num: UDP Encapsulation sequence num.
  * @return Length of the PDU
  */
-int can_to_avtp(frame_t *can_frames, Avtp_CanVariant_t can_variant, uint8_t *pdu, int use_udp,
-                int use_tscf, uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num,
-                uint32_t udp_seq_num);
+int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int use_tscf,
+                uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num);
