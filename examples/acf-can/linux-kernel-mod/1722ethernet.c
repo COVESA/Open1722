@@ -236,6 +236,12 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
         return NET_RX_DROP;
     }
 
+    if (!Avtp_Can_IsValid(can, skb->len - sizeof(Avtp_Ntscf_t))) {
+        printk(KERN_INFO "ACFCAN: Drop invalid ACF-CAN packet\n");
+        kfree_skb(skb);
+        return NET_RX_DROP;
+    }
+
     uint64_t stream_id = Avtp_Ntscf_GetStreamId(ntscf);
     uint8_t busid = Avtp_Can_GetCanBusId(can);
 
@@ -266,6 +272,8 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
     }
 
     bool is_fd = Avtp_Can_IsFdf(can);
+    uint8_t can_payload_length = Avtp_Can_GetPayloadLength(can);
+    const uint8_t *can_payload = Avtp_Can_GetPayload(can);
     struct sk_buff *can_skb;
     struct can_frame *cf;
     struct canfd_frame *cfd;
@@ -307,25 +315,15 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
         if (Avtp_Can_IsEsi(can)) {
             cfd->flags |= CANFD_ESI;
         }
-        cfd->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
+        cfd->len = can_payload_length;
     } else {
-        cf->len = msg_length - AVTP_CAN_HEADER_LEN - Avtp_Can_GetPad(can);
-    }
-
-    if (is_fd && cfd->len > CANFD_MAX_DLEN) {
-        printk(KERN_ERR "DLC too large for CAN FD\n");
-        kfree_skb(skb);
-        return NET_RX_DROP;
-    } else if (!is_fd && cf->len > CAN_MAX_DLEN) {
-        printk(KERN_ERR "DLC too large for CAN\n");
-        kfree_skb(skb);
-        return NET_RX_DROP;
+        cf->len = can_payload_length;
     }
 
     if (is_fd) {
-        memcpy(cfd->data, skb->data + sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t), cfd->len);
+        memcpy(cfd->data, can_payload, can_payload_length);
     } else {
-        memcpy(cf->data, skb->data + sizeof(Avtp_Ntscf_t) + sizeof(Avtp_Can_t), cf->len);
+        memcpy(cf->data, can_payload, can_payload_length);
     }
 
     can_skb->cb[SKB_CB_LOCATION] |= SKB_CB_MINE; // Mark the skb as our own
