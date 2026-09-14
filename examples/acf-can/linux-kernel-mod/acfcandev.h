@@ -37,7 +37,6 @@
  * SPDX-License-Identifier: BSD-3-Clause or GPL-2.0-only
  */
 
-
 #pragma once
 
 #include <linux/types.h>
@@ -50,15 +49,8 @@
 #define TX_ENABLE (1 << 7)
 #define RX_ENABLE (1 << 6)
 
-// this is more guesswork. We need some space and it seems
-// raw can is using one int.... Not sure what would happen with
-// ISO-TP and such things....
-#define SKB_CB_LOCATION 4
-#define SKB_CB_MINE (1 << 7)
-
 /* Private per-device configuration */
-struct acfcan_cfg
-{
+struct acfcan_cfg {
     struct list_head list; // we need a list so we can map received ethernet packets
     __u8 dstmac[6];        // send acf-can frames to this mac
     __u64 rx_streamid;     // listen to this acf-can stream-id
@@ -73,4 +65,5 @@ struct acfcan_cfg
 };
 
 // get the acfcan_cfg struct from the device
-#define get_acfcan_cfg(dev) ((struct acfcan_cfg *)((char *)(can_get_ml_priv(dev)) + sizeof(struct can_ml_priv)))
+#define get_acfcan_cfg(dev)                                                                        \
+    ((struct acfcan_cfg *)((char *)(can_get_ml_priv(dev)) + sizeof(struct can_ml_priv)))

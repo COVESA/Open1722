@@ -278,8 +278,6 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
     struct can_frame *cf;
     struct canfd_frame *cfd;
 
-    int err;
-
     // Allocate a CAN skb
     if (is_fd) {
         pr_debug("ACFCAN: Allocating CAN FD skb\n");
@@ -326,16 +324,13 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
         memcpy(cf->data, can_payload, can_payload_length);
     }
 
-    can_skb->cb[SKB_CB_LOCATION] |= SKB_CB_MINE; // Mark the skb as our own
-    // Send the CAN skb, disable loop (otherwise the module would receive and forward
-    // it's own frame)
-    // TODO: Do we need to free can_skb?
-    err = can_send(can_skb, 1);
-    if (err) {
-        printk(KERN_ERR "Failed to send CAN skb: %d\n", err);
-        kfree_skb(skb);
-        return NET_RX_DROP;
-    }
+    // Inject the received CAN frame into the local RX path, like a real CAN
+    // controller would. netif_rx() keeps the frame out of acfcan_tx(), which
+    // would otherwise forward it back to the Ethernet and create a loop.
+    can_skb->pkt_type = PACKET_HOST;
+    can_skb->dev = can_dev;
+    can_skb->ip_summed = CHECKSUM_UNNECESSARY;
+    netif_rx(can_skb);
 
     kfree_skb(skb);
     return NET_RX_SUCCESS;
