@@ -109,7 +109,7 @@
 #define AAF_SAMPLE_SIZE 2  /* Sample size in bytes. */
 #define AAF_NUM_CHANNELS 2 /* Number of channels per frame */
 #define AAF_DATA_LEN (AAF_NUM_SAMPLES * AAF_SAMPLE_SIZE * AAF_NUM_CHANNELS)
-#define AAF_PDU_SIZE (sizeof(struct avtp_stream_pdu) + AAF_DATA_LEN)
+#define AAF_PDU_SIZE (sizeof(Avtp_Pcm_t) + AAF_DATA_LEN)
 #define AAF_SAMPLE_RATE 48000
 
 #define CRF_STREAM_ID 0xAABBCCDDEEFF0002
@@ -386,175 +386,101 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
     return true;
 }
 
-static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
+static bool is_valid_aaf_pdu(Avtp_Pcm_t *pdu)
 {
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
     uint64_t val64;
-    uint32_t val32;
-    int res;
+    uint8_t val8;
 
-    res = avtp_pdu_get(common, AVTP_FIELD_VERSION, &val32);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get version field: %d\n", res);
-        return false;
-    }
-    if (val32 != 0) {
-        fprintf(stderr, "AAF: Version mismatch: expected %u, got %u\n", 0, val32);
+    if (!Avtp_Pcm_IsValid(pdu, AAF_PDU_SIZE)) {
+        fprintf(stderr, "AAF: Invalid AAF PCM PDU\n");
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_TV, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get tv field: %d\n", res);
-        return false;
-    }
-    if (val64 != 1) {
-        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
+    val8 = Avtp_CommonHeader_GetVersion((const Avtp_CommonHeader_t *)pdu);
+    if (val8 != 0) {
+        fprintf(stderr, "AAF: Version mismatch: expected %u, got %u\n", 0, val8);
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_SP, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get sp field: %d\n", res);
-        return false;
-    }
-    if (val64 != AVTP_AAF_PCM_SP_NORMAL) {
-        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
+    if (!Avtp_Pcm_IsTv(pdu)) {
+        fprintf(stderr, "AAF: tv mismatch: expected %u, got %u\n", 1, 0);
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_STREAM_ID, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get stream ID field: %d\n", res);
+    if (Avtp_Pcm_IsSp(pdu)) {
+        fprintf(stderr, "AAF: sp mismatch: expected %u, got %u\n", AVTP_AAF_SP_NORMAL,
+                AVTP_AAF_SP_SPARSE);
         return false;
     }
+
+    val64 = Avtp_Pcm_GetStreamId(pdu);
     if (val64 != AAF_STREAM_ID) {
         fprintf(stderr, "AAF: Stream ID mismatch: expected %" PRIu64 ", got %" PRIu64 "\n",
                 AAF_STREAM_ID, val64);
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_SEQ_NUM, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get sequence num field: %d\n", res);
-        return false;
-    }
-
-    if (val64 != aaf_seq_num) {
+    val8 = Avtp_Pcm_GetSequenceNum(pdu);
+    if (val8 != aaf_seq_num) {
         /* If we have a sequence number mismatch, we simply log the
          * issue and continue to process the packet. We don't want to
          * invalidate it since it is a valid packet after all.
          */
-        fprintf(stderr, "AAF Sequence number mismatch: expected %u, got %" PRIu64 "\n", aaf_seq_num,
-                val64);
+        fprintf(stderr, "AAF Sequence number mismatch: expected %u, got %u\n", aaf_seq_num, val8);
 
-        aaf_seq_num = val64;
+        aaf_seq_num = val8;
     }
 
     aaf_seq_num++;
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_FORMAT, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get format field: %d\n", res);
-        return false;
-    }
-    if (val64 != AVTP_AAF_FORMAT_INT_16BIT) {
-        fprintf(stderr, "AAF: Format mismatch: expected %u, got %" PRIu64 "\n",
-                AVTP_AAF_FORMAT_INT_16BIT, val64);
+    if (Avtp_Pcm_GetFormat(pdu) != AVTP_AAF_FORMAT_INT_16BIT) {
+        fprintf(stderr, "AAF: Format mismatch: expected %u, got %u\n", AVTP_AAF_FORMAT_INT_16BIT,
+                Avtp_Pcm_GetFormat(pdu));
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_NSR, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get sample rate field: %d\n", res);
-        return false;
-    }
-    if (val64 != AVTP_AAF_PCM_NSR_48KHZ) {
-        fprintf(stderr, "AAF: Sample rate mismatch: expected %u, got %" PRIu64 "\n",
-                AVTP_AAF_PCM_NSR_48KHZ, val64);
+    if (Avtp_Pcm_GetNsr(pdu) != AVTP_PCM_NSR_48KHZ) {
+        fprintf(stderr, "AAF: Sample rate mismatch: expected %u, got %u\n", AVTP_PCM_NSR_48KHZ,
+                Avtp_Pcm_GetNsr(pdu));
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get channels field: %d\n", res);
-        return false;
-    }
-    if (val64 != AAF_NUM_CHANNELS) {
-        fprintf(stderr, "AAF: Channels mismatch: expected %u, got %" PRIu64 "\n", AAF_NUM_CHANNELS,
-                val64);
+    if (Avtp_Pcm_GetChannelsPerFrame(pdu) != AAF_NUM_CHANNELS) {
+        fprintf(stderr, "AAF: Channels mismatch: expected %u, got %u\n", AAF_NUM_CHANNELS,
+                Avtp_Pcm_GetChannelsPerFrame(pdu));
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_BIT_DEPTH, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get depth field: %d\n", res);
-        return false;
-    }
-    if (val64 != 16) {
-        fprintf(stderr, "AAF: Depth mismatch: expected %u, got %" PRIu64 "\n", 16, val64);
+    if (Avtp_Pcm_GetBitDepth(pdu) != 16) {
+        fprintf(stderr, "AAF: Depth mismatch: expected %u, got %u\n", 16,
+                Avtp_Pcm_GetBitDepth(pdu));
         return false;
     }
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, &val64);
-    if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get data_len field: %d\n", res);
-        return false;
-    }
-    if (val64 != AAF_DATA_LEN) {
-        fprintf(stderr, "AAF: Data len mismatch: expected %u, got %" PRIu64 "\n", AAF_DATA_LEN,
-                val64);
+    if (Avtp_Pcm_GetStreamDataLength(pdu) != AAF_DATA_LEN) {
+        fprintf(stderr, "AAF: Data len mismatch: expected %u, got %u\n", AAF_DATA_LEN,
+                Avtp_Pcm_GetStreamDataLength(pdu));
         return false;
     }
 
     return true;
 }
 
-static int init_aaf_pdu(struct avtp_stream_pdu *pdu)
+static void init_aaf_pdu(Avtp_Pcm_t *pdu)
 {
-    int res;
-
-    res = avtp_aaf_pdu_init(pdu);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TV, 1);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_ID, AAF_STREAM_ID);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT, AVTP_AAF_FORMAT_INT_16BIT);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR, AVTP_AAF_PCM_NSR_48KHZ);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, AAF_NUM_CHANNELS);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_BIT_DEPTH, 16);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, AAF_DATA_LEN);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SP, AVTP_AAF_PCM_SP_NORMAL);
-    if (res < 0)
-        return -1;
-
-    return 0;
+    Avtp_Pcm_Init(pdu);
+    Avtp_Pcm_SetTv(pdu, true);
+    Avtp_Pcm_SetStreamId(pdu, AAF_STREAM_ID);
+    Avtp_Pcm_SetFormat(pdu, AVTP_AAF_FORMAT_INT_16BIT);
+    Avtp_Pcm_SetNsr(pdu, AVTP_PCM_NSR_48KHZ);
+    Avtp_Pcm_SetChannelsPerFrame(pdu, AAF_NUM_CHANNELS);
+    Avtp_Pcm_SetBitDepth(pdu, 16);
+    Avtp_Pcm_SetStreamDataLength(pdu, AAF_DATA_LEN);
+    Avtp_Pcm_SetSp(pdu, false);
 }
 
 static int aaf_talker_tx_timeout(int fd_timer, int fd_sk, const struct sockaddr_ll *addr,
-                                 struct avtp_stream_pdu *pdu)
+                                 Avtp_Pcm_t *pdu)
 {
     int res;
     ssize_t n;
@@ -570,13 +496,8 @@ static int aaf_talker_tx_timeout(int fd_timer, int fd_sk, const struct sockaddr_
     while (expirations--) {
         avtp_time = get_next_mclk_timestamp();
 
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP, avtp_time);
-        if (res < 0)
-            return res;
-
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SEQ_NUM, aaf_seq_num++);
-        if (res < 0)
-            return res;
+        Avtp_Pcm_SetAvtpTimestamp(pdu, avtp_time);
+        Avtp_Pcm_SetSequenceNum(pdu, aaf_seq_num++);
 
         n = sendto(fd_sk, pdu, AAF_PDU_SIZE, 0, (struct sockaddr *)addr, sizeof(*addr));
         if (n < 0) {
@@ -664,22 +585,15 @@ static int handle_crf_pdu(struct avtp_crf_pdu *pdu)
     return recover_mclk(pdu);
 }
 
-static int handle_aaf_pdu(struct avtp_stream_pdu *pdu)
+static int handle_aaf_pdu(Avtp_Pcm_t *pdu)
 {
-    int res;
     bool state;
-    uint64_t val;
     uint32_t avtp_time, mclk_time;
 
     if (!is_valid_aaf_pdu(pdu))
         return 0;
 
-    res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_TIMESTAMP, &val);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get AVTP time from PDU\n");
-        return res;
-    }
-    avtp_time = val;
+    avtp_time = Avtp_Pcm_GetAvtpTimestamp(pdu);
 
     if (need_mclk_lookup) {
         mclk_time = mclk_lookup(avtp_time);
@@ -748,11 +662,10 @@ static int aaf_talker_recv_pdu(int fd_sk, int fd_timer)
 
 static int aaf_listener_recv_pdu(int fd)
 {
-    int res;
+    int res = 0;
     ssize_t n;
-    uint32_t val;
+    uint8_t subtype;
     void *pdu = alloca(MAX_PDU_SIZE);
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
 
     memset(pdu, 0, MAX_PDU_SIZE);
 
@@ -770,18 +683,14 @@ static int aaf_listener_recv_pdu(int fd)
     if (n != AAF_PDU_SIZE && n != CRF_PDU_SIZE)
         return 0;
 
-    res = avtp_pdu_get(common, AVTP_FIELD_SUBTYPE, &val);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get subtype field: %d\n", res);
-        return -1;
-    }
+    subtype = Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu);
 
-    switch (val) {
+    switch (subtype) {
     case AVTP_SUBTYPE_CRF:
         res = handle_crf_pdu(pdu);
         break;
     case AVTP_SUBTYPE_AAF:
-        res = handle_aaf_pdu(pdu);
+        res = handle_aaf_pdu((Avtp_Pcm_t *)pdu);
         break;
     }
 
@@ -837,7 +746,7 @@ static int aaf_talker(int fd_rx)
     struct pollfd poll_fd[2];
     struct sockaddr_ll sk_addr = {0};
     struct ifreq req = {0};
-    struct avtp_stream_pdu *pdu;
+    Avtp_Pcm_t *pdu;
 
     fd_tx = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_TSN));
     if (fd_tx < 0) {
@@ -871,10 +780,8 @@ static int aaf_talker(int fd_rx)
         goto fd_tx_close;
 
     pdu = alloca(AAF_PDU_SIZE);
-    res = init_aaf_pdu(pdu);
-    if (res < 0)
-        goto fd_timer_close;
-    memset(pdu->avtp_payload, 0, AAF_DATA_LEN);
+    init_aaf_pdu(pdu);
+    memset(pdu->payload, 0, AAF_DATA_LEN);
 
     poll_fd[0].fd = fd_rx;
     poll_fd[0].events = POLLIN;

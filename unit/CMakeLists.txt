@@ -66,6 +66,7 @@ endfunction()
 # Create dual tests for all modules
 add_dual_test(test-can test-can.c m)
 add_dual_test(test-aaf test-aaf.c)
+add_dual_test(test-pcm test-pcm.c)
 add_dual_test(test-avtp test-avtp.c)
 add_dual_test(test-crf test-crf.c)
 add_dual_test(test-cvf test-cvf.c)

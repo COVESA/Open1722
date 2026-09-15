@@ -10,6 +10,12 @@ surface lives and where the conventions matter most. The ACF format modules all
 follow one shared template. `ACF CAN` (`include/avtp/acf/Can.h`) is the
 reference implementation of that template; when in doubt, follow it.
 
+The AAF stream format modules (`include/avtp/aaf/Aaf.h` and `Pcm.h`) follow the
+same template - header-only inline accessors, a field descriptor table covering
+every header bit, `Init`, `IsValid` and payload helpers. They differ only in the
+header they describe (the common stream header instead of the ACF header), so
+everything below applies to them as well unless stated otherwise.
+
 The document is split along two audiences:
 
 - [Part 1 - Using Open1722](#part-1--using-open1722) covers everything an
@@ -555,8 +561,8 @@ header (4.7.4) and common control header (4.7.5) define it as `sv`
 themselves or leave it reserved.
 
 Format modules therefore keep their own semantic accessors wherever the format
-defines the bit - e.g. AAF/CVF/TSCF/RVF (`GetSv`/`EnableSv`/`DisableSv`) and
-CRF/NTSCF (`IsSv`/`SetSv`), even though the latter two use the alternative
+defines the bit - e.g. AAF/TSCF/NTSCF (`IsSv`/`SetSv`) and CVF/RVF/CRF
+(`GetSv`/`EnableSv`/`DisableSv`) - even though CRF/NTSCF use the alternative
 header. `Avtp_CommonHeader_GetH`/`SetH` remains the generic accessor for the raw
 bit, for formats that redefine it or reserve it.
 

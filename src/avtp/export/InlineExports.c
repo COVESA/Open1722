@@ -55,6 +55,9 @@
 
 #include "avtp/Udp.h"
 
+#include "avtp/aaf/Aaf.h"
+#include "avtp/aaf/Pcm.h"
+
 #include "avtp/acf/Abb.h"
 #include "avtp/acf/Can.h"
 #include "avtp/acf/CanBrief.h"

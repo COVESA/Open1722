@@ -69,13 +69,12 @@
 
 #include "avtp/aaf/Pcm.h"
 #include "common/common.h"
-#include "avtp/CommonHeader.h"
 
 #define STREAM_ID 0xAABBCCDDEEFF0001
 #define SAMPLE_SIZE 2 /* Sample size in bytes. */
 #define NUM_CHANNELS 2
 #define DATA_LEN (SAMPLE_SIZE * NUM_CHANNELS)
-#define PDU_SIZE (sizeof(struct avtp_stream_pdu) + DATA_LEN)
+#define PDU_SIZE (sizeof(Avtp_Pcm_t) + DATA_LEN)
 #define NSEC_PER_SEC 1000000000ULL
 #define NSEC_PER_MSEC 1000000ULL
 
@@ -121,54 +120,24 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp argp = {options, parser};
 
-static int init_pdu(struct avtp_stream_pdu *pdu)
+static void init_pdu(Avtp_Pcm_t *pdu)
 {
-    int res;
-
-    res = avtp_aaf_pdu_init(pdu);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TV, 1);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_ID, STREAM_ID);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT, AVTP_AAF_FORMAT_INT_16BIT);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR, AVTP_AAF_PCM_NSR_48KHZ);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, NUM_CHANNELS);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_BIT_DEPTH, 16);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, DATA_LEN);
-    if (res < 0)
-        return -1;
-
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SP, AVTP_AAF_PCM_SP_NORMAL);
-    if (res < 0)
-        return -1;
-
-    return 0;
+    Avtp_Pcm_Init(pdu);
+    Avtp_Pcm_SetTv(pdu, true);
+    Avtp_Pcm_SetStreamId(pdu, STREAM_ID);
+    Avtp_Pcm_SetFormat(pdu, AVTP_AAF_FORMAT_INT_16BIT);
+    Avtp_Pcm_SetNsr(pdu, AVTP_PCM_NSR_48KHZ);
+    Avtp_Pcm_SetChannelsPerFrame(pdu, NUM_CHANNELS);
+    Avtp_Pcm_SetBitDepth(pdu, 16);
+    Avtp_Pcm_SetStreamDataLength(pdu, DATA_LEN);
+    Avtp_Pcm_SetSp(pdu, false);
 }
 
 int main(int argc, char *argv[])
 {
     int fd, res;
     struct sockaddr_ll sk_addr;
-    struct avtp_stream_pdu *pdu = alloca(PDU_SIZE);
+    Avtp_Pcm_t *pdu = alloca(PDU_SIZE);
     uint8_t seq_num = 0;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
@@ -181,17 +150,15 @@ int main(int argc, char *argv[])
     if (res < 0)
         goto err;
 
-    res = init_pdu(pdu);
-    if (res < 0)
-        goto err;
+    init_pdu(pdu);
 
     while (1) {
         ssize_t n;
         uint32_t avtp_time;
 
-        memset(pdu->avtp_payload, 0, DATA_LEN);
+        memset(pdu->payload, 0, DATA_LEN);
 
-        n = read(STDIN_FILENO, pdu->avtp_payload, DATA_LEN);
+        n = read(STDIN_FILENO, pdu->payload, DATA_LEN);
         if (n == 0)
             break;
 
@@ -205,13 +172,8 @@ int main(int argc, char *argv[])
             goto err;
         }
 
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP, avtp_time);
-        if (res < 0)
-            goto err;
-
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SEQ_NUM, seq_num++);
-        if (res < 0)
-            goto err;
+        Avtp_Pcm_SetAvtpTimestamp(pdu, avtp_time);
+        Avtp_Pcm_SetSequenceNum(pdu, seq_num++);
 
         n = sendto(fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {
