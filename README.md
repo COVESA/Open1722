@@ -204,6 +204,9 @@ To learn what you can expect from the Open1722 API and to get a starting point i
 
 Open1722 uses `static inline` functions for field accessors to enable compiler optimizations on embedded targets. These same functions are also exported as regular symbols in the shared library for FFI users. See [inline.md](docs/inline.md) for details.
 
+## Rust
+Open1722 is consciously implemented in C and designed to effciently run on anything with a processor. Now we _do_ know Rust is awesome and has many advantages for some use cases. If you happen to be one of those guys: There is probably no need to wrap Open1722 yourself or endavour in yet another "let's rewrite it in Rust" initiative. Instead, check out this nice third-party wrapper to Open1722 first: https://crates.io/crates/open1722/
+
 ## Contribute to Open1722
 
 For detailed information see our [contribution guide](./CONTRIBUTING.md)!
