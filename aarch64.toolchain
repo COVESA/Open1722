@@ -5,4 +5,3 @@ set(triple aarch64-linux-gnu)
 
 set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
 set(CMAKE_C_COMPILER_TARGET ${triple})
-

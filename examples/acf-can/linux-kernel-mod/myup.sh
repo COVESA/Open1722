@@ -23,6 +23,3 @@ sudo echo -n "cafe11"  | sudo tee /sys/class/net/ecu2/acfcan/rx_streamid
 
 sudo ip link set up ecu1
 sudo ip link set up ecu2
-
-
-

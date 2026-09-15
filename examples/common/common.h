@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2024, COVESA
  * Copyright (c) 2019, Intel Corporation
  *
@@ -132,8 +132,8 @@ int create_talker_socket_udp(int priority);
  *    0: Success.
  *    -1: Could not get interface index.
  */
-int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
-                int protocol, struct sockaddr_ll *sk_addr);
+int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[], int protocol,
+                         struct sockaddr_ll *sk_addr);
 
 /* Set struct sockaddr_in with destination IP address and port parameters,
  * so it can be used later on sendo() or bind() calls.
@@ -145,6 +145,4 @@ int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
  *    0: Success.
  *    -1: Could not get interface index.
  */
-int setup_udp_socket_address(struct in_addr *addr, uint32_t port,
-                struct sockaddr_in *sk_addr);
-
+int setup_udp_socket_address(struct in_addr *addr, uint32_t port, struct sockaddr_in *sk_addr);

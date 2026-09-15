@@ -5,6 +5,3 @@ packetdiag -T svg  static_id.diag
 packetdiag -T svg  interop_path.diag
 packetdiag -T svg  string.diag
 packetdiag -T svg  array.diag
-
-
-

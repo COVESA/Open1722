@@ -55,7 +55,7 @@ static void get_field_null_pdu(void **state)
 static void get_field_null_val(void **state)
 {
     int res;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     res = avtp_pdu_get(&pdu, AVTP_FIELD_SUBTYPE, NULL);
 
@@ -66,7 +66,7 @@ static void get_field_invalid_field(void **state)
 {
     int res;
     uint32_t val = AVTP_SUBTYPE_MAAP;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     res = avtp_pdu_get(&pdu, AVTP_FIELD_MAX, &val);
 
@@ -77,7 +77,7 @@ static void get_field_subtype(void **state)
 {
     int res;
     uint32_t val;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     /* Set 'subtype' field to 0xFE (AVTP_SUBTYPE_MAAP). */
     pdu.subtype_data = htonl(0xFE000000);
@@ -92,7 +92,7 @@ static void get_field_version(void **state)
 {
     int res;
     uint32_t val;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     /* Set 'version' field to 5. */
     pdu.subtype_data = htonl(0x00500000);
@@ -115,7 +115,7 @@ static void set_field_null_pdu(void **state)
 static void set_field_invalid_field(void **state)
 {
     int res;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     res = avtp_pdu_set(&pdu, AVTP_FIELD_MAX, 1);
 
@@ -125,7 +125,7 @@ static void set_field_invalid_field(void **state)
 static void set_field_subtype(void **state)
 {
     int res;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     res = avtp_pdu_set(&pdu, AVTP_FIELD_SUBTYPE, AVTP_SUBTYPE_MAAP);
 
@@ -136,7 +136,7 @@ static void set_field_subtype(void **state)
 static void set_field_version(void **state)
 {
     int res;
-    struct avtp_common_pdu pdu = { 0 };
+    struct avtp_common_pdu pdu = {0};
 
     res = avtp_pdu_set(&pdu, AVTP_FIELD_VERSION, 5);
 
@@ -147,14 +147,10 @@ static void set_field_version(void **state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(get_field_null_pdu),
-        cmocka_unit_test(get_field_null_val),
-        cmocka_unit_test(get_field_invalid_field),
-        cmocka_unit_test(get_field_subtype),
-        cmocka_unit_test(get_field_version),
-        cmocka_unit_test(set_field_null_pdu),
-        cmocka_unit_test(set_field_invalid_field),
-        cmocka_unit_test(set_field_subtype),
+        cmocka_unit_test(get_field_null_pdu),      cmocka_unit_test(get_field_null_val),
+        cmocka_unit_test(get_field_invalid_field), cmocka_unit_test(get_field_subtype),
+        cmocka_unit_test(get_field_version),       cmocka_unit_test(set_field_null_pdu),
+        cmocka_unit_test(set_field_invalid_field), cmocka_unit_test(set_field_subtype),
         cmocka_unit_test(set_field_version),
     };
 

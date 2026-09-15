@@ -58,28 +58,28 @@ typedef enum Avtp_Jpeg2000Field {
     AVTP_JPEG2000_FIELD_MAX
 } Avtp_Jpeg2000Field_t;
 
-void Avtp_Jpeg2000_Init(Avtp_Jpeg2000_t* pdu);
+void Avtp_Jpeg2000_Init(Avtp_Jpeg2000_t *pdu);
 
-uint64_t Avtp_Jpeg2000_GetField(const Avtp_Jpeg2000_t* const pdu, Avtp_Jpeg2000Field_t field);
+uint64_t Avtp_Jpeg2000_GetField(const Avtp_Jpeg2000_t *const pdu, Avtp_Jpeg2000Field_t field);
 
-uint8_t Avtp_Jpeg2000_GetTp(const Avtp_Jpeg2000_t* const pdu);
-uint8_t Avtp_Jpeg2000_GetMhf(const Avtp_Jpeg2000_t* const pdu);
-uint8_t Avtp_Jpeg2000_GetMhId(const Avtp_Jpeg2000_t* const pdu);
-uint8_t Avtp_Jpeg2000_GetT(const Avtp_Jpeg2000_t* const pdu);
-uint8_t Avtp_Jpeg2000_GetPriority(const Avtp_Jpeg2000_t* const pdu);
-uint16_t Avtp_Jpeg2000_GetTileNumber(const Avtp_Jpeg2000_t* const pdu);
-uint32_t Avtp_Jpeg2000_GetFragmentOffset(const Avtp_Jpeg2000_t* const pdu);
+uint8_t Avtp_Jpeg2000_GetTp(const Avtp_Jpeg2000_t *const pdu);
+uint8_t Avtp_Jpeg2000_GetMhf(const Avtp_Jpeg2000_t *const pdu);
+uint8_t Avtp_Jpeg2000_GetMhId(const Avtp_Jpeg2000_t *const pdu);
+uint8_t Avtp_Jpeg2000_GetT(const Avtp_Jpeg2000_t *const pdu);
+uint8_t Avtp_Jpeg2000_GetPriority(const Avtp_Jpeg2000_t *const pdu);
+uint16_t Avtp_Jpeg2000_GetTileNumber(const Avtp_Jpeg2000_t *const pdu);
+uint32_t Avtp_Jpeg2000_GetFragmentOffset(const Avtp_Jpeg2000_t *const pdu);
 
-void Avtp_Jpeg2000_SetField(Avtp_Jpeg2000_t* pdu, Avtp_Jpeg2000Field_t field, uint64_t value);
+void Avtp_Jpeg2000_SetField(Avtp_Jpeg2000_t *pdu, Avtp_Jpeg2000Field_t field, uint64_t value);
 
-void Avtp_Jpeg2000_SetTp(Avtp_Jpeg2000_t* pdu, uint8_t value);
-void Avtp_Jpeg2000_SetMhf(Avtp_Jpeg2000_t* pdu, uint8_t value);
-void Avtp_Jpeg2000_SetMhId(Avtp_Jpeg2000_t* pdu, uint8_t value);
-void Avtp_Jpeg2000_EnableT(Avtp_Jpeg2000_t* pdu);
-void Avtp_Jpeg2000_DisableT(Avtp_Jpeg2000_t* pdu);
-void Avtp_Jpeg2000_SetPriority(Avtp_Jpeg2000_t* pdu, uint8_t value);
-void Avtp_Jpeg2000_SetTileNumber(Avtp_Jpeg2000_t* pdu, uint16_t value);
-void Avtp_Jpeg2000_SetFragmentOffset(Avtp_Jpeg2000_t* pdu, uint32_t value);
+void Avtp_Jpeg2000_SetTp(Avtp_Jpeg2000_t *pdu, uint8_t value);
+void Avtp_Jpeg2000_SetMhf(Avtp_Jpeg2000_t *pdu, uint8_t value);
+void Avtp_Jpeg2000_SetMhId(Avtp_Jpeg2000_t *pdu, uint8_t value);
+void Avtp_Jpeg2000_EnableT(Avtp_Jpeg2000_t *pdu);
+void Avtp_Jpeg2000_DisableT(Avtp_Jpeg2000_t *pdu);
+void Avtp_Jpeg2000_SetPriority(Avtp_Jpeg2000_t *pdu, uint8_t value);
+void Avtp_Jpeg2000_SetTileNumber(Avtp_Jpeg2000_t *pdu, uint16_t value);
+void Avtp_Jpeg2000_SetFragmentOffset(Avtp_Jpeg2000_t *pdu, uint32_t value);
 
 #ifdef __cplusplus
 }

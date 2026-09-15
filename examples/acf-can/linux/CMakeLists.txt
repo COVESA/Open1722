@@ -84,7 +84,7 @@ target_compile_definitions(acf-can-brief-v2-bridge PRIVATE AVTP_CAN_API=AVTP_CAN
 target_link_libraries(acf-can-brief-v2-bridge open1722 open1722examples)
 target_include_directories(acf-can-brief-v2-bridge PUBLIC ${PROJECT_SOURCE_DIR}/include ../ ../../)
 
-add_dependencies(examples acf-can-talker acf-can-listener acf-can-bridge 
+add_dependencies(examples acf-can-talker acf-can-listener acf-can-bridge
                 acf-canv2-talker acf-canv2-listener acf-canv2-bridge
                 acf-can-brief-talker acf-can-brief-listener acf-can-brief-bridge
                 acf-can-brief-v2-talker acf-can-brief-v2-listener acf-can-brief-v2-bridge)

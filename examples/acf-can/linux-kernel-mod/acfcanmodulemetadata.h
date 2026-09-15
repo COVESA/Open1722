@@ -41,7 +41,6 @@
 
 #include <linux/module.h>
 
-
 #define DRV_NAME "acfcan"
 
 // Module metadata

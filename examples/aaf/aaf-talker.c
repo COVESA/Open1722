@@ -68,13 +68,13 @@
 #include "common/common.h"
 #include "avtp/CommonHeader.h"
 
-#define STREAM_ID		0xAABBCCDDEEFF0001
-#define SAMPLE_SIZE		2 /* Sample size in bytes. */
-#define NUM_CHANNELS		2
-#define DATA_LEN		(SAMPLE_SIZE * NUM_CHANNELS)
-#define PDU_SIZE		(sizeof(struct avtp_stream_pdu) + DATA_LEN)
-#define NSEC_PER_SEC		1000000000ULL
-#define NSEC_PER_MSEC		1000000ULL
+#define STREAM_ID 0xAABBCCDDEEFF0001
+#define SAMPLE_SIZE 2 /* Sample size in bytes. */
+#define NUM_CHANNELS 2
+#define DATA_LEN (SAMPLE_SIZE * NUM_CHANNELS)
+#define PDU_SIZE (sizeof(struct avtp_stream_pdu) + DATA_LEN)
+#define NSEC_PER_SEC 1000000000ULL
+#define NSEC_PER_MSEC 1000000ULL
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -82,12 +82,11 @@ static int priority = -1;
 static int max_transit_time;
 
 static struct argp_option options[] = {
-    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address" },
-    {"ifname", 'i', "IFNAME", 0, "Network Interface" },
-    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms" },
-    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in socket" },
-    { 0 }
-};
+    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address"},
+    {"ifname", 'i', "IFNAME", 0, "Network Interface"},
+    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms"},
+    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in socket"},
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -95,9 +94,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                    &macaddr[0], &macaddr[1], &macaddr[2],
-                    &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid address\n");
             exit(EXIT_FAILURE);
@@ -118,7 +116,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser };
+static struct argp argp = {options, parser};
 
 static int init_pdu(struct avtp_stream_pdu *pdu)
 {
@@ -136,18 +134,15 @@ static int init_pdu(struct avtp_stream_pdu *pdu)
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT,
-                        AVTP_AAF_FORMAT_INT_16BIT);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT, AVTP_AAF_FORMAT_INT_16BIT);
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR,
-                        AVTP_AAF_PCM_NSR_48KHZ);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR, AVTP_AAF_PCM_NSR_48KHZ);
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME,
-                                NUM_CHANNELS);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, NUM_CHANNELS);
     if (res < 0)
         return -1;
 
@@ -198,8 +193,7 @@ int main(int argc, char *argv[])
             break;
 
         if (n != DATA_LEN) {
-            fprintf(stderr, "read %zd bytes, expected %d\n",
-                                n, DATA_LEN);
+            fprintf(stderr, "read %zd bytes, expected %d\n", n, DATA_LEN);
         }
 
         res = calculate_avtp_time(&avtp_time, max_transit_time);
@@ -208,8 +202,7 @@ int main(int argc, char *argv[])
             goto err;
         }
 
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP,
-                                avtp_time);
+        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP, avtp_time);
         if (res < 0)
             goto err;
 
@@ -217,16 +210,14 @@ int main(int argc, char *argv[])
         if (res < 0)
             goto err;
 
-        n = sendto(fd, pdu, PDU_SIZE, 0,
-                (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+        n = sendto(fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {
             perror("Failed to send data");
             goto err;
         }
 
         if (n != PDU_SIZE) {
-            fprintf(stderr, "wrote %zd bytes, expected %zd\n",
-                                n, PDU_SIZE);
+            fprintf(stderr, "wrote %zd bytes, expected %zd\n", n, PDU_SIZE);
         }
     }
 

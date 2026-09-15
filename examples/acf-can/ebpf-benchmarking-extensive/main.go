@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// Load the eBPF object files and assign them to the CANTraceObjects struct
-	// This will also rewrite the constants in the eBPF code based on the flags provided	
+	// This will also rewrite the constants in the eBPF code based on the flags provided
 	var objs CANTraceObjects
 	spec, err := LoadCANTrace()
 	if err != nil {
@@ -262,7 +262,7 @@ func main() {
 				dev := string(rxData[:])
 				dev = strings.TrimRight(dev, "\x00")
 
-				rxTimestampsKernelMutex.Lock() 
+				rxTimestampsKernelMutex.Lock()
 				rxTimestampsKernel[dev] = append(rxTimestampsKernel[dev], uint64(utils.ParseEventsRxKernel(data).Timestamp))
 				rxTimestampsKernelMutex.Unlock()
 			}
@@ -306,7 +306,7 @@ func main() {
 			writerfileEventsCanAvtp := csv.NewWriter(fileEventsCanAvtp)
 			defer writerfileEventsCanAvtp.Flush()
 			writerfileEventsCanAvtp.Write([]string{"PID", "Dev", "TimestampEnterRead", "TimestampExitRead", "TimeReadingCANBus", "TimestampEnterSendto", "TimestampExitSendto", "TimeWriting", "TimestampEnterCanToAvtp", "TimestampExitCanToAvtp", "TimeCanToAvtp", "TimestampEnterAvtpToCan", "TimestampExitAvtpToCan", "TimeAvtpToCan"})
-			
+
 			traceDataMapMutex.Lock()
 			for _, tData := range traceDataMap {
 				fmt.Println("Results")
@@ -399,7 +399,7 @@ func main() {
 				histInterarrivalTime.SaveImage(filename)
 			}
 			rxTimestampsKernelMutex.Unlock()
-			
+
 			fmt.Println("Received termination signal")
 			os.Exit(0)
 			return

@@ -43,15 +43,15 @@
 extern "C" {
 #endif
 
-#define AVTP_VSS_BRIEF_HEADER_LEN   (1 * AVTP_QUADLET_SIZE)
-#define AVTP_ACF_TYPE_VSS_BRIEF     0x42
+#define AVTP_VSS_BRIEF_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
+#define AVTP_ACF_TYPE_VSS_BRIEF 0x42
 
 typedef struct {
     uint8_t header[AVTP_VSS_BRIEF_HEADER_LEN];
     uint8_t payload[0];
 } Avtp_VssBrief_t;
 
-typedef enum  {
+typedef enum {
 
     /* ACF common header fields */
     AVTP_VSS_BRIEF_FIELD_ACF_MSG_TYPE = 0,
@@ -77,7 +77,7 @@ typedef enum  {
  *
  * @param vss_pdu Pointer to the first bit of a 1722 ACF VSS PDU.
  */
-void Avtp_VssBrief_Init(Avtp_VssBrief_t* vss_pdu);
+void Avtp_VssBrief_Init(Avtp_VssBrief_t *vss_pdu);
 
 /**
  * Returns the value of an an ACF VSS PDU field as specified in the
@@ -87,7 +87,7 @@ void Avtp_VssBrief_Init(Avtp_VssBrief_t* vss_pdu);
  * @param field Specifies the position of the data field to be read
  * @returns Value of the specified field of the IEEE 1722 ACF VSS PDU.
  */
-uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t* const vss_pdu, Avtp_VssBriefFields_t field);
+uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t *const vss_pdu, Avtp_VssBriefFields_t field);
 
 /**
  * Sets the value of an an ACF VSS PDU field as specified in the
@@ -97,7 +97,7 @@ uint64_t Avtp_VssBrief_GetField(const Avtp_VssBrief_t* const vss_pdu, Avtp_VssBr
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-void Avtp_VssBrief_SetField(Avtp_VssBrief_t* vss_pdu, Avtp_VssBriefFields_t field, uint64_t value);
+void Avtp_VssBrief_SetField(Avtp_VssBrief_t *vss_pdu, Avtp_VssBriefFields_t field, uint64_t value);
 
 #ifdef __cplusplus
 }

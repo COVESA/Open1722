@@ -7,7 +7,7 @@ If you think you have found a vulnerability in this repository, please report it
 
 **Please do not report security vulnerabilities through public issues, discussions, or change requests.**
 
-Instead, 
+Instead,
 
 *  [Report a vulnerability](https://github.com/COVESA/Open1722/security/advisories/new) directly via private vulnerability reporting on GitHub
 
@@ -25,4 +25,3 @@ Please include as much of the information listed below as you can to help us bet
 * Proof-of-concept or exploit code (if possible)
 
 This information will help us triage your report more quickly.
-

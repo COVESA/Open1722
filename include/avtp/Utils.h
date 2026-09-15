@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -52,8 +52,8 @@ extern "C" {
  * @param field Specifies the position of the data field to be read
  * @returns This function returns the field value from the PDU.
  */
-uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
-        uint8_t numFields, const uint8_t* const pdu, uint8_t field);
+uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t *fieldDescriptors, uint8_t numFields,
+                       const uint8_t *const pdu, uint8_t field);
 
 /**
  * Sets a data field in a 1722 frame to a specified value and handles necessary
@@ -64,8 +64,8 @@ uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
  * @param field Specifies the position of the data field to be written
  * @param value The value to set.
  */
-void Avtp_SetField(const Avtp_FieldDescriptor_t* fieldDescriptors,
-        uint8_t numFields, uint8_t* pdu, uint8_t field, uint64_t value);
+void Avtp_SetField(const Avtp_FieldDescriptor_t *fieldDescriptors, uint8_t numFields, uint8_t *pdu,
+                   uint8_t field, uint64_t value);
 
 #ifdef __cplusplus
 }

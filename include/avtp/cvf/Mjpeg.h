@@ -10,7 +10,7 @@
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
  *    * Neither the name of COVESA, Intel Corporation nor the names of its
- *      contributors  may be used to endorse or promote products derived from 
+ *      contributors  may be used to endorse or promote products derived from
  *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -56,25 +56,25 @@ typedef enum Avtp_MjpegField {
     AVTP_MJPEG_FIELD_MAX
 } Avtp_MjpegField_t;
 
-void Avtp_Mjpeg_Init(Avtp_Mjpeg_t* pdu);
+void Avtp_Mjpeg_Init(Avtp_Mjpeg_t *pdu);
 
-uint64_t Avtp_Mjpeg_GetField(const Avtp_Mjpeg_t* const pdu, Avtp_MjpegField_t field);
+uint64_t Avtp_Mjpeg_GetField(const Avtp_Mjpeg_t *const pdu, Avtp_MjpegField_t field);
 
-uint8_t Avtp_Mjpeg_GetTypeSpecific(const Avtp_Mjpeg_t* const pdu);
-uint32_t Avtp_Mjpeg_GetFragmentOffset(const Avtp_Mjpeg_t* const pdu);
-uint8_t Avtp_Mjpeg_GetType(const Avtp_Mjpeg_t* const pdu);
-uint8_t Avtp_Mjpeg_GetQ(const Avtp_Mjpeg_t* const pdu);
-uint8_t Avtp_Mjpeg_GetWidth(const Avtp_Mjpeg_t* const pdu);
-uint8_t Avtp_Mjpeg_GetHeight(const Avtp_Mjpeg_t* const pdu);
+uint8_t Avtp_Mjpeg_GetTypeSpecific(const Avtp_Mjpeg_t *const pdu);
+uint32_t Avtp_Mjpeg_GetFragmentOffset(const Avtp_Mjpeg_t *const pdu);
+uint8_t Avtp_Mjpeg_GetType(const Avtp_Mjpeg_t *const pdu);
+uint8_t Avtp_Mjpeg_GetQ(const Avtp_Mjpeg_t *const pdu);
+uint8_t Avtp_Mjpeg_GetWidth(const Avtp_Mjpeg_t *const pdu);
+uint8_t Avtp_Mjpeg_GetHeight(const Avtp_Mjpeg_t *const pdu);
 
-void Avtp_Mjpeg_SetField(Avtp_Mjpeg_t* pdu, Avtp_MjpegField_t field, uint64_t value);
+void Avtp_Mjpeg_SetField(Avtp_Mjpeg_t *pdu, Avtp_MjpegField_t field, uint64_t value);
 
-void Avtp_Mjpeg_SetTypeSpecific(Avtp_Mjpeg_t* pdu, uint8_t value);
-void Avtp_Mjpeg_SetFragmentOffset(Avtp_Mjpeg_t* pdu, uint32_t value);
-void Avtp_Mjpeg_SetType(Avtp_Mjpeg_t* pdu, uint8_t value);
-void Avtp_Mjpeg_SetQ(Avtp_Mjpeg_t* pdu, uint8_t value);
-void Avtp_Mjpeg_SetWidth(Avtp_Mjpeg_t* pdu, uint8_t value);
-void Avtp_Mjpeg_SetHeight(Avtp_Mjpeg_t* pdu, uint8_t value);
+void Avtp_Mjpeg_SetTypeSpecific(Avtp_Mjpeg_t *pdu, uint8_t value);
+void Avtp_Mjpeg_SetFragmentOffset(Avtp_Mjpeg_t *pdu, uint32_t value);
+void Avtp_Mjpeg_SetType(Avtp_Mjpeg_t *pdu, uint8_t value);
+void Avtp_Mjpeg_SetQ(Avtp_Mjpeg_t *pdu, uint8_t value);
+void Avtp_Mjpeg_SetWidth(Avtp_Mjpeg_t *pdu, uint8_t value);
+void Avtp_Mjpeg_SetHeight(Avtp_Mjpeg_t *pdu, uint8_t value);
 
 #ifdef __cplusplus
 }

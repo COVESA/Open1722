@@ -45,20 +45,20 @@ function(add_dual_test TEST_NAME SOURCE_FILE)
     # Parse additional arguments for extra libraries
     set(EXTRA_LIBS ${ARGN})
     set(BASE_LIBS open1722 cmocka ${EXTRA_LIBS})
-    
+
     # C version
     add_executable(${TEST_NAME} ${SOURCE_FILE})
     target_link_libraries(${TEST_NAME} ${BASE_LIBS})
     target_include_directories(${TEST_NAME} PUBLIC ../include)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-    
+
     # C++ version (compile same source file as C++)
     set_source_files_properties(${SOURCE_FILE} PROPERTIES LANGUAGE CXX)
     add_executable(${TEST_NAME}-cpp ${SOURCE_FILE})
     target_link_libraries(${TEST_NAME}-cpp ${BASE_LIBS})
     target_include_directories(${TEST_NAME}-cpp PUBLIC ../include)
     add_test(NAME ${TEST_NAME}-cpp COMMAND ${TEST_NAME}-cpp)
-    
+
     # Automatically add both targets to unittests dependencies
     add_dependencies(unittests ${TEST_NAME} ${TEST_NAME}-cpp)
 endfunction()

@@ -67,5 +67,3 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_subdirectory(hello-world)
     add_subdirectory(acf-vss)
 endif()
-
-

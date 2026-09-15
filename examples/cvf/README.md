@@ -28,7 +28,7 @@ TSN stream parameters (e.g. destination mac address, traffic priority) are passe
 In order to have this example working properly, make sure you have configured FQTSS feature from your NIC according (for further information see tc-cbs(8)). Also, this example relies on system clock to set the AVTP timestamp so make sure it is synchronized with the PTP Hardware Clock (PHC) from your NIC and that the PHC is synchronized with the network clock. For further information see ptp4l(8) and phc2sys(8).
 
 The easiest way to use this example is by combining it with a GStreamer pipeline. We use GStreamer to provide an H.264 stream that is sent to stdout, from where this example reads the stream. So, to generate an H.264 video to send via TSN network, you can do something like:
- 
+
 ```
 $ gst-launch-1.0 -e -q videotestsrc pattern=ball \
   ! video/x-raw,width=192,height=144 ! x264enc \

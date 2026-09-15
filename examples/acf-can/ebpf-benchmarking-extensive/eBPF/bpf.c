@@ -35,8 +35,7 @@
 #include <string.h>
 #include "utils.h"
 
-struct config
-{
+struct config {
     __u32 pid_talker;
     __u32 pid_listener;
     __u32 pid_can_gen;
@@ -50,20 +49,17 @@ struct config
 volatile const struct config CONFIG;
 #define cfg (&CONFIG)
 
-struct
-{
+struct {
     __uint(type, BPF_MAP_TYPE_RINGBUF);
     __uint(max_entries, 256 * 1024);
 } events_can_avtp SEC(".maps");
 
-struct
-{
+struct {
     __uint(type, BPF_MAP_TYPE_RINGBUF);
     __uint(max_entries, 256 * 1024);
 } events_recv_ts SEC(".maps");
 
-struct event
-{
+struct event {
     __u64 timestamp;
     __u32 pid;
     __u32 uid; // Unique identifier for the event
@@ -71,8 +67,7 @@ struct event
     char devname[32];
 };
 
-struct event_recv
-{
+struct event_recv {
     __u64 timestamp;
     char devname[32];
 };
@@ -106,43 +101,38 @@ static __always_inline void submit_event(__u32 pid, const char *msg)
 }
 */
 
-#define SUBMIT_EVENT(func_name, _pid, _uid, ts, devname)                \
-    do                                                                  \
-    {                                                                   \
-        struct event *e = bpf_ringbuf_reserve(&events_can_avtp,         \
-                                              sizeof(struct event), 0); \
-        if (!e)                                                         \
-        {                                                               \
-            bpf_printk("Failed to reserve ringbuf space\n");            \
-            return 0;                                                   \
-        }                                                               \
-        memset(e, 0, sizeof(*e));                                       \
-        e->timestamp = ts;                                            \
-        e->pid = _pid;                                                  \
-        e->uid = _uid;                                                  \
-        __builtin_memcpy(e->function, (func_name),                      \
-                         sizeof(e->function) - 1);                      \
-        e->function[sizeof(e->function) - 1] = '\0';                    \
-        memset(e->devname, 0, sizeof(e->devname));                      \
-        bpf_probe_read_str(e->devname, sizeof(e->devname), devname);    \
-        bpf_ringbuf_submit(e, 0);                                       \
+#define SUBMIT_EVENT(func_name, _pid, _uid, ts, devname)                                           \
+    do {                                                                                           \
+        struct event *e = bpf_ringbuf_reserve(&events_can_avtp, sizeof(struct event), 0);          \
+        if (!e) {                                                                                  \
+            bpf_printk("Failed to reserve ringbuf space\n");                                       \
+            return 0;                                                                              \
+        }                                                                                          \
+        memset(e, 0, sizeof(*e));                                                                  \
+        e->timestamp = ts;                                                                         \
+        e->pid = _pid;                                                                             \
+        e->uid = _uid;                                                                             \
+        __builtin_memcpy(e->function, (func_name), sizeof(e->function) - 1);                       \
+        e->function[sizeof(e->function) - 1] = '\0';                                               \
+        memset(e->devname, 0, sizeof(e->devname));                                                 \
+        bpf_probe_read_str(e->devname, sizeof(e->devname), devname);                               \
+        bpf_ringbuf_submit(e, 0);                                                                  \
     } while (0)
 
 // Helper function for safe string comparison
-static __always_inline bool is_ecu(const char *devname, const char *ecu_name, unsigned int size) 
+static __always_inline bool is_ecu(const char *devname, const char *ecu_name, unsigned int size)
 {
-    #pragma unroll  // Required for eBPF verifier
+#pragma unroll // Required for eBPF verifier
     for (int i = 0; i < size; i++) {
         if (devname[i] != ecu_name[i]) {
             return false;
         }
         if (devname[i] == '\0') {
-            return true;  // Strings match up to null terminator
+            return true; // Strings match up to null terminator
         }
     }
-    return (devname[size-1] == '\0' && ecu_name[size-1] == '\0');
+    return (devname[size - 1] == '\0' && ecu_name[size - 1] == '\0');
 }
-
 
 static __always_inline int printStatsSK(struct sk_buff *skb)
 {
@@ -176,7 +166,7 @@ static __always_inline int getDevName(char *devname, struct sk_buff *skb)
 
 SEC("tracepoint/raw_syscalls/sys_enter_read")
 int tp_enter_read(struct trace_event_raw_sys_enter *ctx)
-{   
+{
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
@@ -185,17 +175,15 @@ int tp_enter_read(struct trace_event_raw_sys_enter *ctx)
         return 0;
 
     char devname[32];
-    if (pid == cfg->pid_talker)
-    {
-        uid++; 
+    if (pid == cfg->pid_talker) {
+        uid++;
         strncpy(devname, "talker", sizeof(devname));
-        //bpf_printk("%llu |  pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(), pid, uid, devname);
+        // bpf_printk("%llu |  pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(), pid, uid, devname);
     }
-    if (pid == cfg->pid_listener)
-    {
+    if (pid == cfg->pid_listener) {
         uid2++;
         strncpy(devname, "listener", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
 
     SUBMIT_EVENT("sys_enter_read", pid, uid, bpf_ktime_get_ns(), devname);
@@ -209,21 +197,17 @@ int tp_exit_read(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
-    if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
+    if (cfg->pid_listener != pid && cfg->pid_talker != pid)
         return 0;
 
     char devname[32];
-    if (pid == cfg->pid_talker)
-    {
+    if (pid == cfg->pid_talker) {
         strncpy(devname, "talker", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
-
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
-    if (pid == cfg->pid_listener)
-    {
+    if (pid == cfg->pid_listener) {
         strncpy(devname, "listener", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
-
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
 
     SUBMIT_EVENT("sys_exit_read", pid, uid, bpf_ktime_get_ns(), devname);
@@ -239,20 +223,16 @@ int tp_enter_sendto(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
-    if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
+    if (cfg->pid_listener != pid && cfg->pid_talker != pid)
         return 0;
     char devname[32];
-    if (pid == cfg->pid_talker)
-    {
+    if (pid == cfg->pid_talker) {
         strncpy(devname, "talker", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
-
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
-    if (pid == cfg->pid_listener)
-    {
+    if (pid == cfg->pid_listener) {
         strncpy(devname, "listener", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
-
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
 
     SUBMIT_EVENT("sys_enter_sendto", pid, uid, bpf_ktime_get_ns(), devname);
@@ -267,18 +247,16 @@ int tp_exit_sendto(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_talker == 0 && cfg->pid_listener == 0)
         return 0;
 
-    if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
+    if (cfg->pid_listener != pid && cfg->pid_talker != pid)
         return 0;
     char devname[32];
-    if (pid == cfg->pid_talker)
-    {
+    if (pid == cfg->pid_talker) {
         strncpy(devname, "talker", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
-    if (pid == cfg->pid_listener)
-    {
+    if (pid == cfg->pid_listener) {
         strncpy(devname, "listener", sizeof(devname));
-        //bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
+        // bpf_printk("%llu | pid: %d, uid: %d -- %s\n", bpf_ktime_get_ns(),  pid, uid, devname);
     }
 
     SUBMIT_EVENT("sys_exit_sendto", pid, uid, bpf_ktime_get_ns(), devname);
@@ -293,26 +271,23 @@ int tp_enter_recvfrom(struct trace_event_raw_sys_enter *ctx)
     if (cfg->pid_listener != 0 && pid != cfg->pid_listener)
         return 0;
 
-    if (cfg->pid_listener != pid &&  cfg->pid_talker != pid)
+    if (cfg->pid_listener != pid && cfg->pid_talker != pid)
         return 0;
     // bpf_printk("sys_enter_recvfrom called\n");
-   
+
     __u64 rx_time = bpf_ktime_get_ns();
     char devname[32];
 
-    if (pid == cfg->pid_talker)
-    {
+    if (pid == cfg->pid_talker) {
         strncpy(devname, "talker", sizeof(devname));
     }
-    if (pid == cfg->pid_listener)
-    {
+    if (pid == cfg->pid_listener) {
         uid2++;
         strncpy(devname, "listener", sizeof(devname));
     }
     struct event_recv *e;
     e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event_recv), 0);
-    if (!e)
-    {
+    if (!e) {
         bpf_printk("Failed to reserve ringbuf space\n");
         return 0;
     }
@@ -329,12 +304,12 @@ int uprobe_can_to_avtp(struct pt_regs *ctx)
 {
 
     u32 pid = bpf_get_current_pid_tgid() >> 32;
-     if (cfg->pid_talker != 0 && pid != cfg->pid_talker)
+    if (cfg->pid_talker != 0 && pid != cfg->pid_talker)
         return 0;
 
     char devname[32];
     strncpy(devname, "talker", sizeof(devname));
-    //bpf_printk("UUID: %d, can_to_avtp called %d \n",uid, pid);
+    // bpf_printk("UUID: %d, can_to_avtp called %d \n",uid, pid);
 
     SUBMIT_EVENT("can_to_avtp_enter", pid, uid, bpf_ktime_get_ns(), devname);
     return 0;
@@ -342,7 +317,7 @@ int uprobe_can_to_avtp(struct pt_regs *ctx)
 
 SEC("uretprobe/can_to_avtp")
 int uprobe_ret_can_to_avtp(struct pt_regs *ctx)
-{  
+{
 
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     if (cfg->pid_talker != 0 && pid != cfg->pid_talker)
@@ -350,21 +325,22 @@ int uprobe_ret_can_to_avtp(struct pt_regs *ctx)
 
     char devname[32];
     strncpy(devname, "talker", sizeof(devname));
-    //bpf_printk("UUID: %d, can_to_avtp exited %d\n",uid, pid);    
+    // bpf_printk("UUID: %d, can_to_avtp exited %d\n",uid, pid);
 
     SUBMIT_EVENT("can_to_avtp_exit", pid, uid, bpf_ktime_get_ns(), devname);
     return 0;
 }
 
 SEC("uprobe/avtp_to_can")
-int uprobe_avtp_to_can(struct pt_regs *ctx){
+int uprobe_avtp_to_can(struct pt_regs *ctx)
+{
     u32 pid = bpf_get_current_pid_tgid() >> 32;
     if (cfg->pid_listener != 0 && pid != cfg->pid_listener)
         return 0;
 
     char devname[32];
     strncpy(devname, "listener", sizeof(devname));
-    //bpf_printk("UUID: %d, avtp_to_can called %d \n",uid2, pid);
+    // bpf_printk("UUID: %d, avtp_to_can called %d \n",uid2, pid);
 
     SUBMIT_EVENT("avtp_to_can_enter", pid, uid2, bpf_ktime_get_ns(), devname);
     return 0;
@@ -379,7 +355,7 @@ int uprobe_ret_avtp_to_can(struct pt_regs *ctx)
 
     char devname[32];
     strncpy(devname, "listener", sizeof(devname));
-    //bpf_printk("UUID: %d, avtp_to_can exited %d\n",uid2, pid);
+    // bpf_printk("UUID: %d, avtp_to_can exited %d\n",uid2, pid);
 
     SUBMIT_EVENT("avtp_to_can_exit", pid, uid2, bpf_ktime_get_ns(), devname);
     return 0;
@@ -398,16 +374,13 @@ int kprobe_acfcan_tx(struct pt_regs *ctx)
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM1(ctx));
     last_read_start_from_can_ts = bpf_ktime_get_ns();
 
-    if (is_ecu(devname, "ecu1", 4)  == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding))
-    {
+    if (is_ecu(devname, "ecu1", 4) == 0 && !(ecu1_acf_can_tx_called && is_ecu1_forwarding)) {
         uid++;
         strncpy(devname, "ecu1", sizeof(devname));
         SUBMIT_EVENT("acfcan_tx", 0, uid, last_read_start_from_can_ts, devname);
         ecu1_acf_can_tx_called = true;
         bpf_printk("ecu1 acfcan_tx called\n");
-    }
-    else if (is_ecu(devname, "ecu2", 4) == 0)
-    {
+    } else if (is_ecu(devname, "ecu2", 4) == 0) {
         uid2++;
         strncpy(devname, "ecu2", sizeof(devname));
         SUBMIT_EVENT("acfcan_tx", 0, uid2, last_read_start_from_can_ts, devname);
@@ -435,23 +408,18 @@ int kprobe_entry_forward_can_frame(struct pt_regs *ctx)
 
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM2(ctx));
     // bpf_printk("devname (entry_tx_side): %s", devname);
-    if (is_ecu(devname, "ecu1", 4)== 0)
-    {
+    if (is_ecu(devname, "ecu1", 4) == 0) {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu1 start time: %llu", last_send_start_talker_ts);
         is_ecu1_forwarding = true;
         SUBMIT_EVENT("enter_forward_can_frame", 0, uid, last_send_start_talker_ts, devname);
         bpf_printk("ecu1 enter_forward_can_frame called\n");
-    }
-    else if (is_ecu(devname, "ecu2", 4)  == 0)
-    {
+    } else if (is_ecu(devname, "ecu2", 4) == 0) {
         last_send_start_talker_ts = bpf_ktime_get_ns();
         // bpf_printk("ecu2 start time: %llu", last_send_start_talker_ts);
         is_ecu2_forwarding = true;
         SUBMIT_EVENT("enter_forward_can_frame", 0, uid2, last_send_start_talker_ts, devname);
-    }
-    else
-    {
+    } else {
         is_ecu1_forwarding = false;
         is_ecu2_forwarding = false;
     }
@@ -466,21 +434,16 @@ int kretprobe_exit_forward_can_frame(struct pt_regs *ctx)
     getDevName(devname, (struct sk_buff *)PT_REGS_PARM2(ctx));
     last_send_end_talker_ts = bpf_ktime_get_ns();
     // bpf_printk("devname (exit_tx_side): %s", devname);
-    if (is_ecu1_forwarding)
-    {
+    if (is_ecu1_forwarding) {
         strncpy(devname, "ecu1", sizeof(devname));
         SUBMIT_EVENT("exit_forward_can_frame", 0, uid, last_send_end_talker_ts, devname);
         is_ecu1_forwarding = false;
         bpf_printk("ecu1 enter_forward_can_frame exited\n");
-    }
-    else if (is_ecu2_forwarding)
-    {
+    } else if (is_ecu2_forwarding) {
         strncpy(devname, "ecu2", sizeof(devname));
         SUBMIT_EVENT("exit_forward_can_frame", 0, uid2, last_send_end_talker_ts, devname);
         is_ecu2_forwarding = false;
-    }
-    else if (is_ecu1_forwarding && is_ecu2_forwarding)
-    {
+    } else if (is_ecu1_forwarding && is_ecu2_forwarding) {
         // TODO: HANDLE THIS CASE
         bpf_printk("ecu1 and ecu2 are forwarding at the same time: TRICKY CASE");
         return 0;
@@ -503,8 +466,7 @@ int kprobe_ieee1722_packet_handdler(struct pt_regs *ctx)
 
     struct event_recv *e;
     e = bpf_ringbuf_reserve(&events_recv_ts, sizeof(struct event_recv), 0);
-    if (!e)
-    {
+    if (!e) {
         bpf_printk("Failed to reserve ringbuf space\n");
         return 0;
     }

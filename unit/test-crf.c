@@ -57,7 +57,7 @@ static void crf_get_field_null_pdu(void **state)
 static void crf_get_field_null_val(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_SV, NULL);
 
@@ -68,7 +68,7 @@ static void crf_get_field_invalid_field(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_MAX, &val);
 
@@ -79,7 +79,7 @@ static void crf_get_field_sv(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'sv' field to 1 */
     pdu.subtype_data = htonl(0x00800000);
@@ -94,7 +94,7 @@ static void crf_get_field_mr(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'mr' field to 1 */
     pdu.subtype_data = htonl(0x00080000);
@@ -109,7 +109,7 @@ static void ctf_get_field_fs(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'fs' field to 1 */
     pdu.subtype_data = htonl(0x00020000);
@@ -124,7 +124,7 @@ static void crf_get_field_tu(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'tu' field to 1 */
     pdu.subtype_data = htonl(0x00010000);
@@ -139,7 +139,7 @@ static void crf_get_field_seq_num(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'seq_num' field to 0xBB */
     pdu.subtype_data = htonl(0x0000BB00);
@@ -154,7 +154,7 @@ static void crf_get_field_type(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'type' field to AVTP_CRF_TYPE_VIDEO_LINE */
     pdu.subtype_data = htonl(0x00000003);
@@ -169,7 +169,7 @@ static void crf_get_field_stream_id(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'stream_id' field to 0xAABBCCDDEEFF0002 */
     pdu.stream_id = htobe64(0xAABBCCDDEEFF0002);
@@ -184,7 +184,7 @@ static void crf_get_field_pull(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'pull' field to AVTP_CRF_PULL_MULT_BY_1_001 */
     pdu.packet_info = htobe64(0x4000000000000000);
@@ -199,7 +199,7 @@ static void crf_get_field_base_freq(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'base_freq' field to 0x1FFFFFFF */
     pdu.packet_info = htobe64(0x1FFFFFFF00000000);
@@ -214,7 +214,7 @@ static void crf_get_field_crf_data_len(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'crf_data_len' field to 0xABCD */
     pdu.packet_info = htobe64(0x00000000ABCD0000);
@@ -229,7 +229,7 @@ static void crf_get_field_timestamp_interval(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     /* Set the 'timestamp_interval' field to 0xABCD */
     pdu.packet_info = htobe64(0x000000000000ABCD);
@@ -252,7 +252,7 @@ static void crf_set_field_null_pdu(void **state)
 static void crf_set_field_invalid_field(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_MAX, 1);
 
@@ -262,7 +262,7 @@ static void crf_set_field_invalid_field(void **state)
 static void crf_set_field_sv(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_SV, 1);
 
@@ -275,7 +275,7 @@ static void crf_set_field_sv(void **state)
 static void crf_set_field_mr(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_MR, 1);
 
@@ -288,7 +288,7 @@ static void crf_set_field_mr(void **state)
 static void crf_set_field_fs(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_FS, 1);
 
@@ -301,7 +301,7 @@ static void crf_set_field_fs(void **state)
 static void crf_set_field_tu(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TU, 1);
 
@@ -314,7 +314,7 @@ static void crf_set_field_tu(void **state)
 static void crf_set_field_seq_num(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_SEQ_NUM, 0xAA);
 
@@ -327,10 +327,9 @@ static void crf_set_field_seq_num(void **state)
 static void crf_set_field_type(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TYPE,
-                          AVTP_CRF_TYPE_AUDIO_SAMPLE);
+    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TYPE, AVTP_CRF_TYPE_AUDIO_SAMPLE);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.subtype_data) == 0x00000001);
@@ -341,10 +340,9 @@ static void crf_set_field_type(void **state)
 static void crf_set_field_stream_id(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_STREAM_ID,
-                              0xAABBCCDDEEFF0002);
+    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_STREAM_ID, 0xAABBCCDDEEFF0002);
 
     assert_int_equal(res, 0);
     assert_true(be64toh(pdu.stream_id) == 0xAABBCCDDEEFF0002);
@@ -355,10 +353,9 @@ static void crf_set_field_stream_id(void **state)
 static void crf_set_field_pull(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_PULL,
-                          AVTP_CRF_PULL_MULT_BY_1_001);
+    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_PULL, AVTP_CRF_PULL_MULT_BY_1_001);
 
     assert_int_equal(res, 0);
     assert_true(pdu.subtype_data == 0);
@@ -369,7 +366,7 @@ static void crf_set_field_pull(void **state)
 static void crf_set_field_base_freq(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_BASE_FREQ, 0x1FFFFFFF);
 
@@ -382,7 +379,7 @@ static void crf_set_field_base_freq(void **state)
 static void crf_set_field_crf_data_len(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, 0xABCD);
 
@@ -395,7 +392,7 @@ static void crf_set_field_crf_data_len(void **state)
 static void crf_set_field_timestamp_interval(void **state)
 {
     int res;
-    struct avtp_crf_pdu pdu = { 0 };
+    struct avtp_crf_pdu pdu = {0};
 
     res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, 0xABCD);
 

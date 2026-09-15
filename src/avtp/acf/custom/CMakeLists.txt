@@ -34,5 +34,3 @@ set(LIB_NAME "${LIB_NAME}custom" )
 file(GLOB LIB_SOURCES *.c)
 
 target_sources(${LIB_NAME} PRIVATE ${LIB_SOURCES})
-
-

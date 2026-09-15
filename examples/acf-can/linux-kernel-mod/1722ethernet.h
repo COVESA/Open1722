@@ -48,8 +48,7 @@
 #include "avtp/CommonHeader.h"
 
 #define CAN_PAYLOAD_LEN 64
-typedef struct
-{
+typedef struct {
     // IEEE 1722 NTSCF header
     Avtp_Ntscf_t ntscf;
     // IEEE 1722 ACF message #1
@@ -62,5 +61,5 @@ void calculate_and_set_ntscf_size(ACFCANPdu_t *pdu);
 
 int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb);
 
-int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev,
-                             struct packet_type *pt, struct net_device *orig_dev);
+int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt,
+                             struct net_device *orig_dev);

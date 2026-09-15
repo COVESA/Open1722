@@ -43,33 +43,35 @@ extern "C" {
 
 #define MAX_PDU_SIZE 1500
 
-static void udp_init(void **state) {
+static void udp_init(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t init_pdu[AVTP_UDP_HEADER_LEN];
 
     Avtp_Udp_Init(NULL);
 
-    Avtp_Udp_Init((Avtp_Udp_t*)pdu);
+    Avtp_Udp_Init((Avtp_Udp_t *)pdu);
     memset(init_pdu, 0, AVTP_UDP_HEADER_LEN);
     assert_memory_equal(init_pdu, pdu, AVTP_UDP_HEADER_LEN);
 }
 
-static void udp_get_set_fields(void **state) {
+static void udp_get_set_fields(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
-    
-    Avtp_Udp_Init((Avtp_Udp_t*)pdu);
 
-    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t*)pdu, 0x12345678);
-    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t*)pdu), 0x12345678);
+    Avtp_Udp_Init((Avtp_Udp_t *)pdu);
 
-    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t*)pdu, 0xABCDEF00);
-    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t*)pdu), 0xABCDEF00);
+    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t *)pdu, 0x12345678);
+    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)pdu), 0x12345678);
 
-    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t*)pdu, 0);
-    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t*)pdu), 0);
+    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t *)pdu, 0xABCDEF00);
+    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)pdu), 0xABCDEF00);
 
-    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t*)pdu, 0xFFFFFFFF);
-    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t*)pdu), 0xFFFFFFFF);
+    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t *)pdu, 0);
+    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)pdu), 0);
+
+    Avtp_Udp_SetEncapsulationSeqNo((Avtp_Udp_t *)pdu, 0xFFFFFFFF);
+    assert_int_equal(Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)pdu), 0xFFFFFFFF);
 }
 
 int main(void)

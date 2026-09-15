@@ -69,34 +69,33 @@
 #include "common/common.h"
 #include "avtp/CommonHeader.h"
 
-#define STREAM_ID		0xAABBCCDDEEFF0002
+#define STREAM_ID 0xAABBCCDDEEFF0002
 
 /* Values based on Spec 1722 Table 28 recommendation. */
-#define SAMPLE_RATE		48000
-#define TIMESTAMP_INTERVAL	160
-#define TIMESTAMPS_PER_SEC	300
-#define TIMESTAMPS_PER_PKT	6
+#define SAMPLE_RATE 48000
+#define TIMESTAMP_INTERVAL 160
+#define TIMESTAMPS_PER_SEC 300
+#define TIMESTAMPS_PER_PKT 6
 
-#define NSEC_PER_SEC		1000000000ULL
-#define NSEC_PER_MSEC		1000000ULL
+#define NSEC_PER_SEC 1000000000ULL
+#define NSEC_PER_MSEC 1000000ULL
 
-#define DATA_LEN		(sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
-#define PDU_SIZE		(sizeof(struct avtp_crf_pdu) + DATA_LEN)
-#define PDUS_PER_SEC		(TIMESTAMPS_PER_SEC / TIMESTAMPS_PER_PKT)
-#define CRF_PERIOD		(NSEC_PER_SEC / TIMESTAMPS_PER_SEC)
-#define NOMINAL_PERIOD		(1.0 / SAMPLE_RATE)
-#define TX_INTERVAL		(NSEC_PER_SEC / PDUS_PER_SEC)
+#define DATA_LEN (sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
+#define PDU_SIZE (sizeof(struct avtp_crf_pdu) + DATA_LEN)
+#define PDUS_PER_SEC (TIMESTAMPS_PER_SEC / TIMESTAMPS_PER_PKT)
+#define CRF_PERIOD (NSEC_PER_SEC / TIMESTAMPS_PER_SEC)
+#define NOMINAL_PERIOD (1.0 / SAMPLE_RATE)
+#define TX_INTERVAL (NSEC_PER_SEC / PDUS_PER_SEC)
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static int mtt;
 
 static struct argp_option options[] = {
-    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address" },
-    {"ifname", 'i', "IFNAME", 0, "Network Interface" },
-    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms" },
-    { 0 }
-};
+    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address"},
+    {"ifname", 'i', "IFNAME", 0, "Network Interface"},
+    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms"},
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -104,9 +103,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                    &macaddr[0], &macaddr[1], &macaddr[2],
-                    &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid address\n");
             exit(EXIT_FAILURE);
@@ -124,7 +122,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser };
+static struct argp argp = {options, parser};
 
 static uint64_t calculate_crf_timestamp(struct timespec tspec, uint64_t rounded_mtt)
 {
@@ -147,7 +145,7 @@ static uint64_t calculate_crf_timestamp(struct timespec tspec, uint64_t rounded_
      * this is a CRF talker example, for simplicity, the value for Tc
      * is set to 0.
      */
-    crf_time =  ts + rounded_mtt + tc;
+    crf_time = ts + rounded_mtt + tc;
 
     return crf_time;
 }
@@ -164,8 +162,7 @@ static int init_pdu(struct avtp_crf_pdu *pdu)
     if (res < 0)
         return -1;
 
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TYPE,
-                        AVTP_CRF_TYPE_AUDIO_SAMPLE);
+    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TYPE, AVTP_CRF_TYPE_AUDIO_SAMPLE);
     if (res < 0)
         return -1;
 
@@ -173,18 +170,15 @@ static int init_pdu(struct avtp_crf_pdu *pdu)
     if (res < 0)
         return -1;
 
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_PULL,
-                        AVTP_CRF_PULL_MULT_BY_1);
+    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_PULL, AVTP_CRF_PULL_MULT_BY_1);
     if (res < 0)
         return -1;
 
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_BASE_FREQ,
-                            SAMPLE_RATE);
+    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_BASE_FREQ, SAMPLE_RATE);
     if (res < 0)
         return -1;
 
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL,
-                            TIMESTAMP_INTERVAL);
+    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, TIMESTAMP_INTERVAL);
     if (res < 0)
         return -1;
 
@@ -238,16 +232,14 @@ int main(int argc, char *argv[])
         if (res < 0)
             goto err;
 
-        n = sendto(sk_fd, pdu, PDU_SIZE, 0,
-                (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+        n = sendto(sk_fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {
             perror("Failed to send data");
             goto err;
         }
 
         if (n != PDU_SIZE) {
-            fprintf(stderr, "wrote %zd bytes, expected %zd\n",
-                                n, PDU_SIZE);
+            fprintf(stderr, "wrote %zd bytes, expected %zd\n", n, PDU_SIZE);
         }
 
         clksrc_ts.tv_nsec += TX_INTERVAL;

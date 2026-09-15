@@ -9,7 +9,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of COVESA nor the names of its contributors may be 
+ *    * Neither the name of COVESA nor the names of its contributors may be
  *      used to endorse or promote products derived from this software without
  *      specific prior written permission.
  *
@@ -44,8 +44,7 @@ extern "C" {
  */
 OPEN1722_INLINE uint16_t Avtp_Bswap16(uint16_t x)
 {
-    return    ((x & 0xff00u) >> 8u)
-            | ((x & 0x00ffu) << 8u);
+    return ((x & 0xff00u) >> 8u) | ((x & 0x00ffu) << 8u);
 }
 
 /**
@@ -53,10 +52,8 @@ OPEN1722_INLINE uint16_t Avtp_Bswap16(uint16_t x)
  */
 OPEN1722_INLINE uint32_t Avtp_Bswap32(uint32_t x)
 {
-    return    ((x & 0xff000000u) >> 24u)
-            | ((x & 0x00ff0000u) >>  8u)
-            | ((x & 0x0000ff00u) <<  8u)
-            | ((x & 0x000000ffu) << 24u);
+    return ((x & 0xff000000u) >> 24u) | ((x & 0x00ff0000u) >> 8u) | ((x & 0x0000ff00u) << 8u) |
+           ((x & 0x000000ffu) << 24u);
 }
 
 /**
@@ -64,44 +61,112 @@ OPEN1722_INLINE uint32_t Avtp_Bswap32(uint32_t x)
  */
 OPEN1722_INLINE uint64_t Avtp_Bswap64(uint64_t x)
 {
-    return    ((x & 0xff00000000000000u) >> 56u)
-            | ((x & 0x00ff000000000000u) >> 40u)
-            | ((x & 0x0000ff0000000000u) >> 24u)
-            | ((x & 0x000000ff00000000u) >>  8u)
-            | ((x & 0x00000000ff000000u) <<  8u)
-            | ((x & 0x0000000000ff0000u) << 24u)
-            | ((x & 0x000000000000ff00u) << 40u)
-            | ((x & 0x00000000000000ffu) << 56u);
+    return ((x & 0xff00000000000000u) >> 56u) | ((x & 0x00ff000000000000u) >> 40u) |
+           ((x & 0x0000ff0000000000u) >> 24u) | ((x & 0x000000ff00000000u) >> 8u) |
+           ((x & 0x00000000ff000000u) << 8u) | ((x & 0x0000000000ff0000u) << 24u) |
+           ((x & 0x000000000000ff00u) << 40u) | ((x & 0x00000000000000ffu) << 56u);
 }
 
-#if(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 /* System uses little-endian */
-OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x) { return x; }
-OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x) { return x; }
-OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x) { return x; }
-OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x) { return Avtp_Bswap16(x); }
-OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x) { return Avtp_Bswap32(x); }
-OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x) { return Avtp_Bswap64(x); }
-OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x) { return x; }
-OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x) { return x; }
-OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x) { return x; }
-OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
-OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
-OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
+OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x)
+{
+    return Avtp_Bswap16(x);
+}
+OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x)
+{
+    return Avtp_Bswap32(x);
+}
+OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x)
+{
+    return Avtp_Bswap64(x);
+}
+OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x)
+{
+    return Avtp_Bswap16(x);
+}
+OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x)
+{
+    return Avtp_Bswap32(x);
+}
+OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x)
+{
+    return Avtp_Bswap64(x);
+}
 #else
 /* System uses big-endian */
-OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x) { return Avtp_Bswap16(x); }
-OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x) { return Avtp_Bswap32(x); }
-OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x) { return Avtp_Bswap64(x); }
-OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x) { return x; }
-OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x) { return x; }
-OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x) { return x; }
-OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x) { return Avtp_Bswap16(x); }
-OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x) { return Avtp_Bswap32(x); }
-OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x) { return Avtp_Bswap64(x); }
-OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x) { return x; }
-OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x) { return x; }
-OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x) { return x; }
+OPEN1722_INLINE uint16_t Avtp_CpuToLe16(uint16_t x)
+{
+    return Avtp_Bswap16(x);
+}
+OPEN1722_INLINE uint32_t Avtp_CpuToLe32(uint32_t x)
+{
+    return Avtp_Bswap32(x);
+}
+OPEN1722_INLINE uint64_t Avtp_CpuToLe64(uint64_t x)
+{
+    return Avtp_Bswap64(x);
+}
+OPEN1722_INLINE uint16_t Avtp_CpuToBe16(uint16_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint32_t Avtp_CpuToBe32(uint32_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint64_t Avtp_CpuToBe64(uint64_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint16_t Avtp_LeToCpu16(uint16_t x)
+{
+    return Avtp_Bswap16(x);
+}
+OPEN1722_INLINE uint32_t Avtp_LeToCpu32(uint32_t x)
+{
+    return Avtp_Bswap32(x);
+}
+OPEN1722_INLINE uint64_t Avtp_LeToCpu64(uint64_t x)
+{
+    return Avtp_Bswap64(x);
+}
+OPEN1722_INLINE uint16_t Avtp_BeToCpu16(uint16_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint32_t Avtp_BeToCpu32(uint32_t x)
+{
+    return x;
+}
+OPEN1722_INLINE uint64_t Avtp_BeToCpu64(uint64_t x)
+{
+    return x;
+}
 #endif
 
 #ifdef __cplusplus

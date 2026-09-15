@@ -5,7 +5,7 @@
 
 
 This wrap Open1722 ACF-CAN functionality in a Linux CAN kernel module. That means your applications can use the normal Linux socketcan interface (like using HW CAN interfaces or vcan), but will speak ACF-CAN via Ethernet directly.
-Compared to the [Linux user space examples](../linux) the kernel module leads to less user/kernelspace switches, and you do not need to deal with addtional user space processes. 
+Compared to the [Linux user space examples](../linux) the kernel module leads to less user/kernelspace switches, and you do not need to deal with addtional user space processes.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ With this module, from user space perspective there is no difference between a r
 Make sure you are generally setup to compile kernel modules, e.g. in Ubuntu something like
 
 ```
-sudo apt update && 
+sudo apt update &&
 sudo apt-get install gcc make build-essential libncurses-dev exuberant-ctags build-essential linux-headers-`uname -r`
 ```
 
@@ -69,7 +69,7 @@ If you have a secure boot system you may not be able to load unsigned kernel mod
 
 You can add a number of acfcan interfaces. Some aspects like destination MAC or ethernet infterface to be used need to be configured via sysfs _after_ the interface is created, but _before_ it is set to up.
 
-This is a complete example to set up 2 acf-can interfaces connected via two _virtual_ ethernet interfaces on a single machine. 
+This is a complete example to set up 2 acf-can interfaces connected via two _virtual_ ethernet interfaces on a single machine.
 
 First set up a pair of virtual ethernet interfaced as in [./instalmon.sh](./installmon.sh):
 
@@ -108,7 +108,7 @@ sudo ip link set up ecu2
 Note that IEEE-1722 specific options for an ACF-CAn device `<devname>` can be set via sysfs in the folder `/sys/class/net/<devname>/acfcan`.
 This can only be done when the interface is (still) _down_. You can always change options by downing the interface, changing the desired option and bringing it up again.
 
-Keep an eye out in kernel logs via `dmesg --follow` for any problems. 
+Keep an eye out in kernel logs via `dmesg --follow` for any problems.
 
 once everything is setup you can use `cansend` and `candump` to see every message you sent to ACF-CAN interface `ecu1` being replicated on `ecu2` and vice versa.
 
@@ -117,7 +117,7 @@ With tcpdump or wireshark you can see the IEEE-1722 frames on the `mon1` and  `m
 To really distribute this on two machines, set up interface `ecu1` on the first machine, using the real ethernet inferface for the `ethif` option and do the same for `ecu2` on the second machine.
 
 ## Debugging
-If your kernel supports [dynamic debugging](https://www.kernel.org/doc/html/latest/admin-guide/dynamic-debug-howto.html) you can enable debug messages from the kernel module by doing 
+If your kernel supports [dynamic debugging](https://www.kernel.org/doc/html/latest/admin-guide/dynamic-debug-howto.html) you can enable debug messages from the kernel module by doing
 
 ```
 echo 'module acfcan +p'>  /sys/kernel/debug/dynamic_debug/control

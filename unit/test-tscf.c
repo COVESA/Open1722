@@ -46,9 +46,10 @@ extern "C" {
 #include "avtp/acf/Tscf.h"
 #include "avtp/CommonHeader.h"
 
-#define MAX_PDU_SIZE        1500
+#define MAX_PDU_SIZE 1500
 
-static void tscf_init(void **state) {
+static void tscf_init(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t init_pdu[AVTP_TSCF_HEADER_LEN];
@@ -60,35 +61,35 @@ static void tscf_init(void **state) {
     Avtp_Tscf_Init(NULL);
 
     // Check if the function is initializing properly
-    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
+    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
     memset(init_pdu, 0, AVTP_TSCF_HEADER_LEN);
     init_pdu[0] = AVTP_SUBTYPE_TSCF; // Setting AVTP Subtype as TSCF
-    init_pdu[1] = 0x80; // Setting Stream as valid
+    init_pdu[1] = 0x80;              // Setting Stream as valid
     assert_memory_equal(init_pdu, pdu, AVTP_TSCF_HEADER_LEN);
 }
 
-static void tscf_is_valid(void **state) {
+static void tscf_is_valid(void **state)
+{
 
     uint8_t pdu[MAX_PDU_SIZE], result;
 
     // Valid IEEE 1722 TSCF Frame
-    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
-    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, MAX_PDU_SIZE), 1);
+    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, MAX_PDU_SIZE), 1);
 
     // Not a IEEE 1722 TSCF Frame
     memset(pdu, 0, MAX_PDU_SIZE);
-    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, MAX_PDU_SIZE), 0);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, MAX_PDU_SIZE), 0);
 
     // Valid IEEE 1722 TSCF Frame (Length 28, Buffer 30)
-    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
-    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, 28);
-    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, 30), 1);
+    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)pdu, 28);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, 30), 1);
 
     // Invalid IEEE 1722 TSCF Frame (Length 24 but buffer only 9!)
-    Avtp_Tscf_Init((Avtp_Tscf_t*)pdu);
-    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t*)pdu, 24);
-    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t*)pdu, 9), 0);
-
+    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)pdu, 24);
+    assert_int_equal(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, 9), 0);
 }
 
 int main(void)

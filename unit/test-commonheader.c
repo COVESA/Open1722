@@ -43,37 +43,39 @@ extern "C" {
 
 #define MAX_PDU_SIZE 1500
 
-static void common_header_get_set_fields(void **state) {
+static void common_header_get_set_fields(void **state)
+{
     uint8_t pdu[MAX_PDU_SIZE];
-    
+
     memset(pdu, 0, MAX_PDU_SIZE);
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_AAF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_AAF);
+    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_AAF);
+    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)pdu), AVTP_SUBTYPE_AAF);
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_CVF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_CVF);
+    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CVF);
+    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)pdu), AVTP_SUBTYPE_CVF);
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_TSCF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_TSCF);
+    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_TSCF);
+    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)pdu), AVTP_SUBTYPE_TSCF);
 
-    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t*)pdu, AVTP_SUBTYPE_NTSCF);
-    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t*)pdu), AVTP_SUBTYPE_NTSCF);
+    Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_NTSCF);
+    assert_int_equal(Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)pdu), AVTP_SUBTYPE_NTSCF);
 
-    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t*)pdu, 1);
-    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t*)pdu), 1);
+    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t *)pdu, 1);
+    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t *)pdu), 1);
 
-    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t*)pdu, 0);
-    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t*)pdu), 0);
+    Avtp_CommonHeader_SetH((Avtp_CommonHeader_t *)pdu, 0);
+    assert_int_equal(Avtp_CommonHeader_GetH((Avtp_CommonHeader_t *)pdu), 0);
 
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t*)pdu, 0);
-    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t*)pdu), 0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)pdu), 0);
 
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t*)pdu, 3);
-    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t*)pdu), 3);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 3);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)pdu), 3);
 }
 
-static void common_header_subtypes(void **state) {
+static void common_header_subtypes(void **state)
+{
     assert_int_equal(AVTP_SUBTYPE_AAF, 0x2);
     assert_int_equal(AVTP_SUBTYPE_CVF, 0x3);
     assert_int_equal(AVTP_SUBTYPE_CRF, 0x4);

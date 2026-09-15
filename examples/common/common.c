@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2024, COVESA
  * Copyright (c) 2019, Intel Corporation
  *
@@ -47,8 +47,8 @@
 #include "common.h"
 
 #ifdef __linux__
-#define NSEC_PER_SEC		1000000000ULL
-#define NSEC_PER_MSEC		1000000ULL
+#define NSEC_PER_SEC 1000000000ULL
+#define NSEC_PER_MSEC 1000000ULL
 
 int calculate_avtp_time(uint32_t *avtp_time, uint32_t max_transit_time)
 {
@@ -62,8 +62,7 @@ int calculate_avtp_time(uint32_t *avtp_time, uint32_t max_transit_time)
         return -1;
     }
 
-    ptime = (tspec.tv_sec * NSEC_PER_SEC) +
-            (max_transit_time * NSEC_PER_MSEC) + tspec.tv_nsec;
+    ptime = (tspec.tv_sec * NSEC_PER_SEC) + (max_transit_time * NSEC_PER_MSEC) + tspec.tv_nsec;
 
     *avtp_time = ptime % (1ULL << 32);
 
@@ -105,7 +104,7 @@ int get_presentation_time(uint64_t avtp_time, struct timespec *tspec)
 int arm_timer(int fd, struct timespec *tspec)
 {
     int res;
-    struct itimerspec timer_spec = { 0 };
+    struct itimerspec timer_spec = {0};
 
     timer_spec.it_value.tv_sec = tspec->tv_sec;
     timer_spec.it_value.tv_nsec = tspec->tv_nsec;
@@ -133,8 +132,8 @@ int present_data(uint8_t *data, size_t len)
 }
 #endif
 
-int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
-                int protocol, struct sockaddr_ll *sk_addr)
+int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[], int protocol,
+                         struct sockaddr_ll *sk_addr)
 {
 #ifdef __linux__
     int res;
@@ -161,15 +160,14 @@ int setup_socket_address(int fd, const char *ifname, uint8_t macaddr[],
     return 0;
 }
 
-int setup_udp_socket_address(struct in_addr *addr, uint32_t port,
-                struct sockaddr_in *sk_addr) {
+int setup_udp_socket_address(struct in_addr *addr, uint32_t port, struct sockaddr_in *sk_addr)
+{
 
     sk_addr->sin_family = AF_INET;
     sk_addr->sin_addr = *addr;
     sk_addr->sin_port = htons(port);
 
     return 0;
-
 }
 
 int create_talker_socket_udp(int priority)
@@ -183,8 +181,7 @@ int create_talker_socket_udp(int priority)
     }
 
     if (priority != -1) {
-        res = setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &priority,
-                            sizeof(priority));
+        res = setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &priority, sizeof(priority));
         if (res < 0) {
             perror("Failed to set priority");
             goto err;
@@ -209,8 +206,7 @@ int create_talker_socket(int priority)
     }
 
     if (priority != -1) {
-        res = setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &priority,
-                            sizeof(priority));
+        res = setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &priority, sizeof(priority));
         if (res < 0) {
             perror("Failed to set priority");
             goto err;
@@ -224,12 +220,13 @@ err:
     return -1;
 }
 
-int create_listener_socket_udp(uint32_t udp_port) {
+int create_listener_socket_udp(uint32_t udp_port)
+{
 
     int fd, res;
     struct sockaddr_in sk_addr;
 
-    //create a UDP socket
+    // create a UDP socket
     fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (fd < 0) {
         perror("Failed to open socket");
@@ -237,12 +234,12 @@ int create_listener_socket_udp(uint32_t udp_port) {
     }
 
     // Initialize the socket
-    memset((char *) &sk_addr, 0, sizeof(sk_addr));
+    memset((char *)&sk_addr, 0, sizeof(sk_addr));
     sk_addr.sin_family = AF_INET;
     sk_addr.sin_port = htons(udp_port);
     sk_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    res = bind(fd, (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+    res = bind(fd, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
     if (res < 0) {
         perror("Couldn't bind() to port");
         goto err;
@@ -255,7 +252,7 @@ err:
     return -1;
 }
 
-int create_listener_socket(char *ifname, uint8_t* macaddr, int protocol)
+int create_listener_socket(char *ifname, uint8_t *macaddr, int protocol)
 {
     int fd, res;
     struct sockaddr_ll sk_addr;
@@ -270,7 +267,7 @@ int create_listener_socket(char *ifname, uint8_t* macaddr, int protocol)
     if (res < 0)
         goto err;
 
-    res = bind(fd, (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+    res = bind(fd, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
     if (res < 0) {
         perror("Couldn't bind() to interface");
         goto err;
@@ -283,8 +280,7 @@ int create_listener_socket(char *ifname, uint8_t* macaddr, int protocol)
     mreq.mr_alen = ETH_ALEN;
     memcpy(&mreq.mr_address, macaddr, ETH_ALEN);
 
-    res = setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP,
-                    &mreq, sizeof(struct packet_mreq));
+    res = setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq, sizeof(struct packet_mreq));
     if (res < 0) {
         perror("Couldn't set PACKET_ADD_MEMBERSHIP");
         goto err;
@@ -297,5 +293,3 @@ err:
     close(fd);
     return -1;
 }
-
-

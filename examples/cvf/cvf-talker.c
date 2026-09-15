@@ -80,11 +80,11 @@
 #include "common/common.h"
 #include "avtp/CommonHeader.h"
 
-#define STREAM_ID				0xAABBCCDDEEFF0001
-#define DATA_LEN				1400
-#define AVTP_H264_HEADER_LEN	(sizeof(Avtp_H264_t))
-#define AVTP_FULL_HEADER_LEN	(sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
-#define MAX_PDU_SIZE			(AVTP_FULL_HEADER_LEN + DATA_LEN)
+#define STREAM_ID 0xAABBCCDDEEFF0001
+#define DATA_LEN 1400
+#define AVTP_H264_HEADER_LEN (sizeof(Avtp_H264_t))
+#define AVTP_FULL_HEADER_LEN (sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
+#define MAX_PDU_SIZE (AVTP_FULL_HEADER_LEN + DATA_LEN)
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
@@ -96,15 +96,14 @@ static size_t buffer_level;
 
 static uint8_t seq_num;
 
-enum process_result {PROCESS_OK, PROCESS_NONE, PROCESS_ERROR};
+enum process_result { PROCESS_OK, PROCESS_NONE, PROCESS_ERROR };
 
 static struct argp_option options[] = {
-    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address" },
-    {"ifname", 'i', "IFNAME", 0, "Network Interface" },
-    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms" },
-    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in socket" },
-    { 0 }
-};
+    {"dst-addr", 'd', "MACADDR", 0, "Stream Destination MAC address"},
+    {"ifname", 'i', "IFNAME", 0, "Network Interface"},
+    {"max-transit-time", 'm', "MSEC", 0, "Maximum Transit Time in ms"},
+    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in socket"},
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -112,9 +111,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 'd':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-                    &macaddr[0], &macaddr[1], &macaddr[2],
-                    &macaddr[3], &macaddr[4], &macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &macaddr[0], &macaddr[1], &macaddr[2],
+                     &macaddr[3], &macaddr[4], &macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid address\n");
             exit(EXIT_FAILURE);
@@ -135,9 +133,9 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser };
+static struct argp argp = {options, parser};
 
-static int init_pdu(Avtp_Cvf_t* cvf)
+static int init_pdu(Avtp_Cvf_t *cvf)
 {
     Avtp_Cvf_Init(cvf);
     Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_FORMAT_SUBTYPE, AVTP_CVF_FORMAT_SUBTYPE_H264);
@@ -147,7 +145,7 @@ static int init_pdu(Avtp_Cvf_t* cvf)
     Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_M, 1);
     Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_PTV, 0);
 
-    Avtp_H264_t* h264 = (Avtp_H264_t*)(&cvf->payload);
+    Avtp_H264_t *h264 = (Avtp_H264_t *)(&cvf->payload);
     Avtp_H264_Init(h264);
     Avtp_H264_SetField(h264, AVTP_H264_FIELD_TIMESTAMP, 0);
 
@@ -158,8 +156,7 @@ static ssize_t fill_buffer(void)
 {
     ssize_t n;
 
-    n = read(STDIN_FILENO, buffer + buffer_level,
-                    sizeof(buffer) - buffer_level);
+    n = read(STDIN_FILENO, buffer + buffer_level, sizeof(buffer) - buffer_level);
     if (n < 0) {
         perror("Could not read from standard input");
     }
@@ -189,12 +186,12 @@ static ssize_t start_code_position(size_t offset)
     return -1;
 }
 
-static int prepare_packet(Avtp_Cvf_t* cvfHeader, char *nal_data, size_t nal_data_len)
+static int prepare_packet(Avtp_Cvf_t *cvfHeader, char *nal_data, size_t nal_data_len)
 {
     int res;
     uint32_t avtp_time;
-    Avtp_H264_t* h264Header = (Avtp_H264_t*)(&cvfHeader->payload);
-    uint8_t* h264Payload = (uint8_t*)(&h264Header->payload);
+    Avtp_H264_t *h264Header = (Avtp_H264_t *)(&cvfHeader->payload);
+    uint8_t *h264Payload = (uint8_t *)(&h264Header->payload);
 
     res = calculate_avtp_time(&avtp_time, max_transit_time);
     if (res < 0) {
@@ -204,15 +201,15 @@ static int prepare_packet(Avtp_Cvf_t* cvfHeader, char *nal_data, size_t nal_data
 
     Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_AVTP_TIMESTAMP, avtp_time);
     Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_SEQUENCE_NUM, seq_num++);
-    Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_STREAM_DATA_LENGTH, nal_data_len + AVTP_H264_HEADER_LEN);
+    Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_STREAM_DATA_LENGTH,
+                      nal_data_len + AVTP_H264_HEADER_LEN);
 
     memcpy(h264Payload, nal_data, nal_data_len);
 
     return 0;
 }
 
-static int process_nal(Avtp_Cvf_t* pdu, bool process_last,
-                            size_t* nal_len)
+static int process_nal(Avtp_Cvf_t *pdu, bool process_last, size_t *nal_len)
 {
     int res;
     ssize_t start, end;
@@ -236,8 +233,10 @@ static int process_nal(Avtp_Cvf_t* pdu, bool process_last,
 
     *nal_len = end - start;
     if (*nal_len > DATA_LEN) {
-        fprintf(stderr, "NAL length bigger than expected. Expected %u, "
-                    "found %zd\n", DATA_LEN, *nal_len);
+        fprintf(stderr,
+                "NAL length bigger than expected. Expected %u, "
+                "found %zd\n",
+                DATA_LEN, *nal_len);
         goto err;
     }
 
@@ -262,8 +261,8 @@ int main(int argc, char *argv[])
 {
     int fd, res;
     struct sockaddr_ll sk_addr;
-    uint8_t* pdu = alloca(MAX_PDU_SIZE);
-    Avtp_Cvf_t* cvf = (Avtp_Cvf_t*)pdu;
+    uint8_t *pdu = alloca(MAX_PDU_SIZE);
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -288,15 +287,14 @@ int main(int argc, char *argv[])
             end = true;
 
         while (buffer_level > 0) {
-            enum process_result pr =
-                    process_nal(cvf, end, (size_t *)&n);
+            enum process_result pr = process_nal(cvf, end, (size_t *)&n);
             if (pr == PROCESS_ERROR)
                 goto err;
             if (pr == PROCESS_NONE)
                 break;
 
-            n = sendto(fd, pdu, AVTP_FULL_HEADER_LEN + n, 0,
-                (struct sockaddr *) &sk_addr, sizeof(sk_addr));
+            n = sendto(fd, pdu, AVTP_FULL_HEADER_LEN + n, 0, (struct sockaddr *)&sk_addr,
+                       sizeof(sk_addr));
             if (n < 0) {
                 perror("Failed to send data");
                 goto err;

@@ -104,30 +104,30 @@
 #include "common/common.h"
 #include "avtp/CommonHeader.h"
 
-#define AAF_STREAM_ID		0xAABBCCDDEEFF0001
-#define AAF_NUM_SAMPLES 	6 /* Number of samples per packet. */
-#define AAF_SAMPLE_SIZE 	2 /* Sample size in bytes. */
-#define AAF_NUM_CHANNELS	2 /* Number of channels per frame */
-#define AAF_DATA_LEN		(AAF_NUM_SAMPLES * AAF_SAMPLE_SIZE * AAF_NUM_CHANNELS)
-#define AAF_PDU_SIZE		(sizeof(struct avtp_stream_pdu) + AAF_DATA_LEN)
-#define AAF_SAMPLE_RATE 	48000
+#define AAF_STREAM_ID 0xAABBCCDDEEFF0001
+#define AAF_NUM_SAMPLES 6  /* Number of samples per packet. */
+#define AAF_SAMPLE_SIZE 2  /* Sample size in bytes. */
+#define AAF_NUM_CHANNELS 2 /* Number of channels per frame */
+#define AAF_DATA_LEN (AAF_NUM_SAMPLES * AAF_SAMPLE_SIZE * AAF_NUM_CHANNELS)
+#define AAF_PDU_SIZE (sizeof(struct avtp_stream_pdu) + AAF_DATA_LEN)
+#define AAF_SAMPLE_RATE 48000
 
-#define CRF_STREAM_ID		0xAABBCCDDEEFF0002
+#define CRF_STREAM_ID 0xAABBCCDDEEFF0002
 /* Values based on Spec 1722 Table 28 recommendation. */
-#define CRF_SAMPLE_RATE 	48000
-#define CRF_TIMESTAMPS_PER_SEC	300
-#define TIMESTAMPS_PER_PKT	6
-#define CRF_DATA_LEN		(sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
-#define CRF_PDU_SIZE		(sizeof(struct avtp_crf_pdu) + CRF_DATA_LEN)
+#define CRF_SAMPLE_RATE 48000
+#define CRF_TIMESTAMPS_PER_SEC 300
+#define TIMESTAMPS_PER_PKT 6
+#define CRF_DATA_LEN (sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
+#define CRF_PDU_SIZE (sizeof(struct avtp_crf_pdu) + CRF_DATA_LEN)
 
-#define MAX_PDU_SIZE		MAX(AAF_PDU_SIZE, CRF_PDU_SIZE)
-#define TIME_PERIOD_NS		((double)NSEC_PER_SEC / CRF_SAMPLE_RATE)
-#define AAF_PERIOD		(NSEC_PER_SEC * AAF_NUM_SAMPLES / AAF_SAMPLE_RATE)
-#define MCLK_PERIOD		AAF_PERIOD
-#define MCLKLIST_TS_PER_CRF	(CRF_SAMPLE_RATE / CRF_TIMESTAMPS_PER_SEC)
+#define MAX_PDU_SIZE MAX(AAF_PDU_SIZE, CRF_PDU_SIZE)
+#define TIME_PERIOD_NS ((double)NSEC_PER_SEC / CRF_SAMPLE_RATE)
+#define AAF_PERIOD (NSEC_PER_SEC * AAF_NUM_SAMPLES / AAF_SAMPLE_RATE)
+#define MCLK_PERIOD AAF_PERIOD
+#define MCLKLIST_TS_PER_CRF (CRF_SAMPLE_RATE / CRF_TIMESTAMPS_PER_SEC)
 
-#define NSEC_PER_SEC		1000000000ULL
-#define NSEC_PER_MSEC		1000000ULL
+#define NSEC_PER_SEC 1000000000ULL
+#define NSEC_PER_MSEC 1000000ULL
 
 struct media_clock_entry {
     STAILQ_ENTRY(media_clock_entry) mclk_entries;
@@ -153,14 +153,13 @@ static uint64_t prev_mclk_timestamp, rounded_mtt;
 static STAILQ_HEAD(timestamp_queue, media_clock_entry) mclk_timestamps;
 
 static struct argp_option options[] = {
-    {"crf-addr", 'c', "MACADDR", 0, "CRF Stream Destination MAC address" },
-    {"aaf-addr", 'a', "MACADDR", 0, "AAF Stream Destination MAC address" },
-    {"ifname", 'i', "IFNAME", 0, "Network Interface" },
-    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in AAF stream" },
-    {"mtt", 'm', "MSEC", 0, "Max Transit time from AAF stream (in ms)" },
+    {"crf-addr", 'c', "MACADDR", 0, "CRF Stream Destination MAC address"},
+    {"aaf-addr", 'a', "MACADDR", 0, "AAF Stream Destination MAC address"},
+    {"ifname", 'i', "IFNAME", 0, "Network Interface"},
+    {"prio", 'p', "NUM", 0, "SO_PRIORITY to be set in AAF stream"},
+    {"mtt", 'm', "MSEC", 0, "Max Transit time from AAF stream (in ms)"},
     {"mode", 'o', "talker|listener", 0, "AAF operation mode"},
-    { 0 }
-};
+    {0}};
 
 static error_t parser(int key, char *arg, struct argp_state *state)
 {
@@ -168,9 +167,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 'c':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-            &crf_macaddr[0], &crf_macaddr[1], &crf_macaddr[2],
-            &crf_macaddr[3], &crf_macaddr[4], &crf_macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &crf_macaddr[0], &crf_macaddr[1],
+                     &crf_macaddr[2], &crf_macaddr[3], &crf_macaddr[4], &crf_macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid CRF address\n");
             exit(EXIT_FAILURE);
@@ -178,9 +176,8 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
         break;
     case 'a':
-        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-            &aaf_macaddr[0], &aaf_macaddr[1], &aaf_macaddr[2],
-            &aaf_macaddr[3], &aaf_macaddr[4], &aaf_macaddr[5]);
+        res = sscanf(arg, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &aaf_macaddr[0], &aaf_macaddr[1],
+                     &aaf_macaddr[2], &aaf_macaddr[3], &aaf_macaddr[4], &aaf_macaddr[5]);
         if (res != 6) {
             fprintf(stderr, "Invalid AAF address\n");
             exit(EXIT_FAILURE);
@@ -211,7 +208,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
     return 0;
 }
 
-static struct argp argp = { options, parser };
+static struct argp argp = {options, parser};
 
 static uint64_t mclk_dequeue_ts(void)
 {
@@ -273,7 +270,7 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
     int res;
     uint32_t val32;
     uint64_t val64;
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *) pdu;
+    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
 
     res = avtp_pdu_get(common, AVTP_FIELD_SUBTYPE, &val32);
     if (res < 0) {
@@ -289,8 +286,7 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
         return false;
     }
     if (val32 != 0) {
-        fprintf(stderr, "CRF: Version mismatch: expected %u, got %u\n",
-                                0, val32);
+        fprintf(stderr, "CRF: Version mismatch: expected %u, got %u\n", 0, val32);
         return false;
     }
 
@@ -300,8 +296,7 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
         return false;
     }
     if (val64 != 1) {
-        fprintf(stderr, "CRF: sv mismatch: expected %u, got %" PRIu64 "\n",
-                                1, val64);
+        fprintf(stderr, "CRF: sv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
         return false;
     }
 
@@ -311,15 +306,13 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
         return false;
     }
     if (val64 != 0) {
-        fprintf(stderr, "CRF: fs mismatch: expected %u, got %" PRIu64 "\n",
-                                0, val64);
+        fprintf(stderr, "CRF: fs mismatch: expected %u, got %" PRIu64 "\n", 0, val64);
         return false;
     }
 
     res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_SEQ_NUM, &val64);
     if (res < 0) {
-        fprintf(stderr, "Failed to get CRF sequence num field: %d\n",
-                                    res);
+        fprintf(stderr, "Failed to get CRF sequence num field: %d\n", res);
         return false;
     }
     if (val64 != crf_seq_num) {
@@ -328,7 +321,7 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
          * invalidate it since it is a valid packet after all.
          */
         fprintf(stderr, "CRF: Sequence number mismatch: expected %u, got %" PRIu64 "\n",
-                            crf_seq_num, val64);
+                crf_seq_num, val64);
 
         crf_seq_num = val64;
     }
@@ -342,55 +335,51 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
     }
     if (val64 != AVTP_CRF_TYPE_AUDIO_SAMPLE) {
         fprintf(stderr, "CRF: Format mismatch: expected %u, got %" PRIu64 "\n",
-                    AVTP_CRF_TYPE_AUDIO_SAMPLE, val64);
+                AVTP_CRF_TYPE_AUDIO_SAMPLE, val64);
         return false;
     }
 
     res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_STREAM_ID, &val64);
     if (res < 0) {
-        fprintf(stderr, "Failed to get CRF stream ID field: %d\n",
-                                    res);
+        fprintf(stderr, "Failed to get CRF stream ID field: %d\n", res);
         return false;
     }
     if (val64 != CRF_STREAM_ID) {
         fprintf(stderr, "CRF: Stream ID mismatch: expected %" PRIu64 ", got %" PRIu64 "\n",
-                            CRF_STREAM_ID, val64);
+                CRF_STREAM_ID, val64);
         return false;
     }
 
     res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_PULL, &val64);
     if (res < 0) {
-        fprintf(stderr, "Failed to get CRF multiplier modifier field: %d\n",
-                                    res);
+        fprintf(stderr, "Failed to get CRF multiplier modifier field: %d\n", res);
         return false;
     }
     if (val64 != AVTP_CRF_PULL_MULT_BY_1) {
         fprintf(stderr, "CRF Pull mismatch: expected %u, got %" PRIu64 "\n",
-                    AVTP_CRF_PULL_MULT_BY_1, val64);
+                AVTP_CRF_PULL_MULT_BY_1, val64);
         return false;
     }
 
     res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_BASE_FREQ, &val64);
     if (res < 0) {
-        fprintf(stderr, "Failed to get CRF base frequency field: %d\n",
-                                    res);
+        fprintf(stderr, "Failed to get CRF base frequency field: %d\n", res);
         return false;
     }
     if (val64 != CRF_SAMPLE_RATE) {
-        fprintf(stderr, "CRF Base frequency: expected %u, got %" PRIu64 "\n",
-                        CRF_SAMPLE_RATE, val64);
+        fprintf(stderr, "CRF Base frequency: expected %u, got %" PRIu64 "\n", CRF_SAMPLE_RATE,
+                val64);
         return false;
     }
 
     res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, &val64);
     if (res < 0) {
-        fprintf(stderr, "Failed to get CRF data length field: %d\n",
-                                    res);
+        fprintf(stderr, "Failed to get CRF data length field: %d\n", res);
         return false;
     }
     if (val64 != CRF_DATA_LEN) {
-        fprintf(stderr, "CRF Data length mismatch: expected %zu, got %" PRIu64 "\n",
-                            CRF_DATA_LEN, val64);
+        fprintf(stderr, "CRF Data length mismatch: expected %zu, got %" PRIu64 "\n", CRF_DATA_LEN,
+                val64);
         return false;
     }
 
@@ -399,7 +388,7 @@ static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
 
 static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
 {
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *) pdu;
+    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
     uint64_t val64;
     uint32_t val32;
     int res;
@@ -410,8 +399,7 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
         return false;
     }
     if (val32 != 0) {
-        fprintf(stderr, "AAF: Version mismatch: expected %u, got %u\n",
-                                0, val32);
+        fprintf(stderr, "AAF: Version mismatch: expected %u, got %u\n", 0, val32);
         return false;
     }
 
@@ -421,8 +409,7 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
         return false;
     }
     if (val64 != 1) {
-        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n",
-                                1, val64);
+        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
         return false;
     }
 
@@ -432,27 +419,24 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
         return false;
     }
     if (val64 != AVTP_AAF_PCM_SP_NORMAL) {
-        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n",
-                                1, val64);
+        fprintf(stderr, "AAF: tv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
         return false;
     }
 
     res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_STREAM_ID, &val64);
     if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get stream ID field: %d\n",
-                                    res);
+        fprintf(stderr, "AAF: Failed to get stream ID field: %d\n", res);
         return false;
     }
     if (val64 != AAF_STREAM_ID) {
         fprintf(stderr, "AAF: Stream ID mismatch: expected %" PRIu64 ", got %" PRIu64 "\n",
-                            AAF_STREAM_ID, val64);
+                AAF_STREAM_ID, val64);
         return false;
     }
 
     res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_SEQ_NUM, &val64);
     if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get sequence num field: %d\n",
-                                    res);
+        fprintf(stderr, "AAF: Failed to get sequence num field: %d\n", res);
         return false;
     }
 
@@ -461,8 +445,8 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
          * issue and continue to process the packet. We don't want to
          * invalidate it since it is a valid packet after all.
          */
-        fprintf(stderr, "AAF Sequence number mismatch: expected %u, got %" PRIu64 "\n",
-                            aaf_seq_num, val64);
+        fprintf(stderr, "AAF Sequence number mismatch: expected %u, got %" PRIu64 "\n", aaf_seq_num,
+                val64);
 
         aaf_seq_num = val64;
     }
@@ -476,31 +460,29 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
     }
     if (val64 != AVTP_AAF_FORMAT_INT_16BIT) {
         fprintf(stderr, "AAF: Format mismatch: expected %u, got %" PRIu64 "\n",
-                    AVTP_AAF_FORMAT_INT_16BIT, val64);
+                AVTP_AAF_FORMAT_INT_16BIT, val64);
         return false;
     }
 
     res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_NSR, &val64);
     if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get sample rate field: %d\n",
-                                    res);
+        fprintf(stderr, "AAF: Failed to get sample rate field: %d\n", res);
         return false;
     }
     if (val64 != AVTP_AAF_PCM_NSR_48KHZ) {
         fprintf(stderr, "AAF: Sample rate mismatch: expected %u, got %" PRIu64 "\n",
-                        AVTP_AAF_PCM_NSR_48KHZ, val64);
+                AVTP_AAF_PCM_NSR_48KHZ, val64);
         return false;
     }
 
     res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, &val64);
     if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get channels field: %d\n",
-                                    res);
+        fprintf(stderr, "AAF: Failed to get channels field: %d\n", res);
         return false;
     }
     if (val64 != AAF_NUM_CHANNELS) {
-        fprintf(stderr, "AAF: Channels mismatch: expected %u, got %" PRIu64 "\n",
-                        AAF_NUM_CHANNELS, val64);
+        fprintf(stderr, "AAF: Channels mismatch: expected %u, got %" PRIu64 "\n", AAF_NUM_CHANNELS,
+                val64);
         return false;
     }
 
@@ -510,20 +492,18 @@ static bool is_valid_aaf_pdu(struct avtp_stream_pdu *pdu)
         return false;
     }
     if (val64 != 16) {
-        fprintf(stderr, "AAF: Depth mismatch: expected %u, got %" PRIu64 "\n",
-                                16, val64);
+        fprintf(stderr, "AAF: Depth mismatch: expected %u, got %" PRIu64 "\n", 16, val64);
         return false;
     }
 
     res = avtp_aaf_pdu_get(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, &val64);
     if (res < 0) {
-        fprintf(stderr, "AAF: Failed to get data_len field: %d\n",
-                                    res);
+        fprintf(stderr, "AAF: Failed to get data_len field: %d\n", res);
         return false;
     }
     if (val64 != AAF_DATA_LEN) {
-        fprintf(stderr, "AAF: Data len mismatch: expected %u, got %" PRIu64 "\n",
-                            AAF_DATA_LEN, val64);
+        fprintf(stderr, "AAF: Data len mismatch: expected %u, got %" PRIu64 "\n", AAF_DATA_LEN,
+                val64);
         return false;
     }
 
@@ -546,18 +526,15 @@ static int init_aaf_pdu(struct avtp_stream_pdu *pdu)
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT,
-                           AVTP_AAF_FORMAT_INT_16BIT);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_FORMAT, AVTP_AAF_FORMAT_INT_16BIT);
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR,
-                        AVTP_AAF_PCM_NSR_48KHZ);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_NSR, AVTP_AAF_PCM_NSR_48KHZ);
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME,
-                            AAF_NUM_CHANNELS);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, AAF_NUM_CHANNELS);
     if (res < 0)
         return -1;
 
@@ -565,22 +542,19 @@ static int init_aaf_pdu(struct avtp_stream_pdu *pdu)
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN,
-                                   AAF_DATA_LEN);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, AAF_DATA_LEN);
     if (res < 0)
         return -1;
 
-    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SP,
-                        AVTP_AAF_PCM_SP_NORMAL);
+    res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SP, AVTP_AAF_PCM_SP_NORMAL);
     if (res < 0)
         return -1;
 
     return 0;
 }
 
-static int aaf_talker_tx_timeout(int fd_timer, int fd_sk,
-                        const struct sockaddr_ll *addr,
-                        struct avtp_stream_pdu *pdu)
+static int aaf_talker_tx_timeout(int fd_timer, int fd_sk, const struct sockaddr_ll *addr,
+                                 struct avtp_stream_pdu *pdu)
 {
     int res;
     ssize_t n;
@@ -596,26 +570,21 @@ static int aaf_talker_tx_timeout(int fd_timer, int fd_sk,
     while (expirations--) {
         avtp_time = get_next_mclk_timestamp();
 
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP,
-                                avtp_time);
+        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_TIMESTAMP, avtp_time);
         if (res < 0)
             return res;
 
-        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SEQ_NUM,
-                                aaf_seq_num++);
+        res = avtp_aaf_pdu_set(pdu, AVTP_AAF_FIELD_SEQ_NUM, aaf_seq_num++);
         if (res < 0)
             return res;
 
-        n = sendto(fd_sk, pdu, AAF_PDU_SIZE, 0,
-                    (struct sockaddr *) addr,
-                    sizeof(*addr));
+        n = sendto(fd_sk, pdu, AAF_PDU_SIZE, 0, (struct sockaddr *)addr, sizeof(*addr));
         if (n < 0) {
             perror("Failed to send data");
             return -1;
         }
         if (n != AAF_PDU_SIZE) {
-            fprintf(stderr, "AAF: wrote %zd bytes, expected %zd\n",
-                            n, AAF_PDU_SIZE);
+            fprintf(stderr, "AAF: wrote %zd bytes, expected %zd\n", n, AAF_PDU_SIZE);
         }
     }
 
@@ -670,8 +639,8 @@ static int is_ts_aligned(uint32_t mclk_ts, uint32_t avtp_ts)
 
     t_offset = avtp_ts - mclk_ts;
 
-    delta_ll = (n * TIME_PERIOD_NS) - (TIME_PERIOD_NS/4);
-    delta_hl = (n * TIME_PERIOD_NS) + (TIME_PERIOD_NS/4);
+    delta_ll = (n * TIME_PERIOD_NS) - (TIME_PERIOD_NS / 4);
+    delta_hl = (n * TIME_PERIOD_NS) + (TIME_PERIOD_NS / 4);
 
     /* Equation 16 defined in spec 1722:
      * ((n * Ps) - Ps/4) < Toffset < ((n * Ps) + Ps/4)
@@ -759,7 +728,7 @@ static int aaf_talker_recv_pdu(int fd_sk, int fd_timer)
 
     /* Arm the timer for the first time to start sending AAF stream. */
     if (first_aaf_pdu) {
-        struct itimerspec itspec = { 0 };
+        struct itimerspec itspec = {0};
         uint64_t ts = mclk_dequeue_ts();
 
         first_aaf_pdu = false;
@@ -768,8 +737,7 @@ static int aaf_talker_recv_pdu(int fd_sk, int fd_timer)
         itspec.it_value.tv_nsec = ts % NSEC_PER_SEC;
         itspec.it_interval.tv_sec = 0;
         itspec.it_interval.tv_nsec = AAF_PERIOD;
-        res = timerfd_settime(fd_timer, TFD_TIMER_ABSTIME, &itspec,
-                                    NULL);
+        res = timerfd_settime(fd_timer, TFD_TIMER_ABSTIME, &itspec, NULL);
         if (res < 0) {
             perror("Failed to set timer");
             return -1;
@@ -784,7 +752,7 @@ static int aaf_listener_recv_pdu(int fd)
     ssize_t n;
     uint32_t val;
     void *pdu = alloca(MAX_PDU_SIZE);
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *) pdu;
+    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
 
     memset(pdu, 0, MAX_PDU_SIZE);
 
@@ -849,8 +817,7 @@ static int setup_rx_socket(void)
         mreq.mr_alen = ETH_ALEN;
         memcpy(&mreq.mr_address, aaf_macaddr, ETH_ALEN);
 
-        res = setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq,
-                        sizeof(struct packet_mreq));
+        res = setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq, sizeof(struct packet_mreq));
         if (res < 0) {
             perror("Couldn't add membership for AAF stream");
             goto err;
@@ -879,8 +846,7 @@ static int aaf_talker(int fd_rx)
     }
 
     if (priority != -1) {
-        res = setsockopt(fd_tx, SOL_SOCKET, SO_PRIORITY, &priority,
-                            sizeof(priority));
+        res = setsockopt(fd_tx, SOL_SOCKET, SO_PRIORITY, &priority, sizeof(priority));
         if (res < 0) {
             perror("Failed to set priority");
             goto fd_tx_close;
@@ -929,8 +895,7 @@ static int aaf_talker(int fd_rx)
         }
 
         if (poll_fd[1].revents & POLLIN) {
-            res = aaf_talker_tx_timeout(fd_timer, fd_tx, &sk_addr,
-                                    pdu);
+            res = aaf_talker_tx_timeout(fd_timer, fd_tx, &sk_addr, pdu);
             if (res < 0)
                 goto fd_timer_close;
         }

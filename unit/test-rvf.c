@@ -60,7 +60,7 @@ static void rvf_get_field_null_pdu(void **state)
 static void rvf_get_field_null_val(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_get(&pdu, AVTP_RVF_FIELD_SV, NULL);
 
@@ -71,7 +71,7 @@ static void rvf_get_field_invalid_field(void **state)
 {
     int res;
     uint64_t val = 1;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_get(&pdu, AVTP_RVF_FIELD_MAX, &val);
 
@@ -82,14 +82,13 @@ static void rvf_get_field_sv(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'sv' field to 1. */
     pdu.subtype_data = htonl(0x00800000);
     // pdu.subtype_data = htonl(0x00000100);
 
     res = avtp_rvf_pdu_get(&pdu, AVTP_RVF_FIELD_SV, &val);
-
 
     assert_int_equal(res, 0);
     assert_true(val == 1);
@@ -99,7 +98,7 @@ static void rvf_get_field_mr(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'mr' field to 1. */
     pdu.subtype_data = htonl(0x00080000);
@@ -114,7 +113,7 @@ static void rvf_get_field_tv(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'tv' field to 1. */
     pdu.subtype_data = htonl(0x00010000);
@@ -129,7 +128,7 @@ static void rvf_get_field_seq_num(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'sequence_num' field to 0x55. */
     pdu.subtype_data = htonl(0x00005500);
@@ -144,7 +143,7 @@ static void rvf_get_field_tu(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'tu' field to 1. */
     pdu.subtype_data = htonl(0x00000001);
@@ -159,7 +158,7 @@ static void rvf_get_field_stream_id(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'stream_id' field to 0xAABBCCDDEEFF0001. */
     pdu.stream_id = htobe64(0xAABBCCDDEEFF0001);
@@ -174,7 +173,7 @@ static void rvf_get_field_timestamp(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'avtp_timestamp' field to 0x80C0FFEE. */
     pdu.avtp_time = htonl(0x80C0FFEE);
@@ -189,7 +188,7 @@ static void rvf_get_field_active_pixels(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'active_pixels' field to 0x20. */
     pdu.format_specific = htonl(0x00200000);
@@ -204,7 +203,7 @@ static void rvf_get_field_format_total_lines(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'total_lines' field to 0x3C. */
     pdu.format_specific = htonl(0x0000003C);
@@ -219,7 +218,7 @@ static void rvf_get_field_data_len(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'stream_data_length' field to 0xAAAA. */
     pdu.packet_info = htonl(0xAAAA0000);
@@ -234,7 +233,7 @@ static void rvf_get_field_ap(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'AP' field to 0x1. */
     pdu.packet_info = htonl(0x00008000);
@@ -249,7 +248,7 @@ static void rvf_get_field_f(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'F' field to 0x1. */
     pdu.packet_info = htonl(0x00002000);
@@ -264,7 +263,7 @@ static void rvf_get_field_ef(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'EF' field to 0x1. */
     pdu.packet_info = htonl(0x00001000);
@@ -279,7 +278,7 @@ static void rvf_get_field_evt(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'evt' field to 0xA. */
     pdu.packet_info = htonl(0x00000A00);
@@ -294,7 +293,7 @@ static void rvf_get_field_pd(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'PD' field to 0x1. */
     pdu.packet_info = htonl(0x00000080);
@@ -309,7 +308,7 @@ static void rvf_get_field_i(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'I' field to 0x1. */
     pdu.packet_info = htonl(0x00000040);
@@ -332,7 +331,7 @@ static void rvf_set_field_null_pdu(void **state)
 static void rvf_set_field_invalid_field(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_MAX, 1);
 
@@ -342,7 +341,7 @@ static void rvf_set_field_invalid_field(void **state)
 static void rvf_set_field_sv(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_SV, 1);
 
@@ -357,7 +356,7 @@ static void rvf_set_field_sv(void **state)
 static void rvf_set_field_mr(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_MR, 1);
 
@@ -372,7 +371,7 @@ static void rvf_set_field_mr(void **state)
 static void rvf_set_field_tv(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_TV, 1);
 
@@ -387,7 +386,7 @@ static void rvf_set_field_tv(void **state)
 static void rvf_set_field_seq_num(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_SEQ_NUM, 0x55);
 
@@ -402,7 +401,7 @@ static void rvf_set_field_seq_num(void **state)
 static void rvf_set_field_tu(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_TU, 1);
 
@@ -417,10 +416,9 @@ static void rvf_set_field_tu(void **state)
 static void rvf_set_field_stream_id(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
-    res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_STREAM_ID,
-                   0xAABBCCDDEEFF0001);
+    res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_STREAM_ID, 0xAABBCCDDEEFF0001);
 
     assert_int_equal(res, 0);
     assert_true(be64toh(pdu.stream_id) == 0xAABBCCDDEEFF0001);
@@ -433,7 +431,7 @@ static void rvf_set_field_stream_id(void **state)
 static void rvf_set_field_timestamp(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_TIMESTAMP, 0x80C0FFEE);
 
@@ -448,10 +446,9 @@ static void rvf_set_field_timestamp(void **state)
 static void rvf_set_field_active_pixels(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
-    res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_ACTIVE_PIXELS,
-                   AVTP_RVF_PIXEL_DEPTH_16);
+    res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_ACTIVE_PIXELS, AVTP_RVF_PIXEL_DEPTH_16);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.format_specific) == 0x00040000);
@@ -464,7 +461,7 @@ static void rvf_set_field_active_pixels(void **state)
 static void rvf_set_field_total_lines(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_TOTAL_LINES, 0x3C);
 
@@ -479,7 +476,7 @@ static void rvf_set_field_total_lines(void **state)
 static void rvf_set_field_data_len(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_STREAM_DATA_LEN, 0xAAAA);
 
@@ -494,7 +491,7 @@ static void rvf_set_field_data_len(void **state)
 static void rvf_set_field_ap(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_AP, 1);
 
@@ -509,7 +506,7 @@ static void rvf_set_field_ap(void **state)
 static void rvf_set_field_f(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_F, 1);
 
@@ -524,7 +521,7 @@ static void rvf_set_field_f(void **state)
 static void rvf_set_field_ef(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_EF, 1);
 
@@ -539,7 +536,7 @@ static void rvf_set_field_ef(void **state)
 static void rvf_set_field_evt(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_EVT, 0xA);
 
@@ -554,7 +551,7 @@ static void rvf_set_field_evt(void **state)
 static void rvf_set_field_pd(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_PD, 1);
 
@@ -569,7 +566,7 @@ static void rvf_set_field_pd(void **state)
 static void rvf_set_field_i(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_rvf_pdu_set(&pdu, AVTP_RVF_FIELD_I, 1);
 
@@ -593,7 +590,7 @@ static void rvf_pdu_init(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
     res = avtp_rvf_pdu_init(pdu);
 
@@ -612,9 +609,8 @@ static void rvf_get_field_raw_pixel_depth(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'pixel_depth' field to AVTP_RVF_PIXEL_DEPTH_16 */
     pay->raw_header = htobe64(0x0040000000000000);
@@ -630,9 +626,8 @@ static void rvf_get_field_raw_pixel_format(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'pixel_format' field to AVTP_RVF_PIXEL_DEPTH_16 */
     pay->raw_header = htobe64(0x0003000000000000);
@@ -648,9 +643,8 @@ static void rvf_get_field_raw_frame_rate(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'frame rate' field to AVTP_RVF_FRAME_RATE_30 */
     pay->raw_header = htobe64(0x0000150000000000);
@@ -666,9 +660,8 @@ static void rvf_get_field_raw_colorspace(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'colorspace' field to AVTP_RVF_COLORSPACE_GRAY */
     pay->raw_header = htobe64(0x0000004000000000);
@@ -684,9 +677,8 @@ static void rvf_get_field_raw_num_lines(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'num_lines' field to 0x05 */
     pay->raw_header = htobe64(0x0000000500000000);
@@ -702,9 +694,8 @@ static void rvf_get_field_raw_i_seq_num(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'i_seq_num' field to 0x03 */
     pay->raw_header = htobe64(0x0000000000030000);
@@ -720,9 +711,8 @@ static void rvf_get_field_raw_line_number(void **state)
     int res;
     uint64_t val;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
 
     /* Set 'i_seq_num' field to 0x123 */
     pay->raw_header = htobe64(0x0000000000000123);
@@ -737,13 +727,11 @@ static void rvf_set_field_raw_pixel_depth(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
-    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_PIXEL_DEPTH,
-                   AVTP_RVF_PIXEL_DEPTH_16);
+    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_PIXEL_DEPTH, AVTP_RVF_PIXEL_DEPTH_16);
 
     assert_int_equal(res, 0);
     assert_true(pdu->avtp_time == 0);
@@ -758,13 +746,11 @@ static void rvf_set_field_raw_pixel_format(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
-    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_PIXEL_FORMAT,
-                   AVTP_RVF_PIXEL_FORMAT_422);
+    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_PIXEL_FORMAT, AVTP_RVF_PIXEL_FORMAT_422);
 
     assert_int_equal(res, 0);
     assert_true(pdu->avtp_time == 0);
@@ -779,13 +765,11 @@ static void rvf_set_field_raw_frame_rate(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
-    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_FRAME_RATE,
-                   AVTP_RVF_FRAME_RATE_30);
+    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_FRAME_RATE, AVTP_RVF_FRAME_RATE_30);
 
     assert_int_equal(res, 0);
     assert_true(pdu->avtp_time == 0);
@@ -800,13 +784,11 @@ static void rvf_set_field_raw_colorspace(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
-    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_COLORSPACE,
-                   AVTP_RVF_COLORSPACE_GRAY);
+    res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_COLORSPACE, AVTP_RVF_COLORSPACE_GRAY);
 
     assert_int_equal(res, 0);
     assert_true(pdu->avtp_time == 0);
@@ -821,9 +803,8 @@ static void rvf_set_field_raw_num_lines(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
     res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_NUM_LINES, 0x05);
@@ -841,9 +822,8 @@ static void rvf_set_field_raw_i_seq_num(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
     res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_I_SEQ_NUM, 0x03);
@@ -861,9 +841,8 @@ static void rvf_set_field_raw_line_number(void **state)
 {
     int res;
     struct avtp_stream_pdu *pdu =
-        (struct avtp_stream_pdu *) alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
-    struct avtp_rvf_payload *pay =
-        (struct avtp_rvf_payload *)pdu->avtp_payload;
+        (struct avtp_stream_pdu *)alloca(sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
+    struct avtp_rvf_payload *pay = (struct avtp_rvf_payload *)pdu->avtp_payload;
     memset(pdu, 0, sizeof(struct avtp_stream_pdu) + sizeof(uint64_t));
 
     res = avtp_rvf_pdu_set(pdu, AVTP_RVF_FIELD_RAW_LINE_NUMBER, 0x123);

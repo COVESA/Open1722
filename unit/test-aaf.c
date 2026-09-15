@@ -56,7 +56,7 @@ static void aaf_get_field_null_pdu(void **state)
 static void aaf_get_field_null_val(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_SV, NULL);
 
@@ -67,7 +67,7 @@ static void aaf_get_field_invalid_field(void **state)
 {
     int res;
     uint64_t val = 1;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_get(&pdu, AVTP_AAF_FIELD_MAX, &val);
 
@@ -78,7 +78,7 @@ static void aaf_get_field_sv(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'sv' field to 1. */
     pdu.subtype_data = htonl(0x00800000);
@@ -93,7 +93,7 @@ static void aaf_get_field_mr(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'mr' field to 1. */
     pdu.subtype_data = htonl(0x00080000);
@@ -108,7 +108,7 @@ static void aaf_get_field_tv(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'tv' field to 1. */
     pdu.subtype_data = htonl(0x00010000);
@@ -123,7 +123,7 @@ static void aaf_get_field_seq_num(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'sequence_num' field to 0x55. */
     pdu.subtype_data = htonl(0x00005500);
@@ -138,7 +138,7 @@ static void aaf_get_field_tu(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'tu' field to 1. */
     pdu.subtype_data = htonl(0x00000001);
@@ -153,7 +153,7 @@ static void aaf_get_field_stream_id(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'stream_id' field to 0xAABBCCDDEEFF0001. */
     pdu.stream_id = htobe64(0xAABBCCDDEEFF0001);
@@ -168,7 +168,7 @@ static void aaf_get_field_timestamp(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'avtp_timestamp' field to 0x80C0FFEE. */
     pdu.avtp_time = htonl(0x80C0FFEE);
@@ -183,7 +183,7 @@ static void aaf_get_field_format(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'format' field to AVTP_AAF_FORMAT_INT_16BIT. */
     pdu.format_specific = htonl(0x04000000);
@@ -198,7 +198,7 @@ static void aaf_get_field_nsr(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'nsr' field to AVTP_AAF_PCM_NSR_48KHZ. */
     pdu.format_specific = htonl(0x00500000);
@@ -213,7 +213,7 @@ static void aaf_get_field_chan(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'channels_per_frame' field to 0x2AA. */
     pdu.format_specific = htonl(0x0002AA00);
@@ -228,7 +228,7 @@ static void aaf_get_field_depth(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'bit_depth' field to 0xA5. */
     pdu.format_specific = htonl(0x000000A5);
@@ -243,7 +243,7 @@ static void aaf_get_field_data_len(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'stream_data_length' field to 0xAAAA. */
     pdu.packet_info = htonl(0xAAAA0000);
@@ -258,7 +258,7 @@ static void aaf_get_field_sp(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'sp' field to AVTP_AAF_PCM_SP_SPARSE. */
     pdu.packet_info = htonl(0x00001000);
@@ -273,7 +273,7 @@ static void aaf_get_field_evt(void **state)
 {
     int res;
     uint64_t val;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     /* Set 'evt' field to 0xA. */
     pdu.packet_info = htonl(0x00000A00);
@@ -296,7 +296,7 @@ static void aaf_set_field_null_pdu(void **state)
 static void aaf_set_field_invalid_field(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_MAX, 1);
 
@@ -306,7 +306,7 @@ static void aaf_set_field_invalid_field(void **state)
 static void aaf_set_field_sv(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SV, 1);
 
@@ -321,7 +321,7 @@ static void aaf_set_field_sv(void **state)
 static void aaf_set_field_mr(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_MR, 1);
 
@@ -336,7 +336,7 @@ static void aaf_set_field_mr(void **state)
 static void aaf_set_field_tv(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TV, 1);
 
@@ -351,7 +351,7 @@ static void aaf_set_field_tv(void **state)
 static void aaf_set_field_seq_num(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SEQ_NUM, 0x55);
 
@@ -366,7 +366,7 @@ static void aaf_set_field_seq_num(void **state)
 static void aaf_set_field_tu(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TU, 1);
 
@@ -381,10 +381,9 @@ static void aaf_set_field_tu(void **state)
 static void aaf_set_field_stream_id(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
-    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_STREAM_ID,
-                            0xAABBCCDDEEFF0001);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_STREAM_ID, 0xAABBCCDDEEFF0001);
 
     assert_int_equal(res, 0);
     assert_true(be64toh(pdu.stream_id) == 0xAABBCCDDEEFF0001);
@@ -397,7 +396,7 @@ static void aaf_set_field_stream_id(void **state)
 static void aaf_set_field_timestamp(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_TIMESTAMP, 0x80C0FFEE);
 
@@ -412,10 +411,9 @@ static void aaf_set_field_timestamp(void **state)
 static void aaf_set_field_format(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
-    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_FORMAT,
-                        AVTP_AAF_FORMAT_INT_16BIT);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_FORMAT, AVTP_AAF_FORMAT_INT_16BIT);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.format_specific) == 0x04000000);
@@ -428,10 +426,9 @@ static void aaf_set_field_format(void **state)
 static void aaf_set_field_nsr(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
-    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_NSR,
-                        AVTP_AAF_PCM_NSR_48KHZ);
+    res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_NSR, AVTP_AAF_PCM_NSR_48KHZ);
 
     assert_int_equal(res, 0);
     assert_true(ntohl(pdu.format_specific) == 0x00500000);
@@ -444,7 +441,7 @@ static void aaf_set_field_nsr(void **state)
 static void aaf_set_field_chan(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_CHAN_PER_FRAME, 0x2AA);
 
@@ -459,7 +456,7 @@ static void aaf_set_field_chan(void **state)
 static void aaf_set_field_depth(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_BIT_DEPTH, 0xA5);
 
@@ -474,7 +471,7 @@ static void aaf_set_field_depth(void **state)
 static void aaf_set_field_data_len(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_STREAM_DATA_LEN, 0xAAAA);
 
@@ -489,7 +486,7 @@ static void aaf_set_field_data_len(void **state)
 static void aaf_set_field_sp(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_SP, 1);
 
@@ -504,7 +501,7 @@ static void aaf_set_field_sp(void **state)
 static void aaf_set_field_evt(void **state)
 {
     int res;
-    struct avtp_stream_pdu pdu = { 0 };
+    struct avtp_stream_pdu pdu = {0};
 
     res = avtp_aaf_pdu_set(&pdu, AVTP_AAF_FIELD_EVT, 0xA);
 
