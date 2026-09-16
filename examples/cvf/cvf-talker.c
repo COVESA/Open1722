@@ -78,11 +78,9 @@
 #include "avtp/cvf/Cvf.h"
 #include "avtp/cvf/H264.h"
 #include "common/common.h"
-#include "avtp/CommonHeader.h"
 
 #define STREAM_ID 0xAABBCCDDEEFF0001
 #define DATA_LEN 1400
-#define AVTP_H264_HEADER_LEN (sizeof(Avtp_H264_t))
 #define AVTP_FULL_HEADER_LEN (sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
 #define MAX_PDU_SIZE (AVTP_FULL_HEADER_LEN + DATA_LEN)
 
@@ -135,21 +133,18 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
 static struct argp argp = {options, parser};
 
-static int init_pdu(Avtp_Cvf_t *cvf)
+static void init_pdu(Avtp_Cvf_t *cvf)
 {
     Avtp_Cvf_Init(cvf);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_FORMAT_SUBTYPE, AVTP_CVF_FORMAT_SUBTYPE_H264);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_FORMAT, AVTP_CVF_FORMAT_RFC);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_TV, 1);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_STREAM_ID, STREAM_ID);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_M, 1);
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_PTV, 0);
+    Avtp_Cvf_SetFormatSubtype(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    Avtp_Cvf_SetTv(cvf, true);
+    Avtp_Cvf_SetStreamId(cvf, STREAM_ID);
+    Avtp_Cvf_SetM(cvf, true);
+    Avtp_Cvf_SetPtv(cvf, false);
 
     Avtp_H264_t *h264 = (Avtp_H264_t *)(&cvf->payload);
     Avtp_H264_Init(h264);
-    Avtp_H264_SetField(h264, AVTP_H264_FIELD_TIMESTAMP, 0);
-
-    return 0;
+    Avtp_H264_SetTimestamp(h264, 0);
 }
 
 static ssize_t fill_buffer(void)
@@ -199,10 +194,10 @@ static int prepare_packet(Avtp_Cvf_t *cvfHeader, char *nal_data, size_t nal_data
         return -1;
     }
 
-    Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_AVTP_TIMESTAMP, avtp_time);
-    Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_SEQUENCE_NUM, seq_num++);
-    Avtp_Cvf_SetField(cvfHeader, AVTP_CVF_FIELD_STREAM_DATA_LENGTH,
-                      nal_data_len + AVTP_H264_HEADER_LEN);
+    Avtp_Cvf_SetAvtpTimestamp(cvfHeader, avtp_time);
+    Avtp_Cvf_SetSequenceNum(cvfHeader, seq_num++);
+    Avtp_Cvf_SetStreamDataLength(cvfHeader,
+                                 (uint16_t)(nal_data_len + (size_t)AVTP_H264_HEADER_LEN));
 
     memcpy(h264Payload, nal_data, nal_data_len);
 
@@ -274,9 +269,7 @@ int main(int argc, char *argv[])
     if (res < 0)
         goto err;
 
-    res = init_pdu(cvf);
-    if (res < 0)
-        goto err;
+    init_pdu(cvf);
 
     while (1) {
         ssize_t n;

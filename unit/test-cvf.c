@@ -28,10 +28,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <alloca.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <string.h>
 #include <setjmp.h>
 #if defined(__cplusplus)
 extern "C" {
@@ -41,536 +39,556 @@ extern "C" {
 #include <cmocka.h>
 #endif
 #include <arpa/inet.h>
-#include <errno.h>
+#include <string.h>
 
 #include "avtp/CommonHeader.h"
 #include "avtp/cvf/Cvf.h"
 #include "avtp/cvf/H264.h"
+#include "avtp/cvf/Jpeg2000.h"
+#include "avtp/cvf/Mjpeg.h"
 
-static void cvf_get_field_null_pdu(void **state)
+#define MAX_PDU_SIZE 1500
+
+static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
 {
-    int res;
-    uint64_t val = 1;
+    uint32_t word;
 
-    res = avtp_cvf_pdu_get(NULL, AVTP_CVF_FIELD_SV, &val);
-
-    assert_int_equal(res, -EINVAL);
+    memcpy(&word, pdu + (quadlet * 4), sizeof(word));
+    return ntohl(word);
 }
 
-static void cvf_get_field_null_val(void **state)
+/******************************************************************************
+ * CVF tests
+ *****************************************************************************/
+
+static void cvf_init(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t init_pdu[AVTP_CVF_HEADER_LEN];
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SV, NULL);
+    assert_int_equal(sizeof(Avtp_Cvf_t), AVTP_CVF_HEADER_LEN);
 
-    assert_int_equal(res, -EINVAL);
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Cvf_Init(NULL);
+
+    Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
+    memset(init_pdu, 0, AVTP_CVF_HEADER_LEN);
+    init_pdu[0] = AVTP_SUBTYPE_CVF;     /* subtype = CVF */
+    init_pdu[1] = 0x80;                 /* sv = 1 */
+    init_pdu[16] = AVTP_CVF_FORMAT_RFC; /* format = RFC */
+    assert_memory_equal(init_pdu, pdu, AVTP_CVF_HEADER_LEN);
 }
 
-static void cvf_get_field_invalid_field(void **state)
+static void cvf_is_valid(void **state)
 {
-    int res;
-    uint64_t val = 1;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_MAX, &val);
+    Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
+    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN));
 
-    assert_int_equal(res, -EINVAL);
+    /* NULL pdu. */
+    assert_false(Avtp_Cvf_IsValid(NULL, MAX_PDU_SIZE));
+
+    /* Not a CVF frame. */
+    memset(pdu, 0, MAX_PDU_SIZE);
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, MAX_PDU_SIZE));
+
+    /* Buffer smaller than the CVF header. */
+    Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN - 1));
+
+    /* stream_data_length does not fit into the buffer. */
+    Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
+    Avtp_Cvf_SetStreamDataLength((Avtp_Cvf_t *)pdu, 10);
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN + 9));
+    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN + 10));
 }
 
-static void cvf_get_field_sv(void **state)
+static void cvf_field_descriptors_cover_header(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t coverage[AVTP_CVF_HEADER_LEN * 8] = {0};
 
-    /* Set 'sv' field to 1. */
-    pdu.subtype_data = htonl(0x00800000);
+    /* Every bit of the header must be described exactly once. */
+    for (uint8_t i = 0; i < AVTP_CVF_FIELD_MAX; i++) {
+        uint8_t quadlet = Avtp_CvfFieldDesc[i].quadlet;
+        uint8_t offset = Avtp_CvfFieldDesc[i].offset;
+        uint8_t bits = Avtp_CvfFieldDesc[i].bits;
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SV, &val);
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+            assert_true(bit < sizeof(coverage));
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
+
+    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
+        assert_int_equal(coverage[bit], 1);
+    }
 }
 
-static void cvf_get_field_mr(void **state)
+static void cvf_flag_fields(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
 
-    /* Set 'mr' field to 1. */
-    pdu.subtype_data = htonl(0x00080000);
+    Avtp_Cvf_Init(cvf);
+    assert_true(Avtp_Cvf_IsSv(cvf));
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_MR, &val);
+    Avtp_Cvf_SetSv(cvf, false);
+    assert_false(Avtp_Cvf_IsSv(cvf));
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    Avtp_Cvf_SetMr(cvf, true);
+    assert_true(Avtp_Cvf_IsMr(cvf));
+    Avtp_Cvf_SetMr(cvf, false);
+    assert_false(Avtp_Cvf_IsMr(cvf));
+
+    Avtp_Cvf_SetTv(cvf, true);
+    assert_true(Avtp_Cvf_IsTv(cvf));
+    Avtp_Cvf_SetTv(cvf, false);
+    assert_false(Avtp_Cvf_IsTv(cvf));
+
+    Avtp_Cvf_SetTu(cvf, true);
+    assert_true(Avtp_Cvf_IsTu(cvf));
+    Avtp_Cvf_SetTu(cvf, false);
+    assert_false(Avtp_Cvf_IsTu(cvf));
+
+    Avtp_Cvf_SetPtv(cvf, true);
+    assert_true(Avtp_Cvf_IsPtv(cvf));
+    Avtp_Cvf_SetPtv(cvf, false);
+    assert_false(Avtp_Cvf_IsPtv(cvf));
+
+    Avtp_Cvf_SetM(cvf, true);
+    assert_true(Avtp_Cvf_IsM(cvf));
+    Avtp_Cvf_SetM(cvf, false);
+    assert_false(Avtp_Cvf_IsM(cvf));
 }
 
-static void cvf_get_field_tv(void **state)
+static void cvf_field_layout(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
 
-    /* Set 'tv' field to 1. */
-    pdu.subtype_data = htonl(0x00010000);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_TV, &val);
+    Avtp_Cvf_SetSequenceNum(cvf, 0x55);
+    assert_int_equal(Avtp_Cvf_GetSequenceNum(cvf), 0x55);
+    assert_int_equal(read_quadlet(pdu, 0), 0x00005500);
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    Avtp_Cvf_SetTu(cvf, true);
+    assert_true(Avtp_Cvf_IsTu(cvf));
+    assert_int_equal(read_quadlet(pdu, 0), 0x00005501);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Cvf_SetStreamId(cvf, 0xAABBCCDDEEFF0001);
+    assert_int_equal(Avtp_Cvf_GetStreamId(cvf), 0xAABBCCDDEEFF0001);
+
+    Avtp_Cvf_SetAvtpTimestamp(cvf, 0x80C0FFEE);
+    assert_int_equal(Avtp_Cvf_GetAvtpTimestamp(cvf), 0x80C0FFEE);
+    assert_int_equal(read_quadlet(pdu, 3), 0x80C0FFEE);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Cvf_SetFormat(cvf, AVTP_CVF_FORMAT_RFC);
+    assert_int_equal(Avtp_Cvf_GetFormat(cvf), AVTP_CVF_FORMAT_RFC);
+    assert_int_equal(read_quadlet(pdu, 4), 0x02000000);
+
+    Avtp_Cvf_SetFormatSubtype(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    assert_int_equal(Avtp_Cvf_GetFormatSubtype(cvf), AVTP_CVF_FORMAT_SUBTYPE_H264);
+    assert_int_equal(read_quadlet(pdu, 4), 0x02010000);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Cvf_SetStreamDataLength(cvf, 0xAAAA);
+    assert_int_equal(Avtp_Cvf_GetStreamDataLength(cvf), 0xAAAA);
+    assert_int_equal(read_quadlet(pdu, 5), 0xAAAA0000);
+
+    Avtp_Cvf_SetPtv(cvf, true);
+    assert_true(Avtp_Cvf_IsPtv(cvf));
+    assert_int_equal(read_quadlet(pdu, 5), 0xAAAA2000);
+
+    Avtp_Cvf_SetM(cvf, true);
+    assert_true(Avtp_Cvf_IsM(cvf));
+    assert_int_equal(read_quadlet(pdu, 5), 0xAAAA3000);
+
+    Avtp_Cvf_SetEvt(cvf, 0xA);
+    assert_int_equal(Avtp_Cvf_GetEvt(cvf), 0xA);
+    assert_int_equal(read_quadlet(pdu, 5), 0xAAAA3A00);
 }
 
-static void cvf_get_field_seq_num(void **state)
+static void cvf_payload(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    uint8_t payload_out[8] = {0};
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
 
-    /* Set 'sequence_num' field to 0x55. */
-    pdu.subtype_data = htonl(0x00005500);
+    Avtp_Cvf_Init(cvf);
+    Avtp_Cvf_SetPayload(cvf, payload, sizeof(payload));
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_SEQUENCE_NUM, &val);
+    assert_memory_equal(Avtp_Cvf_GetPayload(cvf), payload, sizeof(payload));
+    assert_memory_equal(cvf->payload, payload, sizeof(payload));
 
-    assert_int_equal(res, 0);
-    assert_true(val == 0x55);
+    memcpy(payload_out, Avtp_Cvf_GetPayload(cvf), sizeof(payload_out));
+    assert_memory_equal(payload_out, payload, sizeof(payload_out));
 }
 
-static void cvf_get_field_tu(void **state)
+static void cvf_get_set_field(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
 
-    /* Set 'tu' field to 1. */
-    pdu.subtype_data = htonl(0x00000001);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_TU, &val);
+    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_EVT, 0xA);
+    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_EVT), 0xA);
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    /* Reserved fields are reachable through the generic access engine. */
+    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_RSV1, 0x3);
+    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_RSV1), 0x3);
+
+    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_RESERVED1, 0x7F);
+    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_RESERVED1), 0x7F);
 }
 
-static void cvf_get_field_stream_id(void **state)
+/******************************************************************************
+ * MJPEG tests
+ *****************************************************************************/
+
+static void mjpeg_init(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_MJPEG_HEADER_LEN];
+    uint8_t zero[AVTP_MJPEG_HEADER_LEN] = {0};
 
-    /* Set 'stream_id' field to 0xAABBCCDDEEFF0001. */
-    pdu.stream_id = htobe64(0xAABBCCDDEEFF0001);
+    assert_int_equal(sizeof(Avtp_Mjpeg_t), AVTP_MJPEG_HEADER_LEN);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_STREAM_ID, &val);
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Mjpeg_Init(NULL);
 
-    assert_int_equal(res, 0);
-    assert_true(val == 0xAABBCCDDEEFF0001);
+    memset(pdu, 0xFF, AVTP_MJPEG_HEADER_LEN);
+    Avtp_Mjpeg_Init((Avtp_Mjpeg_t *)pdu);
+    assert_memory_equal(pdu, zero, AVTP_MJPEG_HEADER_LEN);
 }
 
-static void cvf_get_field_timestamp(void **state)
+static void mjpeg_is_valid(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_MJPEG_HEADER_LEN];
 
-    /* Set 'avtp_timestamp' field to 0x80C0FFEE. */
-    pdu.avtp_time = htonl(0x80C0FFEE);
-
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_AVTP_TIMESTAMP, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0x80C0FFEE);
+    assert_true(Avtp_Mjpeg_IsValid((Avtp_Mjpeg_t *)pdu, AVTP_MJPEG_HEADER_LEN));
+    assert_false(Avtp_Mjpeg_IsValid(NULL, AVTP_MJPEG_HEADER_LEN));
+    assert_false(Avtp_Mjpeg_IsValid((Avtp_Mjpeg_t *)pdu, AVTP_MJPEG_HEADER_LEN - 1));
 }
 
-static void cvf_get_field_format(void **state)
+static void mjpeg_field_descriptors_cover_header(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t coverage[AVTP_MJPEG_HEADER_LEN * 8] = {0};
 
-    /* Set 'format' field to AVTP_CVF_FORMAT_RFC. */
-    pdu.format_specific = htonl(0x02000000);
+    for (uint8_t i = 0; i < AVTP_MJPEG_FIELD_MAX; i++) {
+        uint8_t quadlet = Avtp_MjpegFieldDesc[i].quadlet;
+        uint8_t offset = Avtp_MjpegFieldDesc[i].offset;
+        uint8_t bits = Avtp_MjpegFieldDesc[i].bits;
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_FORMAT, &val);
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
 
-    assert_int_equal(res, 0);
-    assert_true(val == AVTP_CVF_FORMAT_RFC);
+            assert_true(bit < sizeof(coverage));
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
+
+    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
+        assert_int_equal(coverage[bit], 1);
+    }
 }
 
-static void cvf_get_field_format_subtype(void **state)
+static void mjpeg_field_layout(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Mjpeg_t *mjpeg = (Avtp_Mjpeg_t *)pdu;
 
-    /* Set 'format_subtype' field to AVTP_CVF_FORMAT_SUBTYPE_H264. */
-    pdu.format_specific = htonl(0x00010000);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE, &val);
+    Avtp_Mjpeg_SetTypeSpecific(mjpeg, 0xAB);
+    assert_int_equal(Avtp_Mjpeg_GetTypeSpecific(mjpeg), 0xAB);
+    assert_int_equal(read_quadlet(pdu, 0), 0xAB000000);
 
-    assert_int_equal(res, 0);
-    assert_true(val == AVTP_CVF_FORMAT_SUBTYPE_H264);
+    Avtp_Mjpeg_SetFragmentOffset(mjpeg, 0x123456);
+    assert_int_equal(Avtp_Mjpeg_GetFragmentOffset(mjpeg), 0x123456);
+    assert_int_equal(read_quadlet(pdu, 0), 0xAB123456);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Mjpeg_SetType(mjpeg, 0x11);
+    assert_int_equal(Avtp_Mjpeg_GetType(mjpeg), 0x11);
+    assert_int_equal(read_quadlet(pdu, 1), 0x11000000);
+
+    Avtp_Mjpeg_SetQ(mjpeg, 0x22);
+    assert_int_equal(Avtp_Mjpeg_GetQ(mjpeg), 0x22);
+    assert_int_equal(read_quadlet(pdu, 1), 0x11220000);
+
+    Avtp_Mjpeg_SetWidth(mjpeg, 0x33);
+    assert_int_equal(Avtp_Mjpeg_GetWidth(mjpeg), 0x33);
+    assert_int_equal(read_quadlet(pdu, 1), 0x11223300);
+
+    Avtp_Mjpeg_SetHeight(mjpeg, 0x44);
+    assert_int_equal(Avtp_Mjpeg_GetHeight(mjpeg), 0x44);
+    assert_int_equal(read_quadlet(pdu, 1), 0x11223344);
 }
 
-static void cvf_get_field_data_len(void **state)
+static void mjpeg_payload(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    Avtp_Mjpeg_t *mjpeg = (Avtp_Mjpeg_t *)pdu;
 
-    /* Set 'stream_data_length' field to 0xAAAA. */
-    pdu.packet_info = htonl(0xAAAA0000);
+    Avtp_Mjpeg_Init(mjpeg);
+    Avtp_Mjpeg_SetPayload(mjpeg, payload, sizeof(payload));
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_STREAM_DATA_LENGTH, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0xAAAA);
+    assert_memory_equal(Avtp_Mjpeg_GetPayload(mjpeg), payload, sizeof(payload));
+    assert_memory_equal(mjpeg->payload, payload, sizeof(payload));
 }
 
-static void cvf_get_field_m(void **state)
+/******************************************************************************
+ * H.264 tests
+ *****************************************************************************/
+
+static void h264_init(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_H264_HEADER_LEN];
+    uint8_t zero[AVTP_H264_HEADER_LEN] = {0};
 
-    /* Set 'M' field to 0x1. */
-    pdu.packet_info = htonl(0x00001000);
+    assert_int_equal(sizeof(Avtp_H264_t), AVTP_H264_HEADER_LEN);
 
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_M, &val);
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_H264_Init(NULL);
 
-    assert_int_equal(res, 0);
-    assert_true(val == 0x1);
+    memset(pdu, 0xFF, AVTP_H264_HEADER_LEN);
+    Avtp_H264_Init((Avtp_H264_t *)pdu);
+    assert_memory_equal(pdu, zero, AVTP_H264_HEADER_LEN);
 }
 
-static void cvf_get_field_evt(void **state)
+static void h264_is_valid(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_H264_HEADER_LEN];
 
-    /* Set 'evt' field to 0xA. */
-    pdu.packet_info = htonl(0x00000A00);
-
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_EVT, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0xA);
+    assert_true(Avtp_H264_IsValid((Avtp_H264_t *)pdu, AVTP_H264_HEADER_LEN));
+    assert_false(Avtp_H264_IsValid(NULL, AVTP_H264_HEADER_LEN));
+    assert_false(Avtp_H264_IsValid((Avtp_H264_t *)pdu, AVTP_H264_HEADER_LEN - 1));
 }
 
-static void cvf_set_field_null_pdu(void **state)
+static void h264_field_descriptors_cover_header(void **state)
 {
-    int res;
+    (void)state;
+    uint8_t coverage[AVTP_H264_HEADER_LEN * 8] = {0};
 
-    res = avtp_cvf_pdu_set(NULL, AVTP_CVF_FIELD_SV, 1);
+    for (uint8_t i = 0; i < AVTP_H264_FIELD_MAX; i++) {
+        uint8_t quadlet = Avtp_H264FieldDesc[i].quadlet;
+        uint8_t offset = Avtp_H264FieldDesc[i].offset;
+        uint8_t bits = Avtp_H264FieldDesc[i].bits;
 
-    assert_int_equal(res, -EINVAL);
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
+
+            assert_true(bit < sizeof(coverage));
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
+
+    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
+        assert_int_equal(coverage[bit], 1);
+    }
 }
 
-static void cvf_set_field_invalid_field(void **state)
+static void h264_field_layout(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_H264_t *h264 = (Avtp_H264_t *)pdu;
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_MAX, 1);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    assert_int_equal(res, -EINVAL);
+    Avtp_H264_SetTimestamp(h264, 0x80C0FFEE);
+    assert_int_equal(Avtp_H264_GetTimestamp(h264), 0x80C0FFEE);
+    assert_int_equal(read_quadlet(pdu, 0), 0x80C0FFEE);
 }
 
-static void cvf_set_field_sv(void **state)
+static void h264_payload(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    Avtp_H264_t *h264 = (Avtp_H264_t *)pdu;
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_SV, 1);
+    Avtp_H264_Init(h264);
+    Avtp_H264_SetPayload(h264, payload, sizeof(payload));
 
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00800000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+    assert_memory_equal(Avtp_H264_GetPayload(h264), payload, sizeof(payload));
+    assert_memory_equal(h264->payload, payload, sizeof(payload));
 }
 
-static void cvf_set_field_mr(void **state)
+/******************************************************************************
+ * JPEG 2000 tests
+ *****************************************************************************/
+
+static void jpeg2000_init(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_JPEG2000_HEADER_LEN];
+    uint8_t zero[AVTP_JPEG2000_HEADER_LEN] = {0};
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_MR, 1);
+    assert_int_equal(sizeof(Avtp_Jpeg2000_t), AVTP_JPEG2000_HEADER_LEN);
 
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00080000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Jpeg2000_Init(NULL);
+
+    memset(pdu, 0xFF, AVTP_JPEG2000_HEADER_LEN);
+    Avtp_Jpeg2000_Init((Avtp_Jpeg2000_t *)pdu);
+    assert_memory_equal(pdu, zero, AVTP_JPEG2000_HEADER_LEN);
 }
 
-static void cvf_set_field_tv(void **state)
+static void jpeg2000_is_valid(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[AVTP_JPEG2000_HEADER_LEN];
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_TV, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00010000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+    assert_true(Avtp_Jpeg2000_IsValid((Avtp_Jpeg2000_t *)pdu, AVTP_JPEG2000_HEADER_LEN));
+    assert_false(Avtp_Jpeg2000_IsValid(NULL, AVTP_JPEG2000_HEADER_LEN));
+    assert_false(Avtp_Jpeg2000_IsValid((Avtp_Jpeg2000_t *)pdu, AVTP_JPEG2000_HEADER_LEN - 1));
 }
 
-static void cvf_set_field_seq_num(void **state)
+static void jpeg2000_field_descriptors_cover_header(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t coverage[AVTP_JPEG2000_HEADER_LEN * 8] = {0};
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_SEQUENCE_NUM, 0x55);
+    for (uint8_t i = 0; i < AVTP_JPEG2000_FIELD_MAX; i++) {
+        uint8_t quadlet = Avtp_Jpeg2000FieldDesc[i].quadlet;
+        uint8_t offset = Avtp_Jpeg2000FieldDesc[i].offset;
+        uint8_t bits = Avtp_Jpeg2000FieldDesc[i].bits;
 
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00005500);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
+
+            assert_true(bit < sizeof(coverage));
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
+
+    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
+        assert_int_equal(coverage[bit], 1);
+    }
 }
 
-static void cvf_set_field_tu(void **state)
+static void jpeg2000_flag_fields(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Jpeg2000_t *jpeg2000 = (Avtp_Jpeg2000_t *)pdu;
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_TU, 1);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00000001);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+    Avtp_Jpeg2000_SetT(jpeg2000, true);
+    assert_true(Avtp_Jpeg2000_IsT(jpeg2000));
+    Avtp_Jpeg2000_SetT(jpeg2000, false);
+    assert_false(Avtp_Jpeg2000_IsT(jpeg2000));
 }
 
-static void cvf_set_field_stream_id(void **state)
+static void jpeg2000_field_layout(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Jpeg2000_t *jpeg2000 = (Avtp_Jpeg2000_t *)pdu;
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_STREAM_ID, 0xAABBCCDDEEFF0001);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    assert_int_equal(res, 0);
-    assert_true(be64toh(pdu.stream_id) == 0xAABBCCDDEEFF0001);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
+    Avtp_Jpeg2000_SetTp(jpeg2000, 0x3);
+    assert_int_equal(Avtp_Jpeg2000_GetTp(jpeg2000), 0x3);
+    assert_int_equal(read_quadlet(pdu, 0), 0xC0000000);
+
+    Avtp_Jpeg2000_SetMhf(jpeg2000, 0x2);
+    assert_int_equal(Avtp_Jpeg2000_GetMhf(jpeg2000), 0x2);
+    assert_int_equal(read_quadlet(pdu, 0), 0xE0000000);
+
+    Avtp_Jpeg2000_SetMhId(jpeg2000, 0x5);
+    assert_int_equal(Avtp_Jpeg2000_GetMhId(jpeg2000), 0x5);
+    assert_int_equal(read_quadlet(pdu, 0), 0xEA000000);
+
+    Avtp_Jpeg2000_SetT(jpeg2000, true);
+    assert_true(Avtp_Jpeg2000_IsT(jpeg2000));
+    assert_int_equal(read_quadlet(pdu, 0), 0xEB000000);
+
+    Avtp_Jpeg2000_SetPriority(jpeg2000, 0x11);
+    assert_int_equal(Avtp_Jpeg2000_GetPriority(jpeg2000), 0x11);
+    assert_int_equal(read_quadlet(pdu, 0), 0xEB110000);
+
+    Avtp_Jpeg2000_SetTileNumber(jpeg2000, 0x2233);
+    assert_int_equal(Avtp_Jpeg2000_GetTileNumber(jpeg2000), 0x2233);
+    assert_int_equal(read_quadlet(pdu, 0), 0xEB112233);
+
+    Avtp_Jpeg2000_SetFragmentOffset(jpeg2000, 0x123456);
+    assert_int_equal(Avtp_Jpeg2000_GetFragmentOffset(jpeg2000), 0x123456);
+    assert_int_equal(read_quadlet(pdu, 1), 0x00123456);
 }
 
-static void cvf_set_field_timestamp(void **state)
+static void jpeg2000_payload(void **state)
 {
-    int res;
-    struct avtp_stream_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    Avtp_Jpeg2000_t *jpeg2000 = (Avtp_Jpeg2000_t *)pdu;
 
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_AVTP_TIMESTAMP, 0x80C0FFEE);
+    Avtp_Jpeg2000_Init(jpeg2000);
+    Avtp_Jpeg2000_SetPayload(jpeg2000, payload, sizeof(payload));
 
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.avtp_time) == 0x80C0FFEE);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void cvf_set_field_format(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_FORMAT, AVTP_CVF_FORMAT_RFC);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.format_specific) == 0x02000000);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void cvf_set_field_format_subtype(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE, AVTP_CVF_FORMAT_SUBTYPE_H264);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.format_specific) == 0x10000);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void cvf_set_field_data_len(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_STREAM_DATA_LENGTH, 0xAAAA);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.packet_info) == 0xAAAA0000);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-}
-
-static void cvf_set_field_m(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_M, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.packet_info) == 0x00001000);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-}
-
-static void cvf_set_field_evt(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_EVT, 0xA);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.packet_info) == 0x00000A00);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-}
-
-static void cvf_pdu_init_null_pdu(void **state)
-{
-    int res;
-
-    res = avtp_cvf_pdu_init(NULL, AVTP_CVF_FORMAT_SUBTYPE_H264);
-    assert_int_equal(res, -EINVAL);
-}
-
-static void cvf_pdu_init(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu;
-
-    res = avtp_cvf_pdu_init(&pdu, AVTP_CVF_FORMAT_SUBTYPE_H264);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x03800000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(ntohl(pdu.format_specific) == 0x2010000);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void cvf_get_field_ptv(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_stream_pdu pdu = {0};
-
-    /* Set 'ptv' field to 1. */
-    pdu.packet_info = htonl(0x00002000);
-
-    res = avtp_cvf_pdu_get(&pdu, AVTP_CVF_FIELD_PTV, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
-}
-
-static void cvf_set_field_ptv(void **state)
-{
-    int res;
-    struct avtp_stream_pdu pdu = {0};
-
-    res = avtp_cvf_pdu_set(&pdu, AVTP_CVF_FIELD_PTV, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.avtp_time == 0);
-    assert_true(pdu.format_specific == 0);
-    assert_true(ntohl(pdu.packet_info) == 0x00002000);
-}
-
-/**** Tests for H.264 fields ****/
-
-static void cvf_get_field_h264_timestamp(void **state)
-{
-    uint64_t val;
-    Avtp_H264_t pdu;
-
-    /* Set 'h264_timestamp' field (which lives in h264_header) to
-     * 0x80C0FFEE. */
-    uint32_t value = htonl(0x80C0FFEE);
-    memcpy(&pdu.header, &value, 4);
-
-    val = Avtp_H264_GetField(&pdu, AVTP_H264_FIELD_TIMESTAMP);
-    assert_true(val == 0x80C0FFEE);
-}
-
-static void cvf_set_field_h264_timestamp(void **state)
-{
-    Avtp_H264_t pdu;
-    Avtp_H264_SetField(&pdu, AVTP_H264_FIELD_TIMESTAMP, 0x80C0FFEE);
-    assert_true(ntohl(*(uint32_t *)(&pdu.header)) == 0x80C0FFEE);
+    assert_memory_equal(Avtp_Jpeg2000_GetPayload(jpeg2000), payload, sizeof(payload));
+    assert_memory_equal(jpeg2000->payload, payload, sizeof(payload));
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(cvf_get_field_null_pdu),
-        cmocka_unit_test(cvf_get_field_null_val),
-        cmocka_unit_test(cvf_get_field_invalid_field),
-        cmocka_unit_test(cvf_get_field_sv),
-        cmocka_unit_test(cvf_get_field_mr),
-        cmocka_unit_test(cvf_get_field_tv),
-        cmocka_unit_test(cvf_get_field_seq_num),
-        cmocka_unit_test(cvf_get_field_tu),
-        cmocka_unit_test(cvf_get_field_stream_id),
-        cmocka_unit_test(cvf_get_field_timestamp),
-        cmocka_unit_test(cvf_get_field_format),
-        cmocka_unit_test(cvf_get_field_format_subtype),
-        cmocka_unit_test(cvf_get_field_data_len),
-        cmocka_unit_test(cvf_get_field_m),
-        cmocka_unit_test(cvf_get_field_evt),
-        cmocka_unit_test(cvf_get_field_ptv),
-        cmocka_unit_test(cvf_get_field_h264_timestamp),
-        cmocka_unit_test(cvf_set_field_null_pdu),
-        cmocka_unit_test(cvf_set_field_invalid_field),
-        cmocka_unit_test(cvf_set_field_sv),
-        cmocka_unit_test(cvf_set_field_mr),
-        cmocka_unit_test(cvf_set_field_tv),
-        cmocka_unit_test(cvf_set_field_seq_num),
-        cmocka_unit_test(cvf_set_field_tu),
-        cmocka_unit_test(cvf_set_field_stream_id),
-        cmocka_unit_test(cvf_set_field_timestamp),
-        cmocka_unit_test(cvf_set_field_format),
-        cmocka_unit_test(cvf_set_field_format_subtype),
-        cmocka_unit_test(cvf_set_field_data_len),
-        cmocka_unit_test(cvf_set_field_m),
-        cmocka_unit_test(cvf_set_field_evt),
-        cmocka_unit_test(cvf_set_field_ptv),
-        cmocka_unit_test(cvf_set_field_h264_timestamp),
-        cmocka_unit_test(cvf_pdu_init_null_pdu),
-        cmocka_unit_test(cvf_pdu_init),
+        cmocka_unit_test(cvf_init),
+        cmocka_unit_test(cvf_is_valid),
+        cmocka_unit_test(cvf_field_descriptors_cover_header),
+        cmocka_unit_test(cvf_flag_fields),
+        cmocka_unit_test(cvf_field_layout),
+        cmocka_unit_test(cvf_payload),
+        cmocka_unit_test(cvf_get_set_field),
+        cmocka_unit_test(mjpeg_init),
+        cmocka_unit_test(mjpeg_is_valid),
+        cmocka_unit_test(mjpeg_field_descriptors_cover_header),
+        cmocka_unit_test(mjpeg_field_layout),
+        cmocka_unit_test(mjpeg_payload),
+        cmocka_unit_test(h264_init),
+        cmocka_unit_test(h264_is_valid),
+        cmocka_unit_test(h264_field_descriptors_cover_header),
+        cmocka_unit_test(h264_field_layout),
+        cmocka_unit_test(h264_payload),
+        cmocka_unit_test(jpeg2000_init),
+        cmocka_unit_test(jpeg2000_is_valid),
+        cmocka_unit_test(jpeg2000_field_descriptors_cover_header),
+        cmocka_unit_test(jpeg2000_flag_fields),
+        cmocka_unit_test(jpeg2000_field_layout),
+        cmocka_unit_test(jpeg2000_payload),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

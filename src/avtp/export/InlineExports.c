@@ -75,3 +75,8 @@
 #include "avtp/acf/Sensor.h"
 #include "avtp/acf/SensorBrief.h"
 #include "avtp/acf/Tscf.h"
+
+#include "avtp/cvf/Cvf.h"
+#include "avtp/cvf/H264.h"
+#include "avtp/cvf/Jpeg2000.h"
+#include "avtp/cvf/Mjpeg.h"

@@ -32,5 +32,4 @@ target_sources(${LIB_NAME} PRIVATE ${LIB_SOURCES})
 
 # Add subdirectories
 add_subdirectory(acf)
-add_subdirectory(cvf)
 add_subdirectory(export)

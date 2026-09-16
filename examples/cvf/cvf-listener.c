@@ -79,7 +79,6 @@
 
 #define STREAM_ID 0xAABBCCDDEEFF0001
 #define DATA_LEN 1400
-#define AVTP_H264_HEADER_LEN (sizeof(Avtp_H264_t))
 #define AVTP_FULL_HEADER_LEN (sizeof(Avtp_Cvf_t) + sizeof(Avtp_H264_t))
 #define MAX_PDU_SIZE (AVTP_FULL_HEADER_LEN + DATA_LEN)
 
@@ -159,12 +158,10 @@ static int schedule_nal(int fd, struct timespec *tspec, uint8_t *nal, ssize_t le
     return 0;
 }
 
-static bool is_valid_packet(Avtp_Cvf_t *cvf)
+static bool is_valid_packet(Avtp_Cvf_t *cvf, size_t bufferSize)
 {
-    uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cvf);
-    if (subtype != AVTP_SUBTYPE_CVF) {
-        fprintf(stderr, "Subtype mismatch: expected %u, got %" PRIu8 "\n", AVTP_SUBTYPE_CVF,
-                subtype);
+    if (!Avtp_Cvf_IsValid(cvf, bufferSize)) {
+        fprintf(stderr, "Invalid CVF PDU\n");
         return false;
     }
 
@@ -174,9 +171,8 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf)
         return false;
     }
 
-    uint8_t tv = Avtp_Cvf_GetTv(cvf);
-    if (tv != 1) {
-        fprintf(stderr, "tv mismatch: expected %u, got %" PRIu8 "\n", 1, tv);
+    if (!Avtp_Cvf_IsTv(cvf)) {
+        fprintf(stderr, "tv mismatch: expected %u, got %u\n", 1, 0);
         return false;
     }
 
@@ -196,17 +192,17 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf)
     }
     expected_seq++;
 
-    uint8_t format = Avtp_Cvf_GetFormat(cvf);
+    Avtp_CvfFormat_t format = Avtp_Cvf_GetFormat(cvf);
     if (format != AVTP_CVF_FORMAT_RFC) {
-        fprintf(stderr, "Format mismatch: expected %" PRIu8 ", got %" PRIu8 "\n",
-                AVTP_CVF_FORMAT_RFC, format);
+        fprintf(stderr, "Format mismatch: expected %u, got %u\n", AVTP_CVF_FORMAT_RFC,
+                (unsigned)format);
         return false;
     }
 
-    uint8_t format_subtype = Avtp_Cvf_GetFormatSubtype(cvf);
+    Avtp_CvfFormatSubtype_t format_subtype = Avtp_Cvf_GetFormatSubtype(cvf);
     if (format_subtype != AVTP_CVF_FORMAT_SUBTYPE_H264) {
-        fprintf(stderr, "Format mismatch: expected %" PRIu8 ", got %" PRIu8 "\n",
-                AVTP_CVF_FORMAT_SUBTYPE_H264, format_subtype);
+        fprintf(stderr, "Format mismatch: expected %u, got %u\n", AVTP_CVF_FORMAT_SUBTYPE_H264,
+                (unsigned)format_subtype);
         return false;
     }
 
@@ -216,7 +212,7 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf)
 static uint16_t get_h264_data_len(Avtp_Cvf_t *cvf)
 {
     uint16_t stream_data_len = Avtp_Cvf_GetStreamDataLength(cvf);
-    return stream_data_len - AVTP_H264_HEADER_LEN;
+    return (uint16_t)(stream_data_len - AVTP_H264_HEADER_LEN);
 }
 
 static int new_packet(int sk_fd, int timer_fd)
@@ -238,8 +234,13 @@ static int new_packet(int sk_fd, int timer_fd)
         return -1;
     }
 
-    if (!is_valid_packet(cvf)) {
+    if (!is_valid_packet(cvf, (size_t)n)) {
         fprintf(stderr, "Dropping packet\n");
+        return 0;
+    }
+
+    if (!Avtp_H264_IsValid(h264Header, Avtp_Cvf_GetStreamDataLength(cvf))) {
+        fprintf(stderr, "Dropping packet: H.264 header does not fit into the CVF stream data\n");
         return 0;
     }
 
