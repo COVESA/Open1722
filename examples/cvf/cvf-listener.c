@@ -50,11 +50,20 @@
  *
  * The easiest way to use this example is by combining it with a GStreamer
  * pipeline. We use GStreamer to read the H.264 byte-stream from stdin and
- * present it. So, to play an H.264 video from a TSN strem and show it on a X
+ * present it. So, to play an H.264 video from a TSN stream and show it on a X
  * display, you can do something like:
  *
  * $ cvf-listener <args> | gst-launch-1.0 filesrc location=/dev/stdin \
  *    ! h264parse ! avdec_h264 ! videoconvert ! autovideosink
+ *
+ * To record the raw H.264 stream instead (playable by VLC/ffplay), redirect
+ * stdout to a file. To wrap it into a common container, pipe it to ffmpeg,
+ * whose raw H.264 demuxer generates timestamps from the frame rate:
+ *
+ * $ sudo ./cvf-listener <args> > output.h264
+ * $ sudo ./cvf-listener <args> | ffmpeg -f h264 -framerate 30 -i - -c:v copy output.mp4
+ *
+ * See README.md for details.
  */
 
 #include <assert.h>

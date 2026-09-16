@@ -53,14 +53,17 @@
  * stdout, from where this example reads the stream. So, to generate
  * an H.264 video to send via TSN network, you can do something like:
  *
- * $ gst-launch-1.0 -e -q videotestsrc pattern=ball \
- *  ! video/x-raw,width=192,height=144 ! x264enc \
+ * $ gst-launch-1.0 -e -q videotestsrc pattern=ball is-live=true \
+ *  ! video/x-raw,width=192,height=144 ! x264enc key-int-max=30 \
  *  ! video/x-h264,stream-format=byte-stream ! filesink location=/dev/stdout \
  *  | cvf-talker <args>
  *
  * Note that the `x264enc` may be changed by any other H.264 encoder
  * available, as long as it generates a byte-stream with NAL units no longer
- * than 1400 bytes.
+ * than 1400 bytes. `is-live=true` makes videotestsrc produce frames in real
+ * time instead of as fast as the CPU allows (otherwise the receiver drops
+ * frames), and `key-int-max=30` inserts a key frame roughly once per second
+ * so listeners can join a stream that is already running.
  */
 
 #include <alloca.h>
