@@ -55,6 +55,9 @@
 
 #include "avtp/Udp.h"
 
+#include "avtp/Crf.h"
+#include "avtp/Rvf.h"
+
 #include "avtp/aaf/Aaf.h"
 #include "avtp/aaf/Pcm.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Intel Corporation
+ * Copyright (c) 2026, COVESA
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -9,9 +9,9 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of Intel Corporation nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *    * Neither the name of COVESA nor the names of its contributors may be
+ *      used to endorse or promote products derived from this software without
+ *      specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -38,424 +38,220 @@ extern "C" {
 #include <cmocka.h>
 #endif
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <errno.h>
+#include <string.h>
 
 #include "avtp/CommonHeader.h"
 #include "avtp/Crf.h"
 
-static void crf_get_field_null_pdu(void **state)
+#define MAX_PDU_SIZE 1500
+
+static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
 {
-    int res;
-    uint64_t val;
+    uint32_t word;
 
-    res = avtp_crf_pdu_get(NULL, AVTP_CRF_FIELD_SV, &val);
-
-    assert_int_equal(res, -EINVAL);
+    memcpy(&word, pdu + (quadlet * 4), sizeof(word));
+    return ntohl(word);
 }
 
-static void crf_get_field_null_val(void **state)
+/* Initializes a minimal but valid CRF frame. */
+static void init_valid_crf(Avtp_Crf_t *pdu)
 {
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_SV, NULL);
-
-    assert_int_equal(res, -EINVAL);
+    Avtp_Crf_Init(pdu);
+    Avtp_Crf_SetCrfDataLength(pdu, 8);
+    Avtp_Crf_SetTimestampInterval(pdu, 1);
 }
 
-static void crf_get_field_invalid_field(void **state)
+static void crf_init(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t init_pdu[AVTP_CRF_HEADER_LEN];
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_MAX, &val);
+    assert_int_equal(sizeof(Avtp_Crf_t), AVTP_CRF_HEADER_LEN);
 
-    assert_int_equal(res, -EINVAL);
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Crf_Init(NULL);
+
+    Avtp_Crf_Init((Avtp_Crf_t *)pdu);
+    memset(init_pdu, 0, AVTP_CRF_HEADER_LEN);
+    init_pdu[0] = AVTP_SUBTYPE_CRF; /* subtype = CRF */
+    init_pdu[1] = 0x80;             /* sv = 1 */
+    assert_memory_equal(init_pdu, pdu, AVTP_CRF_HEADER_LEN);
 }
 
-static void crf_get_field_sv(void **state)
+static void crf_is_valid(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    /* Set the 'sv' field to 1 */
-    pdu.subtype_data = htonl(0x00800000);
+    init_valid_crf(crf);
+    assert_true(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN + 8));
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_SV, &val);
+    /* NULL pdu. */
+    assert_false(Avtp_Crf_IsValid(NULL, MAX_PDU_SIZE));
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    /* Not a CRF frame. */
+    memset(pdu, 0, MAX_PDU_SIZE);
+    assert_false(Avtp_Crf_IsValid(crf, MAX_PDU_SIZE));
+
+    /* Buffer smaller than the CRF header. */
+    init_valid_crf(crf);
+    assert_false(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN - 1));
+
+    /* crf_data_length shall be a non-zero multiple of 8. */
+    init_valid_crf(crf);
+    Avtp_Crf_SetCrfDataLength(crf, 0);
+    assert_false(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN));
+    Avtp_Crf_SetCrfDataLength(crf, 7);
+    assert_false(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN + 8));
+
+    /* crf_data_length does not fit into the buffer. */
+    init_valid_crf(crf);
+    Avtp_Crf_SetCrfDataLength(crf, 16);
+    assert_false(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN + 15));
+    assert_true(Avtp_Crf_IsValid(crf, AVTP_CRF_HEADER_LEN + 16));
 }
 
-static void crf_get_field_mr(void **state)
+static void crf_field_descriptors_cover_header(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t coverage[AVTP_CRF_HEADER_LEN * 8] = {0};
 
-    /* Set the 'mr' field to 1 */
-    pdu.subtype_data = htonl(0x00080000);
+    /* Every bit of the header must be described exactly once. */
+    for (uint8_t i = 0; i < AVTP_CRF_FIELD_MAX; i++) {
+        uint8_t quadlet = Avtp_CrfFieldDesc[i].quadlet;
+        uint8_t offset = Avtp_CrfFieldDesc[i].offset;
+        uint8_t bits = Avtp_CrfFieldDesc[i].bits;
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_MR, &val);
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+            assert_true(bit < sizeof(coverage));
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
+
+    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
+        assert_int_equal(coverage[bit], 1);
+    }
 }
 
-static void ctf_get_field_fs(void **state)
+static void crf_flag_fields(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    /* Set the 'fs' field to 1 */
-    pdu.subtype_data = htonl(0x00020000);
+    Avtp_Crf_Init(crf);
+    assert_true(Avtp_Crf_IsSv(crf));
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_FS, &val);
+    Avtp_Crf_SetSv(crf, false);
+    assert_false(Avtp_Crf_IsSv(crf));
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    Avtp_Crf_SetMr(crf, true);
+    assert_true(Avtp_Crf_IsMr(crf));
+    Avtp_Crf_SetMr(crf, false);
+    assert_false(Avtp_Crf_IsMr(crf));
+
+    Avtp_Crf_SetFs(crf, true);
+    assert_true(Avtp_Crf_IsFs(crf));
+    Avtp_Crf_SetFs(crf, false);
+    assert_false(Avtp_Crf_IsFs(crf));
+
+    Avtp_Crf_SetTu(crf, true);
+    assert_true(Avtp_Crf_IsTu(crf));
+    Avtp_Crf_SetTu(crf, false);
+    assert_false(Avtp_Crf_IsTu(crf));
 }
 
-static void crf_get_field_tu(void **state)
+static void crf_field_layout(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    /* Set the 'tu' field to 1 */
-    pdu.subtype_data = htonl(0x00010000);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_TU, &val);
+    Avtp_Crf_SetSequenceNum(crf, 0xBB);
+    assert_int_equal(Avtp_Crf_GetSequenceNum(crf), 0xBB);
+    assert_int_equal(read_quadlet(pdu, 0), 0x0000BB00);
 
-    assert_int_equal(res, 0);
-    assert_true(val == 1);
+    Avtp_Crf_SetType(crf, AVTP_CRF_TYPE_VIDEO_LINE);
+    assert_int_equal(Avtp_Crf_GetType(crf), AVTP_CRF_TYPE_VIDEO_LINE);
+    assert_int_equal(read_quadlet(pdu, 0), 0x0000BB03);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Crf_SetStreamId(crf, 0xAABBCCDDEEFF0002);
+    assert_int_equal(Avtp_Crf_GetStreamId(crf), 0xAABBCCDDEEFF0002);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Crf_SetPull(crf, AVTP_CRF_PULL_MULT_BY_1_001);
+    assert_int_equal(Avtp_Crf_GetPull(crf), AVTP_CRF_PULL_MULT_BY_1_001);
+    assert_int_equal(read_quadlet(pdu, 3), 0x40000000);
+
+    Avtp_Crf_SetBaseFrequency(crf, 0x1FFFFFFF);
+    assert_int_equal(Avtp_Crf_GetBaseFrequency(crf), 0x1FFFFFFF);
+    assert_int_equal(read_quadlet(pdu, 3), 0x5FFFFFFF);
+
+    memset(pdu, 0, MAX_PDU_SIZE);
+
+    Avtp_Crf_SetCrfDataLength(crf, 0xABCD);
+    assert_int_equal(Avtp_Crf_GetCrfDataLength(crf), 0xABCD);
+    assert_int_equal(read_quadlet(pdu, 4), 0xABCD0000);
+
+    Avtp_Crf_SetTimestampInterval(crf, 0x1234);
+    assert_int_equal(Avtp_Crf_GetTimestampInterval(crf), 0x1234);
+    assert_int_equal(read_quadlet(pdu, 4), 0xABCD1234);
 }
 
-static void crf_get_field_seq_num(void **state)
+static void crf_payload(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    uint8_t payload_out[8] = {0};
+    Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    /* Set the 'seq_num' field to 0xBB */
-    pdu.subtype_data = htonl(0x0000BB00);
+    Avtp_Crf_Init(crf);
+    Avtp_Crf_SetPayload(crf, payload, sizeof(payload));
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_SEQ_NUM, &val);
+    assert_memory_equal(Avtp_Crf_GetPayload(crf), payload, sizeof(payload));
+    assert_memory_equal(crf->payload, payload, sizeof(payload));
 
-    assert_int_equal(res, 0);
-    assert_true(val == 0xBB);
+    memcpy(payload_out, Avtp_Crf_GetPayload(crf), sizeof(payload_out));
+    assert_memory_equal(payload_out, payload, sizeof(payload_out));
 }
 
-static void crf_get_field_type(void **state)
+static void crf_get_set_field(void **state)
 {
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    /* Set the 'type' field to AVTP_CRF_TYPE_VIDEO_LINE */
-    pdu.subtype_data = htonl(0x00000003);
+    memset(pdu, 0, MAX_PDU_SIZE);
 
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_TYPE, &val);
+    Avtp_Crf_SetField(crf, AVTP_CRF_FIELD_SEQUENCE_NUM, 0xAA);
+    assert_int_equal(Avtp_Crf_GetField(crf, AVTP_CRF_FIELD_SEQUENCE_NUM), 0xAA);
 
-    assert_int_equal(res, 0);
-    assert_true(val == AVTP_CRF_TYPE_VIDEO_LINE);
-}
-
-static void crf_get_field_stream_id(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
-
-    /* Set the 'stream_id' field to 0xAABBCCDDEEFF0002 */
-    pdu.stream_id = htobe64(0xAABBCCDDEEFF0002);
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_STREAM_ID, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0xAABBCCDDEEFF0002);
-}
-
-static void crf_get_field_pull(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
-
-    /* Set the 'pull' field to AVTP_CRF_PULL_MULT_BY_1_001 */
-    pdu.packet_info = htobe64(0x4000000000000000);
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_PULL, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == AVTP_CRF_PULL_MULT_BY_1_001);
-}
-
-static void crf_get_field_base_freq(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
-
-    /* Set the 'base_freq' field to 0x1FFFFFFF */
-    pdu.packet_info = htobe64(0x1FFFFFFF00000000);
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_BASE_FREQ, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0x1FFFFFFF);
-}
-
-static void crf_get_field_crf_data_len(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
-
-    /* Set the 'crf_data_len' field to 0xABCD */
-    pdu.packet_info = htobe64(0x00000000ABCD0000);
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0xABCD);
-}
-
-static void crf_get_field_timestamp_interval(void **state)
-{
-    int res;
-    uint64_t val;
-    struct avtp_crf_pdu pdu = {0};
-
-    /* Set the 'timestamp_interval' field to 0xABCD */
-    pdu.packet_info = htobe64(0x000000000000ABCD);
-
-    res = avtp_crf_pdu_get(&pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, &val);
-
-    assert_int_equal(res, 0);
-    assert_true(val == 0xABCD);
-}
-
-static void crf_set_field_null_pdu(void **state)
-{
-    int res;
-
-    res = avtp_crf_pdu_set(NULL, AVTP_CRF_FIELD_SV, 1);
-
-    assert_int_equal(res, -EINVAL);
-}
-
-static void crf_set_field_invalid_field(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_MAX, 1);
-
-    assert_int_equal(res, -EINVAL);
-}
-
-static void crf_set_field_sv(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_SV, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00800000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_mr(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_MR, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00080000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_fs(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_FS, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00020000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_tu(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TU, 1);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00010000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_seq_num(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_SEQ_NUM, 0xAA);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x0000AA00);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_type(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TYPE, AVTP_CRF_TYPE_AUDIO_SAMPLE);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x00000001);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_stream_id(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_STREAM_ID, 0xAABBCCDDEEFF0002);
-
-    assert_int_equal(res, 0);
-    assert_true(be64toh(pdu.stream_id) == 0xAABBCCDDEEFF0002);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.packet_info == 0);
-}
-
-static void crf_set_field_pull(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_PULL, AVTP_CRF_PULL_MULT_BY_1_001);
-
-    assert_int_equal(res, 0);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(be64toh(pdu.packet_info) == 0x4000000000000000);
-}
-
-static void crf_set_field_base_freq(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_BASE_FREQ, 0x1FFFFFFF);
-
-    assert_int_equal(res, 0);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-    assert_true(be64toh(pdu.packet_info) == 0x1FFFFFFF00000000);
-}
-
-static void crf_set_field_crf_data_len(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, 0xABCD);
-
-    assert_int_equal(res, 0);
-    assert_true(be64toh(pdu.packet_info) == 0x00000000ABCD0000);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-}
-
-static void crf_set_field_timestamp_interval(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu = {0};
-
-    res = avtp_crf_pdu_set(&pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, 0xABCD);
-
-    assert_int_equal(res, 0);
-    assert_true(be64toh(pdu.packet_info) == 0x000000000000ABCD);
-    assert_true(pdu.subtype_data == 0);
-    assert_true(pdu.stream_id == 0);
-}
-
-static void crf_pdu_init_null_pdu(void **state)
-{
-    int res;
-
-    res = avtp_crf_pdu_init(NULL);
-
-    assert_int_equal(res, -EINVAL);
-}
-
-static void crf_pdu_init(void **state)
-{
-    int res;
-    struct avtp_crf_pdu pdu;
-
-    res = avtp_crf_pdu_init(&pdu);
-
-    assert_int_equal(res, 0);
-    assert_true(ntohl(pdu.subtype_data) == 0x04800000);
-    assert_true(pdu.stream_id == 0);
-    assert_true(pdu.packet_info == 0);
+    /* Reserved fields are reachable through the generic access engine. */
+    Avtp_Crf_SetField(crf, AVTP_CRF_FIELD_R, 0x1);
+    assert_int_equal(Avtp_Crf_GetField(crf, AVTP_CRF_FIELD_R), 0x1);
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(crf_get_field_null_pdu),
-        cmocka_unit_test(crf_get_field_null_val),
-        cmocka_unit_test(crf_get_field_invalid_field),
-        cmocka_unit_test(crf_get_field_sv),
-        cmocka_unit_test(crf_get_field_mr),
-        cmocka_unit_test(ctf_get_field_fs),
-        cmocka_unit_test(crf_get_field_tu),
-        cmocka_unit_test(crf_get_field_seq_num),
-        cmocka_unit_test(crf_get_field_type),
-        cmocka_unit_test(crf_get_field_stream_id),
-        cmocka_unit_test(crf_get_field_pull),
-        cmocka_unit_test(crf_get_field_base_freq),
-        cmocka_unit_test(crf_get_field_crf_data_len),
-        cmocka_unit_test(crf_get_field_timestamp_interval),
-        cmocka_unit_test(crf_set_field_null_pdu),
-        cmocka_unit_test(crf_set_field_invalid_field),
-        cmocka_unit_test(crf_set_field_sv),
-        cmocka_unit_test(crf_set_field_mr),
-        cmocka_unit_test(crf_set_field_fs),
-        cmocka_unit_test(crf_set_field_tu),
-        cmocka_unit_test(crf_set_field_seq_num),
-        cmocka_unit_test(crf_set_field_type),
-        cmocka_unit_test(crf_set_field_stream_id),
-        cmocka_unit_test(crf_set_field_pull),
-        cmocka_unit_test(crf_set_field_base_freq),
-        cmocka_unit_test(crf_set_field_crf_data_len),
-        cmocka_unit_test(crf_set_field_timestamp_interval),
-        cmocka_unit_test(crf_pdu_init_null_pdu),
-        cmocka_unit_test(crf_pdu_init),
+        cmocka_unit_test(crf_init),
+        cmocka_unit_test(crf_is_valid),
+        cmocka_unit_test(crf_field_descriptors_cover_header),
+        cmocka_unit_test(crf_flag_fields),
+        cmocka_unit_test(crf_field_layout),
+        cmocka_unit_test(crf_payload),
+        cmocka_unit_test(crf_get_set_field),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -118,7 +118,7 @@
 #define CRF_TIMESTAMPS_PER_SEC 300
 #define TIMESTAMPS_PER_PKT 6
 #define CRF_DATA_LEN (sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
-#define CRF_PDU_SIZE (sizeof(struct avtp_crf_pdu) + CRF_DATA_LEN)
+#define CRF_PDU_SIZE (sizeof(Avtp_Crf_t) + CRF_DATA_LEN)
 
 #define MAX_PDU_SIZE MAX(AAF_PDU_SIZE, CRF_PDU_SIZE)
 #define TIME_PERIOD_NS ((double)NSEC_PER_SEC / CRF_SAMPLE_RATE)
@@ -265,121 +265,73 @@ static uint64_t mclk_lookup(uint32_t avtp_time)
     return mclk_timestamp;
 }
 
-static bool is_valid_crf_pdu(struct avtp_crf_pdu *pdu)
+static bool is_valid_crf_pdu(Avtp_Crf_t *pdu)
 {
-    int res;
-    uint32_t val32;
     uint64_t val64;
-    struct avtp_common_pdu *common = (struct avtp_common_pdu *)pdu;
+    uint8_t val8;
 
-    res = avtp_pdu_get(common, AVTP_FIELD_SUBTYPE, &val32);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF subtype field: %d\n", res);
-        return false;
-    }
-    if (val32 != AVTP_SUBTYPE_CRF)
-        return false;
-
-    res = avtp_pdu_get(common, AVTP_FIELD_VERSION, &val32);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF version field: %d\n", res);
-        return false;
-    }
-    if (val32 != 0) {
-        fprintf(stderr, "CRF: Version mismatch: expected %u, got %u\n", 0, val32);
+    if (!Avtp_Crf_IsValid(pdu, CRF_PDU_SIZE)) {
+        fprintf(stderr, "CRF: Invalid CRF PDU\n");
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_SV, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF sv field: %d\n", res);
-        return false;
-    }
-    if (val64 != 1) {
-        fprintf(stderr, "CRF: sv mismatch: expected %u, got %" PRIu64 "\n", 1, val64);
+    val8 = Avtp_CommonHeader_GetVersion((const Avtp_CommonHeader_t *)pdu);
+    if (val8 != 0) {
+        fprintf(stderr, "CRF: Version mismatch: expected %u, got %u\n", 0, val8);
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_FS, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF fs field: %d\n", res);
-        return false;
-    }
-    if (val64 != 0) {
-        fprintf(stderr, "CRF: fs mismatch: expected %u, got %" PRIu64 "\n", 0, val64);
+    if (!Avtp_Crf_IsSv(pdu)) {
+        fprintf(stderr, "CRF: sv mismatch: expected %u, got %u\n", 1, 0);
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_SEQ_NUM, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF sequence num field: %d\n", res);
+    if (Avtp_Crf_IsFs(pdu)) {
+        fprintf(stderr, "CRF: fs mismatch: expected %u, got %u\n", 0, 1);
         return false;
     }
-    if (val64 != crf_seq_num) {
+
+    val8 = Avtp_Crf_GetSequenceNum(pdu);
+    if (val8 != crf_seq_num) {
         /* If we have a sequence number mismatch, we simply log the
          * issue and continue to process the packet. We don't want to
          * invalidate it since it is a valid packet after all.
          */
-        fprintf(stderr, "CRF: Sequence number mismatch: expected %u, got %" PRIu64 "\n",
-                crf_seq_num, val64);
+        fprintf(stderr, "CRF: Sequence number mismatch: expected %u, got %u\n", crf_seq_num, val8);
 
-        crf_seq_num = val64;
+        crf_seq_num = val8;
     }
 
     crf_seq_num++;
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_TYPE, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF format field: %d\n", res);
-        return false;
-    }
-    if (val64 != AVTP_CRF_TYPE_AUDIO_SAMPLE) {
-        fprintf(stderr, "CRF: Format mismatch: expected %u, got %" PRIu64 "\n",
-                AVTP_CRF_TYPE_AUDIO_SAMPLE, val64);
+    if (Avtp_Crf_GetType(pdu) != AVTP_CRF_TYPE_AUDIO_SAMPLE) {
+        fprintf(stderr, "CRF: Type mismatch: expected %u, got %u\n",
+                (unsigned)AVTP_CRF_TYPE_AUDIO_SAMPLE, (unsigned)Avtp_Crf_GetType(pdu));
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_STREAM_ID, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF stream ID field: %d\n", res);
-        return false;
-    }
+    val64 = Avtp_Crf_GetStreamId(pdu);
     if (val64 != CRF_STREAM_ID) {
         fprintf(stderr, "CRF: Stream ID mismatch: expected %" PRIu64 ", got %" PRIu64 "\n",
                 CRF_STREAM_ID, val64);
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_PULL, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF multiplier modifier field: %d\n", res);
-        return false;
-    }
-    if (val64 != AVTP_CRF_PULL_MULT_BY_1) {
-        fprintf(stderr, "CRF Pull mismatch: expected %u, got %" PRIu64 "\n",
-                AVTP_CRF_PULL_MULT_BY_1, val64);
+    if (Avtp_Crf_GetPull(pdu) != AVTP_CRF_PULL_MULT_BY_1) {
+        fprintf(stderr, "CRF: Pull mismatch: expected %u, got %u\n",
+                (unsigned)AVTP_CRF_PULL_MULT_BY_1, (unsigned)Avtp_Crf_GetPull(pdu));
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_BASE_FREQ, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF base frequency field: %d\n", res);
-        return false;
-    }
-    if (val64 != CRF_SAMPLE_RATE) {
-        fprintf(stderr, "CRF Base frequency: expected %u, got %" PRIu64 "\n", CRF_SAMPLE_RATE,
-                val64);
+    if (Avtp_Crf_GetBaseFrequency(pdu) != (uint32_t)CRF_SAMPLE_RATE) {
+        fprintf(stderr, "CRF: Base frequency mismatch: expected %u, got %u\n", CRF_SAMPLE_RATE,
+                Avtp_Crf_GetBaseFrequency(pdu));
         return false;
     }
 
-    res = avtp_crf_pdu_get(pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, &val64);
-    if (res < 0) {
-        fprintf(stderr, "Failed to get CRF data length field: %d\n", res);
-        return false;
-    }
-    if (val64 != CRF_DATA_LEN) {
-        fprintf(stderr, "CRF Data length mismatch: expected %zu, got %" PRIu64 "\n", CRF_DATA_LEN,
-                val64);
+    if ((size_t)Avtp_Crf_GetCrfDataLength(pdu) != CRF_DATA_LEN) {
+        fprintf(stderr, "CRF: Data length mismatch: expected %zu, got %u\n", CRF_DATA_LEN,
+                Avtp_Crf_GetCrfDataLength(pdu));
         return false;
     }
 
@@ -515,15 +467,16 @@ static int aaf_talker_tx_timeout(int fd_timer, int fd_sk, const struct sockaddr_
 /* This routine generates media clock timestamps using timestamps from CRF
  * stream.
  */
-static int recover_mclk(struct avtp_crf_pdu *pdu)
+static int recover_mclk(Avtp_Crf_t *pdu)
 {
     int res, idx;
-    uint64_t ts_mclk, ts_crf;
+    uint64_t ts_mclk, ts_crf, ts_crf_be;
 
     /* For simplicity's sake, we consider only the first timestamp from
      * CRF PDU to recover the media clock.
      */
-    ts_crf = be64toh(pdu->crf_data[0]);
+    memcpy(&ts_crf_be, Avtp_Crf_GetPayload(pdu), sizeof(ts_crf_be));
+    ts_crf = be64toh(ts_crf_be);
 
     for (idx = 0; idx < MCLKLIST_TS_PER_CRF; idx++) {
         ts_mclk = ts_crf + (idx * MCLK_PERIOD);
@@ -577,7 +530,7 @@ static int is_ts_aligned(uint32_t mclk_ts, uint32_t avtp_ts)
     return true;
 }
 
-static int handle_crf_pdu(struct avtp_crf_pdu *pdu)
+static int handle_crf_pdu(Avtp_Crf_t *pdu)
 {
     if (!is_valid_crf_pdu(pdu))
         return 0;
@@ -618,7 +571,7 @@ static int aaf_talker_recv_pdu(int fd_sk, int fd_timer)
 {
     int res;
     ssize_t n;
-    struct avtp_crf_pdu *pdu = alloca(CRF_PDU_SIZE);
+    Avtp_Crf_t *pdu = alloca(CRF_PDU_SIZE);
 
     memset(pdu, 0, CRF_PDU_SIZE);
 
@@ -687,7 +640,7 @@ static int aaf_listener_recv_pdu(int fd)
 
     switch (subtype) {
     case AVTP_SUBTYPE_CRF:
-        res = handle_crf_pdu(pdu);
+        res = handle_crf_pdu((Avtp_Crf_t *)pdu);
         break;
     case AVTP_SUBTYPE_AAF:
         res = handle_aaf_pdu((Avtp_Pcm_t *)pdu);

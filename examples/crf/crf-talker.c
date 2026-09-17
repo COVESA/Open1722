@@ -81,7 +81,7 @@
 #define NSEC_PER_MSEC 1000000ULL
 
 #define DATA_LEN (sizeof(uint64_t) * TIMESTAMPS_PER_PKT)
-#define PDU_SIZE (sizeof(struct avtp_crf_pdu) + DATA_LEN)
+#define PDU_SIZE (sizeof(Avtp_Crf_t) + DATA_LEN)
 #define PDUS_PER_SEC (TIMESTAMPS_PER_SEC / TIMESTAMPS_PER_PKT)
 #define CRF_PERIOD (NSEC_PER_SEC / TIMESTAMPS_PER_SEC)
 #define NOMINAL_PERIOD (1.0 / SAMPLE_RATE)
@@ -150,43 +150,15 @@ static uint64_t calculate_crf_timestamp(struct timespec tspec, uint64_t rounded_
     return crf_time;
 }
 
-static int init_pdu(struct avtp_crf_pdu *pdu)
+static void init_pdu(Avtp_Crf_t *pdu)
 {
-    int res;
-
-    res = avtp_crf_pdu_init(pdu);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_FS, 0);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TYPE, AVTP_CRF_TYPE_AUDIO_SAMPLE);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_STREAM_ID, STREAM_ID);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_PULL, AVTP_CRF_PULL_MULT_BY_1);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_BASE_FREQ, SAMPLE_RATE);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, TIMESTAMP_INTERVAL);
-    if (res < 0)
-        return -1;
-
-    res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_CRF_DATA_LEN, DATA_LEN);
-    if (res < 0)
-        return -1;
-
-    return 0;
+    Avtp_Crf_Init(pdu);
+    Avtp_Crf_SetType(pdu, AVTP_CRF_TYPE_AUDIO_SAMPLE);
+    Avtp_Crf_SetStreamId(pdu, STREAM_ID);
+    Avtp_Crf_SetPull(pdu, AVTP_CRF_PULL_MULT_BY_1);
+    Avtp_Crf_SetBaseFrequency(pdu, SAMPLE_RATE);
+    Avtp_Crf_SetTimestampInterval(pdu, TIMESTAMP_INTERVAL);
+    Avtp_Crf_SetCrfDataLength(pdu, (uint16_t)DATA_LEN);
 }
 
 int main(int argc, char *argv[])
@@ -196,7 +168,7 @@ int main(int argc, char *argv[])
     uint64_t crf_time, rounded_mtt;
     struct timespec clksrc_ts = {0};
     struct sockaddr_ll sk_addr = {0};
-    struct avtp_crf_pdu *pdu = alloca(PDU_SIZE);
+    Avtp_Crf_t *pdu = alloca(PDU_SIZE);
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
 
@@ -209,9 +181,7 @@ int main(int argc, char *argv[])
     if (res < 0)
         goto err;
 
-    res = init_pdu(pdu);
-    if (res < 0)
-        goto err;
+    init_pdu(pdu);
 
     res = clock_gettime(CLOCK_REALTIME, &clksrc_ts);
     if (res < 0) {
@@ -225,12 +195,13 @@ int main(int argc, char *argv[])
         ssize_t n;
 
         crf_time = calculate_crf_timestamp(clksrc_ts, rounded_mtt);
-        for (idx = 0; idx < TIMESTAMPS_PER_PKT; idx++)
-            pdu->crf_data[idx] = htobe64(crf_time + (CRF_PERIOD * idx));
+        for (idx = 0; idx < TIMESTAMPS_PER_PKT; idx++) {
+            uint64_t timestamp = htobe64(crf_time + (CRF_PERIOD * idx));
 
-        res = avtp_crf_pdu_set(pdu, AVTP_CRF_FIELD_SEQ_NUM, seq_num++);
-        if (res < 0)
-            goto err;
+            memcpy(pdu->payload + (idx * sizeof(timestamp)), &timestamp, sizeof(timestamp));
+        }
+
+        Avtp_Crf_SetSequenceNum(pdu, seq_num++);
 
         n = sendto(sk_fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {

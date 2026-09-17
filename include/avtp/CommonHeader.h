@@ -150,15 +150,6 @@ struct avtp_common_pdu {
     uint8_t pdu_specific[0];
 } __attribute__((__packed__));
 
-struct avtp_stream_pdu {
-    uint32_t subtype_data;
-    uint64_t stream_id;
-    uint32_t avtp_time;
-    uint32_t format_specific;
-    uint32_t packet_info;
-    uint8_t avtp_payload[0];
-} __attribute__((__packed__));
-
 #define AVTP_FIELD_SUBTYPE (AVTP_COMMON_HEADER_FIELD_SUBTYPE)
 #define AVTP_FIELD_VERSION (AVTP_COMMON_HEADER_FIELD_VERSION)
 #define AVTP_FIELD_MAX (AVTP_COMMON_HEADER_FIELD_MAX)

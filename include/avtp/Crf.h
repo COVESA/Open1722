@@ -28,11 +28,25 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#pragma once
+/**
+ * @file
+ * This file contains the fields descriptions of the IEEE 1722 CRF PDUs and
+ * functions to invoke corresponding parser and deparser.
+ */
 
-#include <stdint.h>
+#pragma once
+#include "avtp/Inline.h"
+
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
+#include <string.h>
+#include <stdbool.h>
+#endif
 
 #include "avtp/Utils.h"
+#include "avtp/Defines.h"
+#include "avtp/CommonHeader.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,132 +54,433 @@ extern "C" {
 
 #define AVTP_CRF_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
 
-typedef struct Avtp_Cvf {
+#define GET_CRF_FIELD(field)                                                                       \
+    (Avtp_GetField(Avtp_CrfFieldDesc, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu, field))
+#define SET_CRF_FIELD(field, value)                                                                \
+    (Avtp_SetField(Avtp_CrfFieldDesc, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, field, value))
+
+typedef struct {
     uint8_t header[AVTP_CRF_HEADER_LEN];
     uint8_t payload[0];
-} Avtp_Crf_t;
+} __attribute__((packed)) Avtp_Crf_t;
 
-/* CRF 'type' field values. */
-#define AVTP_CRF_TYPE_USER 0x00
-#define AVTP_CRF_TYPE_AUDIO_SAMPLE 0x01
-#define AVTP_CRF_TYPE_VIDEO_FRAME 0x02
-#define AVTP_CRF_TYPE_VIDEO_LINE 0x03
-#define AVTP_CRF_TYPE_MACHINE_CYCLE 0x04
+/**
+ * CRF 'type' field values (IEEE 1722-2025, Table 31). Values 0x05-0xFF are
+ * reserved.
+ */
+typedef enum {
+    AVTP_CRF_TYPE_USER = 0x00,
+    AVTP_CRF_TYPE_AUDIO_SAMPLE = 0x01,
+    AVTP_CRF_TYPE_VIDEO_FRAME = 0x02,
+    AVTP_CRF_TYPE_VIDEO_LINE = 0x03,
+    AVTP_CRF_TYPE_MACHINE_CYCLE = 0x04,
+} Avtp_CrfType_t;
 
-/* CRF 'pull' field values. */
-#define AVTP_CRF_PULL_MULT_BY_1 0x00
-#define AVTP_CRF_PULL_MULT_BY_1_OVER_1_001 0x01
-#define AVTP_CRF_PULL_MULT_BY_1_001 0x02
-#define AVTP_CRF_PULL_MULT_BY_24_OVER_25 0x03
-#define AVTP_CRF_PULL_MULT_BY_25_OVER_24 0x04
-#define AVTP_CRF_PULL_MULT_BY_1_OVER_8 0x05
+/**
+ * CRF 'pull' field values (IEEE 1722-2025, Table 32). Values 0x06-0x07 are
+ * reserved.
+ */
+typedef enum {
+    AVTP_CRF_PULL_MULT_BY_1 = 0x00,
+    AVTP_CRF_PULL_MULT_BY_1_OVER_1_001 = 0x01,
+    AVTP_CRF_PULL_MULT_BY_1_001 = 0x02,
+    AVTP_CRF_PULL_MULT_BY_24_OVER_25 = 0x03,
+    AVTP_CRF_PULL_MULT_BY_25_OVER_24 = 0x04,
+    AVTP_CRF_PULL_MULT_BY_1_OVER_8 = 0x05,
+} Avtp_CrfPull_t;
 
-typedef enum Avtp_CrfField {
-    /* CRF header fields */
+typedef enum {
+
+    /* Common AVTP alternative header fields */
     AVTP_CRF_FIELD_SUBTYPE,
     AVTP_CRF_FIELD_SV,
     AVTP_CRF_FIELD_VERSION,
     AVTP_CRF_FIELD_MR,
-    AVTP_CRF_FIELD_RESERVED,
+    AVTP_CRF_FIELD_R,
     AVTP_CRF_FIELD_FS,
     AVTP_CRF_FIELD_TU,
     AVTP_CRF_FIELD_SEQUENCE_NUM,
+
+    /* CRF header fields */
     AVTP_CRF_FIELD_TYPE,
     AVTP_CRF_FIELD_STREAM_ID,
     AVTP_CRF_FIELD_PULL,
     AVTP_CRF_FIELD_BASE_FREQUENCY,
     AVTP_CRF_FIELD_CRF_DATA_LENGTH,
     AVTP_CRF_FIELD_TIMESTAMP_INTERVAL,
+
     /* Count number of fields for bound checks */
-    AVTP_CRF_FIELD_MAX,
-} Avtp_CrfField_t;
-
-void Avtp_Crf_Init(Avtp_Crf_t *pdu);
-
-uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfField_t field);
-
-uint8_t Avtp_Crf_GetSv(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetMr(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetFs(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetTu(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetType(const Avtp_Crf_t *const pdu);
-uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t *const pdu);
-uint8_t Avtp_Crf_GetPull(const Avtp_Crf_t *const pdu);
-uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t *const pdu);
-uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t *const pdu);
-uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const pdu);
-
-void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfField_t field, uint64_t value);
-
-void Avtp_Crf_EnableSv(Avtp_Crf_t *pdu);
-void Avtp_Crf_DisableSv(Avtp_Crf_t *pdu);
-void Avtp_Crf_EnableMr(Avtp_Crf_t *pdu);
-void Avtp_Crf_DisableMr(Avtp_Crf_t *pdu);
-void Avtp_Crf_EnableFs(Avtp_Crf_t *pdu);
-void Avtp_Crf_DisableFs(Avtp_Crf_t *pdu);
-void Avtp_Crf_EnableTu(Avtp_Crf_t *pdu);
-void Avtp_Crf_DisableTu(Avtp_Crf_t *pdu);
-void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint8_t value);
-void Avtp_Crf_SetType(Avtp_Crf_t *pdu, uint8_t value);
-void Avtp_Crf_SetStreamId(Avtp_Crf_t *pdu, uint64_t value);
-void Avtp_Crf_SetPull(Avtp_Crf_t *pdu, uint8_t value);
-void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t *pdu, uint32_t value);
-void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t *pdu, uint16_t value);
-void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t value);
-
-/******************************************************************************
- * Legacy API (deprecated)
- *****************************************************************************/
-
-#define AVTP_CRF_FIELD_SEQ_NUM AVTP_CRF_FIELD_SEQUENCE_NUM
-#define AVTP_CRF_FIELD_BASE_FREQ AVTP_CRF_FIELD_BASE_FREQUENCY
-#define AVTP_CRF_FIELD_CRF_DATA_LEN AVTP_CRF_FIELD_CRF_DATA_LENGTH
-
-struct avtp_crf_pdu {
-    uint32_t subtype_data;
-    uint64_t stream_id;
-    uint64_t packet_info;
-    uint64_t crf_data[0];
-} __attribute__((__packed__));
+    AVTP_CRF_FIELD_MAX
+} Avtp_CrfFields_t;
 
 /**
- * @deprecated
- * Get value from CRF AVTPDU field.
- * @pdu: Pointer to PDU struct.
- * @field: PDU field to be retrieved.
- * @val: Pointer to variable which the retrieved value should be saved.
- *
- * Returns:
- *    0: Success.
- *    -EINVAL: If any argument is invalid.
+ * This table maps all IEEE 1722 CRF header fields to a descriptor.
  */
-int avtp_crf_pdu_get(const void *const pdu, Avtp_CrfField_t field, uint64_t *val);
+static const Avtp_FieldDescriptor_t Avtp_CrfFieldDesc[AVTP_CRF_FIELD_MAX] = {
+    /* Common AVTP alternative header fields */
+    [AVTP_CRF_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+    [AVTP_CRF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_CRF_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
+    [AVTP_CRF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_CRF_FIELD_R] = {.quadlet = 0, .offset = 13, .bits = 1},
+    [AVTP_CRF_FIELD_FS] = {.quadlet = 0, .offset = 14, .bits = 1},
+    [AVTP_CRF_FIELD_TU] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_CRF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
+    /* CRF header fields */
+    [AVTP_CRF_FIELD_TYPE] = {.quadlet = 0, .offset = 24, .bits = 8},
+    [AVTP_CRF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_CRF_FIELD_PULL] = {.quadlet = 3, .offset = 0, .bits = 3},
+    [AVTP_CRF_FIELD_BASE_FREQUENCY] = {.quadlet = 3, .offset = 3, .bits = 29},
+    [AVTP_CRF_FIELD_CRF_DATA_LENGTH] = {.quadlet = 4, .offset = 0, .bits = 16},
+    [AVTP_CRF_FIELD_TIMESTAMP_INTERVAL] = {.quadlet = 4, .offset = 16, .bits = 16},
+};
 
 /**
- * @deprecated
- * Set value from CRF AVTPDU field.
- * @pdu: Pointer to PDU struct.
- * @field: PDU field to be set.
- * @val: Value to be set.
+ * Return the value of the CRF SV field as specified in the IEEE 1722 Specification.
  *
- * Returns:
- *    0: Success.
- *    -EINVAL: If any argument is invalid.
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF SV field.
  */
-int avtp_crf_pdu_set(void *pdu, Avtp_CrfField_t field, uint64_t val);
+OPEN1722_INLINE bool Avtp_Crf_IsSv(const Avtp_Crf_t *const pdu)
+{
+    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_SV);
+}
 
 /**
- * @deprecated
- * Initialize CRF AVTPDU. All AVTPDU fields are initialized with zero except
- * 'subtype' (which is set to AVTP_SUBTYPE_CRF) and 'sv' (which is set to 1).
- * @pdu: Pointer to PDU struct.
+ * Return the value of the CRF MR field as specified in the IEEE 1722 Specification.
  *
- * Return values:
- *    0: Success.
- *    -EINVAL: If any argument is invalid.
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF MR field.
  */
-int avtp_crf_pdu_init(void *pdu);
+OPEN1722_INLINE bool Avtp_Crf_IsMr(const Avtp_Crf_t *const pdu)
+{
+    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_MR);
+}
+
+/**
+ * Return the value of the CRF FS field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF FS field.
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsFs(const Avtp_Crf_t *const pdu)
+{
+    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_FS);
+}
+
+/**
+ * Return the value of the CRF TU field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF TU field.
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsTu(const Avtp_Crf_t *const pdu)
+{
+    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_TU);
+}
+
+/**
+ * Return the value of the CRF Sequence Number field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Sequence Number field.
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu)
+{
+    return (uint8_t)GET_CRF_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Return the value of the CRF Type field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Type field.
+ */
+OPEN1722_INLINE Avtp_CrfType_t Avtp_Crf_GetType(const Avtp_Crf_t *const pdu)
+{
+    return (Avtp_CrfType_t)GET_CRF_FIELD(AVTP_CRF_FIELD_TYPE);
+}
+
+/**
+ * Return the value of the CRF Stream ID field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Stream ID field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t *const pdu)
+{
+    return (uint64_t)GET_CRF_FIELD(AVTP_CRF_FIELD_STREAM_ID);
+}
+
+/**
+ * Return the value of the CRF Pull field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Pull field.
+ */
+OPEN1722_INLINE Avtp_CrfPull_t Avtp_Crf_GetPull(const Avtp_Crf_t *const pdu)
+{
+    return (Avtp_CrfPull_t)GET_CRF_FIELD(AVTP_CRF_FIELD_PULL);
+}
+
+/**
+ * Return the value of the CRF Base Frequency field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Base Frequency field.
+ */
+OPEN1722_INLINE uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t *const pdu)
+{
+    return (uint32_t)GET_CRF_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY);
+}
+
+/**
+ * Return the value of the CRF Data Length field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Data Length field.
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t *const pdu)
+{
+    return (uint16_t)GET_CRF_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH);
+}
+
+/**
+ * Return the value of the CRF Timestamp Interval field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF Timestamp Interval field.
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const pdu)
+{
+    return (uint16_t)GET_CRF_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
+}
+
+/**
+ * Set the SV bit in a CRF frame as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param sv Value to set the CRF SV field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSv(Avtp_Crf_t *pdu, bool sv)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_SV, sv);
+}
+
+/**
+ * Set the MR bit in a CRF frame as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param mr Value to set the CRF MR field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetMr(Avtp_Crf_t *pdu, bool mr)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_MR, mr);
+}
+
+/**
+ * Set the FS bit in a CRF frame as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param fs Value to set the CRF FS field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetFs(Avtp_Crf_t *pdu, bool fs)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_FS, fs);
+}
+
+/**
+ * Set the TU bit in a CRF frame as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param tu Value to set the CRF TU field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTu(Avtp_Crf_t *pdu, bool tu)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_TU, tu);
+}
+
+/**
+ * Set the value of the CRF Sequence Number field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Sequence Number field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint8_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM, value);
+}
+
+/**
+ * Set the value of the CRF Type field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Type field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetType(Avtp_Crf_t *pdu, Avtp_CrfType_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_TYPE, (uint64_t)value);
+}
+
+/**
+ * Set the value of the CRF Stream ID field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Stream ID field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetStreamId(Avtp_Crf_t *pdu, uint64_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_STREAM_ID, value);
+}
+
+/**
+ * Set the value of the CRF Pull field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Pull field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPull(Avtp_Crf_t *pdu, Avtp_CrfPull_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_PULL, (uint64_t)value);
+}
+
+/**
+ * Set the value of the CRF Base Frequency field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Base Frequency field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t *pdu, uint32_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY, value);
+}
+
+/**
+ * Set the value of the CRF Data Length field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Data Length field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t *pdu, uint16_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH, value);
+}
+
+/**
+ * Set the value of the CRF Timestamp Interval field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF Timestamp Interval field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t value)
+{
+    SET_CRF_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, value);
+}
+
+/**
+ * Returns pointer to the CRF data of a CRF frame.
+ *
+ * The CRF data contains the timestamps of the stream. Each timestamp is
+ * 8 octets long.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @return Pointer to CRF data
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload(const Avtp_Crf_t *const pdu)
+{
+    return pdu->payload;
+}
+
+/**
+ * Sets the CRF data of a CRF frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPayload(Avtp_Crf_t *pdu, uint8_t *payload, uint16_t payload_length)
+{
+    memcpy(pdu->payload, payload, payload_length);
+}
+
+/**
+ * Initializes a CRF PDU as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of a 1722 CRF PDU.
+ */
+OPEN1722_INLINE void Avtp_Crf_Init(Avtp_Crf_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_Crf_t));
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CRF);
+        Avtp_Crf_SetSv(pdu, true);
+    }
+}
+
+/**
+ * Checks if the CRF frame is valid by checking:
+ *     1) if the crf_data_length field contains a value larger than the actual size of the buffer
+ * that contains the AVTP message. 2) if other format specific invariants are not upheld.
+ *
+ * The crf_data_length field contains the length (in octets) of the crf_data
+ * field (IEEE 1722-2025, 10.4.11), so the whole AVTPDU must fit into bufferSize.
+ * The crf_data field contains one or more 8-octet timestamps, so crf_data_length
+ * shall be a non-zero multiple of 8 (IEEE 1722-2025, 10.4.11).
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param bufferSize Size of the buffer containing the CRF frame.
+ * @return true if the CRF frame is valid, false otherwise.
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsValid(const Avtp_Crf_t *const pdu, size_t bufferSize)
+{
+    if (pdu == NULL) {
+        return false;
+    }
+
+    if (bufferSize < AVTP_CRF_HEADER_LEN) {
+        return false;
+    }
+
+    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_CRF) {
+        return false;
+    }
+
+    uint16_t crf_data_length = Avtp_Crf_GetCrfDataLength(pdu);
+
+    if (crf_data_length == 0 || (crf_data_length % 8) != 0) {
+        return false;
+    }
+
+    if ((size_t)AVTP_CRF_HEADER_LEN + (size_t)crf_data_length > bufferSize) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Returns the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfFields_t field)
+{
+    return (uint64_t)GET_CRF_FIELD(field);
+}
+
+/**
+ * Sets the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfFields_t field, uint64_t value)
+{
+    SET_CRF_FIELD(field, value);
+}
 
 #ifdef __cplusplus
 }
