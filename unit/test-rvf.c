@@ -1,4 +1,7 @@
 /*
+ *
+ * Copyright (c) 2021, Fastree3D
+ * Adrian Fiergolski <Adrian.Fiergolski@fastree3d.com>
  * Copyright (c) 2026, COVESA
  *
  * Redistribution and use in source and binary forms, with or without

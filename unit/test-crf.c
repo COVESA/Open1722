@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2018, Intel Corporation
  * Copyright (c) 2026, COVESA
  *
  * Redistribution and use in source and binary forms, with or without
