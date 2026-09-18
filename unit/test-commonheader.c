@@ -76,6 +76,7 @@ static void common_header_get_set_fields(void **state)
 
 static void common_header_subtypes(void **state)
 {
+    (void)state;
     assert_int_equal(AVTP_SUBTYPE_AAF, 0x2);
     assert_int_equal(AVTP_SUBTYPE_CVF, 0x3);
     assert_int_equal(AVTP_SUBTYPE_CRF, 0x4);
@@ -84,11 +85,28 @@ static void common_header_subtypes(void **state)
     assert_int_equal(AVTP_SUBTYPE_NTSCF, 0x82);
 }
 
+static void common_header_version_support(void **state)
+{
+    (void)state;
+    uint8_t both = (uint8_t)((1U << AVTP_VERSION_0) | (1U << AVTP_VERSION_1));
+
+    assert_int_equal(AVTP_VERSION_0, 0);
+    assert_int_equal(AVTP_VERSION_1, 1);
+
+    assert_true(Avtp_Version_IsSupported(both, AVTP_VERSION_0));
+    assert_true(Avtp_Version_IsSupported(both, AVTP_VERSION_1));
+    assert_false(Avtp_Version_IsSupported(both, 2));
+    assert_false(Avtp_Version_IsSupported((uint8_t)(1U << AVTP_VERSION_0), AVTP_VERSION_1));
+    assert_false(Avtp_Version_IsSupported(0, AVTP_VERSION_0));
+    assert_false(Avtp_Version_IsSupported(0xFF, 8));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(common_header_get_set_fields),
         cmocka_unit_test(common_header_subtypes),
+        cmocka_unit_test(common_header_version_support),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
