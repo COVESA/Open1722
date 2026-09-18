@@ -45,7 +45,6 @@
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
 #include "avtp/Utils.h"
-#include "avtp/CommonHeader.h"
 #include "avtp/acf/AcfCommon.h"
 
 /* --- Phase 2: target headers (extern-definition mode) ---------------- */
@@ -53,6 +52,7 @@
 #undef OPEN1722_INLINE
 #define OPEN1722_INLINE
 
+#include "avtp/CommonHeader.h"
 #include "avtp/Udp.h"
 
 #include "avtp/Crf.h"
