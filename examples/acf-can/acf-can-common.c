@@ -268,7 +268,7 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
         proc_bytes += AVTP_TSCF_HEADER_LEN;
         msg_length += Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t *)cf_pdu) + AVTP_TSCF_HEADER_LEN;
         s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t *)cf_pdu);
-        seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
+        seq_num = (uint8_t)Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
         msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
