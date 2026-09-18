@@ -14,6 +14,8 @@ All these applications support IEEE 1722 over Ethernet (layer 2) as well as over
 
 The chosen format has to match between the talker and listener applications. The build system builds the applications using all available formats for the listener, talker and bridge applications. User can extend the build system to build the applications using other formats as well.
 
+In addition to the ACF CAN message format, the TSCF transport can use version 0 (24-octet header, 8-bit sequence number) or version 1 (40-octet header, 32-bit sequence number, PTP grandmaster identity) of the AVTPDU common stream header. Select the version at runtime with `-t1`/`--tscf=1` on the talker or bridge; listeners detect the version from the received frame.
+
 The built applications can be used along with Linux CAN utilities. On Ubuntu/Debian Linux distributions, these utilities can be installed using the package manager `apt install can-utils`
 
 ## acf-can-talker
@@ -33,7 +35,8 @@ Ethernet using Open1722.
   -n, --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
                              UDP)
       --stream-id=STREAM_ID  Stream ID for talker stream
-  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
+  -t, --tscf[=VERSION]       Use TSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
   -u, --udp                  Use UDP (Default: Ethernet)
   -?, --help                 Give this help list
       --usage                Give a short usage message
@@ -78,7 +81,8 @@ acf-can-bridge -- a program for bridging a CAN interface with an Ethernet interf
   -p, --udp-port=UDP_PORT    UDP Port to listen on (if UDP)
       --talker-stream-id=STREAM_ID
                              Stream ID for talker stream
-  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
+  -t, --tscf[=VERSION]       Use TSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
   -u, --udp                  Use UDP
   -?, --help                 Give this help list
       --usage                Give a short usage message

@@ -50,6 +50,7 @@ LOG_MODULE_REGISTER(acf_can_common, LOG_LEVEL_DBG);
 #include <time.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "avtp/Udp.h"
 #include "avtp/CommonHeader.h"
@@ -115,36 +116,41 @@ int setup_can_socket(const char *can_ifname, bool can_fd)
 }
 #endif
 
-static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, int use_tscf, int seq_num)
+static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, acf_can_cf_t cf, uint32_t seq_num)
 {
     int res;
-    if (use_tscf) {
-        Avtp_Tscf_t *tscf_pdu = (Avtp_Tscf_t *)pdu;
-        memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
-        Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetTu(tscf_pdu, false);
-        Avtp_Tscf_SetSequenceNum(tscf_pdu, seq_num);
-        Avtp_Tscf_SetStreamId(tscf_pdu, stream_id);
-        res = AVTP_TSCF_HEADER_LEN;
-    } else {
+
+    if (cf == ACF_CAN_CF_NTSCF) {
         Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
-        memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num);
+        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, (uint8_t)seq_num);
         Avtp_Ntscf_SetStreamId(ntscf_pdu, stream_id);
-        res = AVTP_NTSCF_HEADER_LEN;
+        return AVTP_NTSCF_HEADER_LEN;
     }
+
+    if (cf == ACF_CAN_CF_TSCF_V1) {
+        Avtp_Tscf_InitV1((Avtp_TscfV1_t *)pdu);
+    } else {
+        Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    }
+    Avtp_Tscf_SetTu((Avtp_Tscf_t *)pdu, false);
+    Avtp_Tscf_SetSequenceNum((Avtp_Tscf_t *)pdu, seq_num);
+    Avtp_Tscf_SetStreamId((Avtp_Tscf_t *)pdu, stream_id);
+
+    res = (int)Avtp_CommonStreamHeader_GetHeaderLen((Avtp_CommonStreamHeader_t *)pdu);
     return res;
 }
 
-static int update_cf_length(uint8_t *cf_pdu, uint64_t length, int use_tscf)
+static int update_cf_length(uint8_t *cf_pdu, uint64_t length, acf_can_cf_t cf)
 {
-    if (use_tscf) {
-        uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)cf_pdu, payloadLen);
-    } else {
+    if (cf == ACF_CAN_CF_NTSCF) {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, (uint16_t)payloadLen);
+    } else {
+        size_t headerLen =
+            Avtp_CommonStreamHeader_GetHeaderLen((Avtp_CommonStreamHeader_t *)cf_pdu);
+        uint64_t payloadLen = length - headerLen;
+        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)cf_pdu, (uint16_t)payloadLen);
     }
     return 0;
 }
@@ -200,8 +206,8 @@ static int prepare_acf_packet(uint8_t *acf_pdu, frame_t *frame, bool can_fd)
     return Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)pdu);
 }
 
-int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int use_tscf,
-                uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num)
+int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, acf_can_cf_t cf,
+                uint64_t stream_id, uint8_t num_acf_msgs, uint32_t cf_seq_num, uint32_t udp_seq_num)
 {
 
     // Pack into control formats
@@ -218,7 +224,7 @@ int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int
 
     // Prepare the control format: TSCF/NTSCF
     cf_pdu = pdu + pdu_length;
-    res = init_cf_pdu(cf_pdu, stream_id, use_tscf, cf_seq_num++);
+    res = init_cf_pdu(cf_pdu, stream_id, cf, cf_seq_num);
     pdu_length += res;
     cf_length += res;
 
@@ -232,16 +238,17 @@ int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int
     }
 
     // Update the length of the PDU
-    update_cf_length(cf_pdu, cf_length, use_tscf);
+    update_cf_length(cf_pdu, cf_length, cf);
 
     return pdu_length;
 }
 
 int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
-                uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
+                uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
 {
 
-    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, seq_num, i = 0;
+    uint8_t *cf_pdu, *acf_pdu, *udp_pdu, i = 0;
+    uint32_t seq_num;
     uint32_t udp_seq_num;
     uint16_t proc_bytes = 0, msg_length = 0;
     uint64_t s_id;
@@ -254,8 +261,8 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
         proc_bytes += AVTP_UDP_HEADER_LEN;
         msg_length += AVTP_UDP_HEADER_LEN;
         if (udp_seq_num != *exp_udp_seqnum) {
-            LOG_ERR("Incorrect UDP sequence num. Expected: %d Recd.: %d\n", *exp_udp_seqnum,
-                    udp_seq_num);
+            LOG_ERR("Incorrect UDP sequence num. Expected: %" PRIu32 " Recd.: %" PRIu32 "\n",
+                    *exp_udp_seqnum, udp_seq_num);
             *exp_udp_seqnum = udp_seq_num;
         }
     } else {
@@ -265,10 +272,18 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
     // Only NTSCF and TSCF formats allowed
     uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cf_pdu);
     if (subtype == AVTP_SUBTYPE_TSCF) {
-        proc_bytes += AVTP_TSCF_HEADER_LEN;
-        msg_length += Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t *)cf_pdu) + AVTP_TSCF_HEADER_LEN;
+        uint8_t version =
+            Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)cf_pdu);
+        if (!Avtp_Version_IsSupported(AVTP_TSCF_SUPPORTED_VERSIONS, version)) {
+            LOG_ERR("Unsupported TSCF version %u, ignoring frame.\n", version);
+            return -1;
+        }
+        size_t headerLen =
+            Avtp_CommonStreamHeader_GetHeaderLen((const Avtp_CommonStreamHeader_t *)cf_pdu);
+        proc_bytes += (uint16_t)headerLen;
+        msg_length += (uint16_t)(Avtp_Tscf_GetStreamDataLength((Avtp_Tscf_t *)cf_pdu) + headerLen);
         s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t *)cf_pdu);
-        seq_num = (uint8_t)Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
+        seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         proc_bytes += AVTP_NTSCF_HEADER_LEN;
         msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
@@ -285,7 +300,8 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
 
     // Check sequence numbers.
     if (seq_num != *exp_cf_seqnum) {
-        LOG_ERR("Incorrect sequence num. Expected: %d Recd.: %d\n", *exp_cf_seqnum, seq_num);
+        LOG_ERR("Incorrect sequence num. Expected: %" PRIu32 " Recd.: %" PRIu32 "\n",
+                *exp_cf_seqnum, seq_num);
         *exp_cf_seqnum = seq_num;
     }
 

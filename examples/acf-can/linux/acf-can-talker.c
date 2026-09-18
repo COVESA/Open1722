@@ -53,7 +53,7 @@ static uint8_t macaddr[ETH_ALEN];
 static uint8_t ip_addr[sizeof(struct in_addr)];
 static uint32_t udp_port = 17220;
 static int priority = -1;
-static uint8_t use_tscf = 0;
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF;
 static uint8_t use_udp = 0;
 static bool can_fd = false;
 static uint8_t num_acf_msgs = 1;
@@ -70,7 +70,8 @@ static char doc[] =
          \t(tunnel transactions from vcan1 interface using UDP)";
 
 static struct argp_option options[] = {
-    {"tscf", 't', 0, 0, "Use TSCF v0 (Default: NTSCF v0)"},
+    {"tscf", 't', "VERSION", OPTION_ARG_OPTIONAL,
+     "Use TSCF; VERSION 0 or 1 selects the header version (Default: NTSCF v0)"},
     {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)"},
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
@@ -87,7 +88,15 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 't':
-        use_tscf = 1;
+        cf_format = ACF_CAN_CF_TSCF_V0;
+        if (arg != NULL) {
+            if (strcmp(arg, "1") == 0) {
+                cf_format = ACF_CAN_CF_TSCF_V1;
+            } else if (strcmp(arg, "0") != 0) {
+                fprintf(stderr, "Invalid TSCF version '%s' (only 0 and 1 are supported)\n", arg);
+                exit(EXIT_FAILURE);
+            }
+        }
         break;
     case 'u':
         use_udp = 1;
@@ -148,7 +157,7 @@ int main(int argc, char *argv[])
     struct sockaddr_ll sk_ll_addr;
     struct sockaddr_in sk_udp_addr;
     struct sockaddr *dest_addr;
-    uint8_t cf_seq_num = 0;
+    uint32_t cf_seq_num = 0;
     uint32_t udp_seq_num = 0;
 
     uint8_t pdu[MAX_ETH_PDU_SIZE];
@@ -157,10 +166,17 @@ int main(int argc, char *argv[])
 
     argp_parse(&argp, argc, argv, 0, NULL, NULL);
     printf("acf-talker-configuration:\n");
-    if (use_tscf)
+    switch (cf_format) {
+    case ACF_CAN_CF_TSCF_V0:
         printf("\tUsing TSCF v0\n");
-    else
+        break;
+    case ACF_CAN_CF_TSCF_V1:
+        printf("\tUsing TSCF v1\n");
+        break;
+    default:
         printf("\tUsing NTSCF v0\n");
+        break;
+    }
     if (can_fd)
         printf("\tUsing CAN FD interface: %s\n", can_ifname);
     else
@@ -222,7 +238,7 @@ int main(int argc, char *argv[])
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, use_tscf, talker_stream_id,
+        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, cf_format, talker_stream_id,
                                  num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out

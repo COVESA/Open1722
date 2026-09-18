@@ -8,6 +8,10 @@ config ACF_CAN_BRIDGE_USE_TSCF
     int "Use TSCF encapsulation"
     default 0
 
+config ACF_CAN_BRIDGE_TSCF_VERSION
+    int "TSCF header version (0 or 1)"
+    default 0
+
 config ACF_CAN_BRIDGE_SEND_MAC_ADDR
     string "MAC Address to which ACF CAN frames are sent"
     default "aa:bb:cc:dd:ee:ff"
