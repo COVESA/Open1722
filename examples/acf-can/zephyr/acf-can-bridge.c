@@ -62,7 +62,12 @@ LOG_MODULE_REGISTER(acf_can_bridge, LOG_LEVEL_DBG);
 
 static uint8_t macaddr[NET_ETH_ADDR_LEN];
 static struct in_addr ip_addr;
-static uint8_t use_tscf = CONFIG_ACF_CAN_BRIDGE_USE_TSCF;
+#if CONFIG_ACF_CAN_BRIDGE_USE_TSCF
+static acf_can_cf_t cf_format =
+    CONFIG_ACF_CAN_BRIDGE_TSCF_VERSION == 1 ? ACF_CAN_CF_TSCF_V1 : ACF_CAN_CF_TSCF_V0;
+#else
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF;
+#endif
 static uint8_t use_udp = CONFIG_ACF_CAN_BRIDGE_USE_UDP;
 static uint32_t udp_listen_port = CONFIG_ACF_CAN_BRIDGE_RECV_UDP_PORT;
 static uint32_t udp_send_port = CONFIG_ACF_CAN_BRIDGE_SEND_UDP_PORT;
@@ -203,7 +208,7 @@ err:
 void can_to_avtp_runnable(void *p1, void *p2, void *p3)
 {
 
-    uint8_t cf_seq_num = 0;
+    uint32_t cf_seq_num = 0;
     uint32_t udp_seq_num = 0;
 
     uint8_t pdu[MAX_ETH_PDU_SIZE];
@@ -254,7 +259,7 @@ void can_to_avtp_runnable(void *p1, void *p2, void *p3)
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, use_tscf, talker_stream_id,
+        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, cf_format, talker_stream_id,
                                  num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out over Ethernet
@@ -278,7 +283,7 @@ void avtp_to_can_runnable(void *p1, void *p2, void *p3)
 
     uint16_t pdu_length = 0;
     int8_t num_can_msgs = 0;
-    uint8_t exp_cf_seqnum = 0;
+    uint32_t exp_cf_seqnum = 0;
     uint32_t exp_udp_seqnum = 0;
     uint8_t pdu[MAX_ETH_PDU_SIZE];
     static frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
@@ -353,10 +358,17 @@ int main(void)
 
     // Print current configuration
     printf("acf-can-bridge configuration:\n");
-    if (use_tscf)
+    switch (cf_format) {
+    case ACF_CAN_CF_TSCF_V0:
         printf("\tUsing TSCF v0\n");
-    else
+        break;
+    case ACF_CAN_CF_TSCF_V1:
+        printf("\tUsing TSCF v1\n");
+        break;
+    default:
         printf("\tUsing NTSCF v0\n");
+        break;
+    }
     if (can_fd)
         printf("\tUsing CAN FD\n");
     else
