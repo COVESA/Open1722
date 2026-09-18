@@ -53,6 +53,7 @@
 #define OPEN1722_INLINE
 
 #include "avtp/CommonHeader.h"
+#include "avtp/CommonStreamHeader.h"
 #include "avtp/Udp.h"
 
 #include "avtp/Crf.h"
