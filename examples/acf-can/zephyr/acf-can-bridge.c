@@ -65,8 +65,10 @@ static struct in_addr ip_addr;
 #if CONFIG_ACF_CAN_BRIDGE_USE_TSCF
 static acf_can_cf_t cf_format =
     CONFIG_ACF_CAN_BRIDGE_TSCF_VERSION == 1 ? ACF_CAN_CF_TSCF_V1 : ACF_CAN_CF_TSCF_V0;
+#elif CONFIG_ACF_CAN_BRIDGE_NTSCF_VERSION == 1
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF_V1;
 #else
-static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF;
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF_V0;
 #endif
 static uint8_t use_udp = CONFIG_ACF_CAN_BRIDGE_USE_UDP;
 static uint32_t udp_listen_port = CONFIG_ACF_CAN_BRIDGE_RECV_UDP_PORT;
@@ -364,6 +366,9 @@ int main(void)
         break;
     case ACF_CAN_CF_TSCF_V1:
         printf("\tUsing TSCF v1\n");
+        break;
+    case ACF_CAN_CF_NTSCF_V1:
+        printf("\tUsing NTSCF v1\n");
         break;
     default:
         printf("\tUsing NTSCF v0\n");
