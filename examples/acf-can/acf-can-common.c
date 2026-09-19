@@ -120,12 +120,15 @@ static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, acf_can_cf_t cf, uint32
 {
     int res;
 
-    if (cf == ACF_CAN_CF_NTSCF) {
-        Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
-        Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, (uint8_t)seq_num);
-        Avtp_Ntscf_SetStreamId(ntscf_pdu, stream_id);
-        return AVTP_NTSCF_HEADER_LEN;
+    if (cf == ACF_CAN_CF_NTSCF_V0 || cf == ACF_CAN_CF_NTSCF_V1) {
+        if (cf == ACF_CAN_CF_NTSCF_V1) {
+            Avtp_Ntscf_InitV1((Avtp_NtscfV1_t *)pdu);
+        } else {
+            Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+        }
+        Avtp_Ntscf_SetSequenceNum((Avtp_Ntscf_t *)pdu, seq_num);
+        Avtp_Ntscf_SetStreamId((Avtp_Ntscf_t *)pdu, stream_id);
+        return (int)Avtp_Ntscf_GetHeaderLen((Avtp_Ntscf_t *)pdu);
     }
 
     if (cf == ACF_CAN_CF_TSCF_V1) {
@@ -143,8 +146,9 @@ static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, acf_can_cf_t cf, uint32
 
 static int update_cf_length(uint8_t *cf_pdu, uint64_t length, acf_can_cf_t cf)
 {
-    if (cf == ACF_CAN_CF_NTSCF) {
-        uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
+    if (cf == ACF_CAN_CF_NTSCF_V0 || cf == ACF_CAN_CF_NTSCF_V1) {
+        size_t headerLen = Avtp_Ntscf_GetHeaderLen((Avtp_Ntscf_t *)cf_pdu);
+        uint64_t payloadLen = length - headerLen;
         Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, (uint16_t)payloadLen);
     } else {
         size_t headerLen =
@@ -285,8 +289,15 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
         s_id = Avtp_Tscf_GetStreamId((Avtp_Tscf_t *)cf_pdu);
         seq_num = Avtp_Tscf_GetSequenceNum((Avtp_Tscf_t *)cf_pdu);
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
-        proc_bytes += AVTP_NTSCF_HEADER_LEN;
-        msg_length += Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu) + AVTP_NTSCF_HEADER_LEN;
+        uint8_t version =
+            Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)cf_pdu);
+        if (!Avtp_Version_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
+            LOG_ERR("Unsupported NTSCF version %u, ignoring frame.\n", version);
+            return -1;
+        }
+        size_t headerLen = Avtp_Ntscf_GetHeaderLen((const Avtp_Ntscf_t *)cf_pdu);
+        proc_bytes += (uint16_t)headerLen;
+        msg_length += (uint16_t)(Avtp_Ntscf_GetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu) + headerLen);
         s_id = Avtp_Ntscf_GetStreamId((Avtp_Ntscf_t *)cf_pdu);
         seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t *)cf_pdu);
     } else {

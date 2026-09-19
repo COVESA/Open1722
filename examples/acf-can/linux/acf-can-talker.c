@@ -47,13 +47,14 @@
 #define ARGPARSE_CAN_FD_OPTION 500
 #define ARGPARSE_CAN_IF_OPTION 501
 #define ARGPARSE_TALKER_ID_OPTION 502
+#define ARGPARSE_DST_NW_ADDR_OPTION 504
 
 static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t ip_addr[sizeof(struct in_addr)];
 static uint32_t udp_port = 17220;
 static int priority = -1;
-static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF;
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF_V0;
 static uint8_t use_udp = 0;
 static bool can_fd = false;
 static uint8_t num_acf_msgs = 1;
@@ -72,13 +73,16 @@ static char doc[] =
 static struct argp_option options[] = {
     {"tscf", 't', "VERSION", OPTION_ARG_OPTIONAL,
      "Use TSCF; VERSION 0 or 1 selects the header version (Default: NTSCF v0)"},
+    {"ntscf", 'n', "VERSION", OPTION_ARG_OPTIONAL,
+     "Use NTSCF; VERSION 0 or 1 selects the header version (Default: NTSCF v0)"},
     {"udp", 'u', 0, 0, "Use UDP (Default: Ethernet)"},
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"canif", ARGPARSE_CAN_IF_OPTION, "CAN_IF", 0, "CAN interface"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
-    {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
+    {"dst-nw-addr", ARGPARSE_DST_NW_ADDR_OPTION, "NW_ADDR", 0,
+     "Stream destination network address and port (If UDP)"},
     {"stream-id", ARGPARSE_TALKER_ID_OPTION, "STREAM_ID", 0, "Stream ID for talker stream"},
     {0}};
 
@@ -94,6 +98,17 @@ static error_t parser(int key, char *arg, struct argp_state *state)
                 cf_format = ACF_CAN_CF_TSCF_V1;
             } else if (strcmp(arg, "0") != 0) {
                 fprintf(stderr, "Invalid TSCF version '%s' (only 0 and 1 are supported)\n", arg);
+                exit(EXIT_FAILURE);
+            }
+        }
+        break;
+    case 'n':
+        cf_format = ACF_CAN_CF_NTSCF_V0;
+        if (arg != NULL) {
+            if (strcmp(arg, "1") == 0) {
+                cf_format = ACF_CAN_CF_NTSCF_V1;
+            } else if (strcmp(arg, "0") != 0) {
+                fprintf(stderr, "Invalid NTSCF version '%s' (only 0 and 1 are supported)\n", arg);
                 exit(EXIT_FAILURE);
             }
         }
@@ -125,7 +140,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
             exit(EXIT_FAILURE);
         }
         break;
-    case 'n':
+    case ARGPARSE_DST_NW_ADDR_OPTION:
         res = sscanf(arg, "%[^:]:%d", ip_addr_str, &udp_port);
         if (!res) {
             fprintf(stderr, "Invalid IP address or port\n");
@@ -172,6 +187,9 @@ int main(int argc, char *argv[])
         break;
     case ACF_CAN_CF_TSCF_V1:
         printf("\tUsing TSCF v1\n");
+        break;
+    case ACF_CAN_CF_NTSCF_V1:
+        printf("\tUsing NTSCF v1\n");
         break;
     default:
         printf("\tUsing NTSCF v0\n");

@@ -90,9 +90,10 @@ typedef union {
  * Control format used to encapsulate ACF CAN messages.
  */
 typedef enum {
-    ACF_CAN_CF_NTSCF = 0, /* NTSCF version 0 */
-    ACF_CAN_CF_TSCF_V0,   /* TSCF version 0 */
-    ACF_CAN_CF_TSCF_V1,   /* TSCF version 1 */
+    ACF_CAN_CF_NTSCF_V0 = 0, /* NTSCF version 0 */
+    ACF_CAN_CF_NTSCF_V1,     /* NTSCF version 1 */
+    ACF_CAN_CF_TSCF_V0,      /* TSCF version 0 */
+    ACF_CAN_CF_TSCF_V1,      /* TSCF version 1 */
 } acf_can_cf_t;
 
 #ifdef __linux__
