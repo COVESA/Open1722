@@ -178,6 +178,14 @@ OPEN1722_INLINE void Avtp_Tscf_SetField(Avtp_Tscf_t *pdu, Avtp_TscfFields_t fiel
 }
 
 /**
+ * Returns the length of the TSCF header in octets (24 or 40).
+ */
+OPEN1722_INLINE uint8_t Avtp_Tscf_GetHeaderLen(const Avtp_Tscf_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetHeaderLen((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
  * Return the value of the TSCF SV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF TSCF PDU.

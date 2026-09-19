@@ -41,6 +41,8 @@ extern "C" {
 #include <string.h>
 
 #include "avtp/CommonHeader.h"
+#include "avtp/CommonStreamHeader.h"
+#include "avtp/aaf/Aaf.h"
 #include "avtp/aaf/Pcm.h"
 
 #define MAX_PDU_SIZE 1500
@@ -65,18 +67,38 @@ static void pcm_init(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t init_pdu[AVTP_PCM_HEADER_LEN];
+    uint8_t init_pdu[AVTP_PCM_HEADER_LEN_V0];
 
-    assert_int_equal(sizeof(Avtp_Pcm_t), AVTP_PCM_HEADER_LEN);
+    assert_int_equal(sizeof(Avtp_Pcm_t), AVTP_PCM_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
     Avtp_Pcm_Init(NULL);
 
     Avtp_Pcm_Init((Avtp_Pcm_t *)pdu);
-    memset(init_pdu, 0, AVTP_PCM_HEADER_LEN);
+    memset(init_pdu, 0, AVTP_PCM_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_AAF; /* subtype = AAF */
-    init_pdu[1] = 0x80;             /* sv = 1 */
-    assert_memory_equal(init_pdu, pdu, AVTP_PCM_HEADER_LEN);
+    init_pdu[1] = 0x80;             /* sv = 1, version = 0 */
+    assert_memory_equal(init_pdu, pdu, AVTP_PCM_HEADER_LEN_V0);
+}
+
+static void pcm_init_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t init_pdu[AVTP_PCM_HEADER_LEN_V1];
+
+    assert_int_equal(sizeof(Avtp_PcmV1_t), AVTP_PCM_HEADER_LEN_V1);
+
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Pcm_InitV1(NULL);
+
+    Avtp_Pcm_InitV1((Avtp_PcmV1_t *)pdu);
+    memset(init_pdu, 0, AVTP_PCM_HEADER_LEN_V1);
+    init_pdu[0] = AVTP_SUBTYPE_AAF; /* subtype = AAF */
+    init_pdu[1] = 0x90;             /* sv = 1, version = 1 */
+    assert_memory_equal(init_pdu, pdu, AVTP_PCM_HEADER_LEN_V1);
+
+    assert_int_equal(Avtp_Pcm_GetHeaderLen((Avtp_Pcm_t *)pdu), AVTP_PCM_HEADER_LEN_V1);
 }
 
 static void pcm_is_valid(void **state)
@@ -86,7 +108,7 @@ static void pcm_is_valid(void **state)
     Avtp_Pcm_t *pcm = (Avtp_Pcm_t *)pdu;
 
     init_valid_pcm(pcm);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* NULL pdu. */
     assert_false(Avtp_Pcm_IsValid(NULL, MAX_PDU_SIZE));
@@ -97,88 +119,162 @@ static void pcm_is_valid(void **state)
 
     /* Buffer smaller than the AAF header. */
     init_valid_pcm(pcm);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN - 1));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0 - 1));
 
     /* stream_data_length does not fit into the buffer. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetStreamDataLength(pcm, 10);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN + 9));
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN + 10));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0 + 9));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0 + 10));
 
     /* AES3 (0x05) and reserved format values (0x06) are not PCM. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_AES3_32BIT);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
     Avtp_Pcm_SetFormat(pcm, (Avtp_AafFormat_t)0x06);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* channels_per_frame shall be a positive integer. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetChannelsPerFrame(pcm, 0);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* bit_depth shall not be zero. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetBitDepth(pcm, 0);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* bit_depth shall not exceed the sample container size. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_INT_16BIT);
     Avtp_Pcm_SetBitDepth(pcm, 24);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
     Avtp_Pcm_SetBitDepth(pcm, 16);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_INT_24BIT);
     Avtp_Pcm_SetBitDepth(pcm, 24);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
     Avtp_Pcm_SetBitDepth(pcm, 32);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_INT_32BIT);
     Avtp_Pcm_SetBitDepth(pcm, 32);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* FLOAT_32BIT requires bit_depth to be exactly 32. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_FLOAT_32BIT);
     Avtp_Pcm_SetBitDepth(pcm, 24);
-    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_false(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
     Avtp_Pcm_SetBitDepth(pcm, 32);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
 
     /* The sample size of a user format is not constrained. */
     init_valid_pcm(pcm);
     Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_USER);
     Avtp_Pcm_SetBitDepth(pcm, 20);
-    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN));
+    assert_true(Avtp_Pcm_IsValid(pcm, AVTP_PCM_HEADER_LEN_V0));
+
+    /* Valid version 1 frame. */
+    Avtp_Pcm_InitV1((Avtp_PcmV1_t *)pdu);
+    Avtp_Pcm_SetChannelsPerFrame((Avtp_Pcm_t *)pdu, 2);
+    Avtp_Pcm_SetBitDepth((Avtp_Pcm_t *)pdu, 16);
+    assert_true(Avtp_Pcm_IsValid((Avtp_Pcm_t *)pdu, AVTP_PCM_HEADER_LEN_V1));
+    assert_false(Avtp_Pcm_IsValid((Avtp_Pcm_t *)pdu, AVTP_PCM_HEADER_LEN_V1 - 1));
+
+    /* Unsupported version is rejected. */
+    init_valid_pcm(pcm);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 2);
+    assert_false(Avtp_Pcm_IsValid(pcm, MAX_PDU_SIZE));
+}
+
+static void mark_descriptors(uint8_t *coverage, size_t coverageBits,
+                             const Avtp_FieldDescriptor_t *desc, uint8_t numFields)
+{
+    for (uint8_t i = 0; i < numFields; i++) {
+        uint8_t bits = desc[i].bits;
+        uint8_t offset = desc[i].offset;
+        uint8_t quadlet = desc[i].quadlet;
+
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
+
+            assert_true(bit < coverageBits);
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
 }
 
 static void pcm_field_descriptors_cover_header(void **state)
 {
     (void)state;
-    uint8_t coverage[AVTP_PCM_HEADER_LEN * 8] = {0};
 
-    /* Every bit of the header must be described exactly once. */
-    for (uint8_t i = 0; i < AVTP_PCM_FIELD_MAX; i++) {
-        uint8_t quadlet = Avtp_PcmFieldDesc[i].quadlet;
-        uint8_t offset = Avtp_PcmFieldDesc[i].offset;
-        uint8_t bits = Avtp_PcmFieldDesc[i].bits;
+    for (uint8_t version = 0; version <= 1; version++) {
+        uint8_t coverage[AVTP_PCM_HEADER_LEN_V1 * 8] = {0};
+        size_t coverageBits = sizeof(coverage);
+        const Avtp_FieldDescriptor_t *pcmDesc =
+            version == AVTP_VERSION_1 ? Avtp_PcmFieldDescV1 : Avtp_PcmFieldDescV0;
+        size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_PCM_HEADER_LEN_V1
+                                                       : (size_t)AVTP_PCM_HEADER_LEN_V0) *
+                            8;
 
-        for (uint8_t b = 0; b < bits; b++) {
-            size_t bit = ((size_t)quadlet * 32) + offset + b;
+        mark_descriptors(coverage, coverageBits,
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_SUBTYPE], 1);
+        mark_descriptors(coverage, coverageBits,
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_VERSION], 1);
+        mark_descriptors(coverage, coverageBits, pcmDesc, AVTP_PCM_FIELD_MAX);
 
-            assert_true(bit < sizeof(coverage));
-            assert_int_equal(coverage[bit], 0);
-            coverage[bit] = 1;
+        for (size_t bit = 0; bit < coverageBits; bit++) {
+            assert_int_equal(coverage[bit], bit < headerBits ? 1 : 0);
         }
     }
+}
 
-    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
-        assert_int_equal(coverage[bit], 1);
+static void pcm_common_field_consistency(void **state)
+{
+    (void)state;
+
+    assert_int_equal(AVTP_PCM_FIELD_STREAM_DATA_LENGTH, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH);
+
+    for (uint8_t version = 0; version <= 1; version++) {
+        const Avtp_FieldDescriptor_t *pcmDesc =
+            version == AVTP_VERSION_1 ? Avtp_PcmFieldDescV1 : Avtp_PcmFieldDescV0;
+        const Avtp_FieldDescriptor_t *cshDesc =
+            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+
+        for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
+            assert_int_equal(pcmDesc[i].quadlet, cshDesc[i].quadlet);
+            assert_int_equal(pcmDesc[i].offset, cshDesc[i].offset);
+            assert_int_equal(pcmDesc[i].bits, cshDesc[i].bits);
+        }
+    }
+}
+
+static void pcm_aaf_shared_field_consistency(void **state)
+{
+    (void)state;
+
+    for (uint8_t version = 0; version <= 1; version++) {
+        const Avtp_FieldDescriptor_t *pcmDesc =
+            version == AVTP_VERSION_1 ? Avtp_PcmFieldDescV1 : Avtp_PcmFieldDescV0;
+        const Avtp_FieldDescriptor_t *aafDesc =
+            version == AVTP_VERSION_1 ? Avtp_AafFieldDescV1 : Avtp_AafFieldDescV0;
+
+        /* PCM and AAF interpret the same format-specific data slots, so the
+         * shared fields must have identical positions. */
+        assert_memory_equal(&pcmDesc[AVTP_PCM_FIELD_FORMAT], &aafDesc[AVTP_AAF_FIELD_FORMAT],
+                            sizeof(Avtp_FieldDescriptor_t));
+        assert_memory_equal(&pcmDesc[AVTP_PCM_FIELD_SP], &aafDesc[AVTP_AAF_FIELD_SP],
+                            sizeof(Avtp_FieldDescriptor_t));
+        assert_memory_equal(&pcmDesc[AVTP_PCM_FIELD_EVT], &aafDesc[AVTP_AAF_FIELD_EVT],
+                            sizeof(Avtp_FieldDescriptor_t));
+        assert_memory_equal(&pcmDesc[AVTP_PCM_FIELD_STREAM_DATA_LENGTH],
+                            &aafDesc[AVTP_AAF_FIELD_STREAM_DATA_LENGTH],
+                            sizeof(Avtp_FieldDescriptor_t));
     }
 }
 
@@ -273,6 +369,49 @@ static void pcm_field_layout(void **state)
     Avtp_Pcm_SetEvt(pcm, 0xA);
     assert_int_equal(Avtp_Pcm_GetEvt(pcm), 0xA);
     assert_int_equal(read_quadlet(pdu, 5), 0xAAAA1A00);
+
+    /* ptp_grandmaster_identity does not exist in version 0. */
+    assert_int_equal(Avtp_Pcm_GetPtpGrandmasterIdentity(pcm), 0);
+}
+
+static void pcm_v1_layout(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_PCM_HEADER_LEN_V1];
+    Avtp_Pcm_t *pcm = (Avtp_Pcm_t *)pdu;
+
+    Avtp_Pcm_InitV1((Avtp_PcmV1_t *)pdu);
+
+    Avtp_Pcm_SetSequenceNum(pcm, 0x12345678);
+    assert_int_equal(Avtp_Pcm_GetSequenceNum(pcm), 0x12345678);
+    assert_int_equal(read_quadlet(pdu, 3), 0x12345678);
+
+    Avtp_Pcm_SetAvtpTimestamp(pcm, 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Pcm_GetAvtpTimestamp(pcm), 0x1122334455667788ULL);
+    assert_int_equal(read_quadlet(pdu, 4), 0x11223344);
+    assert_int_equal(read_quadlet(pdu, 5), 0x55667788);
+
+    Avtp_Pcm_SetPtpGrandmasterIdentity(pcm, 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Pcm_GetPtpGrandmasterIdentity(pcm), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(read_quadlet(pdu, 6), 0x99AABBCC);
+    assert_int_equal(read_quadlet(pdu, 7), 0xDDEEFF00);
+
+    Avtp_Pcm_SetFormat(pcm, AVTP_AAF_FORMAT_INT_16BIT);
+    assert_int_equal(read_quadlet(pdu, 8), 0x04000000);
+
+    Avtp_Pcm_SetNsr(pcm, AVTP_PCM_NSR_48KHZ);
+    assert_int_equal(read_quadlet(pdu, 8), 0x04500000);
+
+    Avtp_Pcm_SetChannelsPerFrame(pcm, 0x2AA);
+    assert_int_equal(read_quadlet(pdu, 8), 0x0452AA00);
+
+    Avtp_Pcm_SetBitDepth(pcm, 0xA5);
+    assert_int_equal(read_quadlet(pdu, 8), 0x0452AAA5);
+
+    Avtp_Pcm_SetStreamDataLength(pcm, 0xAAAA);
+    Avtp_Pcm_SetSp(pcm, true);
+    Avtp_Pcm_SetEvt(pcm, 0xA);
+    assert_int_equal(read_quadlet(pdu, 9), 0xAAAA1A00);
 }
 
 static void pcm_payload(void **state)
@@ -286,11 +425,17 @@ static void pcm_payload(void **state)
     Avtp_Pcm_Init(pcm);
     Avtp_Pcm_SetPayload(pcm, payload, sizeof(payload));
 
-    assert_memory_equal(Avtp_Pcm_GetPayload(pcm), payload, sizeof(payload));
-    assert_memory_equal(pcm->payload, payload, sizeof(payload));
+    assert_ptr_equal(Avtp_Pcm_GetPayload(pcm), pdu + AVTP_PCM_HEADER_LEN_V0);
+    assert_memory_equal(pdu + AVTP_PCM_HEADER_LEN_V0, payload, sizeof(payload));
 
     memcpy(payload_out, Avtp_Pcm_GetPayload(pcm), sizeof(payload_out));
     assert_memory_equal(payload_out, payload, sizeof(payload_out));
+
+    /* Version 1 payload starts after the 40-octet header. */
+    Avtp_Pcm_InitV1((Avtp_PcmV1_t *)pdu);
+    Avtp_Pcm_SetPayload((Avtp_Pcm_t *)pdu, payload, sizeof(payload));
+    assert_ptr_equal(Avtp_Pcm_GetPayload((Avtp_Pcm_t *)pdu), pdu + AVTP_PCM_HEADER_LEN_V1);
+    assert_memory_equal(pdu + AVTP_PCM_HEADER_LEN_V1, payload, sizeof(payload));
 }
 
 static void pcm_get_set_field(void **state)
@@ -305,8 +450,8 @@ static void pcm_get_set_field(void **state)
     assert_int_equal(Avtp_Pcm_GetField(pcm, AVTP_PCM_FIELD_EVT), 0xA);
 
     /* Reserved fields are reachable through the generic access engine. */
-    Avtp_Pcm_SetField(pcm, AVTP_PCM_FIELD_RSV2, 0x3);
-    assert_int_equal(Avtp_Pcm_GetField(pcm, AVTP_PCM_FIELD_RSV2), 0x3);
+    Avtp_Pcm_SetField(pcm, AVTP_PCM_FIELD_FSD, 0x3);
+    assert_int_equal(Avtp_Pcm_GetField(pcm, AVTP_PCM_FIELD_FSD), 0x3);
 
     Avtp_Pcm_SetField(pcm, AVTP_PCM_FIELD_RESERVED2, 0xAB);
     assert_int_equal(Avtp_Pcm_GetField(pcm, AVTP_PCM_FIELD_RESERVED2), 0xAB);
@@ -316,10 +461,14 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(pcm_init),
+        cmocka_unit_test(pcm_init_v1),
         cmocka_unit_test(pcm_is_valid),
         cmocka_unit_test(pcm_field_descriptors_cover_header),
+        cmocka_unit_test(pcm_common_field_consistency),
+        cmocka_unit_test(pcm_aaf_shared_field_consistency),
         cmocka_unit_test(pcm_flag_fields),
         cmocka_unit_test(pcm_field_layout),
+        cmocka_unit_test(pcm_v1_layout),
         cmocka_unit_test(pcm_payload),
         cmocka_unit_test(pcm_get_set_field),
     };

@@ -17,9 +17,11 @@ table covering the format's own bits, `Init`, `IsValid` and payload helpers.
 They differ only in the header they describe: the common stream header, except
 for CRF/NTSCF, which use the alternative header. Both header styles are
 versioned (0 and 1); the common stream header fields are described once in
-[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h), and each format
-declares a complete descriptor table per version in absolute coordinates,
-reusing those positions for the common fields (TSCF is the reference). The CVF
+[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h), and each stream
+format (AAF, PCM, CVF, RVF, TSCF) declares a complete descriptor table per
+version in absolute coordinates, reusing those positions for the common fields.
+A per-format consistency test keeps those common entries aligned with the style
+module. The CVF
 format-specific headers (MJPEG, H.264, JPEG 2000) and the RVF raw header are
 fragments of the stream data rather than standalone PDUs: they are validated
 through the enclosing PDU (`Avtp_Cvf_IsValid`/`Avtp_Rvf_IsValid`, plus a
