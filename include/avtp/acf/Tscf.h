@@ -32,10 +32,12 @@
  * This file contains the fields descriptions of the IEEE 1722 TSCF PDUs and
  * functions to invoke corresponding parser and deparser.
  *
- * TSCF uses the AVTPDU common stream header (4.7.4), so all common fields are
- * accessed through Avtp_CommonStreamHeader_*. The fields in this module are
- * described in version 0 coordinates; the GET/SET macros add the common stream
- * header's format offset to reach the version 1 positions.
+ * TSCF uses the AVTPDU common stream header (4.7.4) and declares a complete
+ * descriptor table per version in absolute coordinates: the common fields
+ * reuse the positions from CommonStreamHeader.h and the format-specific data
+ * slots (format_specific_data_2 and _3) are overridden as reserved. A
+ * consistency test keeps the common entries aligned with the common stream
+ * header module.
  */
 
 #pragma once
@@ -65,17 +67,6 @@ extern "C" {
 /* TSCF supports both versions of the common stream header (Table 7). */
 #define AVTP_TSCF_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
 
-#define GET_TSCF_FIELD(field)                                                                      \
-    (Avtp_GetField(Avtp_TscfFieldDesc, AVTP_TSCF_FIELD_MAX,                                        \
-                   (const uint8_t *)pdu + Avtp_CommonStreamHeader_GetFormatOffset(                 \
-                                              (const Avtp_CommonStreamHeader_t *)pdu),             \
-                   field))
-#define SET_TSCF_FIELD(field, value)                                                               \
-    (Avtp_SetField(Avtp_TscfFieldDesc, AVTP_TSCF_FIELD_MAX,                                        \
-                   (uint8_t *)pdu + Avtp_CommonStreamHeader_GetFormatOffset(                       \
-                                        (const Avtp_CommonStreamHeader_t *)pdu),                   \
-                   field, value))
-
 typedef struct {
     uint8_t header[AVTP_TSCF_HEADER_LEN_V0];
     uint8_t payload[0];
@@ -88,6 +79,20 @@ typedef struct {
 
 typedef enum {
 
+    /* Common AVTP stream header fields */
+    AVTP_TSCF_FIELD_SV = 0,
+    AVTP_TSCF_FIELD_MR,
+    AVTP_TSCF_FIELD_FSD,
+    AVTP_TSCF_FIELD_TV,
+    AVTP_TSCF_FIELD_SEQUENCE_NUM,
+    AVTP_TSCF_FIELD_FSD0,
+    AVTP_TSCF_FIELD_FSD1,
+    AVTP_TSCF_FIELD_TU,
+    AVTP_TSCF_FIELD_STREAM_ID,
+    AVTP_TSCF_FIELD_AVTP_TIMESTAMP,
+    AVTP_TSCF_FIELD_PTP_GRANDMASTER_IDENTITY,
+    AVTP_TSCF_FIELD_STREAM_DATA_LENGTH,
+
     /* TSCF-specific fields (format_specific_data_2 and _3) */
     AVTP_TSCF_FIELD_RESERVED2,
     AVTP_TSCF_FIELD_RESERVED3,
@@ -97,14 +102,80 @@ typedef enum {
 } Avtp_TscfFields_t;
 
 /**
- * This table maps all TSCF-specific header fields to a descriptor. It is
- * written in version 0 coordinates; the accessors add the common stream
- * header's format offset for version 1.
+ * This table maps all IEEE 1722 TSCF header fields to a descriptor for version
+ * 0. It is complete and in absolute coordinates; the common stream header
+ * fields use the same positions as Avtp_CshFieldDescV0.
  */
-static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] = {
+static const Avtp_FieldDescriptor_t Avtp_TscfFieldDescV0[AVTP_TSCF_FIELD_MAX] = {
+    [AVTP_TSCF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_TSCF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_TSCF_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_TSCF_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_TSCF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_TSCF_FIELD_FSD0] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_TSCF_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_TSCF_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
+    [AVTP_TSCF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_TSCF_FIELD_AVTP_TIMESTAMP] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_TSCF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
     [AVTP_TSCF_FIELD_RESERVED2] = {.quadlet = 4, .offset = 0, .bits = 32},
     [AVTP_TSCF_FIELD_RESERVED3] = {.quadlet = 5, .offset = 16, .bits = 16},
 };
+
+/**
+ * This table maps all IEEE 1722 TSCF header fields to a descriptor for version
+ * 1. It is complete and in absolute coordinates; the common stream header
+ * fields use the same positions as Avtp_CshFieldDescV1.
+ */
+static const Avtp_FieldDescriptor_t Avtp_TscfFieldDescV1[AVTP_TSCF_FIELD_MAX] = {
+    [AVTP_TSCF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_TSCF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_TSCF_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_TSCF_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_TSCF_FIELD_SEQUENCE_NUM] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_FSD0] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_TSCF_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_TSCF_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
+    [AVTP_TSCF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_TSCF_FIELD_AVTP_TIMESTAMP] = {.quadlet = 4, .offset = 0, .bits = 64},
+    [AVTP_TSCF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 6, .offset = 0, .bits = 64},
+    [AVTP_TSCF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 9, .offset = 0, .bits = 16},
+    [AVTP_TSCF_FIELD_RESERVED2] = {.quadlet = 8, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_RESERVED3] = {.quadlet = 9, .offset = 16, .bits = 16},
+};
+
+/**
+ * Returns the value of an AVTP TSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t *const pdu, Avtp_TscfFields_t field)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_TscfFieldDescV1
+            : Avtp_TscfFieldDescV0;
+    return Avtp_GetField(desc, AVTP_TSCF_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+}
+
+/**
+ * Sets the value of an AVTP TSCF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @param value The value to set.
+ */
+OPEN1722_INLINE void Avtp_Tscf_SetField(Avtp_Tscf_t *pdu, Avtp_TscfFields_t field, uint64_t value)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_TscfFieldDescV1
+            : Avtp_TscfFieldDescV0;
+    Avtp_SetField(desc, AVTP_TSCF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
 
 /**
  * Return the value of the TSCF SV field as specified in the IEEE 1722 Specification.
@@ -114,7 +185,7 @@ static const Avtp_FieldDescriptor_t Avtp_TscfFieldDesc[AVTP_TSCF_FIELD_MAX] = {
  */
 OPEN1722_INLINE bool Avtp_Tscf_IsSv(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_IsSv((const Avtp_CommonStreamHeader_t *)pdu);
+    return (bool)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_SV);
 }
 
 /**
@@ -125,7 +196,7 @@ OPEN1722_INLINE bool Avtp_Tscf_IsSv(const Avtp_Tscf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Tscf_IsMr(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_IsMr((const Avtp_CommonStreamHeader_t *)pdu);
+    return (bool)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_MR);
 }
 
 /**
@@ -136,7 +207,7 @@ OPEN1722_INLINE bool Avtp_Tscf_IsMr(const Avtp_Tscf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Tscf_IsTv(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_IsTv((const Avtp_CommonStreamHeader_t *)pdu);
+    return (bool)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_TV);
 }
 
 /**
@@ -147,7 +218,7 @@ OPEN1722_INLINE bool Avtp_Tscf_IsTv(const Avtp_Tscf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Tscf_IsTu(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_IsTu((const Avtp_CommonStreamHeader_t *)pdu);
+    return (bool)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_TU);
 }
 
 /**
@@ -159,7 +230,7 @@ OPEN1722_INLINE bool Avtp_Tscf_IsTu(const Avtp_Tscf_t *const pdu)
  */
 OPEN1722_INLINE uint32_t Avtp_Tscf_GetSequenceNum(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetSequenceNum((const Avtp_CommonStreamHeader_t *)pdu);
+    return (uint32_t)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -175,10 +246,9 @@ OPEN1722_INLINE uint8_t Avtp_Tscf_GetSequenceNumLsb(const Avtp_Tscf_t *const pdu
 {
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
         AVTP_VERSION_1) {
-        return Avtp_CommonStreamHeader_GetFormatSpecificData0(
-            (const Avtp_CommonStreamHeader_t *)pdu);
+        return (uint8_t)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_FSD0);
     }
-    return (uint8_t)Avtp_CommonStreamHeader_GetSequenceNum((const Avtp_CommonStreamHeader_t *)pdu);
+    return (uint8_t)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -189,7 +259,7 @@ OPEN1722_INLINE uint8_t Avtp_Tscf_GetSequenceNumLsb(const Avtp_Tscf_t *const pdu
  */
 OPEN1722_INLINE uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetStreamId((const Avtp_CommonStreamHeader_t *)pdu);
+    return Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_STREAM_ID);
 }
 
 /**
@@ -201,7 +271,7 @@ OPEN1722_INLINE uint64_t Avtp_Tscf_GetStreamId(const Avtp_Tscf_t *const pdu)
  */
 OPEN1722_INLINE uint64_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetAvtpTimestamp((const Avtp_CommonStreamHeader_t *)pdu);
+    return Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_AVTP_TIMESTAMP);
 }
 
 /**
@@ -213,8 +283,7 @@ OPEN1722_INLINE uint64_t Avtp_Tscf_GetAvtpTimestamp(const Avtp_Tscf_t *const pdu
  */
 OPEN1722_INLINE uint64_t Avtp_Tscf_GetPtpGrandmasterIdentity(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity(
-        (const Avtp_CommonStreamHeader_t *)pdu);
+    return Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_PTP_GRANDMASTER_IDENTITY);
 }
 
 /**
@@ -226,7 +295,7 @@ OPEN1722_INLINE uint64_t Avtp_Tscf_GetPtpGrandmasterIdentity(const Avtp_Tscf_t *
  */
 OPEN1722_INLINE uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetStreamDataLength((const Avtp_CommonStreamHeader_t *)pdu);
+    return (uint16_t)Avtp_Tscf_GetField(pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH);
 }
 
 /**
@@ -237,7 +306,7 @@ OPEN1722_INLINE uint16_t Avtp_Tscf_GetStreamDataLength(const Avtp_Tscf_t *const 
  */
 OPEN1722_INLINE void Avtp_Tscf_SetSv(Avtp_Tscf_t *pdu, bool sv)
 {
-    Avtp_CommonStreamHeader_SetSv((Avtp_CommonStreamHeader_t *)pdu, sv);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_SV, sv);
 }
 
 /**
@@ -248,7 +317,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetSv(Avtp_Tscf_t *pdu, bool sv)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetMr(Avtp_Tscf_t *pdu, bool mr)
 {
-    Avtp_CommonStreamHeader_SetMr((Avtp_CommonStreamHeader_t *)pdu, mr);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_MR, mr);
 }
 
 /**
@@ -259,7 +328,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetMr(Avtp_Tscf_t *pdu, bool mr)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetTv(Avtp_Tscf_t *pdu, bool tv)
 {
-    Avtp_CommonStreamHeader_SetTv((Avtp_CommonStreamHeader_t *)pdu, tv);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_TV, tv);
 }
 
 /**
@@ -270,7 +339,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetTv(Avtp_Tscf_t *pdu, bool tv)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetTu(Avtp_Tscf_t *pdu, bool tu)
 {
-    Avtp_CommonStreamHeader_SetTu((Avtp_CommonStreamHeader_t *)pdu, tu);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_TU, tu);
 }
 
 /**
@@ -283,11 +352,10 @@ OPEN1722_INLINE void Avtp_Tscf_SetTu(Avtp_Tscf_t *pdu, bool tu)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t *pdu, uint32_t value)
 {
-    Avtp_CommonStreamHeader_SetSequenceNum((Avtp_CommonStreamHeader_t *)pdu, value);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_SEQUENCE_NUM, value);
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
         AVTP_VERSION_1) {
-        Avtp_CommonStreamHeader_SetFormatSpecificData0((Avtp_CommonStreamHeader_t *)pdu,
-                                                       (uint8_t)(value & 0xFFU));
+        Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_FSD0, (uint8_t)(value & 0xFFU));
     }
 }
 
@@ -299,7 +367,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetSequenceNum(Avtp_Tscf_t *pdu, uint32_t value)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetStreamId(Avtp_Tscf_t *pdu, uint64_t value)
 {
-    Avtp_CommonStreamHeader_SetStreamId((Avtp_CommonStreamHeader_t *)pdu, value);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_STREAM_ID, value);
 }
 
 /**
@@ -310,7 +378,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetStreamId(Avtp_Tscf_t *pdu, uint64_t value)
  */
 OPEN1722_INLINE void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t *pdu, uint64_t value)
 {
-    Avtp_CommonStreamHeader_SetAvtpTimestamp((Avtp_CommonStreamHeader_t *)pdu, value);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_AVTP_TIMESTAMP, value);
 }
 
 /**
@@ -322,7 +390,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetAvtpTimestamp(Avtp_Tscf_t *pdu, uint64_t value
  */
 OPEN1722_INLINE void Avtp_Tscf_SetPtpGrandmasterIdentity(Avtp_Tscf_t *pdu, uint64_t value)
 {
-    Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity((Avtp_CommonStreamHeader_t *)pdu, value);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_PTP_GRANDMASTER_IDENTITY, value);
 }
 
 /**
@@ -334,7 +402,7 @@ OPEN1722_INLINE void Avtp_Tscf_SetPtpGrandmasterIdentity(Avtp_Tscf_t *pdu, uint6
  */
 OPEN1722_INLINE void Avtp_Tscf_SetStreamDataLength(Avtp_Tscf_t *pdu, uint16_t value)
 {
-    Avtp_CommonStreamHeader_SetStreamDataLength((Avtp_CommonStreamHeader_t *)pdu, value);
+    Avtp_Tscf_SetField(pdu, AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
 /**
@@ -433,30 +501,6 @@ OPEN1722_INLINE void Avtp_Tscf_InitV1(Avtp_TscfV1_t *pdu)
         Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
         Avtp_Tscf_SetSv((Avtp_Tscf_t *)pdu, true);
     }
-}
-
-/**
- * Returns the value of an AVTP TSCF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
- * @param field Specifies the position of the data field to be read
- * @returns This function returns the value of the field.
- */
-OPEN1722_INLINE uint64_t Avtp_Tscf_GetField(const Avtp_Tscf_t *const pdu, Avtp_TscfFields_t field)
-{
-    return (uint64_t)GET_TSCF_FIELD(field);
-}
-
-/**
- * Sets the value of an AVTP TSCF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 AVTP TSCF PDU.
- * @param field Specifies the position of the data field to be read
- * @param value The value to set.
- */
-OPEN1722_INLINE void Avtp_Tscf_SetField(Avtp_Tscf_t *pdu, Avtp_TscfFields_t field, uint64_t value)
-{
-    SET_TSCF_FIELD(field, value);
 }
 
 #ifdef __cplusplus
