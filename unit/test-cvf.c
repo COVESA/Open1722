@@ -42,6 +42,7 @@ extern "C" {
 #include <string.h>
 
 #include "avtp/CommonHeader.h"
+#include "avtp/CommonStreamHeader.h"
 #include "avtp/cvf/Cvf.h"
 #include "avtp/cvf/H264.h"
 #include "avtp/cvf/Jpeg2000.h"
@@ -65,19 +66,40 @@ static void cvf_init(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t init_pdu[AVTP_CVF_HEADER_LEN];
+    uint8_t init_pdu[AVTP_CVF_HEADER_LEN_V0];
 
-    assert_int_equal(sizeof(Avtp_Cvf_t), AVTP_CVF_HEADER_LEN);
+    assert_int_equal(sizeof(Avtp_Cvf_t), AVTP_CVF_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
     Avtp_Cvf_Init(NULL);
 
     Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
-    memset(init_pdu, 0, AVTP_CVF_HEADER_LEN);
+    memset(init_pdu, 0, AVTP_CVF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_CVF;     /* subtype = CVF */
-    init_pdu[1] = 0x80;                 /* sv = 1 */
+    init_pdu[1] = 0x80;                 /* sv = 1, version = 0 */
     init_pdu[16] = AVTP_CVF_FORMAT_RFC; /* format = RFC */
-    assert_memory_equal(init_pdu, pdu, AVTP_CVF_HEADER_LEN);
+    assert_memory_equal(init_pdu, pdu, AVTP_CVF_HEADER_LEN_V0);
+}
+
+static void cvf_init_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t init_pdu[AVTP_CVF_HEADER_LEN_V1];
+
+    assert_int_equal(sizeof(Avtp_CvfV1_t), AVTP_CVF_HEADER_LEN_V1);
+
+    /* Passing a NULL pointer must be a no-op. */
+    Avtp_Cvf_InitV1(NULL);
+
+    Avtp_Cvf_InitV1((Avtp_CvfV1_t *)pdu);
+    memset(init_pdu, 0, AVTP_CVF_HEADER_LEN_V1);
+    init_pdu[0] = AVTP_SUBTYPE_CVF;     /* subtype = CVF */
+    init_pdu[1] = 0x90;                 /* sv = 1, version = 1 */
+    init_pdu[32] = AVTP_CVF_FORMAT_RFC; /* format = RFC at q8@0 */
+    assert_memory_equal(init_pdu, pdu, AVTP_CVF_HEADER_LEN_V1);
+
+    assert_int_equal(Avtp_Cvf_GetHeaderLen((Avtp_Cvf_t *)pdu), AVTP_CVF_HEADER_LEN_V1);
 }
 
 static void cvf_is_valid(void **state)
@@ -86,7 +108,7 @@ static void cvf_is_valid(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
 
     Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
-    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN));
+    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V0));
 
     /* NULL pdu. */
     assert_false(Avtp_Cvf_IsValid(NULL, MAX_PDU_SIZE));
@@ -97,37 +119,87 @@ static void cvf_is_valid(void **state)
 
     /* Buffer smaller than the CVF header. */
     Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
-    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN - 1));
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V0 - 1));
 
     /* stream_data_length does not fit into the buffer. */
     Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
     Avtp_Cvf_SetStreamDataLength((Avtp_Cvf_t *)pdu, 10);
-    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN + 9));
-    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN + 10));
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V0 + 9));
+    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V0 + 10));
+
+    /* Valid version 1 frame. */
+    Avtp_Cvf_InitV1((Avtp_CvfV1_t *)pdu);
+    Avtp_Cvf_SetStreamDataLength((Avtp_Cvf_t *)pdu, 10);
+    assert_true(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V1 + 10));
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V1 + 9));
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, AVTP_CVF_HEADER_LEN_V1 - 1));
+
+    /* Unsupported version is rejected. */
+    Avtp_Cvf_Init((Avtp_Cvf_t *)pdu);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 2);
+    assert_false(Avtp_Cvf_IsValid((Avtp_Cvf_t *)pdu, MAX_PDU_SIZE));
+}
+
+static void mark_descriptors(uint8_t *coverage, size_t coverageBits,
+                             const Avtp_FieldDescriptor_t *desc, uint8_t numFields)
+{
+    for (uint8_t i = 0; i < numFields; i++) {
+        uint8_t bits = desc[i].bits;
+        uint8_t offset = desc[i].offset;
+        uint8_t quadlet = desc[i].quadlet;
+
+        for (uint8_t b = 0; b < bits; b++) {
+            size_t bit = ((size_t)quadlet * 32) + offset + b;
+
+            assert_true(bit < coverageBits);
+            assert_int_equal(coverage[bit], 0);
+            coverage[bit] = 1;
+        }
+    }
 }
 
 static void cvf_field_descriptors_cover_header(void **state)
 {
     (void)state;
-    uint8_t coverage[AVTP_CVF_HEADER_LEN * 8] = {0};
 
-    /* Every bit of the header must be described exactly once. */
-    for (uint8_t i = 0; i < AVTP_CVF_FIELD_MAX; i++) {
-        uint8_t quadlet = Avtp_CvfFieldDesc[i].quadlet;
-        uint8_t offset = Avtp_CvfFieldDesc[i].offset;
-        uint8_t bits = Avtp_CvfFieldDesc[i].bits;
+    for (uint8_t version = 0; version <= 1; version++) {
+        uint8_t coverage[AVTP_CVF_HEADER_LEN_V1 * 8] = {0};
+        size_t coverageBits = sizeof(coverage);
+        const Avtp_FieldDescriptor_t *cvfDesc =
+            version == AVTP_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
+        size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_CVF_HEADER_LEN_V1
+                                                       : (size_t)AVTP_CVF_HEADER_LEN_V0) *
+                            8;
 
-        for (uint8_t b = 0; b < bits; b++) {
-            size_t bit = ((size_t)quadlet * 32) + offset + b;
+        mark_descriptors(coverage, coverageBits,
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_SUBTYPE], 1);
+        mark_descriptors(coverage, coverageBits,
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_VERSION], 1);
+        mark_descriptors(coverage, coverageBits, cvfDesc, AVTP_CVF_FIELD_MAX);
 
-            assert_true(bit < sizeof(coverage));
-            assert_int_equal(coverage[bit], 0);
-            coverage[bit] = 1;
+        for (size_t bit = 0; bit < coverageBits; bit++) {
+            assert_int_equal(coverage[bit], bit < headerBits ? 1 : 0);
         }
     }
+}
 
-    for (size_t bit = 0; bit < sizeof(coverage); bit++) {
-        assert_int_equal(coverage[bit], 1);
+static void cvf_common_field_consistency(void **state)
+{
+    (void)state;
+
+    assert_int_equal(AVTP_CVF_FIELD_STREAM_DATA_LENGTH, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH);
+
+    for (uint8_t version = 0; version <= 1; version++) {
+        const Avtp_FieldDescriptor_t *cvfDesc =
+            version == AVTP_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
+        const Avtp_FieldDescriptor_t *cshDesc =
+            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+
+        for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
+            assert_int_equal(cvfDesc[i].quadlet, cshDesc[i].quadlet);
+            assert_int_equal(cvfDesc[i].offset, cshDesc[i].offset);
+            assert_int_equal(cvfDesc[i].bits, cshDesc[i].bits);
+        }
     }
 }
 
@@ -221,6 +293,42 @@ static void cvf_field_layout(void **state)
     Avtp_Cvf_SetEvt(cvf, 0xA);
     assert_int_equal(Avtp_Cvf_GetEvt(cvf), 0xA);
     assert_int_equal(read_quadlet(pdu, 5), 0xAAAA3A00);
+
+    /* ptp_grandmaster_identity does not exist in version 0. */
+    assert_int_equal(Avtp_Cvf_GetPtpGrandmasterIdentity(cvf), 0);
+}
+
+static void cvf_v1_layout(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_CVF_HEADER_LEN_V1];
+    Avtp_Cvf_t *cvf = (Avtp_Cvf_t *)pdu;
+
+    Avtp_Cvf_InitV1((Avtp_CvfV1_t *)pdu);
+
+    Avtp_Cvf_SetSequenceNum(cvf, 0x12345678);
+    assert_int_equal(Avtp_Cvf_GetSequenceNum(cvf), 0x12345678);
+    assert_int_equal(read_quadlet(pdu, 3), 0x12345678);
+
+    Avtp_Cvf_SetAvtpTimestamp(cvf, 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Cvf_GetAvtpTimestamp(cvf), 0x1122334455667788ULL);
+    assert_int_equal(read_quadlet(pdu, 4), 0x11223344);
+    assert_int_equal(read_quadlet(pdu, 5), 0x55667788);
+
+    Avtp_Cvf_SetPtpGrandmasterIdentity(cvf, 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Cvf_GetPtpGrandmasterIdentity(cvf), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(read_quadlet(pdu, 6), 0x99AABBCC);
+    assert_int_equal(read_quadlet(pdu, 7), 0xDDEEFF00);
+
+    Avtp_Cvf_SetFormat(cvf, AVTP_CVF_FORMAT_RFC);
+    Avtp_Cvf_SetFormatSubtype(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    assert_int_equal(read_quadlet(pdu, 8), 0x02010000);
+
+    Avtp_Cvf_SetStreamDataLength(cvf, 0xAAAA);
+    Avtp_Cvf_SetPtv(cvf, true);
+    Avtp_Cvf_SetM(cvf, true);
+    Avtp_Cvf_SetEvt(cvf, 0xA);
+    assert_int_equal(read_quadlet(pdu, 9), 0xAAAA3A00);
 }
 
 static void cvf_payload(void **state)
@@ -234,11 +342,17 @@ static void cvf_payload(void **state)
     Avtp_Cvf_Init(cvf);
     Avtp_Cvf_SetPayload(cvf, payload, sizeof(payload));
 
-    assert_memory_equal(Avtp_Cvf_GetPayload(cvf), payload, sizeof(payload));
-    assert_memory_equal(cvf->payload, payload, sizeof(payload));
+    assert_ptr_equal(Avtp_Cvf_GetPayload(cvf), pdu + AVTP_CVF_HEADER_LEN_V0);
+    assert_memory_equal(pdu + AVTP_CVF_HEADER_LEN_V0, payload, sizeof(payload));
 
     memcpy(payload_out, Avtp_Cvf_GetPayload(cvf), sizeof(payload_out));
     assert_memory_equal(payload_out, payload, sizeof(payload_out));
+
+    /* Version 1 payload starts after the 40-octet header. */
+    Avtp_Cvf_InitV1((Avtp_CvfV1_t *)pdu);
+    Avtp_Cvf_SetPayload((Avtp_Cvf_t *)pdu, payload, sizeof(payload));
+    assert_ptr_equal(Avtp_Cvf_GetPayload((Avtp_Cvf_t *)pdu), pdu + AVTP_CVF_HEADER_LEN_V1);
+    assert_memory_equal(pdu + AVTP_CVF_HEADER_LEN_V1, payload, sizeof(payload));
 }
 
 static void cvf_get_set_field(void **state)
@@ -253,11 +367,11 @@ static void cvf_get_set_field(void **state)
     assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_EVT), 0xA);
 
     /* Reserved fields are reachable through the generic access engine. */
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_RSV1, 0x3);
-    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_RSV1), 0x3);
+    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_FSD, 0x3);
+    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_FSD), 0x3);
 
-    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_RESERVED1, 0x7F);
-    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_RESERVED1), 0x7F);
+    Avtp_Cvf_SetField(cvf, AVTP_CVF_FIELD_FSD1, 0x7F);
+    assert_int_equal(Avtp_Cvf_GetField(cvf, AVTP_CVF_FIELD_FSD1), 0x7F);
 }
 
 /******************************************************************************
@@ -567,10 +681,13 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(cvf_init),
+        cmocka_unit_test(cvf_init_v1),
         cmocka_unit_test(cvf_is_valid),
         cmocka_unit_test(cvf_field_descriptors_cover_header),
+        cmocka_unit_test(cvf_common_field_consistency),
         cmocka_unit_test(cvf_flag_fields),
         cmocka_unit_test(cvf_field_layout),
+        cmocka_unit_test(cvf_v1_layout),
         cmocka_unit_test(cvf_payload),
         cmocka_unit_test(cvf_get_set_field),
         cmocka_unit_test(mjpeg_init),

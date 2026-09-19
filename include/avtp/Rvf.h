@@ -33,6 +33,12 @@
  * @file
  * This file contains the fields descriptions of the IEEE 1722 RVF PDUs and
  * functions to invoke corresponding parser and deparser.
+ *
+ * RVF uses the AVTPDU common stream header (4.7.4) and declares a complete
+ * descriptor table per version in absolute coordinates: the common stream
+ * header fields reuse the positions from CommonStreamHeader.h and the
+ * RVF-specific fields are added by this module. A consistency test keeps the
+ * common entries aligned with the common stream header module.
  */
 
 #pragma once
@@ -48,23 +54,30 @@
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/CommonHeader.h"
+#include "avtp/CommonStreamHeader.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define AVTP_RVF_HEADER_LEN (6 * AVTP_QUADLET_SIZE)
+#define AVTP_RVF_HEADER_LEN_V0 AVTPDU_CSH_LEN_V0 /* 24 */
+#define AVTP_RVF_HEADER_LEN_V1 AVTPDU_CSH_LEN_V1 /* 40 */
+/* Kept for compatibility: the version 0 header length. */
+#define AVTP_RVF_HEADER_LEN AVTP_RVF_HEADER_LEN_V0
 #define AVTP_RVF_RAW_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
-#define GET_RVF_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_RvfFieldDesc, AVTP_RVF_FIELD_MAX, (const uint8_t *)pdu, field))
-#define SET_RVF_FIELD(field, value)                                                                \
-    (Avtp_SetField(Avtp_RvfFieldDesc, AVTP_RVF_FIELD_MAX, (uint8_t *)pdu, field, value))
+/* RVF supports both versions of the common stream header (Table 7). */
+#define AVTP_RVF_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
 
 typedef struct {
-    uint8_t header[AVTP_RVF_HEADER_LEN];
+    uint8_t header[AVTP_RVF_HEADER_LEN_V0];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_Rvf_t;
+
+typedef struct {
+    uint8_t header[AVTP_RVF_HEADER_LEN_V1];
+    uint8_t payload[0];
+} __attribute__((packed)) Avtp_RvfV1_t;
 
 typedef enum Avtp_RvfPixelDepth {
     AVTP_RVF_PIXEL_DEPTH_8 = 0x01,
@@ -130,22 +143,22 @@ typedef enum Avtp_RvfColorspace {
 typedef enum {
 
     /* Common AVTP stream header fields */
-    AVTP_RVF_FIELD_SUBTYPE,
-    AVTP_RVF_FIELD_SV,
-    AVTP_RVF_FIELD_VERSION,
+    AVTP_RVF_FIELD_SV = 0,
     AVTP_RVF_FIELD_MR,
-    AVTP_RVF_FIELD_RSV,
+    AVTP_RVF_FIELD_FSD,
     AVTP_RVF_FIELD_TV,
     AVTP_RVF_FIELD_SEQUENCE_NUM,
-    AVTP_RVF_FIELD_RESERVED1,
+    AVTP_RVF_FIELD_FSD0,
+    AVTP_RVF_FIELD_FSD1,
     AVTP_RVF_FIELD_TU,
-
-    /* RVF header fields */
     AVTP_RVF_FIELD_STREAM_ID,
     AVTP_RVF_FIELD_AVTP_TIMESTAMP,
+    AVTP_RVF_FIELD_PTP_GRANDMASTER_IDENTITY,
+    AVTP_RVF_FIELD_STREAM_DATA_LENGTH,
+
+    /* RVF format-specific fields */
     AVTP_RVF_FIELD_ACTIVE_PIXELS,
     AVTP_RVF_FIELD_TOTAL_LINES,
-    AVTP_RVF_FIELD_STREAM_DATA_LENGTH,
     AVTP_RVF_FIELD_AP,
     AVTP_RVF_FIELD_R,
     AVTP_RVF_FIELD_F,
@@ -160,25 +173,25 @@ typedef enum {
 } Avtp_RvfFields_t;
 
 /**
- * This table maps all IEEE 1722 RVF header fields to a descriptor.
+ * This table maps all IEEE 1722 RVF header fields to a descriptor for version 0.
+ * It is complete and in absolute coordinates; the common stream header fields
+ * use the same positions as Avtp_CshFieldDescV0.
  */
-static const Avtp_FieldDescriptor_t Avtp_RvfFieldDesc[AVTP_RVF_FIELD_MAX] = {
-    /* Common AVTP stream header fields */
-    [AVTP_RVF_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+static const Avtp_FieldDescriptor_t Avtp_RvfFieldDescV0[AVTP_RVF_FIELD_MAX] = {
     [AVTP_RVF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
-    [AVTP_RVF_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
     [AVTP_RVF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
-    [AVTP_RVF_FIELD_RSV] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_RVF_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
     [AVTP_RVF_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
     [AVTP_RVF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
-    [AVTP_RVF_FIELD_RESERVED1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_RVF_FIELD_FSD0] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_RVF_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
     [AVTP_RVF_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
-    /* RVF header fields */
     [AVTP_RVF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
     [AVTP_RVF_FIELD_AVTP_TIMESTAMP] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_RVF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_RVF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
     [AVTP_RVF_FIELD_ACTIVE_PIXELS] = {.quadlet = 4, .offset = 0, .bits = 16},
     [AVTP_RVF_FIELD_TOTAL_LINES] = {.quadlet = 4, .offset = 16, .bits = 16},
-    [AVTP_RVF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
     [AVTP_RVF_FIELD_AP] = {.quadlet = 5, .offset = 16, .bits = 1},
     [AVTP_RVF_FIELD_R] = {.quadlet = 5, .offset = 17, .bits = 1},
     [AVTP_RVF_FIELD_F] = {.quadlet = 5, .offset = 18, .bits = 1},
@@ -190,6 +203,76 @@ static const Avtp_FieldDescriptor_t Avtp_RvfFieldDesc[AVTP_RVF_FIELD_MAX] = {
 };
 
 /**
+ * This table maps all IEEE 1722 RVF header fields to a descriptor for version 1.
+ * It is complete and in absolute coordinates; the common stream header fields
+ * use the same positions as Avtp_CshFieldDescV1.
+ */
+static const Avtp_FieldDescriptor_t Avtp_RvfFieldDescV1[AVTP_RVF_FIELD_MAX] = {
+    [AVTP_RVF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_RVF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_RVF_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_RVF_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_RVF_FIELD_SEQUENCE_NUM] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_RVF_FIELD_FSD0] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_RVF_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_RVF_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
+    [AVTP_RVF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_RVF_FIELD_AVTP_TIMESTAMP] = {.quadlet = 4, .offset = 0, .bits = 64},
+    [AVTP_RVF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 6, .offset = 0, .bits = 64},
+    [AVTP_RVF_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 9, .offset = 0, .bits = 16},
+    [AVTP_RVF_FIELD_ACTIVE_PIXELS] = {.quadlet = 8, .offset = 0, .bits = 16},
+    [AVTP_RVF_FIELD_TOTAL_LINES] = {.quadlet = 8, .offset = 16, .bits = 16},
+    [AVTP_RVF_FIELD_AP] = {.quadlet = 9, .offset = 16, .bits = 1},
+    [AVTP_RVF_FIELD_R] = {.quadlet = 9, .offset = 17, .bits = 1},
+    [AVTP_RVF_FIELD_F] = {.quadlet = 9, .offset = 18, .bits = 1},
+    [AVTP_RVF_FIELD_EF] = {.quadlet = 9, .offset = 19, .bits = 1},
+    [AVTP_RVF_FIELD_EVT] = {.quadlet = 9, .offset = 20, .bits = 4},
+    [AVTP_RVF_FIELD_PD] = {.quadlet = 9, .offset = 24, .bits = 1},
+    [AVTP_RVF_FIELD_I] = {.quadlet = 9, .offset = 25, .bits = 1},
+    [AVTP_RVF_FIELD_RESERVED2] = {.quadlet = 9, .offset = 26, .bits = 6},
+};
+
+/**
+ * Returns the value of an AVTP RVF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 RVF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfFields_t field)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_RvfFieldDescV1
+            : Avtp_RvfFieldDescV0;
+    return Avtp_GetField(desc, AVTP_RVF_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+}
+
+/**
+ * Sets the value of an AVTP RVF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 RVF PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ */
+OPEN1722_INLINE void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfFields_t field, uint64_t value)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_RvfFieldDescV1
+            : Avtp_RvfFieldDescV0;
+    Avtp_SetField(desc, AVTP_RVF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Returns the length of the RVF header in octets (24 or 40).
+ */
+OPEN1722_INLINE uint8_t Avtp_Rvf_GetHeaderLen(const Avtp_Rvf_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetHeaderLen((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
  * Return the value of the RVF SV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
@@ -197,7 +280,7 @@ static const Avtp_FieldDescriptor_t Avtp_RvfFieldDesc[AVTP_RVF_FIELD_MAX] = {
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsSv(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_SV);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_SV);
 }
 
 /**
@@ -208,7 +291,7 @@ OPEN1722_INLINE bool Avtp_Rvf_IsSv(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsMr(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_MR);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_MR);
 }
 
 /**
@@ -219,18 +302,19 @@ OPEN1722_INLINE bool Avtp_Rvf_IsMr(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsTv(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_TV);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_TV);
 }
 
 /**
- * Return the value of the RVF Sequence Number field as specified in the IEEE 1722 Specification.
+ * Return the value of the RVF Sequence Number field as specified in the IEEE 1722
+ * Specification. The field is 8 bits in version 0 and 32 bits in version 1.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @returns Value of the RVF Sequence Number field.
  */
-OPEN1722_INLINE uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t *const pdu)
+OPEN1722_INLINE uint32_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t *const pdu)
 {
-    return (uint8_t)GET_RVF_FIELD(AVTP_RVF_FIELD_SEQUENCE_NUM);
+    return (uint32_t)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -241,7 +325,7 @@ OPEN1722_INLINE uint8_t Avtp_Rvf_GetSequenceNum(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsTu(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_TU);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_TU);
 }
 
 /**
@@ -252,55 +336,67 @@ OPEN1722_INLINE bool Avtp_Rvf_IsTu(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE uint64_t Avtp_Rvf_GetStreamId(const Avtp_Rvf_t *const pdu)
 {
-    return (uint64_t)GET_RVF_FIELD(AVTP_RVF_FIELD_STREAM_ID);
+    return Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_STREAM_ID);
 }
 
 /**
- * Return the value of the RVF AVTP Timestamp field as specified in the IEEE 1722 Specification.
+ * Return the value of the RVF AVTP Timestamp field as specified in the IEEE 1722
+ * Specification. The field is 32 bits in version 0 and 64 bits in version 1.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @returns Value of the RVF AVTP Timestamp field.
  */
-OPEN1722_INLINE uint32_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Rvf_GetAvtpTimestamp(const Avtp_Rvf_t *const pdu)
 {
-    return (uint32_t)GET_RVF_FIELD(AVTP_RVF_FIELD_AVTP_TIMESTAMP);
+    return Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_AVTP_TIMESTAMP);
 }
 
 /**
- * Return the value of the RVF Active Pixels field as specified in the IEEE 1722 Specification.
+ * Return the value of the RVF ptp_grandmaster_identity field. The field only
+ * exists in version 1; version 0 returns 0.
+ *
+ * @param pdu Pointer to the first bit of an 1722 RVF PDU.
+ * @returns Value of the RVF ptp_grandmaster_identity field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Rvf_GetPtpGrandmasterIdentity(const Avtp_Rvf_t *const pdu)
+{
+    return Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_PTP_GRANDMASTER_IDENTITY);
+}
+
+/**
+ * Return the value of the RVF Active Pixels field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @returns Value of the RVF Active Pixels field.
  */
 OPEN1722_INLINE uint16_t Avtp_Rvf_GetActivePixels(const Avtp_Rvf_t *const pdu)
 {
-    return (uint16_t)GET_RVF_FIELD(AVTP_RVF_FIELD_ACTIVE_PIXELS);
+    return (uint16_t)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_ACTIVE_PIXELS);
 }
 
 /**
- * Return the value of the RVF Total Lines field as specified in the IEEE 1722 Specification.
+ * Return the value of the RVF Total Lines field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @returns Value of the RVF Total Lines field.
  */
 OPEN1722_INLINE uint16_t Avtp_Rvf_GetTotalLines(const Avtp_Rvf_t *const pdu)
 {
-    return (uint16_t)GET_RVF_FIELD(AVTP_RVF_FIELD_TOTAL_LINES);
+    return (uint16_t)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_TOTAL_LINES);
 }
 
 /**
- * Return the value of the RVF Stream Data Length field as specified in the IEEE 1722 Specification.
- *
- * The stream_data_length field contains the length (in octets) of the
- * stream_data_payload field, which for RVF consists of the raw header and the
- * video data payload.
+ * Return the value of the RVF Stream Data Length field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @returns Value of the RVF Stream Data Length field.
  */
 OPEN1722_INLINE uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t *const pdu)
 {
-    return (uint16_t)GET_RVF_FIELD(AVTP_RVF_FIELD_STREAM_DATA_LENGTH);
+    return (uint16_t)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_STREAM_DATA_LENGTH);
 }
 
 /**
@@ -311,7 +407,7 @@ OPEN1722_INLINE uint16_t Avtp_Rvf_GetStreamDataLength(const Avtp_Rvf_t *const pd
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsAp(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_AP);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_AP);
 }
 
 /**
@@ -322,7 +418,7 @@ OPEN1722_INLINE bool Avtp_Rvf_IsAp(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsF(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_F);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_F);
 }
 
 /**
@@ -333,7 +429,7 @@ OPEN1722_INLINE bool Avtp_Rvf_IsF(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsEf(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_EF);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_EF);
 }
 
 /**
@@ -344,7 +440,7 @@ OPEN1722_INLINE bool Avtp_Rvf_IsEf(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t *const pdu)
 {
-    return (uint8_t)GET_RVF_FIELD(AVTP_RVF_FIELD_EVT);
+    return (uint8_t)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_EVT);
 }
 
 /**
@@ -355,7 +451,7 @@ OPEN1722_INLINE uint8_t Avtp_Rvf_GetEvt(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsPd(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_PD);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_PD);
 }
 
 /**
@@ -366,62 +462,64 @@ OPEN1722_INLINE bool Avtp_Rvf_IsPd(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Rvf_IsI(const Avtp_Rvf_t *const pdu)
 {
-    return (bool)GET_RVF_FIELD(AVTP_RVF_FIELD_I);
+    return (bool)Avtp_Rvf_GetField(pdu, AVTP_RVF_FIELD_I);
 }
 
 /**
- * Set the SV bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the SV bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param sv Value to set the RVF SV field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetSv(Avtp_Rvf_t *pdu, bool sv)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_SV, sv);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_SV, sv);
 }
 
 /**
- * Set the MR bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the MR bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param mr Value to set the RVF MR field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetMr(Avtp_Rvf_t *pdu, bool mr)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_MR, mr);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_MR, mr);
 }
 
 /**
- * Set the TV bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the TV bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param tv Value to set the RVF TV field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetTv(Avtp_Rvf_t *pdu, bool tv)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_TV, tv);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_TV, tv);
 }
 
 /**
- * Set the value of the RVF Sequence Number field as specified in the IEEE 1722 Specification.
+ * Set the value of the RVF Sequence Number field as specified in the IEEE 1722
+ * Specification. The field is 8 bits in version 0 and 32 bits in version 1; values are
+ * truncated to the width of the version in use.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param value Value to set the RVF Sequence Number field to.
  */
-OPEN1722_INLINE void Avtp_Rvf_SetSequenceNum(Avtp_Rvf_t *pdu, uint8_t value)
+OPEN1722_INLINE void Avtp_Rvf_SetSequenceNum(Avtp_Rvf_t *pdu, uint32_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_SEQUENCE_NUM, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_SEQUENCE_NUM, value);
 }
 
 /**
- * Set the TU bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the TU bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param tu Value to set the RVF TU field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetTu(Avtp_Rvf_t *pdu, bool tu)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_TU, tu);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_TU, tu);
 }
 
 /**
@@ -432,84 +530,101 @@ OPEN1722_INLINE void Avtp_Rvf_SetTu(Avtp_Rvf_t *pdu, bool tu)
  */
 OPEN1722_INLINE void Avtp_Rvf_SetStreamId(Avtp_Rvf_t *pdu, uint64_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_STREAM_ID, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_STREAM_ID, value);
 }
 
 /**
- * Set the value of the RVF AVTP Timestamp field as specified in the IEEE 1722 Specification.
+ * Set the value of the RVF AVTP Timestamp field as specified in the IEEE 1722
+ * Specification. The field is 32 bits in version 0 and 64 bits in version 1; values are
+ * truncated to the width of the version in use.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param value Value to set the RVF AVTP Timestamp field to.
  */
-OPEN1722_INLINE void Avtp_Rvf_SetAvtpTimestamp(Avtp_Rvf_t *pdu, uint32_t value)
+OPEN1722_INLINE void Avtp_Rvf_SetAvtpTimestamp(Avtp_Rvf_t *pdu, uint64_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_AVTP_TIMESTAMP, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_AVTP_TIMESTAMP, value);
 }
 
 /**
- * Set the value of the RVF Active Pixels field as specified in the IEEE 1722 Specification.
+ * Set the value of the RVF ptp_grandmaster_identity field. The field only
+ * exists in version 1; on version 0 this is a no-op.
+ *
+ * @param pdu Pointer to the first bit of an 1722 RVF PDU.
+ * @param value Value to set the RVF ptp_grandmaster_identity field to.
+ */
+OPEN1722_INLINE void Avtp_Rvf_SetPtpGrandmasterIdentity(Avtp_Rvf_t *pdu, uint64_t value)
+{
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_PTP_GRANDMASTER_IDENTITY, value);
+}
+
+/**
+ * Set the value of the RVF Active Pixels field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param value Value to set the RVF Active Pixels field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetActivePixels(Avtp_Rvf_t *pdu, uint16_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_ACTIVE_PIXELS, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_ACTIVE_PIXELS, value);
 }
 
 /**
- * Set the value of the RVF Total Lines field as specified in the IEEE 1722 Specification.
+ * Set the value of the RVF Total Lines field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param value Value to set the RVF Total Lines field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetTotalLines(Avtp_Rvf_t *pdu, uint16_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_TOTAL_LINES, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_TOTAL_LINES, value);
 }
 
 /**
- * Set the value of the RVF Stream Data Length field as specified in the IEEE 1722 Specification.
+ * Set the value of the RVF Stream Data Length field as specified in the IEEE 1722
+ * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param value Value to set the RVF Stream Data Length field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetStreamDataLength(Avtp_Rvf_t *pdu, uint16_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_STREAM_DATA_LENGTH, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_STREAM_DATA_LENGTH, value);
 }
 
 /**
- * Set the AP bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the AP bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param ap Value to set the RVF AP field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetAp(Avtp_Rvf_t *pdu, bool ap)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_AP, ap);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_AP, ap);
 }
 
 /**
- * Set the F bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the F bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param f Value to set the RVF F field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetF(Avtp_Rvf_t *pdu, bool f)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_F, f);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_F, f);
 }
 
 /**
- * Set the EF bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the EF bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param ef Value to set the RVF EF field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetEf(Avtp_Rvf_t *pdu, bool ef)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_EF, ef);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_EF, ef);
 }
 
 /**
@@ -520,33 +635,34 @@ OPEN1722_INLINE void Avtp_Rvf_SetEf(Avtp_Rvf_t *pdu, bool ef)
  */
 OPEN1722_INLINE void Avtp_Rvf_SetEvt(Avtp_Rvf_t *pdu, uint8_t value)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_EVT, value);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_EVT, value);
 }
 
 /**
- * Set the PD bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the PD bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param pd Value to set the RVF PD field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetPd(Avtp_Rvf_t *pdu, bool pd)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_PD, pd);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_PD, pd);
 }
 
 /**
- * Set the I bit in a RVF frame as specified in the IEEE 1722 Specification.
+ * Set the I bit in an RVF frame as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 RVF PDU.
  * @param i Value to set the RVF I field to.
  */
 OPEN1722_INLINE void Avtp_Rvf_SetI(Avtp_Rvf_t *pdu, bool i)
 {
-    SET_RVF_FIELD(AVTP_RVF_FIELD_I, i);
+    Avtp_Rvf_SetField(pdu, AVTP_RVF_FIELD_I, i);
 }
 
 /**
- * Returns pointer to the stream data of an RVF frame.
+ * Returns pointer to the RVF stream data. The stream data starts after the
+ * version-dependent common stream header.
  *
  * The stream data contains the raw header (an Avtp_RvfRawHeader_t) followed by
  * the video data payload. Its length is given by the stream_data_length field.
@@ -556,7 +672,7 @@ OPEN1722_INLINE void Avtp_Rvf_SetI(Avtp_Rvf_t *pdu, bool i)
  */
 OPEN1722_INLINE const uint8_t *Avtp_Rvf_GetPayload(const Avtp_Rvf_t *const pdu)
 {
-    return pdu->payload;
+    return (const uint8_t *)pdu + Avtp_Rvf_GetHeaderLen(pdu);
 }
 
 /**
@@ -568,11 +684,11 @@ OPEN1722_INLINE const uint8_t *Avtp_Rvf_GetPayload(const Avtp_Rvf_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Rvf_SetPayload(Avtp_Rvf_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
-    memcpy(pdu->payload, payload, payload_length);
+    memcpy((uint8_t *)pdu + Avtp_Rvf_GetHeaderLen(pdu), payload, payload_length);
 }
 
 /**
- * Initializes an RVF PDU as specified in the IEEE 1722 Specification.
+ * Initializes a version 0 RVF PDU as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of a 1722 RVF PDU.
  */
@@ -586,9 +702,27 @@ OPEN1722_INLINE void Avtp_Rvf_Init(Avtp_Rvf_t *pdu)
 }
 
 /**
+ * Initializes a version 1 RVF PDU. The caller must provide a buffer of at least
+ * AVTP_RVF_HEADER_LEN_V1 octets.
+ *
+ * @param pdu Pointer to the first bit of a 1722 RVF PDU.
+ */
+OPEN1722_INLINE void Avtp_Rvf_InitV1(Avtp_RvfV1_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_RvfV1_t));
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_RVF);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_Rvf_SetSv((Avtp_Rvf_t *)pdu, true);
+    }
+}
+
+/**
  * Checks if the RVF frame is valid by checking:
- *     1) if the stream_data_length field contains a value larger than the actual size of the
- * buffer that contains the AVTP message. 2) if other format specific invariants are not upheld.
+ *     1) that the subtype is RVF and the version is supported,
+ *     2) that the version-dependent header fits into the buffer,
+ *     3) that stream_data_length contains at least the raw header and fits into
+ *        the buffer.
  *
  * The stream_data_length field contains the length (in octets) of the
  * stream_data_payload field (IEEE 1722-2025, 4.7.4.12), which for RVF consists
@@ -605,11 +739,17 @@ OPEN1722_INLINE bool Avtp_Rvf_IsValid(const Avtp_Rvf_t *const pdu, size_t buffer
         return false;
     }
 
-    if (bufferSize < AVTP_RVF_HEADER_LEN) {
+    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_RVF) {
         return false;
     }
 
-    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_RVF) {
+    uint8_t version = Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu);
+    if (!Avtp_Version_IsSupported(AVTP_RVF_SUPPORTED_VERSIONS, version)) {
+        return false;
+    }
+
+    size_t headerLen = Avtp_Rvf_GetHeaderLen(pdu);
+    if (bufferSize < headerLen) {
         return false;
     }
 
@@ -620,35 +760,11 @@ OPEN1722_INLINE bool Avtp_Rvf_IsValid(const Avtp_Rvf_t *const pdu, size_t buffer
         return false;
     }
 
-    if ((size_t)AVTP_RVF_HEADER_LEN + (size_t)stream_data_length > bufferSize) {
+    if ((size_t)stream_data_length > bufferSize - headerLen) {
         return false;
     }
 
     return true;
-}
-
-/**
- * Returns the value of an AVTP RVF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 RVF PDU.
- * @param field Specifies the position of the data field to be read
- * @returns This function returns the value of the field.
- */
-OPEN1722_INLINE uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfFields_t field)
-{
-    return (uint64_t)GET_RVF_FIELD(field);
-}
-
-/**
- * Sets the value of an AVTP RVF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 RVF PDU.
- * @param field Specifies the position of the data field to be written
- * @param value The value to set.
- */
-OPEN1722_INLINE void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfFields_t field, uint64_t value)
-{
-    SET_RVF_FIELD(field, value);
 }
 
 /******************************************************************************

@@ -30,8 +30,15 @@
 
 /**
  * @file
- * This file contains the fields descriptions of the IEEE 1722 AAF PCM stream PDUs and
+ * This file contains the fields descriptions of the IEEE 1722 AAF PCM PDUs and
  * functions to invoke corresponding parser and deparser.
+ *
+ * PCM is an AAF subformat (subtype AAF, format field selects PCM). It declares
+ * a complete descriptor table per version in absolute coordinates: the common
+ * stream header fields reuse the positions from CommonStreamHeader.h and the
+ * PCM-specific fields are added by this module. A consistency test keeps the
+ * common entries aligned with the common stream header module and the fields
+ * shared with AAF aligned with the AAF module.
  */
 
 #pragma once
@@ -47,22 +54,29 @@
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/aaf/Aaf.h"
+#include "avtp/CommonStreamHeader.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define AVTP_PCM_HEADER_LEN (6 * AVTP_QUADLET_SIZE)
+#define AVTP_PCM_HEADER_LEN_V0 AVTPDU_CSH_LEN_V0 /* 24 */
+#define AVTP_PCM_HEADER_LEN_V1 AVTPDU_CSH_LEN_V1 /* 40 */
+/* Kept for compatibility: the version 0 header length. */
+#define AVTP_PCM_HEADER_LEN AVTP_PCM_HEADER_LEN_V0
 
-#define GET_PCM_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu, field))
-#define SET_PCM_FIELD(field, value)                                                                \
-    (Avtp_SetField(Avtp_PcmFieldDesc, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, field, value))
+/* PCM (AAF) supports both versions of the common stream header (Table 7). */
+#define AVTP_PCM_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
 
 typedef struct {
-    uint8_t header[AVTP_PCM_HEADER_LEN];
+    uint8_t header[AVTP_PCM_HEADER_LEN_V0];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_Pcm_t;
+
+typedef struct {
+    uint8_t header[AVTP_PCM_HEADER_LEN_V1];
+    uint8_t payload[0];
+} __attribute__((packed)) Avtp_PcmV1_t;
 
 /**
  * AAF PCM 'nsr' (nominal sample rate) field values (IEEE 1722-2025, Table 12).
@@ -85,25 +99,25 @@ typedef enum {
 typedef enum {
 
     /* Common AVTP stream header fields */
-    AVTP_PCM_FIELD_SUBTYPE,
-    AVTP_PCM_FIELD_SV,
-    AVTP_PCM_FIELD_VERSION,
+    AVTP_PCM_FIELD_SV = 0,
     AVTP_PCM_FIELD_MR,
-    AVTP_PCM_FIELD_RSV1,
+    AVTP_PCM_FIELD_FSD,
     AVTP_PCM_FIELD_TV,
     AVTP_PCM_FIELD_SEQUENCE_NUM,
-    AVTP_PCM_FIELD_RESERVED1,
+    AVTP_PCM_FIELD_FSD0,
+    AVTP_PCM_FIELD_FSD1,
     AVTP_PCM_FIELD_TU,
-
-    /* AAF PCM stream header fields */
     AVTP_PCM_FIELD_STREAM_ID,
     AVTP_PCM_FIELD_AVTP_TIMESTAMP,
+    AVTP_PCM_FIELD_PTP_GRANDMASTER_IDENTITY,
+    AVTP_PCM_FIELD_STREAM_DATA_LENGTH,
+
+    /* AAF PCM format-specific fields */
     AVTP_PCM_FIELD_FORMAT,
     AVTP_PCM_FIELD_NSR,
     AVTP_PCM_FIELD_RSV2,
     AVTP_PCM_FIELD_CHANNELS_PER_FRAME,
     AVTP_PCM_FIELD_BIT_DEPTH,
-    AVTP_PCM_FIELD_STREAM_DATA_LENGTH,
     AVTP_PCM_FIELD_RSV3,
     AVTP_PCM_FIELD_SP,
     AVTP_PCM_FIELD_EVT,
@@ -114,33 +128,102 @@ typedef enum {
 } Avtp_PcmFields_t;
 
 /**
- * This table maps all IEEE 1722 AAF PCM stream header fields to a descriptor.
+ * This table maps all IEEE 1722 AAF PCM header fields to a descriptor for
+ * version 0. It is complete and in absolute coordinates; the common stream
+ * header fields use the same positions as Avtp_CshFieldDescV0.
  */
-static const Avtp_FieldDescriptor_t Avtp_PcmFieldDesc[AVTP_PCM_FIELD_MAX] = {
-    /* Common AVTP stream header fields */
-    [AVTP_PCM_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+static const Avtp_FieldDescriptor_t Avtp_PcmFieldDescV0[AVTP_PCM_FIELD_MAX] = {
     [AVTP_PCM_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
-    [AVTP_PCM_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
     [AVTP_PCM_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
-    [AVTP_PCM_FIELD_RSV1] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_PCM_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
     [AVTP_PCM_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
     [AVTP_PCM_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
-    [AVTP_PCM_FIELD_RESERVED1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_PCM_FIELD_FSD0] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_PCM_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
     [AVTP_PCM_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
-    /* AAF PCM stream header fields */
     [AVTP_PCM_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
     [AVTP_PCM_FIELD_AVTP_TIMESTAMP] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_PCM_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_PCM_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
     [AVTP_PCM_FIELD_FORMAT] = {.quadlet = 4, .offset = 0, .bits = 8},
     [AVTP_PCM_FIELD_NSR] = {.quadlet = 4, .offset = 8, .bits = 4},
     [AVTP_PCM_FIELD_RSV2] = {.quadlet = 4, .offset = 12, .bits = 2},
     [AVTP_PCM_FIELD_CHANNELS_PER_FRAME] = {.quadlet = 4, .offset = 14, .bits = 10},
     [AVTP_PCM_FIELD_BIT_DEPTH] = {.quadlet = 4, .offset = 24, .bits = 8},
-    [AVTP_PCM_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 5, .offset = 0, .bits = 16},
     [AVTP_PCM_FIELD_RSV3] = {.quadlet = 5, .offset = 16, .bits = 3},
     [AVTP_PCM_FIELD_SP] = {.quadlet = 5, .offset = 19, .bits = 1},
     [AVTP_PCM_FIELD_EVT] = {.quadlet = 5, .offset = 20, .bits = 4},
     [AVTP_PCM_FIELD_RESERVED2] = {.quadlet = 5, .offset = 24, .bits = 8},
 };
+
+/**
+ * This table maps all IEEE 1722 AAF PCM header fields to a descriptor for
+ * version 1. It is complete and in absolute coordinates; the common stream
+ * header fields use the same positions as Avtp_CshFieldDescV1.
+ */
+static const Avtp_FieldDescriptor_t Avtp_PcmFieldDescV1[AVTP_PCM_FIELD_MAX] = {
+    [AVTP_PCM_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_PCM_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
+    [AVTP_PCM_FIELD_FSD] = {.quadlet = 0, .offset = 13, .bits = 2},
+    [AVTP_PCM_FIELD_TV] = {.quadlet = 0, .offset = 15, .bits = 1},
+    [AVTP_PCM_FIELD_SEQUENCE_NUM] = {.quadlet = 3, .offset = 0, .bits = 32},
+    [AVTP_PCM_FIELD_FSD0] = {.quadlet = 0, .offset = 16, .bits = 8},
+    [AVTP_PCM_FIELD_FSD1] = {.quadlet = 0, .offset = 24, .bits = 7},
+    [AVTP_PCM_FIELD_TU] = {.quadlet = 0, .offset = 31, .bits = 1},
+    [AVTP_PCM_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
+    [AVTP_PCM_FIELD_AVTP_TIMESTAMP] = {.quadlet = 4, .offset = 0, .bits = 64},
+    [AVTP_PCM_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 6, .offset = 0, .bits = 64},
+    [AVTP_PCM_FIELD_STREAM_DATA_LENGTH] = {.quadlet = 9, .offset = 0, .bits = 16},
+    [AVTP_PCM_FIELD_FORMAT] = {.quadlet = 8, .offset = 0, .bits = 8},
+    [AVTP_PCM_FIELD_NSR] = {.quadlet = 8, .offset = 8, .bits = 4},
+    [AVTP_PCM_FIELD_RSV2] = {.quadlet = 8, .offset = 12, .bits = 2},
+    [AVTP_PCM_FIELD_CHANNELS_PER_FRAME] = {.quadlet = 8, .offset = 14, .bits = 10},
+    [AVTP_PCM_FIELD_BIT_DEPTH] = {.quadlet = 8, .offset = 24, .bits = 8},
+    [AVTP_PCM_FIELD_RSV3] = {.quadlet = 9, .offset = 16, .bits = 3},
+    [AVTP_PCM_FIELD_SP] = {.quadlet = 9, .offset = 19, .bits = 1},
+    [AVTP_PCM_FIELD_EVT] = {.quadlet = 9, .offset = 20, .bits = 4},
+    [AVTP_PCM_FIELD_RESERVED2] = {.quadlet = 9, .offset = 24, .bits = 8},
+};
+
+/**
+ * Returns the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_PcmFieldDescV1
+            : Avtp_PcmFieldDescV0;
+    return Avtp_GetField(desc, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+}
+
+/**
+ * Sets the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_PcmFieldDescV1
+            : Avtp_PcmFieldDescV0;
+    Avtp_SetField(desc, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Returns the length of the AAF PCM header in octets (24 or 40).
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetHeaderLen((const Avtp_CommonStreamHeader_t *)pdu);
+}
 
 /**
  * Return the value of the AAF PCM SV field as specified in the IEEE 1722 Specification.
@@ -150,7 +233,7 @@ static const Avtp_FieldDescriptor_t Avtp_PcmFieldDesc[AVTP_PCM_FIELD_MAX] = {
  */
 OPEN1722_INLINE bool Avtp_Pcm_IsSv(const Avtp_Pcm_t *const pdu)
 {
-    return (bool)GET_PCM_FIELD(AVTP_PCM_FIELD_SV);
+    return (bool)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_SV);
 }
 
 /**
@@ -161,7 +244,7 @@ OPEN1722_INLINE bool Avtp_Pcm_IsSv(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Pcm_IsMr(const Avtp_Pcm_t *const pdu)
 {
-    return (bool)GET_PCM_FIELD(AVTP_PCM_FIELD_MR);
+    return (bool)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_MR);
 }
 
 /**
@@ -172,19 +255,19 @@ OPEN1722_INLINE bool Avtp_Pcm_IsMr(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Pcm_IsTv(const Avtp_Pcm_t *const pdu)
 {
-    return (bool)GET_PCM_FIELD(AVTP_PCM_FIELD_TV);
+    return (bool)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_TV);
 }
 
 /**
  * Return the value of the AAF PCM Sequence Number field as specified in the IEEE 1722
- * Specification.
+ * Specification. The field is 8 bits in version 0 and 32 bits in version 1.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @returns Value of the AAF PCM Sequence Number field.
  */
-OPEN1722_INLINE uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t *const pdu)
+OPEN1722_INLINE uint32_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t *const pdu)
 {
-    return (uint8_t)GET_PCM_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM);
+    return (uint32_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_SEQUENCE_NUM);
 }
 
 /**
@@ -195,7 +278,7 @@ OPEN1722_INLINE uint8_t Avtp_Pcm_GetSequenceNum(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Pcm_IsTu(const Avtp_Pcm_t *const pdu)
 {
-    return (bool)GET_PCM_FIELD(AVTP_PCM_FIELD_TU);
+    return (bool)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_TU);
 }
 
 /**
@@ -206,19 +289,31 @@ OPEN1722_INLINE bool Avtp_Pcm_IsTu(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE uint64_t Avtp_Pcm_GetStreamId(const Avtp_Pcm_t *const pdu)
 {
-    return (uint64_t)GET_PCM_FIELD(AVTP_PCM_FIELD_STREAM_ID);
+    return Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_STREAM_ID);
 }
 
 /**
  * Return the value of the AAF PCM AVTP Timestamp field as specified in the IEEE 1722
- * Specification.
+ * Specification. The field is 32 bits in version 0 and 64 bits in version 1.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @returns Value of the AAF PCM AVTP Timestamp field.
  */
-OPEN1722_INLINE uint32_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t *const pdu)
 {
-    return (uint32_t)GET_PCM_FIELD(AVTP_PCM_FIELD_AVTP_TIMESTAMP);
+    return Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_AVTP_TIMESTAMP);
+}
+
+/**
+ * Return the value of the AAF PCM ptp_grandmaster_identity field. The field only
+ * exists in version 1; version 0 returns 0.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @returns Value of the AAF PCM ptp_grandmaster_identity field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetPtpGrandmasterIdentity(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_PTP_GRANDMASTER_IDENTITY);
 }
 
 /**
@@ -229,7 +324,7 @@ OPEN1722_INLINE uint32_t Avtp_Pcm_GetAvtpTimestamp(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE Avtp_AafFormat_t Avtp_Pcm_GetFormat(const Avtp_Pcm_t *const pdu)
 {
-    return (Avtp_AafFormat_t)GET_PCM_FIELD(AVTP_PCM_FIELD_FORMAT);
+    return (Avtp_AafFormat_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_FORMAT);
 }
 
 /**
@@ -240,7 +335,7 @@ OPEN1722_INLINE Avtp_AafFormat_t Avtp_Pcm_GetFormat(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE Avtp_PcmNsr_t Avtp_Pcm_GetNsr(const Avtp_Pcm_t *const pdu)
 {
-    return (Avtp_PcmNsr_t)GET_PCM_FIELD(AVTP_PCM_FIELD_NSR);
+    return (Avtp_PcmNsr_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_NSR);
 }
 
 /**
@@ -252,7 +347,7 @@ OPEN1722_INLINE Avtp_PcmNsr_t Avtp_Pcm_GetNsr(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Pcm_GetChannelsPerFrame(const Avtp_Pcm_t *const pdu)
 {
-    return (uint16_t)GET_PCM_FIELD(AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
+    return (uint16_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
 }
 
 /**
@@ -263,7 +358,7 @@ OPEN1722_INLINE uint16_t Avtp_Pcm_GetChannelsPerFrame(const Avtp_Pcm_t *const pd
  */
 OPEN1722_INLINE uint8_t Avtp_Pcm_GetBitDepth(const Avtp_Pcm_t *const pdu)
 {
-    return (uint8_t)GET_PCM_FIELD(AVTP_PCM_FIELD_BIT_DEPTH);
+    return (uint8_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_BIT_DEPTH);
 }
 
 /**
@@ -275,7 +370,7 @@ OPEN1722_INLINE uint8_t Avtp_Pcm_GetBitDepth(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Pcm_GetStreamDataLength(const Avtp_Pcm_t *const pdu)
 {
-    return (uint16_t)GET_PCM_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH);
+    return (uint16_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_STREAM_DATA_LENGTH);
 }
 
 /**
@@ -286,7 +381,7 @@ OPEN1722_INLINE uint16_t Avtp_Pcm_GetStreamDataLength(const Avtp_Pcm_t *const pd
  */
 OPEN1722_INLINE bool Avtp_Pcm_IsSp(const Avtp_Pcm_t *const pdu)
 {
-    return (bool)GET_PCM_FIELD(AVTP_PCM_FIELD_SP);
+    return (bool)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_SP);
 }
 
 /**
@@ -297,7 +392,7 @@ OPEN1722_INLINE bool Avtp_Pcm_IsSp(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t *const pdu)
 {
-    return (uint8_t)GET_PCM_FIELD(AVTP_PCM_FIELD_EVT);
+    return (uint8_t)Avtp_Pcm_GetField(pdu, AVTP_PCM_FIELD_EVT);
 }
 
 /**
@@ -308,7 +403,7 @@ OPEN1722_INLINE uint8_t Avtp_Pcm_GetEvt(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetSv(Avtp_Pcm_t *pdu, bool sv)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_SV, sv);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_SV, sv);
 }
 
 /**
@@ -319,7 +414,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetSv(Avtp_Pcm_t *pdu, bool sv)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetMr(Avtp_Pcm_t *pdu, bool mr)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_MR, mr);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_MR, mr);
 }
 
 /**
@@ -330,19 +425,20 @@ OPEN1722_INLINE void Avtp_Pcm_SetMr(Avtp_Pcm_t *pdu, bool mr)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetTv(Avtp_Pcm_t *pdu, bool tv)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_TV, tv);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_TV, tv);
 }
 
 /**
  * Set the value of the AAF PCM Sequence Number field as specified in the IEEE 1722
- * Specification.
+ * Specification. The field is 8 bits in version 0 and 32 bits in version 1; values are
+ * truncated to the width of the version in use.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @param value Value to set the AAF PCM Sequence Number field to.
  */
-OPEN1722_INLINE void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t *pdu, uint8_t value)
+OPEN1722_INLINE void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t *pdu, uint32_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_SEQUENCE_NUM, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_SEQUENCE_NUM, value);
 }
 
 /**
@@ -353,7 +449,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetSequenceNum(Avtp_Pcm_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetTu(Avtp_Pcm_t *pdu, bool tu)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_TU, tu);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_TU, tu);
 }
 
 /**
@@ -364,19 +460,32 @@ OPEN1722_INLINE void Avtp_Pcm_SetTu(Avtp_Pcm_t *pdu, bool tu)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetStreamId(Avtp_Pcm_t *pdu, uint64_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_STREAM_ID, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_STREAM_ID, value);
 }
 
 /**
  * Set the value of the AAF PCM AVTP Timestamp field as specified in the IEEE 1722
- * Specification.
+ * Specification. The field is 32 bits in version 0 and 64 bits in version 1; values are
+ * truncated to the width of the version in use.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @param value Value to set the AAF PCM AVTP Timestamp field to.
  */
-OPEN1722_INLINE void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t *pdu, uint32_t value)
+OPEN1722_INLINE void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t *pdu, uint64_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_AVTP_TIMESTAMP, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_AVTP_TIMESTAMP, value);
+}
+
+/**
+ * Set the value of the AAF PCM ptp_grandmaster_identity field. The field only
+ * exists in version 1; on version 0 this is a no-op.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param value Value to set the AAF PCM ptp_grandmaster_identity field to.
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetPtpGrandmasterIdentity(Avtp_Pcm_t *pdu, uint64_t value)
+{
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_PTP_GRANDMASTER_IDENTITY, value);
 }
 
 /**
@@ -387,7 +496,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetAvtpTimestamp(Avtp_Pcm_t *pdu, uint32_t value)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetFormat(Avtp_Pcm_t *pdu, Avtp_AafFormat_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_FORMAT, (uint64_t)value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_FORMAT, (uint64_t)value);
 }
 
 /**
@@ -398,7 +507,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetFormat(Avtp_Pcm_t *pdu, Avtp_AafFormat_t value)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetNsr(Avtp_Pcm_t *pdu, Avtp_PcmNsr_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_NSR, (uint64_t)value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_NSR, (uint64_t)value);
 }
 
 /**
@@ -410,7 +519,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetNsr(Avtp_Pcm_t *pdu, Avtp_PcmNsr_t value)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetChannelsPerFrame(Avtp_Pcm_t *pdu, uint16_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_CHANNELS_PER_FRAME, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME, value);
 }
 
 /**
@@ -421,7 +530,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetChannelsPerFrame(Avtp_Pcm_t *pdu, uint16_t valu
  */
 OPEN1722_INLINE void Avtp_Pcm_SetBitDepth(Avtp_Pcm_t *pdu, uint8_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_BIT_DEPTH, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_BIT_DEPTH, value);
 }
 
 /**
@@ -433,7 +542,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetBitDepth(Avtp_Pcm_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t *pdu, uint16_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_STREAM_DATA_LENGTH, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_STREAM_DATA_LENGTH, value);
 }
 
 /**
@@ -444,7 +553,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetStreamDataLength(Avtp_Pcm_t *pdu, uint16_t valu
  */
 OPEN1722_INLINE void Avtp_Pcm_SetSp(Avtp_Pcm_t *pdu, bool sp)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_SP, sp);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_SP, sp);
 }
 
 /**
@@ -455,18 +564,19 @@ OPEN1722_INLINE void Avtp_Pcm_SetSp(Avtp_Pcm_t *pdu, bool sp)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetEvt(Avtp_Pcm_t *pdu, uint8_t value)
 {
-    SET_PCM_FIELD(AVTP_PCM_FIELD_EVT, value);
+    Avtp_Pcm_SetField(pdu, AVTP_PCM_FIELD_EVT, value);
 }
 
 /**
- * Returns pointer to payload of an AAF PCM frame.
+ * Returns pointer to payload of an AAF PCM frame. The payload starts after the
+ * version-dependent common stream header.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @return Pointer to AAF PCM frame payload
  */
 OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload(const Avtp_Pcm_t *const pdu)
 {
-    return pdu->payload;
+    return (const uint8_t *)pdu + Avtp_Pcm_GetHeaderLen(pdu);
 }
 
 /**
@@ -478,11 +588,11 @@ OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetPayload(Avtp_Pcm_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
-    memcpy(pdu->payload, payload, payload_length);
+    memcpy((uint8_t *)pdu + Avtp_Pcm_GetHeaderLen(pdu), payload, payload_length);
 }
 
 /**
- * Initializes an AAF PCM PDU as specified in the IEEE 1722 Specification.
+ * Initializes a version 0 AAF PCM PDU as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of a 1722 AAF PCM PDU.
  */
@@ -496,9 +606,27 @@ OPEN1722_INLINE void Avtp_Pcm_Init(Avtp_Pcm_t *pdu)
 }
 
 /**
+ * Initializes a version 1 AAF PCM PDU. The caller must provide a buffer of at
+ * least AVTP_PCM_HEADER_LEN_V1 octets.
+ *
+ * @param pdu Pointer to the first bit of a 1722 AAF PCM PDU.
+ */
+OPEN1722_INLINE void Avtp_Pcm_InitV1(Avtp_PcmV1_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_PcmV1_t));
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_AAF);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_Pcm_SetSv((Avtp_Pcm_t *)pdu, true);
+    }
+}
+
+/**
  * Checks if the AAF PCM frame is valid by checking:
- *     1) if the stream_data_length field contains a value larger than the actual size of the
- * buffer that contains the AVTP message. 2) if other format specific invariants are not upheld.
+ *     1) that the subtype is AAF and the version is supported,
+ *     2) that the version-dependent header and the stream_data_length fit into
+ *        the buffer (via Avtp_Aaf_IsValid), and
+ *     3) the PCM-specific invariants.
  *
  * The PCM specific invariants are defined in IEEE 1722-2025, 7.3:
  *     - only the PCM formats (Table 10, values 0x00-0x04) use this encapsulation,
@@ -567,30 +695,6 @@ OPEN1722_INLINE bool Avtp_Pcm_IsValid(const Avtp_Pcm_t *const pdu, size_t buffer
     }
 
     return true;
-}
-
-/**
- * Returns the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
- * @param field Specifies the position of the data field to be read
- * @returns This function returns the value of the field.
- */
-OPEN1722_INLINE uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
-{
-    return (uint64_t)GET_PCM_FIELD(field);
-}
-
-/**
- * Sets the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
- * @param field Specifies the position of the data field to be written
- * @param value The value to set.
- */
-OPEN1722_INLINE void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
-{
-    SET_PCM_FIELD(field, value);
 }
 
 #ifdef __cplusplus
