@@ -72,6 +72,8 @@
 #include "avtp/acf/Gbb.h"
 #include "avtp/acf/Gisf.h"
 #include "avtp/acf/Gpc.h"
+#include "avtp/acf/I2C.h"
+#include "avtp/acf/I2CBrief.h"
 #include "avtp/acf/Lin.h"
 #include "avtp/acf/Most.h"
 #include "avtp/acf/Ntscf.h"

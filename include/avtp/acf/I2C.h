@@ -158,7 +158,7 @@ OPEN1722_INLINE uint64_t Avtp_I2C_GetMessageTimestamp(const Avtp_I2C_t *const pd
 }
 
 /**
- * Return the value of an an ACF I2C Code field as specified in the IEEE 1722
+ * Return the value of an ACF I2C Code field as specified in the IEEE 1722
  * Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 ACF I2C PDU.
@@ -166,7 +166,7 @@ OPEN1722_INLINE uint64_t Avtp_I2C_GetMessageTimestamp(const Avtp_I2C_t *const pd
  */
 OPEN1722_INLINE uint8_t Avtp_I2C_GetI2CCode(const Avtp_I2C_t *const pdu)
 {
-    return GET_I2C_FIELD(AVTP_I2C_FIELD_I2C_CODE);
+    return (uint8_t)GET_I2C_FIELD(AVTP_I2C_FIELD_I2C_CODE);
 }
 
 /**
@@ -345,6 +345,8 @@ OPEN1722_INLINE void Avtp_I2C_Init(Avtp_I2C_t *pdu)
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_I2C_t));
         Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_I2C);
+        // Set the message length field in the ACF common header
+        Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4);
     }
 }
 
@@ -373,9 +375,6 @@ OPEN1722_INLINE void Avtp_I2C_CreateAcfMessage(Avtp_I2C_t *pdu, uint8_t i2c_code
     Avtp_I2C_SetEvent(pdu, event);
     Avtp_I2C_SetExceptionCode(pdu, exception_code);
     Avtp_I2C_SetI2CData(pdu, i2c_data);
-
-    // Set the message length field in the ACF common header
-    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4);
 }
 
 /**
@@ -393,9 +392,13 @@ OPEN1722_INLINE bool Avtp_I2C_IsValid(const Avtp_I2C_t *const pdu, size_t buffer
         return false;
     }
 
+    if (bufferSize < AVTP_I2C_HEADER_LEN) {
+        return false;
+    }
+
     uint16_t msg_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
-    if (bufferSize < AVTP_I2C_HEADER_LEN || msg_length_bytes != AVTP_I2C_HEADER_LEN) {
+    if (msg_length_bytes != AVTP_I2C_HEADER_LEN) {
         return false;
     }
 
