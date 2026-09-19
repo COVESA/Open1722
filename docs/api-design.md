@@ -637,6 +637,37 @@ each version, the common header fields (`subtype`, `version`; `h` is covered by
 the format's `SV`) plus the format's complete table must cover the whole header
 exactly once.
 
+## The AVTP alternative header
+
+The alternative header (4.7.6) is used by formats that do not fit the common
+stream or control headers - CRF and NTSCF in this library. It exists in two
+versions:
+
+| Version | Length | Additional fields                                                        |
+|---------|--------|--------------------------------------------------------------------------|
+| 0       | 4 B    | -                                                                        |
+| 1       | 16 B   | `reserved[20]`, `sequence_num[32]`, `ptp_grandmaster_identity[64]`, then `reserved[12]` at the head of the format area |
+
+[`AlternativeHeader.h`](../include/avtp/AlternativeHeader.h) describes the
+byte-aligned v1 prefix (`AVTPDU_AH_LEN_V1` = 16):
+
+- `Avtp_AlternativeHeader_t` - a view type sized for the v1 prefix.
+- `AVTPDU_AH_FIELD_RESERVED1`, `_SEQUENCE_NUM`, `_PTP_GRANDMASTER_IDENTITY`,
+  mapped by `Avtp_AhFieldDescV0` (all zero) and `Avtp_AhFieldDescV1`.
+- `Avtp_AlternativeHeader_*` accessors; `GetSequenceNum` returns `uint32_t` and
+  `GetPtpGrandmasterIdentity` `uint64_t`, both 0 on version 0.
+
+The trailing `reserved[12]` is the head of the format-specific data area
+(format fields begin at bit 140), so it is owned by the format tables
+(`AVTP_CRF_FIELD_RESERVED`, `AVTP_NTSCF_FIELD_RESERVED`). CRF and NTSCF follow
+the same pattern as the stream formats: complete per-version tables in absolute
+coordinates, alternative header fields first, and a consistency test that
+compares those entries against `Avtp_AhFieldDescV0/V1`. Their header lengths
+are format-defined (`Avtp_Crf_GetHeaderLen` 20/36, `Avtp_Ntscf_GetHeaderLen`
+12/28), and `sequence_num_lsb` remains a semantic wrapper: on version 1 it is a
+copy of the low byte of the alternative header's 32-bit `sequence_num`
+(CRF-25 / NTSCF-6).
+
 ## ACF layering & the common header
 
 ACF formats share a *common header* whose two fields - `acf_msg_type` and

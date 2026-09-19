@@ -54,6 +54,7 @@
 
 #include "avtp/CommonHeader.h"
 #include "avtp/CommonStreamHeader.h"
+#include "avtp/AlternativeHeader.h"
 #include "avtp/Udp.h"
 
 #include "avtp/Crf.h"
