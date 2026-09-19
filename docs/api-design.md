@@ -10,17 +10,21 @@ surface lives and where the conventions matter most. The ACF format modules all
 follow one shared template. `ACF CAN` (`include/avtp/acf/Can.h`) is the
 reference implementation of that template; when in doubt, follow it.
 
-The AAF, CVF, CRF and RVF stream format modules (`include/avtp/aaf/`,
-`include/avtp/cvf/`, `include/avtp/Crf.h` and `include/avtp/Rvf.h`) follow the
-same template - header-only inline accessors, a field descriptor table covering
-every header bit, `Init`, `IsValid` and payload helpers. They differ only in the
-header they describe: the common stream header instead of the ACF header, except
-for CRF, which uses the alternative header (version 0). The CVF format-specific
-headers (MJPEG, H.264, JPEG 2000) and the RVF raw header are fragments of the
-stream data rather than standalone PDUs: they are validated through the
-enclosing PDU (`Avtp_Cvf_IsValid`/`Avtp_Rvf_IsValid`, plus a matching
-`format_subtype` for CVF) and provide a shallow `IsValid` of their own that
-checks the fragment header fits into the given buffer.
+The stream format modules (`include/avtp/aaf/`, `include/avtp/cvf/`,
+`include/avtp/Crf.h`, `include/avtp/Rvf.h` and `include/avtp/acf/Tscf.h`)
+follow the same template - header-only inline accessors, a field descriptor
+table covering the format's own bits, `Init`, `IsValid` and payload helpers.
+They differ only in the header they describe: the common stream header, except
+for CRF/NTSCF, which use the alternative header. Both header styles are
+versioned (0 and 1); the common stream header fields are described once in
+[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h), and each format
+declares a complete descriptor table per version in absolute coordinates,
+reusing those positions for the common fields (TSCF is the reference). The CVF
+format-specific headers (MJPEG, H.264, JPEG 2000) and the RVF raw header are
+fragments of the stream data rather than standalone PDUs: they are validated
+through the enclosing PDU (`Avtp_Cvf_IsValid`/`Avtp_Rvf_IsValid`, plus a
+matching `format_subtype` for CVF) and provide a shallow `IsValid` of their own
+that checks the fragment header fits into the given buffer.
 
 The document is split along two audiences:
 
@@ -553,10 +557,16 @@ functions**. They are accessed through `Avtp_CommonHeader_Get/SetSubtype` and
 - `IsValid` checks it with
   `Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu)`.
 
-Each format still declares `AVTP_<FORMAT>_FIELD_SUBTYPE` and
-`AVTP_<FORMAT>_FIELD_VERSION` in its field enum and descriptor table, so the
-generic `Avtp_<Format>_Get/SetField` path and the "every bit described exactly
-once" rule continue to hold; only the convenience accessors are omitted.
+Version numbers are available as `AVTP_VERSION_0` / `AVTP_VERSION_1`. Each
+format declares the versions it accepts (for example
+`AVTP_TSCF_SUPPORTED_VERSIONS`) and `IsValid` checks them with
+`Avtp_Version_IsSupported(mask, version)`, rejecting reserved version values.
+
+The common header fields are not repeated in format field enums: `subtype`, `h`
+and `version` are owned by `Avtp_CommonHeaderFieldDesc`. Formats that have been
+migrated to the common stream header module (see below) no longer declare
+`AVTP_<FORMAT>_FIELD_SUBTYPE`/`_VERSION`; the remaining stream formats still
+carry their own copies until they are migrated.
 
 ### h (header specific)
 
@@ -571,6 +581,92 @@ defines the bit - all stream formats (AAF/CVF/CRF/RVF/TSCF/NTSCF) provide
 `IsSv`/`SetSv` - even though CRF/NTSCF use the alternative header.
 `Avtp_CommonHeader_GetH`/`SetH` remains the generic accessor for the raw bit,
 for formats that redefine it or reserve it.
+
+## The AVTP common stream header
+
+The common stream header (4.7.4) is shared by all stream formats and exists in
+two versions, selected by the common header's `version` field:
+
+| Version | Length | sequence_num | avtp_timestamp | Additional fields                            |
+|---------|--------|--------------|----------------|----------------------------------------------|
+| 0       | 24 B   | 8 bit        | 32 bit         | -                                            |
+| 1       | 40 B   | 32 bit       | 64 bit         | `ptp_grandmaster_identity`, `format_specific_data_0` |
+
+[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h) describes the
+header once for both versions:
+
+- `Avtp_CommonStreamHeader_t` - a view type sized for the largest version.
+- `AVTPDU_CSH_LEN_V0` / `AVTPDU_CSH_LEN_V1` - the version-dependent lengths.
+- `AVTPDU_CSH_FIELD_*` - the field enum, mapped by `Avtp_CshFieldDescV0` and
+  `Avtp_CshFieldDescV1`, one descriptor table per version.
+- `Avtp_CommonStreamHeader_*` - version-dispatched accessors for `sv`, `mr`,
+  `f_s_d`, `tv`, `sequence_num`, `format_specific_data_0/1`, `tu`, `stream_id`,
+  `avtp_timestamp`, `ptp_grandmaster_identity` and `stream_data_length`.
+  `GetSequenceNum` returns `uint32_t` and `GetAvtpTimestamp` returns `uint64_t`
+  in both versions; fields absent from a version return 0 and their setters are
+  no-ops.
+
+A migrated format (TSCF is the reference) declares a **complete descriptor
+table per version**, in absolute coordinates. The common entries reuse the
+positions from `Avtp_CshFieldDescV0/V1`; the format's own fields override the
+format-specific data slots. The accessors select the table for the version in
+use - there is no offset arithmetic:
+
+```c
+static const Avtp_FieldDescriptor_t Avtp_TscfFieldDescV1[AVTP_TSCF_FIELD_MAX] = {
+    [AVTP_TSCF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    ... /* same positions as Avtp_CshFieldDescV1 */
+    [AVTP_TSCF_FIELD_RESERVED2] = {.quadlet = 8, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_RESERVED3] = {.quadlet = 9, .offset = 16, .bits = 16},
+};
+```
+
+This is the "subclass" model: the common stream header defines the slots and
+the format table declares its interpretation of them. Because the common
+entries are copied into every format table, a per-format consistency test
+asserts that they equal the style module's entries for the same version.
+`GetHeaderLen` is used by the payload helpers so `Avtp_<Format>_Get/SetPayload`
+work for both versions.
+
+The version 1 PDU struct (for example `Avtp_TscfV1_t`) is sized for the larger
+header and is used for allocation and embedding. Accessors keep taking the
+version 0 struct pointer; version 1 callers cast once.
+
+The "every bit described exactly once" rule becomes a cross-module test: for
+each version, the common header fields (`subtype`, `version`; `h` is covered by
+the format's `SV`) plus the format's complete table must cover the whole header
+exactly once.
+
+## The AVTP alternative header
+
+The alternative header (4.7.6) is used by formats that do not fit the common
+stream or control headers - CRF and NTSCF in this library. It exists in two
+versions:
+
+| Version | Length | Additional fields                                                        |
+|---------|--------|--------------------------------------------------------------------------|
+| 0       | 4 B    | -                                                                        |
+| 1       | 16 B   | `reserved[20]`, `sequence_num[32]`, `ptp_grandmaster_identity[64]`, then `reserved[12]` at the head of the format area |
+
+[`AlternativeHeader.h`](../include/avtp/AlternativeHeader.h) describes the
+byte-aligned v1 prefix (`AVTPDU_AH_LEN_V1` = 16):
+
+- `Avtp_AlternativeHeader_t` - a view type sized for the v1 prefix.
+- `AVTPDU_AH_FIELD_RESERVED1`, `_SEQUENCE_NUM`, `_PTP_GRANDMASTER_IDENTITY`,
+  mapped by `Avtp_AhFieldDescV0` (all zero) and `Avtp_AhFieldDescV1`.
+- `Avtp_AlternativeHeader_*` accessors; `GetSequenceNum` returns `uint32_t` and
+  `GetPtpGrandmasterIdentity` `uint64_t`, both 0 on version 0.
+
+The trailing `reserved[12]` is the head of the format-specific data area
+(format fields begin at bit 140), so it is owned by the format tables
+(`AVTP_CRF_FIELD_RESERVED`, `AVTP_NTSCF_FIELD_RESERVED`). CRF and NTSCF follow
+the same pattern as the stream formats: complete per-version tables in absolute
+coordinates, alternative header fields first, and a consistency test that
+compares those entries against `Avtp_AhFieldDescV0/V1`. Their header lengths
+are format-defined (`Avtp_Crf_GetHeaderLen` 20/36, `Avtp_Ntscf_GetHeaderLen`
+12/28), and `sequence_num_lsb` remains a semantic wrapper: on version 1 it is a
+copy of the low byte of the alternative header's 32-bit `sequence_num`
+(CRF-25 / NTSCF-6).
 
 ## ACF layering & the common header
 

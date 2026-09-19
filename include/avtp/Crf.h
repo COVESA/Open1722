@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2024, COVESA
- * Copyright (c) 2018, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -10,9 +9,9 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the name of Intel Corporation, COVESA nor the names of their
- *      contributors  may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ *    * Neither the name of COVESA nor the names of its contributors may be
+ *      used to endorse or promote products derived from this software without
+ *      specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,6 +31,13 @@
  * @file
  * This file contains the fields descriptions of the IEEE 1722 CRF PDUs and
  * functions to invoke corresponding parser and deparser.
+ *
+ * CRF uses the AVTPDU alternative header (4.7.6) and declares a complete
+ * descriptor table per version in absolute coordinates: the alternative header
+ * fields reuse the positions from AlternativeHeader.h, the trailing 12-bit
+ * reserved field and the CRF-specific fields are added by this module. A
+ * consistency test keeps the alternative header entries aligned with the
+ * alternative header module.
  */
 
 #pragma once
@@ -47,22 +53,29 @@
 #include "avtp/Utils.h"
 #include "avtp/Defines.h"
 #include "avtp/CommonHeader.h"
+#include "avtp/AlternativeHeader.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define AVTP_CRF_HEADER_LEN (5 * AVTP_QUADLET_SIZE)
+#define AVTP_CRF_HEADER_LEN_V0 (5 * AVTP_QUADLET_SIZE) /* 20 */
+#define AVTP_CRF_HEADER_LEN_V1 (9 * AVTP_QUADLET_SIZE) /* 36 */
+/* Kept for compatibility: the version 0 header length. */
+#define AVTP_CRF_HEADER_LEN AVTP_CRF_HEADER_LEN_V0
 
-#define GET_CRF_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_CrfFieldDesc, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu, field))
-#define SET_CRF_FIELD(field, value)                                                                \
-    (Avtp_SetField(Avtp_CrfFieldDesc, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, field, value))
+/* CRF supports both versions of the alternative header (Table 7). */
+#define AVTP_CRF_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
 
 typedef struct {
-    uint8_t header[AVTP_CRF_HEADER_LEN];
+    uint8_t header[AVTP_CRF_HEADER_LEN_V0];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_Crf_t;
+
+typedef struct {
+    uint8_t header[AVTP_CRF_HEADER_LEN_V1];
+    uint8_t payload[0];
+} __attribute__((packed)) Avtp_CrfV1_t;
 
 /**
  * CRF 'type' field values (IEEE 1722-2025, Table 31). Values 0x05-0xFF are
@@ -92,16 +105,18 @@ typedef enum {
 typedef enum {
 
     /* Common AVTP alternative header fields */
-    AVTP_CRF_FIELD_SUBTYPE,
+    AVTP_CRF_FIELD_RESERVED1 = 0,
+    AVTP_CRF_FIELD_SEQUENCE_NUM,
+    AVTP_CRF_FIELD_PTP_GRANDMASTER_IDENTITY,
+
+    /* CRF header fields */
     AVTP_CRF_FIELD_SV,
-    AVTP_CRF_FIELD_VERSION,
+    AVTP_CRF_FIELD_RESERVED,
     AVTP_CRF_FIELD_MR,
     AVTP_CRF_FIELD_R,
     AVTP_CRF_FIELD_FS,
     AVTP_CRF_FIELD_TU,
-    AVTP_CRF_FIELD_SEQUENCE_NUM,
-
-    /* CRF header fields */
+    AVTP_CRF_FIELD_SEQUENCE_NUM_LSB,
     AVTP_CRF_FIELD_TYPE,
     AVTP_CRF_FIELD_STREAM_ID,
     AVTP_CRF_FIELD_PULL,
@@ -114,19 +129,21 @@ typedef enum {
 } Avtp_CrfFields_t;
 
 /**
- * This table maps all IEEE 1722 CRF header fields to a descriptor.
+ * This table maps all IEEE 1722 CRF header fields to a descriptor for version
+ * 0. It is complete and in absolute coordinates; the alternative header fields
+ * are absent in version 0.
  */
-static const Avtp_FieldDescriptor_t Avtp_CrfFieldDesc[AVTP_CRF_FIELD_MAX] = {
-    /* Common AVTP alternative header fields */
-    [AVTP_CRF_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+static const Avtp_FieldDescriptor_t Avtp_CrfFieldDescV0[AVTP_CRF_FIELD_MAX] = {
+    [AVTP_CRF_FIELD_RESERVED1] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_CRF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 0, .bits = 0},
+    [AVTP_CRF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 0, .offset = 0, .bits = 0},
     [AVTP_CRF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
-    [AVTP_CRF_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
+    [AVTP_CRF_FIELD_RESERVED] = {.quadlet = 0, .offset = 0, .bits = 0},
     [AVTP_CRF_FIELD_MR] = {.quadlet = 0, .offset = 12, .bits = 1},
     [AVTP_CRF_FIELD_R] = {.quadlet = 0, .offset = 13, .bits = 1},
     [AVTP_CRF_FIELD_FS] = {.quadlet = 0, .offset = 14, .bits = 1},
     [AVTP_CRF_FIELD_TU] = {.quadlet = 0, .offset = 15, .bits = 1},
-    [AVTP_CRF_FIELD_SEQUENCE_NUM] = {.quadlet = 0, .offset = 16, .bits = 8},
-    /* CRF header fields */
+    [AVTP_CRF_FIELD_SEQUENCE_NUM_LSB] = {.quadlet = 0, .offset = 16, .bits = 8},
     [AVTP_CRF_FIELD_TYPE] = {.quadlet = 0, .offset = 24, .bits = 8},
     [AVTP_CRF_FIELD_STREAM_ID] = {.quadlet = 1, .offset = 0, .bits = 64},
     [AVTP_CRF_FIELD_PULL] = {.quadlet = 3, .offset = 0, .bits = 3},
@@ -136,6 +153,73 @@ static const Avtp_FieldDescriptor_t Avtp_CrfFieldDesc[AVTP_CRF_FIELD_MAX] = {
 };
 
 /**
+ * This table maps all IEEE 1722 CRF header fields to a descriptor for version
+ * 1. It is complete and in absolute coordinates; the alternative header fields
+ * use the same positions as Avtp_AhFieldDescV1.
+ */
+static const Avtp_FieldDescriptor_t Avtp_CrfFieldDescV1[AVTP_CRF_FIELD_MAX] = {
+    [AVTP_CRF_FIELD_RESERVED1] = {.quadlet = 0, .offset = 12, .bits = 20},
+    [AVTP_CRF_FIELD_SEQUENCE_NUM] = {.quadlet = 1, .offset = 0, .bits = 32},
+    [AVTP_CRF_FIELD_PTP_GRANDMASTER_IDENTITY] = {.quadlet = 2, .offset = 0, .bits = 64},
+    [AVTP_CRF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTP_CRF_FIELD_RESERVED] = {.quadlet = 4, .offset = 0, .bits = 12},
+    [AVTP_CRF_FIELD_MR] = {.quadlet = 4, .offset = 12, .bits = 1},
+    [AVTP_CRF_FIELD_R] = {.quadlet = 4, .offset = 13, .bits = 1},
+    [AVTP_CRF_FIELD_FS] = {.quadlet = 4, .offset = 14, .bits = 1},
+    [AVTP_CRF_FIELD_TU] = {.quadlet = 4, .offset = 15, .bits = 1},
+    [AVTP_CRF_FIELD_SEQUENCE_NUM_LSB] = {.quadlet = 4, .offset = 16, .bits = 8},
+    [AVTP_CRF_FIELD_TYPE] = {.quadlet = 4, .offset = 24, .bits = 8},
+    [AVTP_CRF_FIELD_STREAM_ID] = {.quadlet = 5, .offset = 0, .bits = 64},
+    [AVTP_CRF_FIELD_PULL] = {.quadlet = 7, .offset = 0, .bits = 3},
+    [AVTP_CRF_FIELD_BASE_FREQUENCY] = {.quadlet = 7, .offset = 3, .bits = 29},
+    [AVTP_CRF_FIELD_CRF_DATA_LENGTH] = {.quadlet = 8, .offset = 0, .bits = 16},
+    [AVTP_CRF_FIELD_TIMESTAMP_INTERVAL] = {.quadlet = 8, .offset = 16, .bits = 16},
+};
+
+/**
+ * Returns the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfFields_t field)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_CrfFieldDescV1
+            : Avtp_CrfFieldDescV0;
+    return Avtp_GetField(desc, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+}
+
+/**
+ * Sets the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfFields_t field, uint64_t value)
+{
+    const Avtp_FieldDescriptor_t *desc =
+        Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) == AVTP_VERSION_1
+            ? Avtp_CrfFieldDescV1
+            : Avtp_CrfFieldDescV0;
+    Avtp_SetField(desc, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Returns the length of the CRF header in octets (20 or 36).
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetHeaderLen(const Avtp_Crf_t *const pdu)
+{
+    return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? (uint8_t)AVTP_CRF_HEADER_LEN_V1
+               : (uint8_t)AVTP_CRF_HEADER_LEN_V0;
+}
+
+/**
  * Return the value of the CRF SV field as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of an 1722 CRF PDU.
@@ -143,7 +227,7 @@ static const Avtp_FieldDescriptor_t Avtp_CrfFieldDesc[AVTP_CRF_FIELD_MAX] = {
  */
 OPEN1722_INLINE bool Avtp_Crf_IsSv(const Avtp_Crf_t *const pdu)
 {
-    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_SV);
+    return (bool)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SV);
 }
 
 /**
@@ -154,7 +238,7 @@ OPEN1722_INLINE bool Avtp_Crf_IsSv(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Crf_IsMr(const Avtp_Crf_t *const pdu)
 {
-    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_MR);
+    return (bool)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_MR);
 }
 
 /**
@@ -165,7 +249,7 @@ OPEN1722_INLINE bool Avtp_Crf_IsMr(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Crf_IsFs(const Avtp_Crf_t *const pdu)
 {
-    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_FS);
+    return (bool)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_FS);
 }
 
 /**
@@ -176,18 +260,49 @@ OPEN1722_INLINE bool Avtp_Crf_IsFs(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE bool Avtp_Crf_IsTu(const Avtp_Crf_t *const pdu)
 {
-    return (bool)GET_CRF_FIELD(AVTP_CRF_FIELD_TU);
+    return (bool)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_TU);
 }
 
 /**
- * Return the value of the CRF Sequence Number field as specified in the IEEE 1722 Specification.
+ * Return the effective CRF Sequence Number field as specified in the IEEE 1722
+ * Specification. The field is the 8-bit sequence_num_lsb in version 0 and the
+ * 32-bit sequence_num in version 1.
  *
  * @param pdu Pointer to the first bit of an 1722 CRF PDU.
  * @returns Value of the CRF Sequence Number field.
  */
-OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu)
+OPEN1722_INLINE uint32_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu)
 {
-    return (uint8_t)GET_CRF_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM);
+    if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        return (uint32_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM);
+    }
+    return (uint8_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+}
+
+/**
+ * Return the value of the CRF sequence_num_lsb field. In version 1 it contains
+ * a copy of the eight least significant bits of the sequence_num field in the
+ * alternative header (CRF-25).
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF sequence_num_lsb field.
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNumLsb(const Avtp_Crf_t *const pdu)
+{
+    return (uint8_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+}
+
+/**
+ * Return the value of the CRF ptp_grandmaster_identity field. The field only
+ * exists in version 1; version 0 returns 0.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @returns Value of the CRF ptp_grandmaster_identity field.
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetPtpGrandmasterIdentity(const Avtp_Crf_t *const pdu)
+{
+    return Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_PTP_GRANDMASTER_IDENTITY);
 }
 
 /**
@@ -198,7 +313,7 @@ OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE Avtp_CrfType_t Avtp_Crf_GetType(const Avtp_Crf_t *const pdu)
 {
-    return (Avtp_CrfType_t)GET_CRF_FIELD(AVTP_CRF_FIELD_TYPE);
+    return (Avtp_CrfType_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_TYPE);
 }
 
 /**
@@ -209,7 +324,7 @@ OPEN1722_INLINE Avtp_CrfType_t Avtp_Crf_GetType(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t *const pdu)
 {
-    return (uint64_t)GET_CRF_FIELD(AVTP_CRF_FIELD_STREAM_ID);
+    return Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_STREAM_ID);
 }
 
 /**
@@ -220,7 +335,7 @@ OPEN1722_INLINE uint64_t Avtp_Crf_GetStreamId(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE Avtp_CrfPull_t Avtp_Crf_GetPull(const Avtp_Crf_t *const pdu)
 {
-    return (Avtp_CrfPull_t)GET_CRF_FIELD(AVTP_CRF_FIELD_PULL);
+    return (Avtp_CrfPull_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_PULL);
 }
 
 /**
@@ -231,7 +346,7 @@ OPEN1722_INLINE Avtp_CrfPull_t Avtp_Crf_GetPull(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t *const pdu)
 {
-    return (uint32_t)GET_CRF_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY);
+    return (uint32_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY);
 }
 
 /**
@@ -242,7 +357,7 @@ OPEN1722_INLINE uint32_t Avtp_Crf_GetBaseFrequency(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t *const pdu)
 {
-    return (uint16_t)GET_CRF_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH);
+    return (uint16_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH);
 }
 
 /**
@@ -253,7 +368,7 @@ OPEN1722_INLINE uint16_t Avtp_Crf_GetCrfDataLength(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const pdu)
 {
-    return (uint16_t)GET_CRF_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
+    return (uint16_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
 }
 
 /**
@@ -264,7 +379,7 @@ OPEN1722_INLINE uint16_t Avtp_Crf_GetTimestampInterval(const Avtp_Crf_t *const p
  */
 OPEN1722_INLINE void Avtp_Crf_SetSv(Avtp_Crf_t *pdu, bool sv)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_SV, sv);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SV, sv);
 }
 
 /**
@@ -275,7 +390,7 @@ OPEN1722_INLINE void Avtp_Crf_SetSv(Avtp_Crf_t *pdu, bool sv)
  */
 OPEN1722_INLINE void Avtp_Crf_SetMr(Avtp_Crf_t *pdu, bool mr)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_MR, mr);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_MR, mr);
 }
 
 /**
@@ -286,7 +401,7 @@ OPEN1722_INLINE void Avtp_Crf_SetMr(Avtp_Crf_t *pdu, bool mr)
  */
 OPEN1722_INLINE void Avtp_Crf_SetFs(Avtp_Crf_t *pdu, bool fs)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_FS, fs);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_FS, fs);
 }
 
 /**
@@ -297,18 +412,35 @@ OPEN1722_INLINE void Avtp_Crf_SetFs(Avtp_Crf_t *pdu, bool fs)
  */
 OPEN1722_INLINE void Avtp_Crf_SetTu(Avtp_Crf_t *pdu, bool tu)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_TU, tu);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_TU, tu);
 }
 
 /**
- * Set the value of the CRF Sequence Number field as specified in the IEEE 1722 Specification.
+ * Set the effective CRF Sequence Number field as specified in the IEEE 1722
+ * Specification. In version 1 the eight least significant bits are also written
+ * to the sequence_num_lsb copy (CRF-25); in version 0 they are the sequence
+ * number itself.
  *
  * @param pdu Pointer to the first bit of an 1722 CRF PDU.
  * @param value Value to set the CRF Sequence Number field to.
  */
-OPEN1722_INLINE void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint8_t value)
+OPEN1722_INLINE void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint32_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_SEQUENCE_NUM, value);
+    /* No-op on version 0: the field only exists in the alternative header v1. */
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM, value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
+}
+
+/**
+ * Set the value of the CRF ptp_grandmaster_identity field. The field only
+ * exists in version 1; on version 0 this is a no-op.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param value Value to set the CRF ptp_grandmaster_identity field to.
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPtpGrandmasterIdentity(Avtp_Crf_t *pdu, uint64_t value)
+{
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_PTP_GRANDMASTER_IDENTITY, value);
 }
 
 /**
@@ -319,7 +451,7 @@ OPEN1722_INLINE void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetType(Avtp_Crf_t *pdu, Avtp_CrfType_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_TYPE, (uint64_t)value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_TYPE, (uint64_t)value);
 }
 
 /**
@@ -330,7 +462,7 @@ OPEN1722_INLINE void Avtp_Crf_SetType(Avtp_Crf_t *pdu, Avtp_CrfType_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetStreamId(Avtp_Crf_t *pdu, uint64_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_STREAM_ID, value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_STREAM_ID, value);
 }
 
 /**
@@ -341,7 +473,7 @@ OPEN1722_INLINE void Avtp_Crf_SetStreamId(Avtp_Crf_t *pdu, uint64_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetPull(Avtp_Crf_t *pdu, Avtp_CrfPull_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_PULL, (uint64_t)value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_PULL, (uint64_t)value);
 }
 
 /**
@@ -352,7 +484,7 @@ OPEN1722_INLINE void Avtp_Crf_SetPull(Avtp_Crf_t *pdu, Avtp_CrfPull_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t *pdu, uint32_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_BASE_FREQUENCY, value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY, value);
 }
 
 /**
@@ -363,7 +495,7 @@ OPEN1722_INLINE void Avtp_Crf_SetBaseFrequency(Avtp_Crf_t *pdu, uint32_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t *pdu, uint16_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_CRF_DATA_LENGTH, value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH, value);
 }
 
 /**
@@ -374,11 +506,12 @@ OPEN1722_INLINE void Avtp_Crf_SetCrfDataLength(Avtp_Crf_t *pdu, uint16_t value)
  */
 OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t value)
 {
-    SET_CRF_FIELD(AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, value);
+    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, value);
 }
 
 /**
- * Returns pointer to the CRF data of a CRF frame.
+ * Returns pointer to the CRF data of a CRF frame. The CRF data starts after the
+ * version-dependent CRF header.
  *
  * The CRF data contains the timestamps of the stream. Each timestamp is
  * 8 octets long.
@@ -388,7 +521,7 @@ OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t val
  */
 OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload(const Avtp_Crf_t *const pdu)
 {
-    return pdu->payload;
+    return (const uint8_t *)pdu + Avtp_Crf_GetHeaderLen(pdu);
 }
 
 /**
@@ -400,11 +533,11 @@ OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Crf_SetPayload(Avtp_Crf_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
-    memcpy(pdu->payload, payload, payload_length);
+    memcpy((uint8_t *)pdu + Avtp_Crf_GetHeaderLen(pdu), payload, payload_length);
 }
 
 /**
- * Initializes a CRF PDU as specified in the IEEE 1722 Specification.
+ * Initializes a version 0 CRF PDU as specified in the IEEE 1722 Specification.
  *
  * @param pdu Pointer to the first bit of a 1722 CRF PDU.
  */
@@ -418,9 +551,27 @@ OPEN1722_INLINE void Avtp_Crf_Init(Avtp_Crf_t *pdu)
 }
 
 /**
+ * Initializes a version 1 CRF PDU. The caller must provide a buffer of at least
+ * AVTP_CRF_HEADER_LEN_V1 octets.
+ *
+ * @param pdu Pointer to the first bit of a 1722 CRF PDU.
+ */
+OPEN1722_INLINE void Avtp_Crf_InitV1(Avtp_CrfV1_t *pdu)
+{
+    if (pdu != NULL) {
+        memset(pdu, 0, sizeof(Avtp_CrfV1_t));
+        Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CRF);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_Crf_SetSv((Avtp_Crf_t *)pdu, true);
+    }
+}
+
+/**
  * Checks if the CRF frame is valid by checking:
- *     1) if the crf_data_length field contains a value larger than the actual size of the buffer
- * that contains the AVTP message. 2) if other format specific invariants are not upheld.
+ *     1) that the subtype is CRF and the version is supported,
+ *     2) that the version-dependent header fits into the buffer,
+ *     3) that crf_data_length is a non-zero multiple of 8 and fits into the
+ *        buffer.
  *
  * The crf_data_length field contains the length (in octets) of the crf_data
  * field (IEEE 1722-2025, 10.4.11), so the whole AVTPDU must fit into bufferSize.
@@ -437,11 +588,17 @@ OPEN1722_INLINE bool Avtp_Crf_IsValid(const Avtp_Crf_t *const pdu, size_t buffer
         return false;
     }
 
-    if (bufferSize < AVTP_CRF_HEADER_LEN) {
+    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_CRF) {
         return false;
     }
 
-    if (Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu) != AVTP_SUBTYPE_CRF) {
+    uint8_t version = Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu);
+    if (!Avtp_Version_IsSupported(AVTP_CRF_SUPPORTED_VERSIONS, version)) {
+        return false;
+    }
+
+    size_t headerLen = Avtp_Crf_GetHeaderLen(pdu);
+    if (bufferSize < headerLen) {
         return false;
     }
 
@@ -451,35 +608,11 @@ OPEN1722_INLINE bool Avtp_Crf_IsValid(const Avtp_Crf_t *const pdu, size_t buffer
         return false;
     }
 
-    if ((size_t)AVTP_CRF_HEADER_LEN + (size_t)crf_data_length > bufferSize) {
+    if (headerLen + (size_t)crf_data_length > bufferSize) {
         return false;
     }
 
     return true;
-}
-
-/**
- * Returns the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 CRF PDU.
- * @param field Specifies the position of the data field to be read
- * @returns This function returns the value of the field.
- */
-OPEN1722_INLINE uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfFields_t field)
-{
-    return (uint64_t)GET_CRF_FIELD(field);
-}
-
-/**
- * Sets the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
- *
- * @param pdu Pointer to the first bit of an 1722 CRF PDU.
- * @param field Specifies the position of the data field to be written
- * @param value The value to set.
- */
-OPEN1722_INLINE void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfFields_t field, uint64_t value)
-{
-    SET_CRF_FIELD(field, value);
 }
 
 #ifdef __cplusplus

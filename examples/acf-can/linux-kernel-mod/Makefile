@@ -1,5 +1,5 @@
 obj-$(CONFIG_ACF_CAN) += acfcan.o
-acfcan-objs := acfcanmain.o 1722ethernet.o ../../../src/avtp/Utils.o ../../../src/avtp/CommonHeader.o
+acfcan-objs := acfcanmain.o 1722ethernet.o ../../../src/avtp/Utils.o
 ccflags-y += -DLINUX_KERNEL1722=1
 ccflags-y += -I $(src)/../../../include
 

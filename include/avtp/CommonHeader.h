@@ -35,32 +35,45 @@
  */
 
 #pragma once
+#include "avtp/Inline.h"
+
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
+#include <string.h>
+#include <stdbool.h>
+#endif
 
 #include "avtp/Defines.h"
+#include "avtp/Utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define AVTP_COMMON_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
+#define AVTPDU_COMMON_LEN (1 * AVTP_QUADLET_SIZE)
+
+/* Version field values (IEEE 1722-2025, 4.7.3.4). */
+#define AVTP_VERSION_0 0
+#define AVTP_VERSION_1 1
 
 typedef struct {
-    uint8_t header[AVTP_COMMON_HEADER_LEN];
+    uint8_t header[AVTPDU_COMMON_LEN];
     uint8_t payload[0];
 } Avtp_CommonHeader_t;
 
 /**
- * Enumeration over all IEEE 1722 header fields. The naming convention used is
- * AVTP_<MSG_TYPE>_FIELD_<FIELD_NAME>.
+ * Enumeration over all IEEE 1722 common header fields. The naming convention
+ * used is AVTPDU_<HEADER>_FIELD_<FIELD_NAME>.
  */
 typedef enum Avtp_CommonHeaderField {
     /* Common AVTP header fields */
-    AVTP_COMMON_HEADER_FIELD_SUBTYPE = 0,
-    AVTP_COMMON_HEADER_FIELD_H,
-    AVTP_COMMON_HEADER_FIELD_VERSION,
+    AVTPDU_COMMON_FIELD_SUBTYPE = 0,
+    AVTPDU_COMMON_FIELD_H,
+    AVTPDU_COMMON_FIELD_VERSION,
 
     /* Count number of fields for bound checks */
-    AVTP_COMMON_HEADER_FIELD_MAX
+    AVTPDU_COMMON_FIELD_MAX
 } Avtp_CommonHeaderField_t;
 
 typedef enum {
@@ -87,6 +100,38 @@ typedef enum {
     AVTP_SUBTYPE_EF_CONTROL = 0xFF,
 } Avtp_AvtpSubtype_t;
 
+#define GET_COMMON_HEADER_FIELD(field)                                                             \
+    (Avtp_GetField(Avtp_CommonHeaderFieldDesc, AVTPDU_COMMON_FIELD_MAX, (const uint8_t *)pdu,      \
+                   field))
+#define SET_COMMON_HEADER_FIELD(field, value)                                                      \
+    (Avtp_SetField(Avtp_CommonHeaderFieldDesc, AVTPDU_COMMON_FIELD_MAX, (uint8_t *)pdu, field,     \
+                   value))
+
+/**
+ * This table maps all IEEE 1722 common header fields to a descriptor.
+ */
+static const Avtp_FieldDescriptor_t Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_MAX] = {
+    /* Common AVTP header */
+    [AVTPDU_COMMON_FIELD_SUBTYPE] = {.quadlet = 0, .offset = 0, .bits = 8},
+    [AVTPDU_COMMON_FIELD_H] = {.quadlet = 0, .offset = 8, .bits = 1},
+    [AVTPDU_COMMON_FIELD_VERSION] = {.quadlet = 0, .offset = 9, .bits = 3},
+};
+
+/**
+ * Returns true if the given AVTP version is present in the supported-version mask.
+ *
+ * @param versionMask Bit mask in which bit N marks version N as supported.
+ * @param version Version number to test (0 to 7).
+ * @returns true if the version is supported, false otherwise.
+ */
+OPEN1722_INLINE bool Avtp_Version_IsSupported(uint8_t versionMask, uint8_t version)
+{
+    if (version >= 8U) {
+        return false;
+    }
+    return ((versionMask >> version) & 0x01U) != 0U;
+}
+
 /**
  * Returns the value of an an AVTP common header field as specified in the IEEE 1722 Specification.
  *
@@ -94,13 +139,19 @@ typedef enum {
  * @param field Specifies the position of the data field to be read
  * @returns This function the value of the specified PDU field
  */
-uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t *const pdu,
-                                    Avtp_CommonHeaderField_t field);
+OPEN1722_INLINE uint64_t Avtp_CommonHeader_GetField(const Avtp_CommonHeader_t *const pdu,
+                                                    Avtp_CommonHeaderField_t field)
+{
+    return GET_COMMON_HEADER_FIELD(field);
+}
 
 /**
  * Returns the subtype field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t *const pdu);
+OPEN1722_INLINE uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t *const pdu)
+{
+    return (uint8_t)GET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_SUBTYPE);
+}
 
 /**
  * Returns the h (header specific) bit of the AVTP common header. The meaning of this bit is defined
@@ -108,12 +159,18 @@ uint8_t Avtp_CommonHeader_GetSubtype(const Avtp_CommonHeader_t *const pdu);
  * it as sv (stream_id valid), while formats using the alternative header (4.7.6) define it
  * themselves or leave it reserved.
  */
-uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t *const pdu);
+OPEN1722_INLINE uint8_t Avtp_CommonHeader_GetH(const Avtp_CommonHeader_t *const pdu)
+{
+    return (uint8_t)GET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_H);
+}
 
 /**
  * Returns the version field of the AVTP common header.
  */
-uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t *const pdu);
+OPEN1722_INLINE uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t *const pdu)
+{
+    return (uint8_t)GET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_VERSION);
+}
 
 /**
  * Sets the value of an an AVTP common header field as specified in the IEEE 1722 Specification.
@@ -122,60 +179,36 @@ uint8_t Avtp_CommonHeader_GetVersion(const Avtp_CommonHeader_t *const pdu);
  * @param field Specifies the position of the data field to be read
  * @param value Pointer to location to store the value.
  */
-void Avtp_CommonHeader_SetField(Avtp_CommonHeader_t *pdu, Avtp_CommonHeaderField_t field,
-                                uint64_t value);
+OPEN1722_INLINE void Avtp_CommonHeader_SetField(Avtp_CommonHeader_t *pdu,
+                                                Avtp_CommonHeaderField_t field, uint64_t value)
+{
+    SET_COMMON_HEADER_FIELD(field, value);
+}
 
 /**
  * Set the subtype field of the AVTP common header.
  */
-void Avtp_CommonHeader_SetSubtype(Avtp_CommonHeader_t *pdu, uint8_t value);
+OPEN1722_INLINE void Avtp_CommonHeader_SetSubtype(Avtp_CommonHeader_t *pdu, uint8_t value)
+{
+    SET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_SUBTYPE, value);
+}
 
 /**
  * Sets the h (header specific) bit of the AVTP common header. See Avtp_CommonHeader_GetH for the
  * definition of this bit.
  */
-void Avtp_CommonHeader_SetH(Avtp_CommonHeader_t *pdu, uint8_t value);
+OPEN1722_INLINE void Avtp_CommonHeader_SetH(Avtp_CommonHeader_t *pdu, uint8_t value)
+{
+    SET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_H, value);
+}
 
 /**
  * Set the version field of the AVTP common header.
  */
-void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t *pdu, uint8_t value);
-
-/******************************************************************************
- * Legacy API (deprecated)
- *****************************************************************************/
-
-struct avtp_common_pdu {
-    uint32_t subtype_data;
-    uint8_t pdu_specific[0];
-} __attribute__((__packed__));
-
-#define AVTP_FIELD_SUBTYPE (AVTP_COMMON_HEADER_FIELD_SUBTYPE)
-#define AVTP_FIELD_VERSION (AVTP_COMMON_HEADER_FIELD_VERSION)
-#define AVTP_FIELD_MAX (AVTP_COMMON_HEADER_FIELD_MAX)
-
-/* Get value from Common AVTPDU field.
- * @pdu: Pointer to PDU struct.
- * @field: PDU field to be retrieved.
- * @val: Pointer to variable which the retrieved value should be saved.
- *
- * Returns:
- *    0: Success.
- *    -EINVAL: If any argument is invalid.
- */
-int avtp_pdu_get(const struct avtp_common_pdu *const pdu, Avtp_CommonHeaderField_t field,
-                 uint32_t *val);
-
-/* Set value from Common AVTPDU field.
- * @pdu: Pointer to PDU struct.
- * @field: PDU field to be set.
- * @val: Value to be set.
- *
- * Returns:
- *    0: Success.
- *    -EINVAL: If any argument is invalid.
- */
-int avtp_pdu_set(struct avtp_common_pdu *pdu, Avtp_CommonHeaderField_t field, uint32_t val);
+OPEN1722_INLINE void Avtp_CommonHeader_SetVersion(Avtp_CommonHeader_t *pdu, uint8_t value)
+{
+    SET_COMMON_HEADER_FIELD(AVTPDU_COMMON_FIELD_VERSION, value);
+}
 
 #ifdef __cplusplus
 }

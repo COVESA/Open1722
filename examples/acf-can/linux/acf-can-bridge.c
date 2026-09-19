@@ -49,6 +49,7 @@
 #define ARGPARSE_CAN_IF_OPTION 501
 #define ARGPARSE_TALKER_ID_OPTION 502
 #define ARGPARSE_LISTENER_ID_OPTION 503
+#define ARGPARSE_DST_NW_ADDR_OPTION 504
 #define TALKER_STREAM_ID 0xAABBCCDDEEFF0001
 #define LISTENER_STREAM_ID 0xAABBCCDDEEFF0001
 
@@ -56,7 +57,7 @@ static char ifname[IFNAMSIZ];
 static uint8_t macaddr[ETH_ALEN];
 static uint8_t ip_addr[sizeof(struct in_addr)];
 static int priority = -1;
-static uint8_t use_tscf = 0;
+static acf_can_cf_t cf_format = ACF_CAN_CF_NTSCF_V0;
 static uint8_t use_udp = 0;
 static uint32_t udp_listen_port = 17220;
 static uint32_t udp_send_port = 17220;
@@ -79,14 +80,18 @@ static char doc[] =
         \t(Bridge eth0 with can1 using Open1722 over UDP)";
 
 static struct argp_option options[] = {
-    {"tscf", 't', 0, 0, "Use TSCF v0 (Default: NTSCF v0)"},
+    {"tscf", 't', "VERSION", OPTION_ARG_OPTIONAL,
+     "Use TSCF; VERSION 0 or 1 selects the header version (Default: NTSCF v0)"},
+    {"ntscf", 'n', "VERSION", OPTION_ARG_OPTIONAL,
+     "Use NTSCF; VERSION 0 or 1 selects the header version (Default: NTSCF v0)"},
     {"udp", 'u', 0, 0, "Use UDP"},
     {"fd", ARGPARSE_CAN_FD_OPTION, 0, 0, "Use CAN-FD"},
     {"count", 'c', "COUNT", 0, "Set count of CAN messages per Ethernet frame"},
     {"canif", ARGPARSE_CAN_IF_OPTION, "CAN_IF", 0, "CAN interface"},
     {"ifname", 'i', "IFNAME", 0, "Network interface (If Ethernet)"},
     {"dst-addr", 'd', "MACADDR", 0, "Stream destination MAC address (If Ethernet)"},
-    {"dst-nw-addr", 'n', "NW_ADDR", 0, "Stream destination network address and port (If UDP)"},
+    {"dst-nw-addr", ARGPARSE_DST_NW_ADDR_OPTION, "NW_ADDR", 0,
+     "Stream destination network address and port (If UDP)"},
     {"udp-port", 'p', "UDP_PORT", 0, "UDP Port to listen on (if UDP)"},
     {"listener-stream-id", ARGPARSE_LISTENER_ID_OPTION, "STREAM_ID", 0,
      "Stream ID for listener stream"},
@@ -99,7 +104,26 @@ static error_t parser(int key, char *arg, struct argp_state *state)
 
     switch (key) {
     case 't':
-        use_tscf = 1;
+        cf_format = ACF_CAN_CF_TSCF_V0;
+        if (arg != NULL) {
+            if (strcmp(arg, "1") == 0) {
+                cf_format = ACF_CAN_CF_TSCF_V1;
+            } else if (strcmp(arg, "0") != 0) {
+                fprintf(stderr, "Invalid TSCF version '%s' (only 0 and 1 are supported)\n", arg);
+                exit(EXIT_FAILURE);
+            }
+        }
+        break;
+    case 'n':
+        cf_format = ACF_CAN_CF_NTSCF_V0;
+        if (arg != NULL) {
+            if (strcmp(arg, "1") == 0) {
+                cf_format = ACF_CAN_CF_NTSCF_V1;
+            } else if (strcmp(arg, "0") != 0) {
+                fprintf(stderr, "Invalid NTSCF version '%s' (only 0 and 1 are supported)\n", arg);
+                exit(EXIT_FAILURE);
+            }
+        }
         break;
     case 'p':
         udp_listen_port = atoi(arg);
@@ -131,7 +155,7 @@ static error_t parser(int key, char *arg, struct argp_state *state)
             exit(EXIT_FAILURE);
         }
         break;
-    case 'n':
+    case ARGPARSE_DST_NW_ADDR_OPTION:
         res = sscanf(arg, "%[^:]:%d", ip_addr_str, &udp_send_port);
         if (!res) {
             fprintf(stderr, "Invalid IP address or port\n");
@@ -167,7 +191,7 @@ static struct argp argp = {options, parser, NULL, doc};
 void *can_to_avtp_runnable(void *args)
 {
 
-    uint8_t cf_seq_num = 0;
+    uint32_t cf_seq_num = 0;
     uint32_t udp_seq_num = 0;
 
     uint8_t pdu[MAX_ETH_PDU_SIZE];
@@ -196,7 +220,7 @@ void *can_to_avtp_runnable(void *args)
         }
 
         // Pack all the read frames into an AVTP frame
-        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, use_tscf, talker_stream_id,
+        pdu_length = can_to_avtp(can_frames, can_fd, pdu, use_udp, cf_format, talker_stream_id,
                                  num_acf_msgs, cf_seq_num++, udp_seq_num++);
 
         // Send the packed frame out
@@ -220,7 +244,7 @@ void *avtp_to_can_runnable(void *args)
 
     uint16_t pdu_length = 0, cf_length = 0;
     int8_t num_can_msgs = 0;
-    uint8_t exp_cf_seqnum = 0;
+    uint32_t exp_cf_seqnum = 0;
     uint32_t exp_udp_seqnum = 0;
     uint8_t pdu[MAX_ETH_PDU_SIZE];
     frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
@@ -269,10 +293,20 @@ int main(int argc, char *argv[])
 
     // Print current configuration
     printf("acf-can-bridge configuration:\n");
-    if (use_tscf)
+    switch (cf_format) {
+    case ACF_CAN_CF_TSCF_V0:
         printf("\tUsing TSCF v0\n");
-    else
+        break;
+    case ACF_CAN_CF_TSCF_V1:
+        printf("\tUsing TSCF v1\n");
+        break;
+    case ACF_CAN_CF_NTSCF_V1:
+        printf("\tUsing NTSCF v1\n");
+        break;
+    default:
         printf("\tUsing NTSCF v0\n");
+        break;
+    }
     if (can_fd)
         printf("\tUsing CAN FD interface: %s\n", can_ifname);
     else

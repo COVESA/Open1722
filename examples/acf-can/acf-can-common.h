@@ -86,6 +86,16 @@ typedef union {
     canfd_frame_t fd;
 } frame_t;
 
+/**
+ * Control format used to encapsulate ACF CAN messages.
+ */
+typedef enum {
+    ACF_CAN_CF_NTSCF_V0 = 0, /* NTSCF version 0 */
+    ACF_CAN_CF_NTSCF_V1,     /* NTSCF version 1 */
+    ACF_CAN_CF_TSCF_V0,      /* TSCF version 0 */
+    ACF_CAN_CF_TSCF_V1,      /* TSCF version 1 */
+} acf_can_cf_t;
+
 #ifdef __linux__
 /**
  * Creates a CAN socket.
@@ -110,7 +120,7 @@ int setup_can_socket(const char *can_ifname, bool can_fd);
  * @return Number of CAN messages received
  */
 int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
-                uint8_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
+                uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
@@ -119,12 +129,13 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
  * @param can_fd true: CAN-FD, false: Classic CAN
  * @param pdu: Start of AVTP Frame
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
- * @param use_tscf 1: TSCF, 0: NTSCF
+ * @param cf: Control format and header version used to encapsulate the CAN frames
  * @param stream_id: AVTP stream ID of interest
  * @param num_acf_msgs: No. of ACF CAN messages to aggregate
  * @param cf_seq_num: Control format sequence num.
  * @param udp_seq_num: UDP Encapsulation sequence num.
  * @return Length of the PDU
  */
-int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, int use_tscf,
-                uint64_t stream_id, uint8_t num_acf_msgs, uint8_t cf_seq_num, uint32_t udp_seq_num);
+int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, acf_can_cf_t cf,
+                uint64_t stream_id, uint8_t num_acf_msgs, uint32_t cf_seq_num,
+                uint32_t udp_seq_num);

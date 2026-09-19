@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     struct ifreq ifr;
     uint16_t pdu_length = 0, cf_length = 0;
     int8_t num_can_msgs = 0;
-    uint8_t exp_cf_seqnum = 0;
+    uint32_t exp_cf_seqnum = 0;
     uint32_t exp_udp_seqnum = 0;
     uint8_t pdu[MAX_ETH_PDU_SIZE];
     frame_t can_frames[MAX_CAN_FRAMES_IN_ACF];
