@@ -207,13 +207,12 @@ static void tscf_payload(void **state)
 }
 
 static void mark_descriptors(uint8_t *coverage, size_t coverageBits,
-                             const Avtp_FieldDescriptor_t *desc, uint8_t numFields,
-                             uint8_t quadletOffset)
+                             const Avtp_FieldDescriptor_t *desc, uint8_t numFields)
 {
     for (uint8_t i = 0; i < numFields; i++) {
         uint8_t bits = desc[i].bits;
         uint8_t offset = desc[i].offset;
-        uint8_t quadlet = (uint8_t)(desc[i].quadlet + quadletOffset);
+        uint8_t quadlet = desc[i].quadlet;
 
         for (uint8_t b = 0; b < bits; b++) {
             size_t bit = ((size_t)quadlet * 32) + offset + b;
@@ -232,27 +231,44 @@ static void tscf_header_coverage(void **state)
     for (uint8_t version = 0; version <= 1; version++) {
         uint8_t coverage[AVTP_TSCF_HEADER_LEN_V1 * 8] = {0};
         size_t coverageBits = sizeof(coverage);
-        const Avtp_FieldDescriptor_t *cshDesc =
-            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
-        uint8_t formatOffsetQuadlets = version == AVTP_VERSION_1 ? 4 : 0;
+        const Avtp_FieldDescriptor_t *tscfDesc =
+            version == AVTP_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
         size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_TSCF_HEADER_LEN_V1
                                                        : (size_t)AVTP_TSCF_HEADER_LEN_V0) *
                             8;
 
-        /* subtype and version are owned by the common header; h/sv is owned by
-         * the style header and covered below. */
+        /* subtype and version are owned by the common header; h/sv is covered
+         * by the format table. */
         mark_descriptors(coverage, coverageBits,
-                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_SUBTYPE], 1, 0);
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_SUBTYPE], 1);
         mark_descriptors(coverage, coverageBits,
-                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_VERSION], 1, 0);
-        /* Common stream header fields. */
-        mark_descriptors(coverage, coverageBits, cshDesc, AVTPDU_CSH_FIELD_MAX, 0);
-        /* TSCF-specific fields, shifted to the version's format area. */
-        mark_descriptors(coverage, coverageBits, Avtp_TscfFieldDesc, AVTP_TSCF_FIELD_MAX,
-                         formatOffsetQuadlets);
+                         &Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIELD_VERSION], 1);
+        mark_descriptors(coverage, coverageBits, tscfDesc, AVTP_TSCF_FIELD_MAX);
 
         for (size_t bit = 0; bit < coverageBits; bit++) {
             assert_int_equal(coverage[bit], bit < headerBits ? 1 : 0);
+        }
+    }
+}
+
+static void tscf_common_field_consistency(void **state)
+{
+    (void)state;
+
+    /* The common fields must be declared in the same order as in the common
+     * stream header module, so the tables can be compared index by index. */
+    assert_int_equal(AVTP_TSCF_FIELD_STREAM_DATA_LENGTH, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH);
+
+    for (uint8_t version = 0; version <= 1; version++) {
+        const Avtp_FieldDescriptor_t *tscfDesc =
+            version == AVTP_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
+        const Avtp_FieldDescriptor_t *cshDesc =
+            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+
+        for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
+            assert_int_equal(tscfDesc[i].quadlet, cshDesc[i].quadlet);
+            assert_int_equal(tscfDesc[i].offset, cshDesc[i].offset);
+            assert_int_equal(tscfDesc[i].bits, cshDesc[i].bits);
         }
     }
 }
@@ -267,6 +283,7 @@ int main(void)
         cmocka_unit_test(tscf_is_valid),
         cmocka_unit_test(tscf_payload),
         cmocka_unit_test(tscf_header_coverage),
+        cmocka_unit_test(tscf_common_field_consistency),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
