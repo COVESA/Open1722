@@ -33,6 +33,10 @@
  * stream header (4.7.4) for versions 0 and 1 and functions to invoke the
  * corresponding parser and deparser. The format-specific data slots 2 and 3
  * are not covered here; their contents are defined by the individual formats.
+ *
+ * Format modules declare complete descriptor tables per version in absolute
+ * coordinates, reusing these positions for the common fields. A consistency
+ * test keeps the common entries of each format aligned with the tables here.
  */
 
 #pragma once
@@ -144,20 +148,6 @@ Avtp_CommonStreamHeader_GetHeaderLen(const Avtp_CommonStreamHeader_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1 ? (uint8_t)AVTPDU_CSH_LEN_V1
                                                                      : (uint8_t)AVTPDU_CSH_LEN_V0;
-}
-
-/**
- * Returns the byte offset of the format-specific data area relative to the
- * version 0 layout: 0 for version 0 and 16 for version 1. Format field
- * descriptor tables are written in version 0 coordinates and add this offset
- * to the PDU pointer.
- */
-OPEN1722_INLINE uint8_t
-Avtp_CommonStreamHeader_GetFormatOffset(const Avtp_CommonStreamHeader_t *const pdu)
-{
-    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
-               ? (uint8_t)(AVTPDU_CSH_LEN_V1 - AVTPDU_CSH_LEN_V0)
-               : 0;
 }
 
 /**

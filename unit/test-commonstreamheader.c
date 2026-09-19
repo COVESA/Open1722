@@ -70,7 +70,6 @@ static void common_stream_header_v0_layout(void **state)
 
     assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTP_VERSION_0);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V0);
-    assert_int_equal(Avtp_CommonStreamHeader_GetFormatOffset(csh), 0);
 
     Avtp_CommonStreamHeader_SetSv(csh, true);
     Avtp_CommonStreamHeader_SetMr(csh, true);
@@ -118,7 +117,6 @@ static void common_stream_header_v1_layout(void **state)
 
     assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTP_VERSION_1);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V1);
-    assert_int_equal(Avtp_CommonStreamHeader_GetFormatOffset(csh), 16);
 
     Avtp_CommonStreamHeader_SetSv(csh, true);
     Avtp_CommonStreamHeader_SetMr(csh, true);

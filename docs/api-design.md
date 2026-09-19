@@ -17,8 +17,9 @@ table covering the format's own bits, `Init`, `IsValid` and payload helpers.
 They differ only in the header they describe: the common stream header, except
 for CRF/NTSCF, which use the alternative header. Both header styles are
 versioned (0 and 1); the common stream header fields are described once in
-[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h) and formats add
-only their own fields in version 0 coordinates (TSCF is the reference). The CVF
+[`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h), and each format
+declares a complete descriptor table per version in absolute coordinates,
+reusing those positions for the common fields (TSCF is the reference). The CVF
 format-specific headers (MJPEG, H.264, JPEG 2000) and the RVF raw header are
 fragments of the stream data rather than standalone PDUs: they are validated
 through the enclosing PDU (`Avtp_Cvf_IsValid`/`Avtp_Rvf_IsValid`, plus a
@@ -605,31 +606,36 @@ header once for both versions:
   in both versions; fields absent from a version return 0 and their setters are
   no-ops.
 
-A migrated format (TSCF is the reference) declares only its own fields, in
-version 0 coordinates, and adds the format offset in its GET/SET macros:
+A migrated format (TSCF is the reference) declares a **complete descriptor
+table per version**, in absolute coordinates. The common entries reuse the
+positions from `Avtp_CshFieldDescV0/V1`; the format's own fields override the
+format-specific data slots. The accessors select the table for the version in
+use - there is no offset arithmetic:
 
 ```c
-#define GET_TSCF_FIELD(field)                                                      \
-    (Avtp_GetField(Avtp_TscfFieldDesc, AVTP_TSCF_FIELD_MAX,                        \
-                   (const uint8_t *)pdu +                                          \
-                       Avtp_CommonStreamHeader_GetFormatOffset(                    \
-                           (const Avtp_CommonStreamHeader_t *)pdu),                \
-                   field))
+static const Avtp_FieldDescriptor_t Avtp_TscfFieldDescV1[AVTP_TSCF_FIELD_MAX] = {
+    [AVTP_TSCF_FIELD_SV] = {.quadlet = 0, .offset = 8, .bits = 1},
+    ... /* same positions as Avtp_CshFieldDescV1 */
+    [AVTP_TSCF_FIELD_RESERVED2] = {.quadlet = 8, .offset = 0, .bits = 32},
+    [AVTP_TSCF_FIELD_RESERVED3] = {.quadlet = 9, .offset = 16, .bits = 16},
+};
 ```
 
-`GetFormatOffset` is 0 for version 0 and 16 for version 1: version 1 inserts 16
-octets before the format-specific data area, so every format field shifts by
-that amount. A new header version therefore means one new table in the style
-module, not one new table per format. `GetHeaderLen` is used by the payload
-helpers so `Avtp_<Format>_Get/SetPayload` work for both versions.
+This is the "subclass" model: the common stream header defines the slots and
+the format table declares its interpretation of them. Because the common
+entries are copied into every format table, a per-format consistency test
+asserts that they equal the style module's entries for the same version.
+`GetHeaderLen` is used by the payload helpers so `Avtp_<Format>_Get/SetPayload`
+work for both versions.
 
 The version 1 PDU struct (for example `Avtp_TscfV1_t`) is sized for the larger
 header and is used for allocation and embedding. Accessors keep taking the
 version 0 struct pointer; version 1 callers cast once.
 
 The "every bit described exactly once" rule becomes a cross-module test: for
-each version, the common header, the common stream header and the format's own
-table (shifted by the format offset) must cover the whole header exactly once.
+each version, the common header fields (`subtype`, `version`; `h` is covered by
+the format's `SV`) plus the format's complete table must cover the whole header
+exactly once.
 
 ## ACF layering & the common header
 
