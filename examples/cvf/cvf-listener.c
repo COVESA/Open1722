@@ -180,18 +180,18 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf, size_t bufferSize)
         return false;
     }
 
-    if (!Avtp_Cvf_IsTv(cvf)) {
+    if (!Avtp_Cvf_IsTv_V0(cvf)) {
         fprintf(stderr, "tv mismatch: expected %u, got %u\n", 1, 0);
         return false;
     }
 
-    uint64_t stream_id = Avtp_Cvf_GetStreamId(cvf);
+    uint64_t stream_id = Avtp_Cvf_GetStreamId_V0(cvf);
     if (stream_id != STREAM_ID) {
         fprintf(stderr, "Stream ID mismatch: expected %lu, got %lu\n", STREAM_ID, stream_id);
         return false;
     }
 
-    uint8_t sequence_num = Avtp_Cvf_GetSequenceNum(cvf);
+    uint8_t sequence_num = Avtp_Cvf_GetSequenceNum_V0(cvf);
     if (sequence_num != expected_seq) {
         fprintf(stderr,
                 "Sequence number mismatch: expected %" PRIu8 ", "
@@ -201,14 +201,14 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf, size_t bufferSize)
     }
     expected_seq++;
 
-    Avtp_CvfFormat_t format = Avtp_Cvf_GetFormat(cvf);
+    Avtp_CvfFormat_t format = Avtp_Cvf_GetFormat_V0(cvf);
     if (format != AVTP_CVF_FORMAT_RFC) {
         fprintf(stderr, "Format mismatch: expected %u, got %u\n", AVTP_CVF_FORMAT_RFC,
                 (unsigned)format);
         return false;
     }
 
-    Avtp_CvfFormatSubtype_t format_subtype = Avtp_Cvf_GetFormatSubtype(cvf);
+    Avtp_CvfFormatSubtype_t format_subtype = Avtp_Cvf_GetFormatSubtype_V0(cvf);
     if (format_subtype != AVTP_CVF_FORMAT_SUBTYPE_H264) {
         fprintf(stderr, "Format mismatch: expected %u, got %u\n", AVTP_CVF_FORMAT_SUBTYPE_H264,
                 (unsigned)format_subtype);
@@ -220,7 +220,7 @@ static bool is_valid_packet(Avtp_Cvf_t *cvf, size_t bufferSize)
 
 static uint16_t get_h264_data_len(Avtp_Cvf_t *cvf)
 {
-    uint16_t stream_data_len = Avtp_Cvf_GetStreamDataLength(cvf);
+    uint16_t stream_data_len = Avtp_Cvf_GetStreamDataLength_V0(cvf);
     return (uint16_t)(stream_data_len - AVTP_H264_HEADER_LEN);
 }
 
@@ -248,12 +248,12 @@ static int new_packet(int sk_fd, int timer_fd)
         return 0;
     }
 
-    if (!Avtp_H264_IsValid(h264Header, Avtp_Cvf_GetStreamDataLength(cvf))) {
+    if (!Avtp_H264_IsValid(h264Header, Avtp_Cvf_GetStreamDataLength_V0(cvf))) {
         fprintf(stderr, "Dropping packet: H.264 header does not fit into the CVF stream data\n");
         return 0;
     }
 
-    avtp_time = Avtp_Cvf_GetAvtpTimestamp(cvf);
+    avtp_time = Avtp_Cvf_GetAvtpTimestamp_V0(cvf);
 
     res = get_presentation_time(avtp_time, &tspec);
     if (res < 0)

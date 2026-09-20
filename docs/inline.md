@@ -25,15 +25,16 @@ All inline functions in the public headers use `OPEN1722_INLINE` instead of `sta
 The shared library build includes a single file `src/avtp/export/InlineExports.c` that overrides the macro and re-includes all inline headers:
 
 ```c
-// Phase 1: include shared deps in static-inline mode
+// Phase 1: leaf dependencies in static-inline mode
 #include "avtp/Inline.h"
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
-// ...
 
 // Phase 2: override and include all target headers
 #undef OPEN1722_INLINE
 #define OPEN1722_INLINE
+#include "avtp/Utils.h"          // field-access engine
+#include "avtp/acf/AcfCommon.h"  // shared ACF common header
 #include "avtp/Udp.h"
 #include "avtp/acf/Ntscf.h"
 // ... all remaining format headers
@@ -41,7 +42,7 @@ The shared library build includes a single file `src/avtp/export/InlineExports.c
 
 When `OPEN1722_INLINE` is empty, each function definition in the target headers becomes a regular external function definition, emitted as an exported symbol in `libopen1722.so`.
 
-Phase 1 ensures that all shared dependencies (Byteorder, Utils, AcfCommon, etc.) are processed in the default static-inline mode, so they have internal linkage and do not cause duplicate-symbol errors.
+Phase 1 ensures that the leaf dependencies (Byteorder, Defines, etc.) are processed in the default static-inline mode, so they have internal linkage and do not cause duplicate-symbol errors. `Utils.h` and `AcfCommon.h` must be part of phase 2 rather than phase 1: `AcfCommon.h` includes `Utils.h`, and `#pragma once` fixes a header's linkage at first parse, so both have to be processed with `OPEN1722_INLINE` empty for their functions (including `Avtp_GetField`/`Avtp_SetField`) to be exported.
 
 ## Usage
 
@@ -98,6 +99,8 @@ This makes the function declarations plain `extern` declarations — no function
 
 ```
 include/avtp/Inline.h                     ← defines OPEN1722_INLINE macro
+include/avtp/Utils.h                      ← field-access engine (inline)
+include/avtp/acf/AcfCommon.h              ← shared ACF common header (inline)
 include/avtp/acf/{Ntscf,Tscf,Can,...}.h   ← uses OPEN1722_INLINE
 src/avtp/export/
 └── InlineExports.c                       ← single export unit (all formats)

@@ -174,25 +174,25 @@ static bool is_valid_packet(Avtp_Pcm_t *pdu)
         return false;
     }
 
-    if (!Avtp_Pcm_IsTv(pdu)) {
+    if (!Avtp_Pcm_IsTv_V0(pdu)) {
         fprintf(stderr, "tv mismatch: expected %u, got %u\n", 1, 0);
         return false;
     }
 
-    if (Avtp_Pcm_IsSp(pdu)) {
+    if (Avtp_Pcm_IsSp_V0(pdu)) {
         fprintf(stderr, "sp mismatch: expected %u, got %u\n", AVTP_AAF_SP_NORMAL,
                 AVTP_AAF_SP_SPARSE);
         return false;
     }
 
-    val64 = Avtp_Pcm_GetStreamId(pdu);
+    val64 = Avtp_Pcm_GetStreamId_V0(pdu);
     if (val64 != STREAM_ID) {
         fprintf(stderr, "Stream ID mismatch: expected %" PRIu64 ", got %" PRIu64 "\n", STREAM_ID,
                 val64);
         return false;
     }
 
-    val8 = Avtp_Pcm_GetSequenceNum(pdu);
+    val8 = Avtp_Pcm_GetSequenceNum_V0(pdu);
     if (val8 != expected_seq) {
         /* If we have a sequence number mismatch, we simply log the
          * issue and continue to process the packet. We don't want to
@@ -204,32 +204,32 @@ static bool is_valid_packet(Avtp_Pcm_t *pdu)
 
     expected_seq++;
 
-    if (Avtp_Pcm_GetFormat(pdu) != AVTP_AAF_FORMAT_INT_16BIT) {
+    if (Avtp_Pcm_GetFormat_V0(pdu) != AVTP_AAF_FORMAT_INT_16BIT) {
         fprintf(stderr, "Format mismatch: expected %u, got %u\n", AVTP_AAF_FORMAT_INT_16BIT,
-                Avtp_Pcm_GetFormat(pdu));
+                Avtp_Pcm_GetFormat_V0(pdu));
         return false;
     }
 
-    if (Avtp_Pcm_GetNsr(pdu) != AVTP_PCM_NSR_48KHZ) {
+    if (Avtp_Pcm_GetNsr_V0(pdu) != AVTP_PCM_NSR_48KHZ) {
         fprintf(stderr, "Sample rate mismatch: expected %u, got %u\n", AVTP_PCM_NSR_48KHZ,
-                Avtp_Pcm_GetNsr(pdu));
+                Avtp_Pcm_GetNsr_V0(pdu));
         return false;
     }
 
-    if (Avtp_Pcm_GetChannelsPerFrame(pdu) != NUM_CHANNELS) {
+    if (Avtp_Pcm_GetChannelsPerFrame_V0(pdu) != NUM_CHANNELS) {
         fprintf(stderr, "Channels mismatch: expected %u, got %u\n", NUM_CHANNELS,
-                Avtp_Pcm_GetChannelsPerFrame(pdu));
+                Avtp_Pcm_GetChannelsPerFrame_V0(pdu));
         return false;
     }
 
-    if (Avtp_Pcm_GetBitDepth(pdu) != 16) {
-        fprintf(stderr, "Depth mismatch: expected %u, got %u\n", 16, Avtp_Pcm_GetBitDepth(pdu));
+    if (Avtp_Pcm_GetBitDepth_V0(pdu) != 16) {
+        fprintf(stderr, "Depth mismatch: expected %u, got %u\n", 16, Avtp_Pcm_GetBitDepth_V0(pdu));
         return false;
     }
 
-    if (Avtp_Pcm_GetStreamDataLength(pdu) != DATA_LEN) {
+    if (Avtp_Pcm_GetStreamDataLength_V0(pdu) != DATA_LEN) {
         fprintf(stderr, "Data len mismatch: expected %u, got %u\n", DATA_LEN,
-                Avtp_Pcm_GetStreamDataLength(pdu));
+                Avtp_Pcm_GetStreamDataLength_V0(pdu));
         return false;
     }
 
@@ -257,7 +257,7 @@ static int new_packet(int sk_fd, int timer_fd)
         return 0;
     }
 
-    avtp_time = Avtp_Pcm_GetAvtpTimestamp(pdu);
+    avtp_time = Avtp_Pcm_GetAvtpTimestamp_V0(pdu);
 
     res = get_presentation_time(avtp_time, &tspec);
     if (res < 0)
