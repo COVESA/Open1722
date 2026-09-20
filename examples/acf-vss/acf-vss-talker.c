@@ -144,16 +144,16 @@ static int init_cf_pdu(uint8_t *pdu)
         Avtp_Tscf_t *tscf_pdu = (Avtp_Tscf_t *)pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
         Avtp_Tscf_Init(tscf_pdu);
-        Avtp_Tscf_SetTu(tscf_pdu, false);
-        Avtp_Tscf_SetSequenceNum(tscf_pdu, seq_num++);
-        Avtp_Tscf_SetStreamId(tscf_pdu, STREAM_ID);
+        Avtp_Tscf_SetTu_V0(tscf_pdu, false);
+        Avtp_Tscf_SetSequenceNum_V0(tscf_pdu, seq_num++);
+        Avtp_Tscf_SetStreamId_V0(tscf_pdu, STREAM_ID);
         res = AVTP_TSCF_HEADER_LEN;
     } else {
         Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
         Avtp_Ntscf_Init(ntscf_pdu);
-        Avtp_Ntscf_SetSequenceNum(ntscf_pdu, seq_num++);
-        Avtp_Ntscf_SetStreamId(ntscf_pdu, STREAM_ID);
+        Avtp_Ntscf_SetSequenceNum_V0(ntscf_pdu, seq_num++);
+        Avtp_Ntscf_SetStreamId_V0(ntscf_pdu, STREAM_ID);
         res = AVTP_NTSCF_HEADER_LEN;
     }
     return res;
@@ -163,10 +163,10 @@ static int update_cf_length(uint8_t *cf_pdu, uint64_t length)
 {
     if (use_tscf) {
         uint64_t payloadLen = length - AVTP_TSCF_HEADER_LEN;
-        Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)cf_pdu, (uint16_t)payloadLen);
+        Avtp_Tscf_SetStreamDataLength_V0((Avtp_Tscf_t *)cf_pdu, (uint16_t)payloadLen);
     } else {
         uint64_t payloadLen = length - AVTP_NTSCF_HEADER_LEN;
-        Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)cf_pdu, (uint16_t)payloadLen);
+        Avtp_Ntscf_SetNtscfDataLength_V0((Avtp_Ntscf_t *)cf_pdu, (uint16_t)payloadLen);
     }
     return 0;
 }
