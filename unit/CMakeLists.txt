@@ -35,10 +35,12 @@ if (NOT cmocka_FOUND)
   return()
 endif()
 
-target_compile_options(open1722 PRIVATE -coverage)
-target_link_options(open1722 PRIVATE -coverage)
-target_compile_options(open1722custom PRIVATE -coverage)
-target_link_options(open1722custom PRIVATE -coverage)
+# Coverage is measured on the unit test executables only (see add_dual_test
+# below), not on the libraries: the public accessors and the field-access
+# engine are header-inline, so the test translation units are where that code
+# is actually executed and counted. test_all.sh filters the lcov report to the
+# public headers. Instrumenting the libraries would add gcov overhead to local
+# and benchmark builds without contributing to the report.
 
 # Function to create dual tests (C and C++ compilation) for the same source file
 function(add_dual_test TEST_NAME SOURCE_FILE)
@@ -71,7 +73,6 @@ endfunction()
 add_dual_test(test-can test-can.c m)
 add_dual_test(test-aaf test-aaf.c)
 add_dual_test(test-pcm test-pcm.c)
-add_dual_test(test-avtp test-avtp.c)
 add_dual_test(test-crf test-crf.c)
 add_dual_test(test-cvf test-cvf.c)
 add_dual_test(test-rvf test-rvf.c)
@@ -85,6 +86,8 @@ add_dual_test(test-gpc test-gpc.c)
 add_dual_test(test-sensor test-sensor.c)
 add_dual_test(test-udp test-udp.c)
 add_dual_test(test-commonheader test-commonheader.c)
+add_dual_test(test-commonstreamheader test-commonstreamheader.c)
+add_dual_test(test-alternativeheader test-alternativeheader.c)
 add_dual_test(test-gisf test-gisf.c)
 add_dual_test(test-abb test-abb.c)
 add_dual_test(test-gbb test-gbb.c)

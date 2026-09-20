@@ -30,12 +30,15 @@
 /*
  * Forces external definitions of all inline functions in the public headers.
  *
- * Phase 1 includes all transitive dependencies (Byteorder, Utils,
- * AcfCommon, etc.) in the default static-inline mode so they have
- * internal linkage and do not conflict between translation units.
+ * Phase 1 includes the leaf dependencies (Byteorder, Defines, etc.) in the
+ * default static-inline mode so they have internal linkage and do not conflict
+ * between translation units.
  *
- * Phase 2 overrides OPEN1722_INLINE to empty and includes each target
- * header, making its inline functions regular extern definitions.
+ * Phase 2 overrides OPEN1722_INLINE to empty and includes each target header,
+ * making its inline functions regular extern definitions. Utils.h comes first
+ * because the field-access engine it defines is used by all format headers;
+ * AcfCommon.h follows it (it includes Utils.h, so both must be processed in
+ * this mode for their functions to be exported).
  */
 
 /* --- Phase 1: shared deps (static-inline mode) ----------------------- */
@@ -44,15 +47,18 @@
 #include "avtp/Inline.h"
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
-#include "avtp/Utils.h"
-#include "avtp/CommonHeader.h"
-#include "avtp/acf/AcfCommon.h"
 
 /* --- Phase 2: target headers (extern-definition mode) ---------------- */
 
 #undef OPEN1722_INLINE
 #define OPEN1722_INLINE
 
+#include "avtp/Utils.h"
+#include "avtp/acf/AcfCommon.h"
+
+#include "avtp/CommonHeader.h"
+#include "avtp/CommonStreamHeader.h"
+#include "avtp/AlternativeHeader.h"
 #include "avtp/Udp.h"
 
 #include "avtp/Crf.h"

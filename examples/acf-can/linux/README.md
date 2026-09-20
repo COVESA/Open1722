@@ -14,6 +14,8 @@ All these applications support IEEE 1722 over Ethernet (layer 2) as well as over
 
 The chosen format has to match between the talker and listener applications. The build system builds the applications using all available formats for the listener, talker and bridge applications. User can extend the build system to build the applications using other formats as well.
 
+In addition to the ACF CAN message format, the NTSCF transport can use version 0 (12-octet header, 8-bit sequence number) or version 1 (28-octet header, 32-bit sequence number, PTP grandmaster identity) of the AVTPDU alternative header, and the TSCF transport can use version 0 (24-octet header, 8-bit sequence number) or version 1 (40-octet header, 32-bit sequence number, PTP grandmaster identity) of the AVTPDU common stream header. Select the version at runtime with `-n1`/`--ntscf=1` or `-t1`/`--tscf=1` on the talker or bridge; listeners detect the version from the received frame.
+
 The built applications can be used along with Linux CAN utilities. On Ubuntu/Debian Linux distributions, these utilities can be installed using the package manager `apt install can-utils`
 
 ## acf-can-talker
@@ -27,13 +29,16 @@ Ethernet using Open1722.
 
       --canif=CAN_IF         CAN interface
   -c, --count=COUNT          Set count of CAN messages per Ethernet frame
+      --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
+                             UDP)
   -d, --dst-addr=MACADDR     Stream destination MAC address (If Ethernet)
       --fd                   Use CAN-FD
   -i, --ifname=IFNAME        Network interface (If Ethernet)
-  -n, --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
-                             UDP)
+  -n, --ntscf[=VERSION]      Use NTSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
       --stream-id=STREAM_ID  Stream ID for talker stream
-  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
+  -t, --tscf[=VERSION]       Use TSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
   -u, --udp                  Use UDP (Default: Ethernet)
   -?, --help                 Give this help list
       --usage                Give a short usage message
@@ -68,17 +73,20 @@ acf-can-bridge -- a program for bridging a CAN interface with an Ethernet interf
 
       --canif=CAN_IF         CAN interface
   -c, --count=COUNT          Set count of CAN messages per Ethernet frame
+      --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
+                             UDP)
   -d, --dst-addr=MACADDR     Stream destination MAC address (If Ethernet)
       --fd                   Use CAN-FD
   -i, --ifname=IFNAME        Network interface (If Ethernet)
       --listener-stream-id=STREAM_ID
                              Stream ID for listener stream
-  -n, --dst-nw-addr=NW_ADDR  Stream destination network address and port (If
-                             UDP)
+  -n, --ntscf[=VERSION]      Use NTSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
   -p, --udp-port=UDP_PORT    UDP Port to listen on (if UDP)
       --talker-stream-id=STREAM_ID
                              Stream ID for talker stream
-  -t, --tscf                 Use TSCF v0 (Default: NTSCF v0)
+  -t, --tscf[=VERSION]       Use TSCF; VERSION 0 or 1 selects the header
+                             version (Default: NTSCF v0)
   -u, --udp                  Use UDP
   -?, --help                 Give this help list
       --usage                Give a short usage message

@@ -50,8 +50,9 @@ void prepare_ntscf_header(Avtp_Ntscf_t *ntscf_header, struct acfcan_cfg *cfg)
 {
     Avtp_Ntscf_Init(ntscf_header);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ntscf_header, 0);
-    Avtp_Ntscf_SetSequenceNum(ntscf_header, cfg->sequenceNum++); // This can't be right. Increase?
-    Avtp_Ntscf_SetStreamId(ntscf_header, cfg->tx_streamid);
+    Avtp_Ntscf_SetSequenceNum_V0(ntscf_header,
+                                 cfg->sequenceNum++); // This can't be right. Increase?
+    Avtp_Ntscf_SetStreamId_V0(ntscf_header, cfg->tx_streamid);
 }
 
 void prepare_can_header(Avtp_Can_t *can_header, struct acfcan_cfg *cfg, const struct sk_buff *skb)
@@ -112,7 +113,7 @@ void calculate_and_set_ntscf_size(ACFCANPdu_t *pdu)
     // 1722 is a mess. Bytes, lukicly we have padded quadlets in can already....
     uint16_t canandpadinbytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((Avtp_AcfCommon_t *)&pdu->can);
-    Avtp_Ntscf_SetNtscfDataLength(&pdu->ntscf, canandpadinbytes);
+    Avtp_Ntscf_SetNtscfDataLength_V0(&pdu->ntscf, canandpadinbytes);
 }
 
 int forward_can_frame(struct net_device *can_dev, const struct sk_buff *skb_can)
@@ -226,7 +227,7 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
     Avtp_Can_t *can = (Avtp_Can_t *)(skb->data + sizeof(Avtp_Ntscf_t));
 
     // This is bytes, not quadlets
-    uint16_t msg_length = Avtp_Ntscf_GetNtscfDataLength(ntscf);
+    uint16_t msg_length = Avtp_Ntscf_GetNtscfDataLength_V0(ntscf);
 
     // seq_num = Avtp_Ntscf_GetSequenceNum((Avtp_Ntscf_t*)cf_pdu);
     if (msg_length > skb->len - sizeof(Avtp_Ntscf_t)) {
@@ -242,7 +243,7 @@ int ieee1722_packet_handdler(struct sk_buff *skb, struct net_device *dev, struct
         return NET_RX_DROP;
     }
 
-    uint64_t stream_id = Avtp_Ntscf_GetStreamId(ntscf);
+    uint64_t stream_id = Avtp_Ntscf_GetStreamId_V0(ntscf);
     uint8_t busid = Avtp_Can_GetCanBusId(can);
 
     pr_debug(

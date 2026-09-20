@@ -153,12 +153,12 @@ static uint64_t calculate_crf_timestamp(struct timespec tspec, uint64_t rounded_
 static void init_pdu(Avtp_Crf_t *pdu)
 {
     Avtp_Crf_Init(pdu);
-    Avtp_Crf_SetType(pdu, AVTP_CRF_TYPE_AUDIO_SAMPLE);
-    Avtp_Crf_SetStreamId(pdu, STREAM_ID);
-    Avtp_Crf_SetPull(pdu, AVTP_CRF_PULL_MULT_BY_1);
-    Avtp_Crf_SetBaseFrequency(pdu, SAMPLE_RATE);
-    Avtp_Crf_SetTimestampInterval(pdu, TIMESTAMP_INTERVAL);
-    Avtp_Crf_SetCrfDataLength(pdu, (uint16_t)DATA_LEN);
+    Avtp_Crf_SetType_V0(pdu, AVTP_CRF_TYPE_AUDIO_SAMPLE);
+    Avtp_Crf_SetStreamId_V0(pdu, STREAM_ID);
+    Avtp_Crf_SetPull_V0(pdu, AVTP_CRF_PULL_MULT_BY_1);
+    Avtp_Crf_SetBaseFrequency_V0(pdu, SAMPLE_RATE);
+    Avtp_Crf_SetTimestampInterval_V0(pdu, TIMESTAMP_INTERVAL);
+    Avtp_Crf_SetCrfDataLength_V0(pdu, (uint16_t)DATA_LEN);
 }
 
 int main(int argc, char *argv[])
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
             memcpy(pdu->payload + (idx * sizeof(timestamp)), &timestamp, sizeof(timestamp));
         }
 
-        Avtp_Crf_SetSequenceNum(pdu, seq_num++);
+        Avtp_Crf_SetSequenceNum_V0(pdu, seq_num++);
 
         n = sendto(sk_fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {

@@ -123,14 +123,14 @@ static struct argp argp = {options, parser};
 static void init_pdu(Avtp_Pcm_t *pdu)
 {
     Avtp_Pcm_Init(pdu);
-    Avtp_Pcm_SetTv(pdu, true);
-    Avtp_Pcm_SetStreamId(pdu, STREAM_ID);
-    Avtp_Pcm_SetFormat(pdu, AVTP_AAF_FORMAT_INT_16BIT);
-    Avtp_Pcm_SetNsr(pdu, AVTP_PCM_NSR_48KHZ);
-    Avtp_Pcm_SetChannelsPerFrame(pdu, NUM_CHANNELS);
-    Avtp_Pcm_SetBitDepth(pdu, 16);
-    Avtp_Pcm_SetStreamDataLength(pdu, DATA_LEN);
-    Avtp_Pcm_SetSp(pdu, false);
+    Avtp_Pcm_SetTv_V0(pdu, true);
+    Avtp_Pcm_SetStreamId_V0(pdu, STREAM_ID);
+    Avtp_Pcm_SetFormat_V0(pdu, AVTP_AAF_FORMAT_INT_16BIT);
+    Avtp_Pcm_SetNsr_V0(pdu, AVTP_PCM_NSR_48KHZ);
+    Avtp_Pcm_SetChannelsPerFrame_V0(pdu, NUM_CHANNELS);
+    Avtp_Pcm_SetBitDepth_V0(pdu, 16);
+    Avtp_Pcm_SetStreamDataLength_V0(pdu, DATA_LEN);
+    Avtp_Pcm_SetSp_V0(pdu, false);
 }
 
 int main(int argc, char *argv[])
@@ -172,8 +172,8 @@ int main(int argc, char *argv[])
             goto err;
         }
 
-        Avtp_Pcm_SetAvtpTimestamp(pdu, avtp_time);
-        Avtp_Pcm_SetSequenceNum(pdu, seq_num++);
+        Avtp_Pcm_SetAvtpTimestamp_V0(pdu, avtp_time);
+        Avtp_Pcm_SetSequenceNum_V0(pdu, seq_num++);
 
         n = sendto(fd, pdu, PDU_SIZE, 0, (struct sockaddr *)&sk_addr, sizeof(sk_addr));
         if (n < 0) {

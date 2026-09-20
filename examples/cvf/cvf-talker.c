@@ -139,11 +139,11 @@ static struct argp argp = {options, parser};
 static void init_pdu(Avtp_Cvf_t *cvf)
 {
     Avtp_Cvf_Init(cvf);
-    Avtp_Cvf_SetFormatSubtype(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
-    Avtp_Cvf_SetTv(cvf, true);
-    Avtp_Cvf_SetStreamId(cvf, STREAM_ID);
-    Avtp_Cvf_SetM(cvf, true);
-    Avtp_Cvf_SetPtv(cvf, false);
+    Avtp_Cvf_SetFormatSubtype_V0(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
+    Avtp_Cvf_SetTv_V0(cvf, true);
+    Avtp_Cvf_SetStreamId_V0(cvf, STREAM_ID);
+    Avtp_Cvf_SetM_V0(cvf, true);
+    Avtp_Cvf_SetPtv_V0(cvf, false);
 
     Avtp_H264_t *h264 = (Avtp_H264_t *)(&cvf->payload);
     Avtp_H264_Init(h264);
@@ -197,10 +197,10 @@ static int prepare_packet(Avtp_Cvf_t *cvfHeader, char *nal_data, size_t nal_data
         return -1;
     }
 
-    Avtp_Cvf_SetAvtpTimestamp(cvfHeader, avtp_time);
-    Avtp_Cvf_SetSequenceNum(cvfHeader, seq_num++);
-    Avtp_Cvf_SetStreamDataLength(cvfHeader,
-                                 (uint16_t)(nal_data_len + (size_t)AVTP_H264_HEADER_LEN));
+    Avtp_Cvf_SetAvtpTimestamp_V0(cvfHeader, avtp_time);
+    Avtp_Cvf_SetSequenceNum_V0(cvfHeader, seq_num++);
+    Avtp_Cvf_SetStreamDataLength_V0(cvfHeader,
+                                    (uint16_t)(nal_data_len + (size_t)AVTP_H264_HEADER_LEN));
 
     memcpy(h264Payload, nal_data, nal_data_len);
 
