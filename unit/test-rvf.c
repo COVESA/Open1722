@@ -57,6 +57,17 @@ static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
     return ntohl(word);
 }
 
+static uint64_t mask_field_value(uint8_t bits, uint64_t value)
+{
+    if (bits == 0) {
+        return 0;
+    }
+    if (bits >= 64) {
+        return value;
+    }
+    return value & ((((uint64_t)1) << bits) - 1);
+}
+
 /* Initializes a minimal but valid RVF frame. */
 static void init_valid_rvf(Avtp_Rvf_t *pdu)
 {
@@ -556,6 +567,158 @@ static void rvf_raw_header_overlay(void **state)
     assert_true(Avtp_Rvf_IsValid(rvf, AVTP_RVF_HEADER_LEN_V0 + AVTP_RVF_RAW_HEADER_LEN));
 }
 
+static void rvf_typed_fields_v0(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_RVF_HEADER_LEN_V1];
+    Avtp_Rvf_t *rvf = (Avtp_Rvf_t *)pdu;
+
+    Avtp_Rvf_Init(rvf);
+
+    for (uint8_t f = 0; f < AVTP_RVF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_RvfFieldDescV0[f].bits;
+        uint64_t value = 0xA5A5A5A5A5A5A5A5ULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_RvfFields_t field = (Avtp_RvfFields_t)f;
+
+        Avtp_Rvf_SetField_V0(rvf, field, value);
+        assert_int_equal(Avtp_Rvf_GetField_V0(rvf, field), expected);
+        assert_int_equal(Avtp_Rvf_GetField(rvf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_RvfFieldDescV0, AVTP_RVF_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void rvf_typed_fields_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_RVF_HEADER_LEN_V1];
+    Avtp_RvfV1_t *rvf = (Avtp_RvfV1_t *)pdu;
+
+    Avtp_Rvf_InitV1(rvf);
+
+    for (uint8_t f = 0; f < AVTP_RVF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_RvfFieldDescV1[f].bits;
+        uint64_t value = 0x5A5A5A5A5A5A5A5AULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_RvfFields_t field = (Avtp_RvfFields_t)f;
+
+        Avtp_Rvf_SetField_V1(rvf, field, value);
+        assert_int_equal(Avtp_Rvf_GetField_V1(rvf, field), expected);
+        assert_int_equal(Avtp_Rvf_GetField((Avtp_Rvf_t *)rvf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_RvfFieldDescV1, AVTP_RVF_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void rvf_typed_named(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_RVF_HEADER_LEN_V1];
+    Avtp_Rvf_t *v0 = (Avtp_Rvf_t *)pdu;
+    Avtp_RvfV1_t *v1 = (Avtp_RvfV1_t *)pdu;
+
+    /* Version 0. */
+    Avtp_Rvf_Init(v0);
+    Avtp_Rvf_SetSv_V0(v0, true);
+    Avtp_Rvf_SetSequenceNum_V0(v0, 0x55);
+    Avtp_Rvf_SetStreamId_V0(v0, 0xAABBCCDDEEFF0001ULL);
+    Avtp_Rvf_SetAvtpTimestamp_V0(v0, 0x80C0FFEE);
+    Avtp_Rvf_SetStreamDataLength_V0(v0, 0xAAAA);
+    Avtp_Rvf_SetActivePixels_V0(v0, 1920);
+    Avtp_Rvf_SetTotalLines_V0(v0, 1080);
+    Avtp_Rvf_SetAp_V0(v0, true);
+    Avtp_Rvf_SetF_V0(v0, true);
+    Avtp_Rvf_SetEf_V0(v0, true);
+    Avtp_Rvf_SetEvt_V0(v0, 0xA);
+    Avtp_Rvf_SetPd_V0(v0, true);
+    Avtp_Rvf_SetI_V0(v0, true);
+
+    assert_true(Avtp_Rvf_IsSv_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetSequenceNum_V0(v0), 0x55);
+    assert_int_equal(Avtp_Rvf_GetStreamId_V0(v0), 0xAABBCCDDEEFF0001ULL);
+    assert_int_equal(Avtp_Rvf_GetAvtpTimestamp_V0(v0), 0x80C0FFEE);
+    assert_int_equal(Avtp_Rvf_GetStreamDataLength_V0(v0), 0xAAAA);
+    assert_int_equal(Avtp_Rvf_GetActivePixels_V0(v0), 1920);
+    assert_int_equal(Avtp_Rvf_GetTotalLines_V0(v0), 1080);
+    assert_true(Avtp_Rvf_IsAp_V0(v0));
+    assert_true(Avtp_Rvf_IsF_V0(v0));
+    assert_true(Avtp_Rvf_IsEf_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetEvt_V0(v0), 0xA);
+    assert_true(Avtp_Rvf_IsPd_V0(v0));
+    assert_true(Avtp_Rvf_IsI_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetPtpGrandmasterIdentity_V0(v0), 0);
+
+    /* The version-dispatched accessors agree with the version 0 variants. */
+    assert_int_equal(Avtp_Rvf_GetSequenceNum(v0), Avtp_Rvf_GetSequenceNum_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetStreamId(v0), Avtp_Rvf_GetStreamId_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetAvtpTimestamp(v0), Avtp_Rvf_GetAvtpTimestamp_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetStreamDataLength(v0), Avtp_Rvf_GetStreamDataLength_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetActivePixels(v0), Avtp_Rvf_GetActivePixels_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetTotalLines(v0), Avtp_Rvf_GetTotalLines_V0(v0));
+    assert_int_equal(Avtp_Rvf_GetEvt(v0), Avtp_Rvf_GetEvt_V0(v0));
+
+    /* Version 1. */
+    Avtp_Rvf_InitV1(v1);
+    Avtp_Rvf_SetSv_V1(v1, true);
+    Avtp_Rvf_SetSequenceNum_V1(v1, 0x12345678);
+    Avtp_Rvf_SetStreamId_V1(v1, 0x0102030405060708ULL);
+    Avtp_Rvf_SetAvtpTimestamp_V1(v1, 0x1122334455667788ULL);
+    Avtp_Rvf_SetPtpGrandmasterIdentity_V1(v1, 0x99AABBCCDDEEFF00ULL);
+    Avtp_Rvf_SetStreamDataLength_V1(v1, 0xBBBB);
+    Avtp_Rvf_SetActivePixels_V1(v1, 1280);
+    Avtp_Rvf_SetTotalLines_V1(v1, 720);
+    Avtp_Rvf_SetAp_V1(v1, true);
+    Avtp_Rvf_SetF_V1(v1, true);
+    Avtp_Rvf_SetEf_V1(v1, true);
+    Avtp_Rvf_SetEvt_V1(v1, 0xB);
+    Avtp_Rvf_SetPd_V1(v1, true);
+    Avtp_Rvf_SetI_V1(v1, true);
+
+    assert_true(Avtp_Rvf_IsSv_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetSequenceNum_V1(v1), 0x12345678);
+    assert_int_equal(Avtp_Rvf_GetStreamId_V1(v1), 0x0102030405060708ULL);
+    assert_int_equal(Avtp_Rvf_GetAvtpTimestamp_V1(v1), 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Rvf_GetPtpGrandmasterIdentity_V1(v1), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Rvf_GetStreamDataLength_V1(v1), 0xBBBB);
+    assert_int_equal(Avtp_Rvf_GetActivePixels_V1(v1), 1280);
+    assert_int_equal(Avtp_Rvf_GetTotalLines_V1(v1), 720);
+    assert_true(Avtp_Rvf_IsAp_V1(v1));
+    assert_true(Avtp_Rvf_IsF_V1(v1));
+    assert_true(Avtp_Rvf_IsEf_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetEvt_V1(v1), 0xB);
+    assert_true(Avtp_Rvf_IsPd_V1(v1));
+    assert_true(Avtp_Rvf_IsI_V1(v1));
+
+    /* The version-dispatched accessors agree with the version 1 variants. */
+    assert_int_equal(Avtp_Rvf_GetSequenceNum(v0), Avtp_Rvf_GetSequenceNum_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetStreamId(v0), Avtp_Rvf_GetStreamId_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetAvtpTimestamp(v0), Avtp_Rvf_GetAvtpTimestamp_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetPtpGrandmasterIdentity(v0),
+                     Avtp_Rvf_GetPtpGrandmasterIdentity_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetStreamDataLength(v0), Avtp_Rvf_GetStreamDataLength_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetActivePixels(v0), Avtp_Rvf_GetActivePixels_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetTotalLines(v0), Avtp_Rvf_GetTotalLines_V1(v1));
+    assert_int_equal(Avtp_Rvf_GetEvt(v0), Avtp_Rvf_GetEvt_V1(v1));
+}
+
+static void rvf_typed_helpers(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+
+    Avtp_Rvf_Init((Avtp_Rvf_t *)pdu);
+    assert_int_equal(Avtp_Rvf_GetHeaderLen_V0((Avtp_Rvf_t *)pdu), AVTP_RVF_HEADER_LEN_V0);
+    assert_ptr_equal(Avtp_Rvf_GetPayload_V0((Avtp_Rvf_t *)pdu), pdu + AVTP_RVF_HEADER_LEN_V0);
+    Avtp_Rvf_SetPayload_V0((Avtp_Rvf_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_RVF_HEADER_LEN_V0, payload, sizeof(payload));
+
+    Avtp_Rvf_InitV1((Avtp_RvfV1_t *)pdu);
+    assert_int_equal(Avtp_Rvf_GetHeaderLen_V1((Avtp_RvfV1_t *)pdu), AVTP_RVF_HEADER_LEN_V1);
+    assert_ptr_equal(Avtp_Rvf_GetPayload_V1((Avtp_RvfV1_t *)pdu), pdu + AVTP_RVF_HEADER_LEN_V1);
+    Avtp_Rvf_SetPayload_V1((Avtp_RvfV1_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_RVF_HEADER_LEN_V1, payload, sizeof(payload));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -575,6 +738,10 @@ int main(void)
         cmocka_unit_test(rvf_raw_header_field_layout),
         cmocka_unit_test(rvf_raw_header_payload),
         cmocka_unit_test(rvf_raw_header_get_set_field),
+        cmocka_unit_test(rvf_typed_fields_v0),
+        cmocka_unit_test(rvf_typed_fields_v1),
+        cmocka_unit_test(rvf_typed_named),
+        cmocka_unit_test(rvf_typed_helpers),
         cmocka_unit_test(rvf_raw_header_overlay),
     };
 

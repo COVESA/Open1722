@@ -54,6 +54,17 @@ static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
     return ntohl(word);
 }
 
+static uint64_t mask_field_value(uint8_t bits, uint64_t value)
+{
+    if (bits == 0) {
+        return 0;
+    }
+    if (bits >= 64) {
+        return value;
+    }
+    return value & ((((uint64_t)1) << bits) - 1);
+}
+
 static void aaf_init(void **state)
 {
     (void)state;
@@ -369,6 +380,155 @@ static void aaf_get_set_field(void **state)
     assert_int_equal(Avtp_Aaf_GetField(aaf, AVTP_AAF_FIELD_FSD1), 0x7F);
 }
 
+static void aaf_typed_fields_v0(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_AAF_HEADER_LEN_V1];
+    Avtp_Aaf_t *aaf = (Avtp_Aaf_t *)pdu;
+
+    Avtp_Aaf_Init(aaf);
+
+    for (uint8_t f = 0; f < AVTP_AAF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_AafFieldDescV0[f].bits;
+        uint64_t value = 0xA5A5A5A5A5A5A5A5ULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_AafFields_t field = (Avtp_AafFields_t)f;
+
+        Avtp_Aaf_SetField_V0(aaf, field, value);
+        assert_int_equal(Avtp_Aaf_GetField_V0(aaf, field), expected);
+        assert_int_equal(Avtp_Aaf_GetField(aaf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_AafFieldDescV0, AVTP_AAF_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void aaf_typed_fields_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_AAF_HEADER_LEN_V1];
+    Avtp_AafV1_t *aaf = (Avtp_AafV1_t *)pdu;
+
+    Avtp_Aaf_InitV1(aaf);
+
+    for (uint8_t f = 0; f < AVTP_AAF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_AafFieldDescV1[f].bits;
+        uint64_t value = 0x5A5A5A5A5A5A5A5AULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_AafFields_t field = (Avtp_AafFields_t)f;
+
+        Avtp_Aaf_SetField_V1(aaf, field, value);
+        assert_int_equal(Avtp_Aaf_GetField_V1(aaf, field), expected);
+        assert_int_equal(Avtp_Aaf_GetField((Avtp_Aaf_t *)aaf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_AafFieldDescV1, AVTP_AAF_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void aaf_typed_named(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_AAF_HEADER_LEN_V1];
+    Avtp_Aaf_t *v0 = (Avtp_Aaf_t *)pdu;
+    Avtp_AafV1_t *v1 = (Avtp_AafV1_t *)pdu;
+
+    /* Version 0. */
+    Avtp_Aaf_Init(v0);
+    Avtp_Aaf_SetSv_V0(v0, true);
+    Avtp_Aaf_SetMr_V0(v0, true);
+    Avtp_Aaf_SetTv_V0(v0, true);
+    Avtp_Aaf_SetTu_V0(v0, true);
+    Avtp_Aaf_SetSequenceNum_V0(v0, 0x55);
+    Avtp_Aaf_SetStreamId_V0(v0, 0xAABBCCDDEEFF0001ULL);
+    Avtp_Aaf_SetAvtpTimestamp_V0(v0, 0x80C0FFEE);
+    Avtp_Aaf_SetFormat_V0(v0, AVTP_AAF_FORMAT_INT_16BIT);
+    Avtp_Aaf_SetAafFormatSpecificData1_V0(v0, 0x123456);
+    Avtp_Aaf_SetStreamDataLength_V0(v0, 0xAAAA);
+    Avtp_Aaf_SetAfsd_V0(v0, 0x5);
+    Avtp_Aaf_SetSp_V0(v0, true);
+    Avtp_Aaf_SetEvt_V0(v0, 0xA);
+    Avtp_Aaf_SetAafFormatSpecificData2_V0(v0, 0xAB);
+
+    assert_true(Avtp_Aaf_IsSv_V0(v0));
+    assert_true(Avtp_Aaf_IsMr_V0(v0));
+    assert_true(Avtp_Aaf_IsTv_V0(v0));
+    assert_true(Avtp_Aaf_IsTu_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetSequenceNum_V0(v0), 0x55);
+    assert_int_equal(Avtp_Aaf_GetStreamId_V0(v0), 0xAABBCCDDEEFF0001ULL);
+    assert_int_equal(Avtp_Aaf_GetAvtpTimestamp_V0(v0), 0x80C0FFEE);
+    assert_int_equal(Avtp_Aaf_GetFormat_V0(v0), AVTP_AAF_FORMAT_INT_16BIT);
+    assert_int_equal(Avtp_Aaf_GetAafFormatSpecificData1_V0(v0), 0x123456);
+    assert_int_equal(Avtp_Aaf_GetStreamDataLength_V0(v0), 0xAAAA);
+    assert_int_equal(Avtp_Aaf_GetAfsd_V0(v0), 0x5);
+    assert_true(Avtp_Aaf_IsSp_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetEvt_V0(v0), 0xA);
+    assert_int_equal(Avtp_Aaf_GetAafFormatSpecificData2_V0(v0), 0xAB);
+    assert_int_equal(Avtp_Aaf_GetPtpGrandmasterIdentity_V0(v0), 0);
+
+    /* The version-dispatched accessors agree with the version 0 variants. */
+    assert_int_equal(Avtp_Aaf_GetSequenceNum(v0), Avtp_Aaf_GetSequenceNum_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetStreamId(v0), Avtp_Aaf_GetStreamId_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetAvtpTimestamp(v0), Avtp_Aaf_GetAvtpTimestamp_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetFormat(v0), Avtp_Aaf_GetFormat_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetStreamDataLength(v0), Avtp_Aaf_GetStreamDataLength_V0(v0));
+    assert_int_equal(Avtp_Aaf_GetEvt(v0), Avtp_Aaf_GetEvt_V0(v0));
+
+    /* Version 1. */
+    Avtp_Aaf_InitV1(v1);
+    Avtp_Aaf_SetSv_V1(v1, true);
+    Avtp_Aaf_SetSequenceNum_V1(v1, 0x12345678);
+    Avtp_Aaf_SetStreamId_V1(v1, 0x0102030405060708ULL);
+    Avtp_Aaf_SetAvtpTimestamp_V1(v1, 0x1122334455667788ULL);
+    Avtp_Aaf_SetPtpGrandmasterIdentity_V1(v1, 0x99AABBCCDDEEFF00ULL);
+    Avtp_Aaf_SetFormat_V1(v1, AVTP_AAF_FORMAT_FLOAT_32BIT);
+    Avtp_Aaf_SetAafFormatSpecificData1_V1(v1, 0x654321);
+    Avtp_Aaf_SetStreamDataLength_V1(v1, 0xBBBB);
+    Avtp_Aaf_SetAfsd_V1(v1, 0x2);
+    Avtp_Aaf_SetSp_V1(v1, true);
+    Avtp_Aaf_SetEvt_V1(v1, 0xB);
+    Avtp_Aaf_SetAafFormatSpecificData2_V1(v1, 0xCD);
+
+    assert_true(Avtp_Aaf_IsSv_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetSequenceNum_V1(v1), 0x12345678);
+    assert_int_equal(Avtp_Aaf_GetStreamId_V1(v1), 0x0102030405060708ULL);
+    assert_int_equal(Avtp_Aaf_GetAvtpTimestamp_V1(v1), 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Aaf_GetPtpGrandmasterIdentity_V1(v1), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Aaf_GetFormat_V1(v1), AVTP_AAF_FORMAT_FLOAT_32BIT);
+    assert_int_equal(Avtp_Aaf_GetAafFormatSpecificData1_V1(v1), 0x654321);
+    assert_int_equal(Avtp_Aaf_GetStreamDataLength_V1(v1), 0xBBBB);
+    assert_int_equal(Avtp_Aaf_GetAfsd_V1(v1), 0x2);
+    assert_true(Avtp_Aaf_IsSp_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetEvt_V1(v1), 0xB);
+    assert_int_equal(Avtp_Aaf_GetAafFormatSpecificData2_V1(v1), 0xCD);
+
+    /* The version-dispatched accessors agree with the version 1 variants. */
+    assert_int_equal(Avtp_Aaf_GetSequenceNum(v0), Avtp_Aaf_GetSequenceNum_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetStreamId(v0), Avtp_Aaf_GetStreamId_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetAvtpTimestamp(v0), Avtp_Aaf_GetAvtpTimestamp_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetPtpGrandmasterIdentity(v0),
+                     Avtp_Aaf_GetPtpGrandmasterIdentity_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetFormat(v0), Avtp_Aaf_GetFormat_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetStreamDataLength(v0), Avtp_Aaf_GetStreamDataLength_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetAfsd(v0), Avtp_Aaf_GetAfsd_V1(v1));
+    assert_int_equal(Avtp_Aaf_GetEvt(v0), Avtp_Aaf_GetEvt_V1(v1));
+}
+
+static void aaf_typed_helpers(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+
+    Avtp_Aaf_Init((Avtp_Aaf_t *)pdu);
+    assert_int_equal(Avtp_Aaf_GetHeaderLen_V0((Avtp_Aaf_t *)pdu), AVTP_AAF_HEADER_LEN_V0);
+    assert_ptr_equal(Avtp_Aaf_GetPayload_V0((Avtp_Aaf_t *)pdu), pdu + AVTP_AAF_HEADER_LEN_V0);
+    Avtp_Aaf_SetPayload_V0((Avtp_Aaf_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_AAF_HEADER_LEN_V0, payload, sizeof(payload));
+
+    Avtp_Aaf_InitV1((Avtp_AafV1_t *)pdu);
+    assert_int_equal(Avtp_Aaf_GetHeaderLen_V1((Avtp_AafV1_t *)pdu), AVTP_AAF_HEADER_LEN_V1);
+    assert_ptr_equal(Avtp_Aaf_GetPayload_V1((Avtp_AafV1_t *)pdu), pdu + AVTP_AAF_HEADER_LEN_V1);
+    Avtp_Aaf_SetPayload_V1((Avtp_AafV1_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_AAF_HEADER_LEN_V1, payload, sizeof(payload));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -382,6 +542,10 @@ int main(void)
         cmocka_unit_test(aaf_v1_layout),
         cmocka_unit_test(aaf_payload),
         cmocka_unit_test(aaf_get_set_field),
+        cmocka_unit_test(aaf_typed_fields_v0),
+        cmocka_unit_test(aaf_typed_fields_v1),
+        cmocka_unit_test(aaf_typed_named),
+        cmocka_unit_test(aaf_typed_helpers),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

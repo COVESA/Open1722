@@ -186,7 +186,38 @@ static const Avtp_FieldDescriptor_t Avtp_PcmFieldDescV1[AVTP_PCM_FIELD_MAX] = {
 };
 
 /**
- * Returns the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
+ * Returns the value of an AVTP AAF PCM field as laid out by version 0. No
+ * version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ * @see Avtp_Pcm_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetField_V0(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
+{
+    return Avtp_GetField(Avtp_PcmFieldDescV0, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTP AAF PCM field as laid out by version 1. No
+ * version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ * @see Avtp_Pcm_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetField_V1(const Avtp_PcmV1_t *const pdu, Avtp_PcmFields_t field)
+{
+    return Avtp_GetField(Avtp_PcmFieldDescV1, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTP AAF PCM field, dispatching on the version field
+ * of the PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @param field Specifies the position of the data field to be read
@@ -194,15 +225,43 @@ static const Avtp_FieldDescriptor_t Avtp_PcmFieldDescV1[AVTP_PCM_FIELD_MAX] = {
  */
 OPEN1722_INLINE uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
 {
-    const Avtp_FieldDescriptor_t *desc =
-        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
-            ? Avtp_PcmFieldDescV1
-            : Avtp_PcmFieldDescV0;
-    return Avtp_GetField(desc, AVTP_PCM_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+    return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? Avtp_Pcm_GetField_V1((const Avtp_PcmV1_t *)pdu, field)
+               : Avtp_Pcm_GetField_V0(pdu, field);
 }
 
 /**
- * Sets the value of an AVTP AAF PCM field as specified in the IEEE 1722 Specification.
+ * Sets the value of an AVTP AAF PCM field as laid out by version 0. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ * @see Avtp_Pcm_SetField
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetField_V0(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
+{
+    Avtp_SetField(Avtp_PcmFieldDescV0, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTP AAF PCM field as laid out by version 1. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ * @see Avtp_Pcm_SetField
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetField_V1(Avtp_PcmV1_t *pdu, Avtp_PcmFields_t field, uint64_t value)
+{
+    Avtp_SetField(Avtp_PcmFieldDescV1, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTP AAF PCM field, dispatching on the version field of
+ * the PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
  * @param field Specifies the position of the data field to be written
@@ -210,19 +269,46 @@ OPEN1722_INLINE uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_Pcm
  */
 OPEN1722_INLINE void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
 {
-    const Avtp_FieldDescriptor_t *desc =
-        Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) == AVTP_VERSION_1
-            ? Avtp_PcmFieldDescV1
-            : Avtp_PcmFieldDescV0;
-    Avtp_SetField(desc, AVTP_PCM_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+    if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        Avtp_Pcm_SetField_V1((Avtp_PcmV1_t *)pdu, field, value);
+    } else {
+        Avtp_Pcm_SetField_V0(pdu, field, value);
+    }
 }
 
 /**
- * Returns the length of the AAF PCM header in octets (24 or 40).
+ * Returns the length of the version 0 AAF PCM header in octets (24). The PDU
+ * pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen_V0(const Avtp_Pcm_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTP_PCM_HEADER_LEN_V0;
+}
+
+/**
+ * Returns the length of the version 1 AAF PCM header in octets (40). The PDU
+ * pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen_V1(const Avtp_PcmV1_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTP_PCM_HEADER_LEN_V1;
+}
+
+/**
+ * Returns the length of the AAF PCM header in octets (24 or 40), dispatching
+ * on the version field of the PDU.
  */
 OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen(const Avtp_Pcm_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetHeaderLen((const Avtp_CommonStreamHeader_t *)pdu);
+    return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? Avtp_Pcm_GetHeaderLen_V1((const Avtp_PcmV1_t *)pdu)
+               : Avtp_Pcm_GetHeaderLen_V0(pdu);
 }
 
 /**
@@ -568,6 +654,30 @@ OPEN1722_INLINE void Avtp_Pcm_SetEvt(Avtp_Pcm_t *pdu, uint8_t value)
 }
 
 /**
+ * Returns a pointer to the payload of a version 0 AAF PCM frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @return Pointer to AAF PCM frame payload
+ * @see Avtp_Pcm_GetPayload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (const uint8_t *)pdu + AVTP_PCM_HEADER_LEN_V0;
+}
+
+/**
+ * Returns a pointer to the payload of a version 1 AAF PCM frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @return Pointer to AAF PCM frame payload
+ * @see Avtp_Pcm_GetPayload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (const uint8_t *)pdu + AVTP_PCM_HEADER_LEN_V1;
+}
+
+/**
  * Returns pointer to payload of an AAF PCM frame. The payload starts after the
  * version-dependent common stream header.
  *
@@ -576,7 +686,38 @@ OPEN1722_INLINE void Avtp_Pcm_SetEvt(Avtp_Pcm_t *pdu, uint8_t value)
  */
 OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload(const Avtp_Pcm_t *const pdu)
 {
-    return (const uint8_t *)pdu + Avtp_Pcm_GetHeaderLen(pdu);
+    return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? Avtp_Pcm_GetPayload_V1((const Avtp_PcmV1_t *)pdu)
+               : Avtp_Pcm_GetPayload_V0(pdu);
+}
+
+/**
+ * Sets the payload of a version 0 AAF PCM frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ * @see Avtp_Pcm_SetPayload
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetPayload_V0(Avtp_Pcm_t *pdu, uint8_t *payload,
+                                            uint16_t payload_length)
+{
+    memcpy((uint8_t *)pdu + AVTP_PCM_HEADER_LEN_V0, payload, payload_length);
+}
+
+/**
+ * Sets the payload of a version 1 AAF PCM frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AAF PCM PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ * @see Avtp_Pcm_SetPayload
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetPayload_V1(Avtp_PcmV1_t *pdu, uint8_t *payload,
+                                            uint16_t payload_length)
+{
+    memcpy((uint8_t *)pdu + AVTP_PCM_HEADER_LEN_V1, payload, payload_length);
 }
 
 /**
@@ -588,7 +729,12 @@ OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload(const Avtp_Pcm_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Pcm_SetPayload(Avtp_Pcm_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
-    memcpy((uint8_t *)pdu + Avtp_Pcm_GetHeaderLen(pdu), payload, payload_length);
+    if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        Avtp_Pcm_SetPayload_V1((Avtp_PcmV1_t *)pdu, payload, payload_length);
+    } else {
+        Avtp_Pcm_SetPayload_V0(pdu, payload, payload_length);
+    }
 }
 
 /**
@@ -695,6 +841,560 @@ OPEN1722_INLINE bool Avtp_Pcm_IsValid(const Avtp_Pcm_t *const pdu, size_t buffer
     }
 
     return true;
+}
+
+/*
+ * Version-typed named accessors. These select the field layout for one
+ * explicit version and never read the version field; the version-dispatched
+ * accessors above delegate to them. Common stream header fields delegate to
+ * the shared Avtp_CommonStreamHeader_* variants. See each version-dispatched
+ * accessor for the full field documentation.
+ */
+
+/**
+ * Version 0 variant of Avtp_Pcm_IsSv().
+ * @see Avtp_Pcm_IsSv
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsSv_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsSv_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_IsSv().
+ * @see Avtp_Pcm_IsSv
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsSv_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsSv_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_IsMr().
+ * @see Avtp_Pcm_IsMr
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsMr_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsMr_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_IsMr().
+ * @see Avtp_Pcm_IsMr
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsMr_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsMr_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_IsTv().
+ * @see Avtp_Pcm_IsTv
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsTv_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsTv_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_IsTv().
+ * @see Avtp_Pcm_IsTv
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsTv_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsTv_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_IsTu().
+ * @see Avtp_Pcm_IsTu
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsTu_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsTu_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_IsTu().
+ * @see Avtp_Pcm_IsTu
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsTu_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_IsTu_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetSequenceNum(). Values are truncated to the
+ * 8-bit version 0 field width.
+ * @see Avtp_Pcm_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t Avtp_Pcm_GetSequenceNum_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetSequenceNum_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetSequenceNum().
+ * @see Avtp_Pcm_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t Avtp_Pcm_GetSequenceNum_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetSequenceNum_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetStreamId().
+ * @see Avtp_Pcm_GetStreamId
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetStreamId_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetStreamId_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetStreamId().
+ * @see Avtp_Pcm_GetStreamId
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetStreamId_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetStreamId_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetAvtpTimestamp().
+ * @see Avtp_Pcm_GetAvtpTimestamp
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetAvtpTimestamp_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetAvtpTimestamp_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetAvtpTimestamp().
+ * @see Avtp_Pcm_GetAvtpTimestamp
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetAvtpTimestamp_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetAvtpTimestamp_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetPtpGrandmasterIdentity(). The field is
+ * absent from version 0, so this always returns 0.
+ * @see Avtp_Pcm_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetPtpGrandmasterIdentity_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity_V0(
+        (const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetPtpGrandmasterIdentity().
+ * @see Avtp_Pcm_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t Avtp_Pcm_GetPtpGrandmasterIdentity_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity_V1(
+        (const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetFormat().
+ * @see Avtp_Pcm_GetFormat
+ */
+OPEN1722_INLINE Avtp_AafFormat_t Avtp_Pcm_GetFormat_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (Avtp_AafFormat_t)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_FORMAT);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetFormat().
+ * @see Avtp_Pcm_GetFormat
+ */
+OPEN1722_INLINE Avtp_AafFormat_t Avtp_Pcm_GetFormat_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (Avtp_AafFormat_t)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_FORMAT);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetNsr().
+ * @see Avtp_Pcm_GetNsr
+ */
+OPEN1722_INLINE Avtp_PcmNsr_t Avtp_Pcm_GetNsr_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (Avtp_PcmNsr_t)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_NSR);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetNsr().
+ * @see Avtp_Pcm_GetNsr
+ */
+OPEN1722_INLINE Avtp_PcmNsr_t Avtp_Pcm_GetNsr_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (Avtp_PcmNsr_t)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_NSR);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetChannelsPerFrame().
+ * @see Avtp_Pcm_GetChannelsPerFrame
+ */
+OPEN1722_INLINE uint16_t Avtp_Pcm_GetChannelsPerFrame_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (uint16_t)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetChannelsPerFrame().
+ * @see Avtp_Pcm_GetChannelsPerFrame
+ */
+OPEN1722_INLINE uint16_t Avtp_Pcm_GetChannelsPerFrame_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (uint16_t)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetBitDepth().
+ * @see Avtp_Pcm_GetBitDepth
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetBitDepth_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (uint8_t)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_BIT_DEPTH);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetBitDepth().
+ * @see Avtp_Pcm_GetBitDepth
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetBitDepth_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (uint8_t)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_BIT_DEPTH);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetStreamDataLength().
+ * @see Avtp_Pcm_GetStreamDataLength
+ */
+OPEN1722_INLINE uint16_t Avtp_Pcm_GetStreamDataLength_V0(const Avtp_Pcm_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetStreamDataLength_V0((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetStreamDataLength().
+ * @see Avtp_Pcm_GetStreamDataLength
+ */
+OPEN1722_INLINE uint16_t Avtp_Pcm_GetStreamDataLength_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetStreamDataLength_V1((const Avtp_CommonStreamHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_IsSp().
+ * @see Avtp_Pcm_IsSp
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsSp_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (bool)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_SP);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_IsSp().
+ * @see Avtp_Pcm_IsSp
+ */
+OPEN1722_INLINE bool Avtp_Pcm_IsSp_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (bool)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_SP);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_GetEvt().
+ * @see Avtp_Pcm_GetEvt
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetEvt_V0(const Avtp_Pcm_t *const pdu)
+{
+    return (uint8_t)Avtp_Pcm_GetField_V0(pdu, AVTP_PCM_FIELD_EVT);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_GetEvt().
+ * @see Avtp_Pcm_GetEvt
+ */
+OPEN1722_INLINE uint8_t Avtp_Pcm_GetEvt_V1(const Avtp_PcmV1_t *const pdu)
+{
+    return (uint8_t)Avtp_Pcm_GetField_V1(pdu, AVTP_PCM_FIELD_EVT);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetSv().
+ * @see Avtp_Pcm_SetSv
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSv_V0(Avtp_Pcm_t *pdu, bool sv)
+{
+    Avtp_CommonStreamHeader_SetSv_V0((Avtp_CommonStreamHeader_t *)pdu, sv);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetSv().
+ * @see Avtp_Pcm_SetSv
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSv_V1(Avtp_PcmV1_t *pdu, bool sv)
+{
+    Avtp_CommonStreamHeader_SetSv_V1((Avtp_CommonStreamHeader_t *)pdu, sv);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetMr().
+ * @see Avtp_Pcm_SetMr
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetMr_V0(Avtp_Pcm_t *pdu, bool mr)
+{
+    Avtp_CommonStreamHeader_SetMr_V0((Avtp_CommonStreamHeader_t *)pdu, mr);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetMr().
+ * @see Avtp_Pcm_SetMr
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetMr_V1(Avtp_PcmV1_t *pdu, bool mr)
+{
+    Avtp_CommonStreamHeader_SetMr_V1((Avtp_CommonStreamHeader_t *)pdu, mr);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetTv().
+ * @see Avtp_Pcm_SetTv
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetTv_V0(Avtp_Pcm_t *pdu, bool tv)
+{
+    Avtp_CommonStreamHeader_SetTv_V0((Avtp_CommonStreamHeader_t *)pdu, tv);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetTv().
+ * @see Avtp_Pcm_SetTv
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetTv_V1(Avtp_PcmV1_t *pdu, bool tv)
+{
+    Avtp_CommonStreamHeader_SetTv_V1((Avtp_CommonStreamHeader_t *)pdu, tv);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetTu().
+ * @see Avtp_Pcm_SetTu
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetTu_V0(Avtp_Pcm_t *pdu, bool tu)
+{
+    Avtp_CommonStreamHeader_SetTu_V0((Avtp_CommonStreamHeader_t *)pdu, tu);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetTu().
+ * @see Avtp_Pcm_SetTu
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetTu_V1(Avtp_PcmV1_t *pdu, bool tu)
+{
+    Avtp_CommonStreamHeader_SetTu_V1((Avtp_CommonStreamHeader_t *)pdu, tu);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetSequenceNum(). Values are truncated to the
+ * 8-bit version 0 field width.
+ * @see Avtp_Pcm_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSequenceNum_V0(Avtp_Pcm_t *pdu, uint32_t value)
+{
+    Avtp_CommonStreamHeader_SetSequenceNum_V0((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetSequenceNum().
+ * @see Avtp_Pcm_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSequenceNum_V1(Avtp_PcmV1_t *pdu, uint32_t value)
+{
+    Avtp_CommonStreamHeader_SetSequenceNum_V1((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetStreamId().
+ * @see Avtp_Pcm_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetStreamId_V0(Avtp_Pcm_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetStreamId_V0((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetStreamId().
+ * @see Avtp_Pcm_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetStreamId_V1(Avtp_PcmV1_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetStreamId_V1((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetAvtpTimestamp().
+ * @see Avtp_Pcm_SetAvtpTimestamp
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetAvtpTimestamp_V0(Avtp_Pcm_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetAvtpTimestamp_V0((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetAvtpTimestamp().
+ * @see Avtp_Pcm_SetAvtpTimestamp
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetAvtpTimestamp_V1(Avtp_PcmV1_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetAvtpTimestamp_V1((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetPtpGrandmasterIdentity(). The field is
+ * absent from version 0, so this is a no-op.
+ * @see Avtp_Pcm_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetPtpGrandmasterIdentity_V0(Avtp_Pcm_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity_V0((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetPtpGrandmasterIdentity().
+ * @see Avtp_Pcm_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetPtpGrandmasterIdentity_V1(Avtp_PcmV1_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity_V1((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetFormat().
+ * @see Avtp_Pcm_SetFormat
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetFormat_V0(Avtp_Pcm_t *pdu, Avtp_AafFormat_t value)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_FORMAT, (uint64_t)value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetFormat().
+ * @see Avtp_Pcm_SetFormat
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetFormat_V1(Avtp_PcmV1_t *pdu, Avtp_AafFormat_t value)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_FORMAT, (uint64_t)value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetNsr().
+ * @see Avtp_Pcm_SetNsr
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetNsr_V0(Avtp_Pcm_t *pdu, Avtp_PcmNsr_t value)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_NSR, (uint64_t)value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetNsr().
+ * @see Avtp_Pcm_SetNsr
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetNsr_V1(Avtp_PcmV1_t *pdu, Avtp_PcmNsr_t value)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_NSR, (uint64_t)value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetChannelsPerFrame().
+ * @see Avtp_Pcm_SetChannelsPerFrame
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetChannelsPerFrame_V0(Avtp_Pcm_t *pdu, uint16_t value)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetChannelsPerFrame().
+ * @see Avtp_Pcm_SetChannelsPerFrame
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetChannelsPerFrame_V1(Avtp_PcmV1_t *pdu, uint16_t value)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_CHANNELS_PER_FRAME, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetBitDepth().
+ * @see Avtp_Pcm_SetBitDepth
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetBitDepth_V0(Avtp_Pcm_t *pdu, uint8_t value)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_BIT_DEPTH, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetBitDepth().
+ * @see Avtp_Pcm_SetBitDepth
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetBitDepth_V1(Avtp_PcmV1_t *pdu, uint8_t value)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_BIT_DEPTH, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetStreamDataLength().
+ * @see Avtp_Pcm_SetStreamDataLength
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetStreamDataLength_V0(Avtp_Pcm_t *pdu, uint16_t value)
+{
+    Avtp_CommonStreamHeader_SetStreamDataLength_V0((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetStreamDataLength().
+ * @see Avtp_Pcm_SetStreamDataLength
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetStreamDataLength_V1(Avtp_PcmV1_t *pdu, uint16_t value)
+{
+    Avtp_CommonStreamHeader_SetStreamDataLength_V1((Avtp_CommonStreamHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetSp().
+ * @see Avtp_Pcm_SetSp
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSp_V0(Avtp_Pcm_t *pdu, bool sp)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_SP, sp);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetSp().
+ * @see Avtp_Pcm_SetSp
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetSp_V1(Avtp_PcmV1_t *pdu, bool sp)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_SP, sp);
+}
+
+/**
+ * Version 0 variant of Avtp_Pcm_SetEvt().
+ * @see Avtp_Pcm_SetEvt
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetEvt_V0(Avtp_Pcm_t *pdu, uint8_t value)
+{
+    Avtp_Pcm_SetField_V0(pdu, AVTP_PCM_FIELD_EVT, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Pcm_SetEvt().
+ * @see Avtp_Pcm_SetEvt
+ */
+OPEN1722_INLINE void Avtp_Pcm_SetEvt_V1(Avtp_PcmV1_t *pdu, uint8_t value)
+{
+    Avtp_Pcm_SetField_V1(pdu, AVTP_PCM_FIELD_EVT, value);
 }
 
 #ifdef __cplusplus
