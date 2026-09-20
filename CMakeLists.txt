@@ -82,6 +82,7 @@ if (NOT (DEFINED ENV{ZEPHYR_BASE}))
     enable_testing()
     add_custom_target(unittests)
     add_subdirectory(unit EXCLUDE_FROM_ALL)
+    add_subdirectory(bench EXCLUDE_FROM_ALL)
 
     install(DIRECTORY include/ DESTINATION include)
     install(TARGETS open1722 EXPORT Open1722Targets DESTINATION lib)

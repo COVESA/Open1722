@@ -108,6 +108,22 @@ src/avtp/export/
 
 When a new header with inline functions is added, simply add its `#include` to `InlineExports.c` in phase 2.
 
+## Coverage instrumentation
+
+The libraries are deliberately **not** instrumented for coverage. The accessors
+and the field-access engine are inline in public headers, so the code that
+actually executes in the tests is compiled into the test executables; those are
+instrumented instead (see `add_dual_test` in `unit/CMakeLists.txt`).
+`test_all.sh` filters the lcov report to the public headers
+(`--include '*/include/*/*.h'`), which is where the inline code lives.
+Instrumenting the libraries would add gcov counters to local and benchmark
+builds without contributing to the report.
+
+Note that the exported copies of the accessors are regular functions, so C
+semantic interposition can leave calls between them. The performance guarantee
+of the version-typed accessors applies to the header path; see
+[`bench/README.md`](../bench/README.md).
+
 ## Frequently Asked Questions
 
 ### Does this affect embedded / Zephyr / bare-metal builds?
