@@ -35,10 +35,12 @@ if (NOT cmocka_FOUND)
   return()
 endif()
 
-target_compile_options(open1722 PRIVATE -coverage)
-target_link_options(open1722 PRIVATE -coverage)
-target_compile_options(open1722custom PRIVATE -coverage)
-target_link_options(open1722custom PRIVATE -coverage)
+# Coverage is measured on the unit test executables only (see add_dual_test
+# below), not on the libraries: the public accessors and the field-access
+# engine are header-inline, so the test translation units are where that code
+# is actually executed and counted. test_all.sh filters the lcov report to the
+# public headers. Instrumenting the libraries would add gcov overhead to local
+# and benchmark builds without contributing to the report.
 
 # Function to create dual tests (C and C++ compilation) for the same source file
 function(add_dual_test TEST_NAME SOURCE_FILE)
