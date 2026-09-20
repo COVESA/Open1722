@@ -55,12 +55,12 @@ static void i2c_init(void **state)
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)pdu), AVTP_ACF_TYPE_I2C);
     assert_int_equal(Avtp_I2C_GetPad((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_IsMtv((Avtp_I2C_t *)pdu), 0);
-    assert_int_equal(Avtp_I2C_GetBusId((Avtp_I2C_t *)pdu), 0);
+    assert_int_equal(Avtp_I2C_GetI2CBusId((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_GetMessageTimestamp((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_GetI2CCode((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_IsTrr((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_GetTransactionNum((Avtp_I2C_t *)pdu), 0);
-    assert_int_equal(Avtp_I2C_GetEvent((Avtp_I2C_t *)pdu), 0);
+    assert_int_equal(Avtp_I2C_GetEvt((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_GetExceptionCode((Avtp_I2C_t *)pdu), 0);
     assert_int_equal(Avtp_I2C_GetI2CData((Avtp_I2C_t *)pdu), 0);
 }
@@ -74,23 +74,23 @@ static void i2c_get_set_fields(void **state)
 
     Avtp_I2C_SetPad((Avtp_I2C_t *)pdu, 3);
     Avtp_I2C_SetMtv((Avtp_I2C_t *)pdu, true);
-    Avtp_I2C_SetBusId((Avtp_I2C_t *)pdu, 0x456);
+    Avtp_I2C_SetI2CBusId((Avtp_I2C_t *)pdu, 0x456);
     Avtp_I2C_SetMessageTimestamp((Avtp_I2C_t *)pdu, 0x123456789ABCDEF0ULL);
     Avtp_I2C_SetI2CCode((Avtp_I2C_t *)pdu, 0xA);
     Avtp_I2C_SetTrr((Avtp_I2C_t *)pdu, true);
     Avtp_I2C_SetTransactionNum((Avtp_I2C_t *)pdu, 0x12);
-    Avtp_I2C_SetEvent((Avtp_I2C_t *)pdu, 0xB);
+    Avtp_I2C_SetEvt((Avtp_I2C_t *)pdu, 0xB);
     Avtp_I2C_SetExceptionCode((Avtp_I2C_t *)pdu, 0xC);
     Avtp_I2C_SetI2CData((Avtp_I2C_t *)pdu, 0xD);
 
     assert_int_equal(Avtp_I2C_GetPad((Avtp_I2C_t *)pdu), 3);
     assert_int_equal(Avtp_I2C_IsMtv((Avtp_I2C_t *)pdu), 1);
-    assert_int_equal(Avtp_I2C_GetBusId((Avtp_I2C_t *)pdu), 0x456);
+    assert_int_equal(Avtp_I2C_GetI2CBusId((Avtp_I2C_t *)pdu), 0x456);
     assert_int_equal(Avtp_I2C_GetMessageTimestamp((Avtp_I2C_t *)pdu), 0x123456789ABCDEF0ULL);
     assert_int_equal(Avtp_I2C_GetI2CCode((Avtp_I2C_t *)pdu), 0xA);
     assert_int_equal(Avtp_I2C_IsTrr((Avtp_I2C_t *)pdu), 1);
     assert_int_equal(Avtp_I2C_GetTransactionNum((Avtp_I2C_t *)pdu), 0x12);
-    assert_int_equal(Avtp_I2C_GetEvent((Avtp_I2C_t *)pdu), 0xB);
+    assert_int_equal(Avtp_I2C_GetEvt((Avtp_I2C_t *)pdu), 0xB);
     assert_int_equal(Avtp_I2C_GetExceptionCode((Avtp_I2C_t *)pdu), 0xC);
     assert_int_equal(Avtp_I2C_GetI2CData((Avtp_I2C_t *)pdu), 0xD);
     assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, AVTP_I2C_HEADER_LEN + 1), 1);
@@ -108,7 +108,7 @@ static void i2c_create_message(void **state)
     assert_int_equal(Avtp_I2C_GetI2CCode((Avtp_I2C_t *)pdu), 0xA);
     assert_int_equal(Avtp_I2C_IsTrr((Avtp_I2C_t *)pdu), 1);
     assert_int_equal(Avtp_I2C_GetTransactionNum((Avtp_I2C_t *)pdu), 0x12);
-    assert_int_equal(Avtp_I2C_GetEvent((Avtp_I2C_t *)pdu), 0xB);
+    assert_int_equal(Avtp_I2C_GetEvt((Avtp_I2C_t *)pdu), 0xB);
     assert_int_equal(Avtp_I2C_GetExceptionCode((Avtp_I2C_t *)pdu), 0xC);
     assert_int_equal(Avtp_I2C_GetI2CData((Avtp_I2C_t *)pdu), 0xD);
 }
@@ -125,11 +125,11 @@ static void i2c_brief_init(void **state)
                      AVTP_ACF_TYPE_I2C_BRIEF);
     assert_int_equal(Avtp_I2CBrief_GetPad((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_IsMtv((Avtp_I2CBrief_t *)pdu), 0);
-    assert_int_equal(Avtp_I2CBrief_GetBusId((Avtp_I2CBrief_t *)pdu), 0);
+    assert_int_equal(Avtp_I2CBrief_GetI2CBusId((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_GetI2CCode((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_IsTrr((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_GetTransactionNum((Avtp_I2CBrief_t *)pdu), 0);
-    assert_int_equal(Avtp_I2CBrief_GetEvent((Avtp_I2CBrief_t *)pdu), 0);
+    assert_int_equal(Avtp_I2CBrief_GetEvt((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_GetExceptionCode((Avtp_I2CBrief_t *)pdu), 0);
     assert_int_equal(Avtp_I2CBrief_GetI2CData((Avtp_I2CBrief_t *)pdu), 0);
 }
@@ -143,21 +143,21 @@ static void i2c_brief_get_set_fields(void **state)
 
     Avtp_I2CBrief_SetPad((Avtp_I2CBrief_t *)pdu, 3);
     Avtp_I2CBrief_SetMtv((Avtp_I2CBrief_t *)pdu, true);
-    Avtp_I2CBrief_SetBusId((Avtp_I2CBrief_t *)pdu, 0x456);
+    Avtp_I2CBrief_SetI2CBusId((Avtp_I2CBrief_t *)pdu, 0x456);
     Avtp_I2CBrief_SetI2CCode((Avtp_I2CBrief_t *)pdu, 0xA);
     Avtp_I2CBrief_SetTrr((Avtp_I2CBrief_t *)pdu, true);
     Avtp_I2CBrief_SetTransactionNum((Avtp_I2CBrief_t *)pdu, 0x12);
-    Avtp_I2CBrief_SetEvent((Avtp_I2CBrief_t *)pdu, 0xB);
+    Avtp_I2CBrief_SetEvt((Avtp_I2CBrief_t *)pdu, 0xB);
     Avtp_I2CBrief_SetExceptionCode((Avtp_I2CBrief_t *)pdu, 0xC);
     Avtp_I2CBrief_SetI2CData((Avtp_I2CBrief_t *)pdu, 0xD);
 
     assert_int_equal(Avtp_I2CBrief_GetPad((Avtp_I2CBrief_t *)pdu), 3);
     assert_int_equal(Avtp_I2CBrief_IsMtv((Avtp_I2CBrief_t *)pdu), 1);
-    assert_int_equal(Avtp_I2CBrief_GetBusId((Avtp_I2CBrief_t *)pdu), 0x456);
+    assert_int_equal(Avtp_I2CBrief_GetI2CBusId((Avtp_I2CBrief_t *)pdu), 0x456);
     assert_int_equal(Avtp_I2CBrief_GetI2CCode((Avtp_I2CBrief_t *)pdu), 0xA);
     assert_int_equal(Avtp_I2CBrief_IsTrr((Avtp_I2CBrief_t *)pdu), 1);
     assert_int_equal(Avtp_I2CBrief_GetTransactionNum((Avtp_I2CBrief_t *)pdu), 0x12);
-    assert_int_equal(Avtp_I2CBrief_GetEvent((Avtp_I2CBrief_t *)pdu), 0xB);
+    assert_int_equal(Avtp_I2CBrief_GetEvt((Avtp_I2CBrief_t *)pdu), 0xB);
     assert_int_equal(Avtp_I2CBrief_GetExceptionCode((Avtp_I2CBrief_t *)pdu), 0xC);
     assert_int_equal(Avtp_I2CBrief_GetI2CData((Avtp_I2CBrief_t *)pdu), 0xD);
     assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN), 1);
@@ -174,7 +174,7 @@ static void i2c_brief_create_message(void **state)
     assert_int_equal(Avtp_I2CBrief_GetI2CCode((Avtp_I2CBrief_t *)pdu), 0xA);
     assert_int_equal(Avtp_I2CBrief_IsTrr((Avtp_I2CBrief_t *)pdu), 1);
     assert_int_equal(Avtp_I2CBrief_GetTransactionNum((Avtp_I2CBrief_t *)pdu), 0x12);
-    assert_int_equal(Avtp_I2CBrief_GetEvent((Avtp_I2CBrief_t *)pdu), 0xB);
+    assert_int_equal(Avtp_I2CBrief_GetEvt((Avtp_I2CBrief_t *)pdu), 0xB);
     assert_int_equal(Avtp_I2CBrief_GetExceptionCode((Avtp_I2CBrief_t *)pdu), 0xC);
     assert_int_equal(Avtp_I2CBrief_GetI2CData((Avtp_I2CBrief_t *)pdu), 0xD);
     assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN + 1),

@@ -112,6 +112,8 @@ The following is the list of the formats currently supported by Open1722:
     - Generic Byte Bus
     - Abbreviated Byte Bus
     - Generic Image Sensor Format (GISF)
+    - I2C
+    - I2C Brief
   - Custom formats not included in the standard but can be transported on top of IEEE 1722
     - COVESA Vehicle Signal Specification (VSS) [(Protocol description)](./examples/acf-vss/protocol_description/acf-vss.md)
 

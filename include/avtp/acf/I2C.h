@@ -140,7 +140,7 @@ OPEN1722_INLINE bool Avtp_I2C_IsMtv(const Avtp_I2C_t *const pdu)
  * @param pdu Pointer to the first bit of an 1722 ACF I2C PDU.
  * @returns Value of the ACF I2C Bus ID.
  */
-OPEN1722_INLINE uint16_t Avtp_I2C_GetBusId(const Avtp_I2C_t *const pdu)
+OPEN1722_INLINE uint16_t Avtp_I2C_GetI2CBusId(const Avtp_I2C_t *const pdu)
 {
     return (uint16_t)GET_I2C_FIELD(AVTP_I2C_FIELD_I2C_BUS_ID);
 }
@@ -197,7 +197,7 @@ OPEN1722_INLINE uint8_t Avtp_I2C_GetTransactionNum(const Avtp_I2C_t *const pdu)
  * @param pdu Pointer to the first bit of an 1722 ACF I2C PDU.
  * @returns Value of the ACF I2C event.
  */
-OPEN1722_INLINE uint8_t Avtp_I2C_GetEvent(const Avtp_I2C_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_I2C_GetEvt(const Avtp_I2C_t *const pdu)
 {
     return (uint8_t)GET_I2C_FIELD(AVTP_I2C_FIELD_EVT);
 }
@@ -252,7 +252,7 @@ OPEN1722_INLINE void Avtp_I2C_SetMtv(Avtp_I2C_t *pdu, bool mtv)
  * @param pdu Pointer to the first bit of an 1722 ACF I2C PDU.
  * @param value Value to set the ACF I2C Bus ID to.
  */
-OPEN1722_INLINE void Avtp_I2C_SetBusId(Avtp_I2C_t *pdu, uint16_t value)
+OPEN1722_INLINE void Avtp_I2C_SetI2CBusId(Avtp_I2C_t *pdu, uint16_t value)
 {
     SET_I2C_FIELD(AVTP_I2C_FIELD_I2C_BUS_ID, value);
 }
@@ -308,7 +308,7 @@ OPEN1722_INLINE void Avtp_I2C_SetTransactionNum(Avtp_I2C_t *pdu, uint8_t value)
  * @param pdu Pointer to the first bit of an 1722 ACF I2C PDU.
  * @param value Value to set the ACF I2C event to.
  */
-OPEN1722_INLINE void Avtp_I2C_SetEvent(Avtp_I2C_t *pdu, uint8_t value)
+OPEN1722_INLINE void Avtp_I2C_SetEvt(Avtp_I2C_t *pdu, uint8_t value)
 {
     SET_I2C_FIELD(AVTP_I2C_FIELD_EVT, value);
 }
@@ -345,8 +345,6 @@ OPEN1722_INLINE void Avtp_I2C_Init(Avtp_I2C_t *pdu)
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_I2C_t));
         Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_I2C);
-        // Set the message length field in the ACF common header
-        Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4);
     }
 }
 
@@ -372,9 +370,12 @@ OPEN1722_INLINE void Avtp_I2C_CreateAcfMessage(Avtp_I2C_t *pdu, uint8_t i2c_code
     Avtp_I2C_SetI2CCode(pdu, i2c_code);
     Avtp_I2C_SetTrr(pdu, trr);
     Avtp_I2C_SetTransactionNum(pdu, transaction_num);
-    Avtp_I2C_SetEvent(pdu, event);
+    Avtp_I2C_SetEvt(pdu, event);
     Avtp_I2C_SetExceptionCode(pdu, exception_code);
     Avtp_I2C_SetI2CData(pdu, i2c_data);
+
+    // Set the message length field in the ACF common header
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4);
 }
 
 /**
