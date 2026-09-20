@@ -98,6 +98,61 @@ static void i2c_get_set_fields(void **state)
     assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, AVTP_I2C_HEADER_LEN), 1);
 }
 
+static void i2c_wire_format(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+    // Expected header bytes for msg_type=I2C(0x0F), msg_length=4 quadlets, pad=3,
+    // mtv=1, i2c_bus_id=0x456, timestamp=0x123456789ABCDEF0, i2c_code=0xA, trr=1,
+    // transaction_num=0x12, evt=0xB, exception_code=0xC, i2c_data=0xD.
+    uint8_t expected[AVTP_I2C_HEADER_LEN] = {
+        0x1E, 0x04, 0xE4, 0x56, 0x12, 0x34, 0x56, 0x78,
+        0x9A, 0xBC, 0xDE, 0xF0, 0xA8, 0x12, 0xBC, 0x0D,
+    };
+
+    Avtp_I2C_Init((Avtp_I2C_t *)pdu);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4);
+    Avtp_I2C_SetPad((Avtp_I2C_t *)pdu, 3);
+    Avtp_I2C_SetMtv((Avtp_I2C_t *)pdu, true);
+    Avtp_I2C_SetI2CBusId((Avtp_I2C_t *)pdu, 0x456);
+    Avtp_I2C_SetMessageTimestamp((Avtp_I2C_t *)pdu, 0x123456789ABCDEF0ULL);
+    Avtp_I2C_SetI2CCode((Avtp_I2C_t *)pdu, 0xA);
+    Avtp_I2C_SetTrr((Avtp_I2C_t *)pdu, true);
+    Avtp_I2C_SetTransactionNum((Avtp_I2C_t *)pdu, 0x12);
+    Avtp_I2C_SetEvt((Avtp_I2C_t *)pdu, 0xB);
+    Avtp_I2C_SetExceptionCode((Avtp_I2C_t *)pdu, 0xC);
+    Avtp_I2C_SetI2CData((Avtp_I2C_t *)pdu, 0xD);
+
+    assert_memory_equal(expected, pdu, AVTP_I2C_HEADER_LEN);
+}
+
+static void i2c_is_valid(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+
+    // Negative: NULL pdu.
+    assert_int_equal(Avtp_I2C_IsValid(NULL, MAX_PDU_SIZE), 0);
+
+    // Negative: buffer smaller than the fixed header size.
+    Avtp_I2C_CreateAcfMessage((Avtp_I2C_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, AVTP_I2C_HEADER_LEN - 1), 0);
+
+    // Negative: AcfMsgLength does not match the fixed I2C header length.
+    Avtp_I2C_CreateAcfMessage((Avtp_I2C_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_HEADER_LEN / 4 + 1);
+    assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, MAX_PDU_SIZE), 0);
+
+    // Negative: AcfMsgType is not ACF_TYPE_I2C.
+    Avtp_I2C_CreateAcfMessage((Avtp_I2C_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_I2C_BRIEF);
+    assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, MAX_PDU_SIZE), 0);
+
+    // Positive: properly formed ACF_I2C frame with buffer exactly matching the
+    // header length, and again with extra buffer space.
+    Avtp_I2C_CreateAcfMessage((Avtp_I2C_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, AVTP_I2C_HEADER_LEN), 1);
+    assert_int_equal(Avtp_I2C_IsValid((Avtp_I2C_t *)pdu, AVTP_I2C_HEADER_LEN + 1), 1);
+}
+
 static void i2c_create_message(void **state)
 {
     uint8_t pdu[MAX_PDU_SIZE];
@@ -183,14 +238,73 @@ static void i2c_brief_create_message(void **state)
                      0);
 }
 
+static void i2c_brief_wire_format(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+    // Expected header bytes for msg_type=I2C_BRIEF(0x10), msg_length=2 quadlets,
+    // pad=3, mtv=1, i2c_bus_id=0x456, i2c_code=0xA, trr=1, transaction_num=0x12,
+    // evt=0xB, exception_code=0xC, i2c_data=0xD.
+    uint8_t expected[AVTP_I2C_BRIEF_HEADER_LEN] = {
+        0x20, 0x02, 0xE4, 0x56, 0xA8, 0x12, 0xBC, 0x0D,
+    };
+
+    Avtp_I2CBrief_Init((Avtp_I2CBrief_t *)pdu);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN / 4);
+    Avtp_I2CBrief_SetPad((Avtp_I2CBrief_t *)pdu, 3);
+    Avtp_I2CBrief_SetMtv((Avtp_I2CBrief_t *)pdu, true);
+    Avtp_I2CBrief_SetI2CBusId((Avtp_I2CBrief_t *)pdu, 0x456);
+    Avtp_I2CBrief_SetI2CCode((Avtp_I2CBrief_t *)pdu, 0xA);
+    Avtp_I2CBrief_SetTrr((Avtp_I2CBrief_t *)pdu, true);
+    Avtp_I2CBrief_SetTransactionNum((Avtp_I2CBrief_t *)pdu, 0x12);
+    Avtp_I2CBrief_SetEvt((Avtp_I2CBrief_t *)pdu, 0xB);
+    Avtp_I2CBrief_SetExceptionCode((Avtp_I2CBrief_t *)pdu, 0xC);
+    Avtp_I2CBrief_SetI2CData((Avtp_I2CBrief_t *)pdu, 0xD);
+
+    assert_memory_equal(expected, pdu, AVTP_I2C_BRIEF_HEADER_LEN);
+}
+
+static void i2c_brief_is_valid(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+
+    // Negative: NULL pdu.
+    assert_int_equal(Avtp_I2CBrief_IsValid(NULL, MAX_PDU_SIZE), 0);
+
+    // Negative: buffer smaller than the fixed header size.
+    Avtp_I2CBrief_CreateAcfMessage((Avtp_I2CBrief_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN - 1),
+                     0);
+
+    // Negative: AcfMsgLength does not match the fixed I2C_BRIEF header length.
+    Avtp_I2CBrief_CreateAcfMessage((Avtp_I2CBrief_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN / 4 + 1);
+    assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, MAX_PDU_SIZE), 0);
+
+    // Negative: AcfMsgType is not ACF_TYPE_I2C_BRIEF.
+    Avtp_I2CBrief_CreateAcfMessage((Avtp_I2CBrief_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)pdu, AVTP_ACF_TYPE_I2C);
+    assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, MAX_PDU_SIZE), 0);
+
+    // Positive: properly formed ACF_I2C_BRIEF frame with buffer exactly matching
+    // the header length, and again with extra buffer space.
+    Avtp_I2CBrief_CreateAcfMessage((Avtp_I2CBrief_t *)pdu, 0xA, true, 0x12, 0xB, 0xC, 0xD);
+    assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN), 1);
+    assert_int_equal(Avtp_I2CBrief_IsValid((Avtp_I2CBrief_t *)pdu, AVTP_I2C_BRIEF_HEADER_LEN + 1),
+                     1);
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(i2c_init),
         cmocka_unit_test(i2c_get_set_fields),
+        cmocka_unit_test(i2c_wire_format),
+        cmocka_unit_test(i2c_is_valid),
         cmocka_unit_test(i2c_create_message),
         cmocka_unit_test(i2c_brief_init),
         cmocka_unit_test(i2c_brief_get_set_fields),
+        cmocka_unit_test(i2c_brief_wire_format),
+        cmocka_unit_test(i2c_brief_is_valid),
         cmocka_unit_test(i2c_brief_create_message),
     };
 
