@@ -116,7 +116,40 @@ OPEN1722_INLINE uint8_t Avtp_AlternativeHeader_GetVersion(const Avtp_Alternative
 }
 
 /**
- * Returns the value of an AVTPDU alternative header field.
+ * Returns the value of an AVTPDU alternative header field as laid out by
+ * version 0. No version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be read.
+ * @returns The value of the specified field.
+ * @see Avtp_AlternativeHeader_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_AlternativeHeader_GetField_V0(
+    const Avtp_AlternativeHeader_t *const pdu, Avtp_AlternativeHeaderField_t field)
+{
+    return Avtp_GetField(Avtp_AhFieldDescV0, AVTPDU_AH_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTPDU alternative header field as laid out by
+ * version 1. No version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be read.
+ * @returns The value of the specified field.
+ * @see Avtp_AlternativeHeader_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_AlternativeHeader_GetField_V1(
+    const Avtp_AlternativeHeader_t *const pdu, Avtp_AlternativeHeaderField_t field)
+{
+    return Avtp_GetField(Avtp_AhFieldDescV1, AVTPDU_AH_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTPDU alternative header field, dispatching on the
+ * version field of the PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
  * @param field Specifies the position of the data field to be read.
@@ -125,15 +158,49 @@ OPEN1722_INLINE uint8_t Avtp_AlternativeHeader_GetVersion(const Avtp_Alternative
 OPEN1722_INLINE uint64_t Avtp_AlternativeHeader_GetField(const Avtp_AlternativeHeader_t *const pdu,
                                                          Avtp_AlternativeHeaderField_t field)
 {
-    const Avtp_FieldDescriptor_t *desc = Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1
-                                             ? Avtp_AhFieldDescV1
-                                             : Avtp_AhFieldDescV0;
-    return Avtp_GetField(desc, AVTPDU_AH_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+    return Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1
+               ? Avtp_AlternativeHeader_GetField_V1(pdu, field)
+               : Avtp_AlternativeHeader_GetField_V0(pdu, field);
 }
 
 /**
- * Sets the value of an AVTPDU alternative header field. Fields absent from the
- * version in use are left untouched.
+ * Sets the value of an AVTPDU alternative header field as laid out by version
+ * 0. No version dispatch is performed; fields absent from version 0 are left
+ * untouched.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be written.
+ * @param value The value to set.
+ * @see Avtp_AlternativeHeader_SetField
+ */
+OPEN1722_INLINE void Avtp_AlternativeHeader_SetField_V0(Avtp_AlternativeHeader_t *pdu,
+                                                        Avtp_AlternativeHeaderField_t field,
+                                                        uint64_t value)
+{
+    Avtp_SetField(Avtp_AhFieldDescV0, AVTPDU_AH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTPDU alternative header field as laid out by version
+ * 1. No version dispatch is performed; fields absent from version 1 are left
+ * untouched.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be written.
+ * @param value The value to set.
+ * @see Avtp_AlternativeHeader_SetField
+ */
+OPEN1722_INLINE void Avtp_AlternativeHeader_SetField_V1(Avtp_AlternativeHeader_t *pdu,
+                                                        Avtp_AlternativeHeaderField_t field,
+                                                        uint64_t value)
+{
+    Avtp_SetField(Avtp_AhFieldDescV1, AVTPDU_AH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTPDU alternative header field, dispatching on the
+ * version field of the PDU. Fields absent from the version in use are left
+ * untouched.
  *
  * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
  * @param field Specifies the position of the data field to be written.
@@ -143,10 +210,11 @@ OPEN1722_INLINE void Avtp_AlternativeHeader_SetField(Avtp_AlternativeHeader_t *p
                                                      Avtp_AlternativeHeaderField_t field,
                                                      uint64_t value)
 {
-    const Avtp_FieldDescriptor_t *desc = Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1
-                                             ? Avtp_AhFieldDescV1
-                                             : Avtp_AhFieldDescV0;
-    Avtp_SetField(desc, AVTPDU_AH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+    if (Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1) {
+        Avtp_AlternativeHeader_SetField_V1(pdu, field, value);
+    } else {
+        Avtp_AlternativeHeader_SetField_V0(pdu, field, value);
+    }
 }
 
 /**
@@ -187,6 +255,97 @@ OPEN1722_INLINE void Avtp_AlternativeHeader_SetPtpGrandmasterIdentity(Avtp_Alter
                                                                       uint64_t value)
 {
     Avtp_AlternativeHeader_SetField(pdu, AVTPDU_AH_FIELD_PTP_GRANDMASTER_IDENTITY, value);
+}
+
+/*
+ * Version-typed named accessors. These select the field layout for one
+ * explicit version and never read the version field; the version-dispatched
+ * accessors above delegate to them. See each version-dispatched accessor for
+ * the full field documentation.
+ */
+
+/**
+ * Version 0 variant of Avtp_AlternativeHeader_GetSequenceNum(). The field is
+ * absent from version 0, so this always returns 0.
+ * @see Avtp_AlternativeHeader_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t
+Avtp_AlternativeHeader_GetSequenceNum_V0(const Avtp_AlternativeHeader_t *const pdu)
+{
+    return (uint32_t)Avtp_AlternativeHeader_GetField_V0(pdu, AVTPDU_AH_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Version 1 variant of Avtp_AlternativeHeader_GetSequenceNum().
+ * @see Avtp_AlternativeHeader_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t
+Avtp_AlternativeHeader_GetSequenceNum_V1(const Avtp_AlternativeHeader_t *const pdu)
+{
+    return (uint32_t)Avtp_AlternativeHeader_GetField_V1(pdu, AVTPDU_AH_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Version 0 variant of Avtp_AlternativeHeader_GetPtpGrandmasterIdentity().
+ * The field is absent from version 0, so this always returns 0.
+ * @see Avtp_AlternativeHeader_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t
+Avtp_AlternativeHeader_GetPtpGrandmasterIdentity_V0(const Avtp_AlternativeHeader_t *const pdu)
+{
+    return Avtp_AlternativeHeader_GetField_V0(pdu, AVTPDU_AH_FIELD_PTP_GRANDMASTER_IDENTITY);
+}
+
+/**
+ * Version 1 variant of Avtp_AlternativeHeader_GetPtpGrandmasterIdentity().
+ * @see Avtp_AlternativeHeader_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t
+Avtp_AlternativeHeader_GetPtpGrandmasterIdentity_V1(const Avtp_AlternativeHeader_t *const pdu)
+{
+    return Avtp_AlternativeHeader_GetField_V1(pdu, AVTPDU_AH_FIELD_PTP_GRANDMASTER_IDENTITY);
+}
+
+/**
+ * Version 0 variant of Avtp_AlternativeHeader_SetSequenceNum(). The field is
+ * absent from version 0, so this is a no-op.
+ * @see Avtp_AlternativeHeader_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_AlternativeHeader_SetSequenceNum_V0(Avtp_AlternativeHeader_t *pdu,
+                                                              uint32_t value)
+{
+    Avtp_AlternativeHeader_SetField_V0(pdu, AVTPDU_AH_FIELD_SEQUENCE_NUM, value);
+}
+
+/**
+ * Version 1 variant of Avtp_AlternativeHeader_SetSequenceNum().
+ * @see Avtp_AlternativeHeader_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_AlternativeHeader_SetSequenceNum_V1(Avtp_AlternativeHeader_t *pdu,
+                                                              uint32_t value)
+{
+    Avtp_AlternativeHeader_SetField_V1(pdu, AVTPDU_AH_FIELD_SEQUENCE_NUM, value);
+}
+
+/**
+ * Version 0 variant of Avtp_AlternativeHeader_SetPtpGrandmasterIdentity().
+ * The field is absent from version 0, so this is a no-op.
+ * @see Avtp_AlternativeHeader_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void
+Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V0(Avtp_AlternativeHeader_t *pdu, uint64_t value)
+{
+    Avtp_AlternativeHeader_SetField_V0(pdu, AVTPDU_AH_FIELD_PTP_GRANDMASTER_IDENTITY, value);
+}
+
+/**
+ * Version 1 variant of Avtp_AlternativeHeader_SetPtpGrandmasterIdentity().
+ * @see Avtp_AlternativeHeader_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void
+Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V1(Avtp_AlternativeHeader_t *pdu, uint64_t value)
+{
+    Avtp_AlternativeHeader_SetField_V1(pdu, AVTPDU_AH_FIELD_PTP_GRANDMASTER_IDENTITY, value);
 }
 
 #ifdef __cplusplus

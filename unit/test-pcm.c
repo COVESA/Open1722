@@ -55,6 +55,17 @@ static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
     return ntohl(word);
 }
 
+static uint64_t mask_field_value(uint8_t bits, uint64_t value)
+{
+    if (bits == 0) {
+        return 0;
+    }
+    if (bits >= 64) {
+        return value;
+    }
+    return value & ((((uint64_t)1) << bits) - 1);
+}
+
 /* Initializes a minimal but valid AAF PCM frame. */
 static void init_valid_pcm(Avtp_Pcm_t *pdu)
 {
@@ -457,6 +468,154 @@ static void pcm_get_set_field(void **state)
     assert_int_equal(Avtp_Pcm_GetField(pcm, AVTP_PCM_FIELD_RESERVED2), 0xAB);
 }
 
+static void pcm_typed_fields_v0(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_PCM_HEADER_LEN_V1];
+    Avtp_Pcm_t *pcm = (Avtp_Pcm_t *)pdu;
+
+    Avtp_Pcm_Init(pcm);
+
+    for (uint8_t f = 0; f < AVTP_PCM_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_PcmFieldDescV0[f].bits;
+        uint64_t value = 0xA5A5A5A5A5A5A5A5ULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_PcmFields_t field = (Avtp_PcmFields_t)f;
+
+        Avtp_Pcm_SetField_V0(pcm, field, value);
+        assert_int_equal(Avtp_Pcm_GetField_V0(pcm, field), expected);
+        assert_int_equal(Avtp_Pcm_GetField(pcm, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_PcmFieldDescV0, AVTP_PCM_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void pcm_typed_fields_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_PCM_HEADER_LEN_V1];
+    Avtp_PcmV1_t *pcm = (Avtp_PcmV1_t *)pdu;
+
+    Avtp_Pcm_InitV1(pcm);
+
+    for (uint8_t f = 0; f < AVTP_PCM_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_PcmFieldDescV1[f].bits;
+        uint64_t value = 0x5A5A5A5A5A5A5A5AULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_PcmFields_t field = (Avtp_PcmFields_t)f;
+
+        Avtp_Pcm_SetField_V1(pcm, field, value);
+        assert_int_equal(Avtp_Pcm_GetField_V1(pcm, field), expected);
+        assert_int_equal(Avtp_Pcm_GetField((Avtp_Pcm_t *)pcm, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_PcmFieldDescV1, AVTP_PCM_FIELD_MAX, pdu, f), expected);
+    }
+}
+
+static void pcm_typed_named(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_PCM_HEADER_LEN_V1];
+    Avtp_Pcm_t *v0 = (Avtp_Pcm_t *)pdu;
+    Avtp_PcmV1_t *v1 = (Avtp_PcmV1_t *)pdu;
+
+    /* Version 0. */
+    Avtp_Pcm_Init(v0);
+    Avtp_Pcm_SetSv_V0(v0, true);
+    Avtp_Pcm_SetSequenceNum_V0(v0, 0x55);
+    Avtp_Pcm_SetStreamId_V0(v0, 0xAABBCCDDEEFF0001ULL);
+    Avtp_Pcm_SetAvtpTimestamp_V0(v0, 0x80C0FFEE);
+    Avtp_Pcm_SetFormat_V0(v0, AVTP_AAF_FORMAT_INT_16BIT);
+    Avtp_Pcm_SetNsr_V0(v0, AVTP_PCM_NSR_48KHZ);
+    Avtp_Pcm_SetChannelsPerFrame_V0(v0, 2);
+    Avtp_Pcm_SetBitDepth_V0(v0, 16);
+    Avtp_Pcm_SetStreamDataLength_V0(v0, 0xAAAA);
+    Avtp_Pcm_SetSp_V0(v0, true);
+    Avtp_Pcm_SetEvt_V0(v0, 0xA);
+
+    assert_true(Avtp_Pcm_IsSv_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetSequenceNum_V0(v0), 0x55);
+    assert_int_equal(Avtp_Pcm_GetStreamId_V0(v0), 0xAABBCCDDEEFF0001ULL);
+    assert_int_equal(Avtp_Pcm_GetAvtpTimestamp_V0(v0), 0x80C0FFEE);
+    assert_int_equal(Avtp_Pcm_GetFormat_V0(v0), AVTP_AAF_FORMAT_INT_16BIT);
+    assert_int_equal(Avtp_Pcm_GetNsr_V0(v0), AVTP_PCM_NSR_48KHZ);
+    assert_int_equal(Avtp_Pcm_GetChannelsPerFrame_V0(v0), 2);
+    assert_int_equal(Avtp_Pcm_GetBitDepth_V0(v0), 16);
+    assert_int_equal(Avtp_Pcm_GetStreamDataLength_V0(v0), 0xAAAA);
+    assert_true(Avtp_Pcm_IsSp_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetEvt_V0(v0), 0xA);
+    assert_int_equal(Avtp_Pcm_GetPtpGrandmasterIdentity_V0(v0), 0);
+
+    /* The version-dispatched accessors agree with the version 0 variants. */
+    assert_int_equal(Avtp_Pcm_GetSequenceNum(v0), Avtp_Pcm_GetSequenceNum_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetStreamId(v0), Avtp_Pcm_GetStreamId_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetAvtpTimestamp(v0), Avtp_Pcm_GetAvtpTimestamp_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetFormat(v0), Avtp_Pcm_GetFormat_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetNsr(v0), Avtp_Pcm_GetNsr_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetChannelsPerFrame(v0), Avtp_Pcm_GetChannelsPerFrame_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetBitDepth(v0), Avtp_Pcm_GetBitDepth_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetStreamDataLength(v0), Avtp_Pcm_GetStreamDataLength_V0(v0));
+    assert_int_equal(Avtp_Pcm_GetEvt(v0), Avtp_Pcm_GetEvt_V0(v0));
+
+    /* Version 1. */
+    Avtp_Pcm_InitV1(v1);
+    Avtp_Pcm_SetSv_V1(v1, true);
+    Avtp_Pcm_SetSequenceNum_V1(v1, 0x12345678);
+    Avtp_Pcm_SetStreamId_V1(v1, 0x0102030405060708ULL);
+    Avtp_Pcm_SetAvtpTimestamp_V1(v1, 0x1122334455667788ULL);
+    Avtp_Pcm_SetPtpGrandmasterIdentity_V1(v1, 0x99AABBCCDDEEFF00ULL);
+    Avtp_Pcm_SetFormat_V1(v1, AVTP_AAF_FORMAT_FLOAT_32BIT);
+    Avtp_Pcm_SetNsr_V1(v1, AVTP_PCM_NSR_96KHZ);
+    Avtp_Pcm_SetChannelsPerFrame_V1(v1, 8);
+    Avtp_Pcm_SetBitDepth_V1(v1, 32);
+    Avtp_Pcm_SetStreamDataLength_V1(v1, 0xBBBB);
+    Avtp_Pcm_SetSp_V1(v1, true);
+    Avtp_Pcm_SetEvt_V1(v1, 0xB);
+
+    assert_true(Avtp_Pcm_IsSv_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetSequenceNum_V1(v1), 0x12345678);
+    assert_int_equal(Avtp_Pcm_GetStreamId_V1(v1), 0x0102030405060708ULL);
+    assert_int_equal(Avtp_Pcm_GetAvtpTimestamp_V1(v1), 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Pcm_GetPtpGrandmasterIdentity_V1(v1), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Pcm_GetFormat_V1(v1), AVTP_AAF_FORMAT_FLOAT_32BIT);
+    assert_int_equal(Avtp_Pcm_GetNsr_V1(v1), AVTP_PCM_NSR_96KHZ);
+    assert_int_equal(Avtp_Pcm_GetChannelsPerFrame_V1(v1), 8);
+    assert_int_equal(Avtp_Pcm_GetBitDepth_V1(v1), 32);
+    assert_int_equal(Avtp_Pcm_GetStreamDataLength_V1(v1), 0xBBBB);
+    assert_true(Avtp_Pcm_IsSp_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetEvt_V1(v1), 0xB);
+
+    /* The version-dispatched accessors agree with the version 1 variants. */
+    assert_int_equal(Avtp_Pcm_GetSequenceNum(v0), Avtp_Pcm_GetSequenceNum_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetStreamId(v0), Avtp_Pcm_GetStreamId_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetAvtpTimestamp(v0), Avtp_Pcm_GetAvtpTimestamp_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetPtpGrandmasterIdentity(v0),
+                     Avtp_Pcm_GetPtpGrandmasterIdentity_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetFormat(v0), Avtp_Pcm_GetFormat_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetNsr(v0), Avtp_Pcm_GetNsr_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetChannelsPerFrame(v0), Avtp_Pcm_GetChannelsPerFrame_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetBitDepth(v0), Avtp_Pcm_GetBitDepth_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetStreamDataLength(v0), Avtp_Pcm_GetStreamDataLength_V1(v1));
+    assert_int_equal(Avtp_Pcm_GetEvt(v0), Avtp_Pcm_GetEvt_V1(v1));
+}
+
+static void pcm_typed_helpers(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+
+    Avtp_Pcm_Init((Avtp_Pcm_t *)pdu);
+    assert_int_equal(Avtp_Pcm_GetHeaderLen_V0((Avtp_Pcm_t *)pdu), AVTP_PCM_HEADER_LEN_V0);
+    assert_ptr_equal(Avtp_Pcm_GetPayload_V0((Avtp_Pcm_t *)pdu), pdu + AVTP_PCM_HEADER_LEN_V0);
+    Avtp_Pcm_SetPayload_V0((Avtp_Pcm_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_PCM_HEADER_LEN_V0, payload, sizeof(payload));
+
+    Avtp_Pcm_InitV1((Avtp_PcmV1_t *)pdu);
+    assert_int_equal(Avtp_Pcm_GetHeaderLen_V1((Avtp_PcmV1_t *)pdu), AVTP_PCM_HEADER_LEN_V1);
+    assert_ptr_equal(Avtp_Pcm_GetPayload_V1((Avtp_PcmV1_t *)pdu), pdu + AVTP_PCM_HEADER_LEN_V1);
+    Avtp_Pcm_SetPayload_V1((Avtp_PcmV1_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_PCM_HEADER_LEN_V1, payload, sizeof(payload));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -471,6 +630,10 @@ int main(void)
         cmocka_unit_test(pcm_v1_layout),
         cmocka_unit_test(pcm_payload),
         cmocka_unit_test(pcm_get_set_field),
+        cmocka_unit_test(pcm_typed_fields_v0),
+        cmocka_unit_test(pcm_typed_fields_v1),
+        cmocka_unit_test(pcm_typed_named),
+        cmocka_unit_test(pcm_typed_helpers),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

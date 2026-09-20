@@ -141,17 +141,76 @@ Avtp_CommonStreamHeader_GetVersion(const Avtp_CommonStreamHeader_t *const pdu)
 }
 
 /**
- * Returns the length of the common stream header in octets (24 or 40).
+ * Returns the length of the version 0 common stream header in octets (24).
+ * The PDU pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetHeaderLen_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTPDU_CSH_LEN_V0;
+}
+
+/**
+ * Returns the length of the version 1 common stream header in octets (40).
+ * The PDU pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetHeaderLen_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTPDU_CSH_LEN_V1;
+}
+
+/**
+ * Returns the length of the common stream header in octets (24 or 40),
+ * dispatching on the version field of the PDU.
  */
 OPEN1722_INLINE uint8_t
 Avtp_CommonStreamHeader_GetHeaderLen(const Avtp_CommonStreamHeader_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1 ? (uint8_t)AVTPDU_CSH_LEN_V1
-                                                                     : (uint8_t)AVTPDU_CSH_LEN_V0;
+    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
+               ? Avtp_CommonStreamHeader_GetHeaderLen_V1(pdu)
+               : Avtp_CommonStreamHeader_GetHeaderLen_V0(pdu);
 }
 
 /**
- * Returns the value of an AVTPDU common stream header field.
+ * Returns the value of an AVTPDU common stream header field as laid out by
+ * version 0. No version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be read.
+ * @returns The value of the specified field.
+ * @see Avtp_CommonStreamHeader_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_CommonStreamHeader_GetField_V0(
+    const Avtp_CommonStreamHeader_t *const pdu, Avtp_CommonStreamHeaderField_t field)
+{
+    return Avtp_GetField(Avtp_CshFieldDescV0, AVTPDU_CSH_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTPDU common stream header field as laid out by
+ * version 1. No version dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be read.
+ * @returns The value of the specified field.
+ * @see Avtp_CommonStreamHeader_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_CommonStreamHeader_GetField_V1(
+    const Avtp_CommonStreamHeader_t *const pdu, Avtp_CommonStreamHeaderField_t field)
+{
+    return Avtp_GetField(Avtp_CshFieldDescV1, AVTPDU_CSH_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTPDU common stream header field, dispatching on
+ * the version field of the PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
  * @param field Specifies the position of the data field to be read.
@@ -160,15 +219,49 @@ Avtp_CommonStreamHeader_GetHeaderLen(const Avtp_CommonStreamHeader_t *const pdu)
 OPEN1722_INLINE uint64_t Avtp_CommonStreamHeader_GetField(
     const Avtp_CommonStreamHeader_t *const pdu, Avtp_CommonStreamHeaderField_t field)
 {
-    const Avtp_FieldDescriptor_t *desc = Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
-                                             ? Avtp_CshFieldDescV1
-                                             : Avtp_CshFieldDescV0;
-    return Avtp_GetField(desc, AVTPDU_CSH_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
+               ? Avtp_CommonStreamHeader_GetField_V1(pdu, field)
+               : Avtp_CommonStreamHeader_GetField_V0(pdu, field);
 }
 
 /**
- * Sets the value of an AVTPDU common stream header field. Fields absent from
- * the version in use are left untouched.
+ * Sets the value of an AVTPDU common stream header field as laid out by
+ * version 0. No version dispatch is performed; fields absent from version 0
+ * are left untouched.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be written.
+ * @param value The value to set.
+ * @see Avtp_CommonStreamHeader_SetField
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetField_V0(Avtp_CommonStreamHeader_t *pdu,
+                                                         Avtp_CommonStreamHeaderField_t field,
+                                                         uint64_t value)
+{
+    Avtp_SetField(Avtp_CshFieldDescV0, AVTPDU_CSH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTPDU common stream header field as laid out by
+ * version 1. No version dispatch is performed; fields absent from version 1
+ * are left untouched.
+ *
+ * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
+ * @param field Specifies the position of the data field to be written.
+ * @param value The value to set.
+ * @see Avtp_CommonStreamHeader_SetField
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetField_V1(Avtp_CommonStreamHeader_t *pdu,
+                                                         Avtp_CommonStreamHeaderField_t field,
+                                                         uint64_t value)
+{
+    Avtp_SetField(Avtp_CshFieldDescV1, AVTPDU_CSH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTPDU common stream header field, dispatching on the
+ * version field of the PDU. Fields absent from the version in use are left
+ * untouched.
  *
  * @param pdu Pointer to the first bit of an 1722 AVTP PDU.
  * @param field Specifies the position of the data field to be written.
@@ -178,10 +271,11 @@ OPEN1722_INLINE void Avtp_CommonStreamHeader_SetField(Avtp_CommonStreamHeader_t 
                                                       Avtp_CommonStreamHeaderField_t field,
                                                       uint64_t value)
 {
-    const Avtp_FieldDescriptor_t *desc = Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
-                                             ? Avtp_CshFieldDescV1
-                                             : Avtp_CshFieldDescV0;
-    Avtp_SetField(desc, AVTPDU_CSH_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+    if (Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1) {
+        Avtp_CommonStreamHeader_SetField_V1(pdu, field, value);
+    } else {
+        Avtp_CommonStreamHeader_SetField_V0(pdu, field, value);
+    }
 }
 
 /**
@@ -404,6 +498,481 @@ OPEN1722_INLINE void Avtp_CommonStreamHeader_SetStreamDataLength(Avtp_CommonStre
                                                                  uint16_t value)
 {
     Avtp_CommonStreamHeader_SetField(pdu, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH, value);
+}
+
+/*
+ * Version-typed named accessors. These select the field layout for one
+ * explicit version and never read the version field; the version-dispatched
+ * accessors above delegate to them. See each version-dispatched accessor for
+ * the full field documentation.
+ */
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_IsSv().
+ * @see Avtp_CommonStreamHeader_IsSv
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsSv_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_SV);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_IsSv().
+ * @see Avtp_CommonStreamHeader_IsSv
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsSv_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_SV);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_IsMr().
+ * @see Avtp_CommonStreamHeader_IsMr
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsMr_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_MR);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_IsMr().
+ * @see Avtp_CommonStreamHeader_IsMr
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsMr_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_MR);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_IsTv().
+ * @see Avtp_CommonStreamHeader_IsTv
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsTv_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_TV);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_IsTv().
+ * @see Avtp_CommonStreamHeader_IsTv
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsTv_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_TV);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_IsTu().
+ * @see Avtp_CommonStreamHeader_IsTu
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsTu_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_TU);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_IsTu().
+ * @see Avtp_CommonStreamHeader_IsTu
+ */
+OPEN1722_INLINE bool Avtp_CommonStreamHeader_IsTu_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (bool)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_TU);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetFsd().
+ * @see Avtp_CommonStreamHeader_GetFsd
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFsd_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_FSD);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetFsd().
+ * @see Avtp_CommonStreamHeader_GetFsd
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFsd_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_FSD);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetFormatSpecificData0(). The
+ * field is absent from version 0, so this always returns 0.
+ * @see Avtp_CommonStreamHeader_GetFormatSpecificData0
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFormatSpecificData0_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_FSD0);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetFormatSpecificData0().
+ * @see Avtp_CommonStreamHeader_GetFormatSpecificData0
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFormatSpecificData0_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_FSD0);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetFormatSpecificData1().
+ * @see Avtp_CommonStreamHeader_GetFormatSpecificData1
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFormatSpecificData1_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_FSD1);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetFormatSpecificData1().
+ * @see Avtp_CommonStreamHeader_GetFormatSpecificData1
+ */
+OPEN1722_INLINE uint8_t
+Avtp_CommonStreamHeader_GetFormatSpecificData1_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint8_t)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_FSD1);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetSequenceNum().
+ * @see Avtp_CommonStreamHeader_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t
+Avtp_CommonStreamHeader_GetSequenceNum_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint32_t)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetSequenceNum().
+ * @see Avtp_CommonStreamHeader_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t
+Avtp_CommonStreamHeader_GetSequenceNum_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint32_t)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetStreamId().
+ * @see Avtp_CommonStreamHeader_GetStreamId
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetStreamId_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_STREAM_ID);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetStreamId().
+ * @see Avtp_CommonStreamHeader_GetStreamId
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetStreamId_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_STREAM_ID);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetAvtpTimestamp().
+ * @see Avtp_CommonStreamHeader_GetAvtpTimestamp
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetAvtpTimestamp_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_AVTP_TIMESTAMP);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetAvtpTimestamp().
+ * @see Avtp_CommonStreamHeader_GetAvtpTimestamp
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetAvtpTimestamp_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_AVTP_TIMESTAMP);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity().
+ * The field is absent from version 0, so this always returns 0.
+ * @see Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_PTP_GRANDMASTER_IDENTITY);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity().
+ * @see Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t
+Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_PTP_GRANDMASTER_IDENTITY);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_GetStreamDataLength().
+ * @see Avtp_CommonStreamHeader_GetStreamDataLength
+ */
+OPEN1722_INLINE uint16_t
+Avtp_CommonStreamHeader_GetStreamDataLength_V0(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint16_t)Avtp_CommonStreamHeader_GetField_V0(pdu, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_GetStreamDataLength().
+ * @see Avtp_CommonStreamHeader_GetStreamDataLength
+ */
+OPEN1722_INLINE uint16_t
+Avtp_CommonStreamHeader_GetStreamDataLength_V1(const Avtp_CommonStreamHeader_t *const pdu)
+{
+    return (uint16_t)Avtp_CommonStreamHeader_GetField_V1(pdu, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetSv().
+ * @see Avtp_CommonStreamHeader_SetSv
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetSv_V0(Avtp_CommonStreamHeader_t *pdu, bool sv)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_SV, sv);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetSv().
+ * @see Avtp_CommonStreamHeader_SetSv
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetSv_V1(Avtp_CommonStreamHeader_t *pdu, bool sv)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_SV, sv);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetMr().
+ * @see Avtp_CommonStreamHeader_SetMr
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetMr_V0(Avtp_CommonStreamHeader_t *pdu, bool mr)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_MR, mr);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetMr().
+ * @see Avtp_CommonStreamHeader_SetMr
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetMr_V1(Avtp_CommonStreamHeader_t *pdu, bool mr)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_MR, mr);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetTv().
+ * @see Avtp_CommonStreamHeader_SetTv
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetTv_V0(Avtp_CommonStreamHeader_t *pdu, bool tv)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_TV, tv);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetTv().
+ * @see Avtp_CommonStreamHeader_SetTv
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetTv_V1(Avtp_CommonStreamHeader_t *pdu, bool tv)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_TV, tv);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetTu().
+ * @see Avtp_CommonStreamHeader_SetTu
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetTu_V0(Avtp_CommonStreamHeader_t *pdu, bool tu)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_TU, tu);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetTu().
+ * @see Avtp_CommonStreamHeader_SetTu
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetTu_V1(Avtp_CommonStreamHeader_t *pdu, bool tu)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_TU, tu);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetFsd().
+ * @see Avtp_CommonStreamHeader_SetFsd
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetFsd_V0(Avtp_CommonStreamHeader_t *pdu, uint8_t fsd)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_FSD, fsd);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetFsd().
+ * @see Avtp_CommonStreamHeader_SetFsd
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetFsd_V1(Avtp_CommonStreamHeader_t *pdu, uint8_t fsd)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_FSD, fsd);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetFormatSpecificData0().
+ * The field is absent from version 0, so this is a no-op.
+ * @see Avtp_CommonStreamHeader_SetFormatSpecificData0
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetFormatSpecificData0_V0(Avtp_CommonStreamHeader_t *pdu, uint8_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_FSD0, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetFormatSpecificData0().
+ * @see Avtp_CommonStreamHeader_SetFormatSpecificData0
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetFormatSpecificData0_V1(Avtp_CommonStreamHeader_t *pdu, uint8_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_FSD0, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetFormatSpecificData1().
+ * @see Avtp_CommonStreamHeader_SetFormatSpecificData1
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetFormatSpecificData1_V0(Avtp_CommonStreamHeader_t *pdu, uint8_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_FSD1, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetFormatSpecificData1().
+ * @see Avtp_CommonStreamHeader_SetFormatSpecificData1
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetFormatSpecificData1_V1(Avtp_CommonStreamHeader_t *pdu, uint8_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_FSD1, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetSequenceNum(). Values are
+ * truncated to the 8-bit version 0 field width.
+ * @see Avtp_CommonStreamHeader_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetSequenceNum_V0(Avtp_CommonStreamHeader_t *pdu,
+                                                               uint32_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_SEQUENCE_NUM, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetSequenceNum().
+ * @see Avtp_CommonStreamHeader_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetSequenceNum_V1(Avtp_CommonStreamHeader_t *pdu,
+                                                               uint32_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_SEQUENCE_NUM, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetStreamId().
+ * @see Avtp_CommonStreamHeader_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetStreamId_V0(Avtp_CommonStreamHeader_t *pdu,
+                                                            uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_STREAM_ID, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetStreamId().
+ * @see Avtp_CommonStreamHeader_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetStreamId_V1(Avtp_CommonStreamHeader_t *pdu,
+                                                            uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_STREAM_ID, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetAvtpTimestamp(). Values are
+ * truncated to the 32-bit version 0 field width.
+ * @see Avtp_CommonStreamHeader_SetAvtpTimestamp
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetAvtpTimestamp_V0(Avtp_CommonStreamHeader_t *pdu,
+                                                                 uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_AVTP_TIMESTAMP, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetAvtpTimestamp().
+ * @see Avtp_CommonStreamHeader_SetAvtpTimestamp
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetAvtpTimestamp_V1(Avtp_CommonStreamHeader_t *pdu,
+                                                                 uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_AVTP_TIMESTAMP, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity().
+ * The field is absent from version 0, so this is a no-op.
+ * @see Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity_V0(Avtp_CommonStreamHeader_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_PTP_GRANDMASTER_IDENTITY, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity().
+ * @see Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void
+Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity_V1(Avtp_CommonStreamHeader_t *pdu, uint64_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_PTP_GRANDMASTER_IDENTITY, value);
+}
+
+/**
+ * Version 0 variant of Avtp_CommonStreamHeader_SetStreamDataLength().
+ * @see Avtp_CommonStreamHeader_SetStreamDataLength
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetStreamDataLength_V0(Avtp_CommonStreamHeader_t *pdu,
+                                                                    uint16_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V0(pdu, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH, value);
+}
+
+/**
+ * Version 1 variant of Avtp_CommonStreamHeader_SetStreamDataLength().
+ * @see Avtp_CommonStreamHeader_SetStreamDataLength
+ */
+OPEN1722_INLINE void Avtp_CommonStreamHeader_SetStreamDataLength_V1(Avtp_CommonStreamHeader_t *pdu,
+                                                                    uint16_t value)
+{
+    Avtp_CommonStreamHeader_SetField_V1(pdu, AVTPDU_CSH_FIELD_STREAM_DATA_LENGTH, value);
 }
 
 #ifdef __cplusplus

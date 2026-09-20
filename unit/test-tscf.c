@@ -54,6 +54,17 @@ static uint32_t read_quadlet(const uint8_t *pdu, size_t quadlet)
     return ntohl(word);
 }
 
+static uint64_t mask_field_value(uint8_t bits, uint64_t value)
+{
+    if (bits == 0) {
+        return 0;
+    }
+    if (bits >= 64) {
+        return value;
+    }
+    return value & ((((uint64_t)1) << bits) - 1);
+}
+
 static void tscf_init(void **state)
 {
     (void)state;
@@ -273,6 +284,128 @@ static void tscf_common_field_consistency(void **state)
     }
 }
 
+static void tscf_typed_fields_v0(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_TSCF_HEADER_LEN_V1];
+    Avtp_Tscf_t *tscf = (Avtp_Tscf_t *)pdu;
+
+    Avtp_Tscf_Init(tscf);
+
+    for (uint8_t f = 0; f < AVTP_TSCF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_TscfFieldDescV0[f].bits;
+        uint64_t value = 0xA5A5A5A5A5A5A5A5ULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_TscfFields_t field = (Avtp_TscfFields_t)f;
+
+        Avtp_Tscf_SetField_V0(tscf, field, value);
+        assert_int_equal(Avtp_Tscf_GetField_V0(tscf, field), expected);
+        assert_int_equal(Avtp_Tscf_GetField(tscf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_TscfFieldDescV0, AVTP_TSCF_FIELD_MAX, pdu, f),
+                         expected);
+    }
+}
+
+static void tscf_typed_fields_v1(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_TSCF_HEADER_LEN_V1];
+    Avtp_TscfV1_t *tscf = (Avtp_TscfV1_t *)pdu;
+
+    Avtp_Tscf_InitV1(tscf);
+
+    for (uint8_t f = 0; f < AVTP_TSCF_FIELD_MAX; f++) {
+        uint8_t bits = Avtp_TscfFieldDescV1[f].bits;
+        uint64_t value = 0x5A5A5A5A5A5A5A5AULL ^ (uint64_t)f;
+        uint64_t expected = mask_field_value(bits, value);
+        Avtp_TscfFields_t field = (Avtp_TscfFields_t)f;
+
+        Avtp_Tscf_SetField_V1(tscf, field, value);
+        assert_int_equal(Avtp_Tscf_GetField_V1(tscf, field), expected);
+        assert_int_equal(Avtp_Tscf_GetField((Avtp_Tscf_t *)tscf, field), expected);
+        assert_int_equal(Avtp_GetField(Avtp_TscfFieldDescV1, AVTP_TSCF_FIELD_MAX, pdu, f),
+                         expected);
+    }
+}
+
+static void tscf_typed_named(void **state)
+{
+    (void)state;
+    uint8_t pdu[AVTP_TSCF_HEADER_LEN_V1];
+    Avtp_Tscf_t *v0 = (Avtp_Tscf_t *)pdu;
+    Avtp_TscfV1_t *v1 = (Avtp_TscfV1_t *)pdu;
+
+    /* Version 0. */
+    Avtp_Tscf_Init(v0);
+    Avtp_Tscf_SetSv_V0(v0, true);
+    Avtp_Tscf_SetSequenceNum_V0(v0, 0xAB);
+    Avtp_Tscf_SetStreamId_V0(v0, 0x0102030405060708ULL);
+    Avtp_Tscf_SetAvtpTimestamp_V0(v0, 0x80C0FFEE);
+    Avtp_Tscf_SetStreamDataLength_V0(v0, 0x0ABC);
+
+    assert_true(Avtp_Tscf_IsSv_V0(v0));
+    assert_int_equal(Avtp_Tscf_GetSequenceNum_V0(v0), 0xAB);
+    assert_int_equal(Avtp_Tscf_GetSequenceNumLsb_V0(v0), 0xAB);
+    assert_int_equal(Avtp_Tscf_GetStreamId_V0(v0), 0x0102030405060708ULL);
+    assert_int_equal(Avtp_Tscf_GetAvtpTimestamp_V0(v0), 0x80C0FFEE);
+    assert_int_equal(Avtp_Tscf_GetStreamDataLength_V0(v0), 0x0ABC);
+    assert_int_equal(Avtp_Tscf_GetPtpGrandmasterIdentity_V0(v0), 0);
+
+    /* The version-dispatched accessors agree with the version 0 variants. */
+    assert_int_equal(Avtp_Tscf_GetSequenceNum(v0), Avtp_Tscf_GetSequenceNum_V0(v0));
+    assert_int_equal(Avtp_Tscf_GetSequenceNumLsb(v0), Avtp_Tscf_GetSequenceNumLsb_V0(v0));
+    assert_int_equal(Avtp_Tscf_GetStreamId(v0), Avtp_Tscf_GetStreamId_V0(v0));
+    assert_int_equal(Avtp_Tscf_GetAvtpTimestamp(v0), Avtp_Tscf_GetAvtpTimestamp_V0(v0));
+    assert_int_equal(Avtp_Tscf_GetStreamDataLength(v0), Avtp_Tscf_GetStreamDataLength_V0(v0));
+
+    /* Version 1. */
+    Avtp_Tscf_InitV1(v1);
+    Avtp_Tscf_SetSv_V1(v1, true);
+    Avtp_Tscf_SetSequenceNum_V1(v1, 0x12345678);
+    Avtp_Tscf_SetStreamId_V1(v1, 0x1122334455667788ULL);
+    Avtp_Tscf_SetAvtpTimestamp_V1(v1, 0x99AABBCCDDEEFF00ULL);
+    Avtp_Tscf_SetPtpGrandmasterIdentity_V1(v1, 0x0F1E2D3C4B5A6978ULL);
+    Avtp_Tscf_SetStreamDataLength_V1(v1, 0x0DEF);
+
+    assert_true(Avtp_Tscf_IsSv_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetSequenceNum_V1(v1), 0x12345678);
+    /* sequence_num_lsb copy in format_specific_data_0 (byte 2 of quadlet 0). */
+    assert_int_equal(Avtp_Tscf_GetSequenceNumLsb_V1(v1), 0x78);
+    assert_int_equal(pdu[2], 0x78);
+    assert_int_equal(Avtp_Tscf_GetStreamId_V1(v1), 0x1122334455667788ULL);
+    assert_int_equal(Avtp_Tscf_GetAvtpTimestamp_V1(v1), 0x99AABBCCDDEEFF00ULL);
+    assert_int_equal(Avtp_Tscf_GetPtpGrandmasterIdentity_V1(v1), 0x0F1E2D3C4B5A6978ULL);
+    assert_int_equal(Avtp_Tscf_GetStreamDataLength_V1(v1), 0x0DEF);
+
+    /* The version-dispatched accessors agree with the version 1 variants. */
+    assert_int_equal(Avtp_Tscf_GetSequenceNum(v0), Avtp_Tscf_GetSequenceNum_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetSequenceNumLsb(v0), Avtp_Tscf_GetSequenceNumLsb_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetStreamId(v0), Avtp_Tscf_GetStreamId_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetAvtpTimestamp(v0), Avtp_Tscf_GetAvtpTimestamp_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetPtpGrandmasterIdentity(v0),
+                     Avtp_Tscf_GetPtpGrandmasterIdentity_V1(v1));
+    assert_int_equal(Avtp_Tscf_GetStreamDataLength(v0), Avtp_Tscf_GetStreamDataLength_V1(v1));
+}
+
+static void tscf_typed_helpers(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+
+    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    assert_int_equal(Avtp_Tscf_GetHeaderLen_V0((Avtp_Tscf_t *)pdu), AVTP_TSCF_HEADER_LEN_V0);
+    assert_ptr_equal(Avtp_Tscf_GetPayload_V0((Avtp_Tscf_t *)pdu), pdu + AVTP_TSCF_HEADER_LEN_V0);
+    Avtp_Tscf_SetPayload_V0((Avtp_Tscf_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_TSCF_HEADER_LEN_V0, payload, sizeof(payload));
+
+    Avtp_Tscf_InitV1((Avtp_TscfV1_t *)pdu);
+    assert_int_equal(Avtp_Tscf_GetHeaderLen_V1((Avtp_TscfV1_t *)pdu), AVTP_TSCF_HEADER_LEN_V1);
+    assert_ptr_equal(Avtp_Tscf_GetPayload_V1((Avtp_TscfV1_t *)pdu), pdu + AVTP_TSCF_HEADER_LEN_V1);
+    Avtp_Tscf_SetPayload_V1((Avtp_TscfV1_t *)pdu, payload, sizeof(payload));
+    assert_memory_equal(pdu + AVTP_TSCF_HEADER_LEN_V1, payload, sizeof(payload));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -284,6 +417,10 @@ int main(void)
         cmocka_unit_test(tscf_payload),
         cmocka_unit_test(tscf_header_coverage),
         cmocka_unit_test(tscf_common_field_consistency),
+        cmocka_unit_test(tscf_typed_fields_v0),
+        cmocka_unit_test(tscf_typed_fields_v1),
+        cmocka_unit_test(tscf_typed_named),
+        cmocka_unit_test(tscf_typed_helpers),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -177,7 +177,38 @@ static const Avtp_FieldDescriptor_t Avtp_CrfFieldDescV1[AVTP_CRF_FIELD_MAX] = {
 };
 
 /**
- * Returns the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ * Returns the value of an AVTP CRF field as laid out by version 0. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ * @see Avtp_Crf_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetField_V0(const Avtp_Crf_t *const pdu, Avtp_CrfFields_t field)
+{
+    return Avtp_GetField(Avtp_CrfFieldDescV0, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTP CRF field as laid out by version 1. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be read
+ * @returns This function returns the value of the field.
+ * @see Avtp_Crf_GetField
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetField_V1(const Avtp_CrfV1_t *const pdu, Avtp_CrfFields_t field)
+{
+    return Avtp_GetField(Avtp_CrfFieldDescV1, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu,
+                         (uint8_t)field);
+}
+
+/**
+ * Returns the value of an AVTP CRF field, dispatching on the version field of
+ * the PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 CRF PDU.
  * @param field Specifies the position of the data field to be read
@@ -185,15 +216,43 @@ static const Avtp_FieldDescriptor_t Avtp_CrfFieldDescV1[AVTP_CRF_FIELD_MAX] = {
  */
 OPEN1722_INLINE uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_CrfFields_t field)
 {
-    const Avtp_FieldDescriptor_t *desc =
-        Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) == AVTP_VERSION_1
-            ? Avtp_CrfFieldDescV1
-            : Avtp_CrfFieldDescV0;
-    return Avtp_GetField(desc, AVTP_CRF_FIELD_MAX, (const uint8_t *)pdu, (uint8_t)field);
+    return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? Avtp_Crf_GetField_V1((const Avtp_CrfV1_t *)pdu, field)
+               : Avtp_Crf_GetField_V0(pdu, field);
 }
 
 /**
- * Sets the value of an AVTP CRF field as specified in the IEEE 1722 Specification.
+ * Sets the value of an AVTP CRF field as laid out by version 0. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ * @see Avtp_Crf_SetField
+ */
+OPEN1722_INLINE void Avtp_Crf_SetField_V0(Avtp_Crf_t *pdu, Avtp_CrfFields_t field, uint64_t value)
+{
+    Avtp_SetField(Avtp_CrfFieldDescV0, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTP CRF field as laid out by version 1. No version
+ * dispatch is performed.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param field Specifies the position of the data field to be written
+ * @param value The value to set.
+ * @see Avtp_Crf_SetField
+ */
+OPEN1722_INLINE void Avtp_Crf_SetField_V1(Avtp_CrfV1_t *pdu, Avtp_CrfFields_t field, uint64_t value)
+{
+    Avtp_SetField(Avtp_CrfFieldDescV1, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+}
+
+/**
+ * Sets the value of an AVTP CRF field, dispatching on the version field of the
+ * PDU.
  *
  * @param pdu Pointer to the first bit of an 1722 CRF PDU.
  * @param field Specifies the position of the data field to be written
@@ -201,22 +260,46 @@ OPEN1722_INLINE uint64_t Avtp_Crf_GetField(const Avtp_Crf_t *const pdu, Avtp_Crf
  */
 OPEN1722_INLINE void Avtp_Crf_SetField(Avtp_Crf_t *pdu, Avtp_CrfFields_t field, uint64_t value)
 {
-    const Avtp_FieldDescriptor_t *desc =
-        Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) == AVTP_VERSION_1
-            ? Avtp_CrfFieldDescV1
-            : Avtp_CrfFieldDescV0;
-    Avtp_SetField(desc, AVTP_CRF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
+    if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        Avtp_Crf_SetField_V1((Avtp_CrfV1_t *)pdu, field, value);
+    } else {
+        Avtp_Crf_SetField_V0(pdu, field, value);
+    }
 }
 
 /**
- * Returns the length of the CRF header in octets (20 or 36).
+ * Returns the length of the version 0 CRF header in octets (20). The PDU
+ * pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetHeaderLen_V0(const Avtp_Crf_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTP_CRF_HEADER_LEN_V0;
+}
+
+/**
+ * Returns the length of the version 1 CRF header in octets (36). The PDU
+ * pointer is not read; it keeps the signature aligned with the
+ * version-dispatched accessors.
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetHeaderLen_V1(const Avtp_CrfV1_t *const pdu)
+{
+    (void)pdu;
+    return (uint8_t)AVTP_CRF_HEADER_LEN_V1;
+}
+
+/**
+ * Returns the length of the CRF header in octets (20 or 36), dispatching on the
+ * version field of the PDU.
  */
 OPEN1722_INLINE uint8_t Avtp_Crf_GetHeaderLen(const Avtp_Crf_t *const pdu)
 {
     return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
                    AVTP_VERSION_1
-               ? (uint8_t)AVTP_CRF_HEADER_LEN_V1
-               : (uint8_t)AVTP_CRF_HEADER_LEN_V0;
+               ? Avtp_Crf_GetHeaderLen_V1((const Avtp_CrfV1_t *)pdu)
+               : Avtp_Crf_GetHeaderLen_V0(pdu);
 }
 
 /**
@@ -273,11 +356,11 @@ OPEN1722_INLINE bool Avtp_Crf_IsTu(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE uint32_t Avtp_Crf_GetSequenceNum(const Avtp_Crf_t *const pdu)
 {
-    if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
-        return (uint32_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM);
-    }
-    return (uint8_t)Avtp_Crf_GetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+    return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? (uint32_t)Avtp_Crf_GetField_V1((const Avtp_CrfV1_t *)pdu,
+                                                AVTP_CRF_FIELD_SEQUENCE_NUM)
+               : (uint8_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
 }
 
 /**
@@ -426,9 +509,14 @@ OPEN1722_INLINE void Avtp_Crf_SetTu(Avtp_Crf_t *pdu, bool tu)
  */
 OPEN1722_INLINE void Avtp_Crf_SetSequenceNum(Avtp_Crf_t *pdu, uint32_t value)
 {
-    /* No-op on version 0: the field only exists in the alternative header v1. */
-    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM, value);
-    Avtp_Crf_SetField(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
+    if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        Avtp_Crf_SetField_V1((Avtp_CrfV1_t *)pdu, AVTP_CRF_FIELD_SEQUENCE_NUM, value);
+        Avtp_Crf_SetField_V1((Avtp_CrfV1_t *)pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB,
+                             (uint8_t)(value & 0xFFU));
+    } else {
+        Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
+    }
 }
 
 /**
@@ -510,6 +598,30 @@ OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t val
 }
 
 /**
+ * Returns a pointer to the CRF data of a version 0 CRF frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @return Pointer to CRF data
+ * @see Avtp_Crf_GetPayload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload_V0(const Avtp_Crf_t *const pdu)
+{
+    return (const uint8_t *)pdu + AVTP_CRF_HEADER_LEN_V0;
+}
+
+/**
+ * Returns a pointer to the CRF data of a version 1 CRF frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @return Pointer to CRF data
+ * @see Avtp_Crf_GetPayload
+ */
+OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (const uint8_t *)pdu + AVTP_CRF_HEADER_LEN_V1;
+}
+
+/**
  * Returns pointer to the CRF data of a CRF frame. The CRF data starts after the
  * version-dependent CRF header.
  *
@@ -521,7 +633,38 @@ OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval(Avtp_Crf_t *pdu, uint16_t val
  */
 OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload(const Avtp_Crf_t *const pdu)
 {
-    return (const uint8_t *)pdu + Avtp_Crf_GetHeaderLen(pdu);
+    return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+                   AVTP_VERSION_1
+               ? Avtp_Crf_GetPayload_V1((const Avtp_CrfV1_t *)pdu)
+               : Avtp_Crf_GetPayload_V0(pdu);
+}
+
+/**
+ * Sets the CRF data of a version 0 CRF frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ * @see Avtp_Crf_SetPayload
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPayload_V0(Avtp_Crf_t *pdu, uint8_t *payload,
+                                            uint16_t payload_length)
+{
+    memcpy((uint8_t *)pdu + AVTP_CRF_HEADER_LEN_V0, payload, payload_length);
+}
+
+/**
+ * Sets the CRF data of a version 1 CRF frame.
+ *
+ * @param pdu Pointer to the first bit of an 1722 CRF PDU.
+ * @param payload Pointer to the payload byte array
+ * @param payload_length Length of the payload
+ * @see Avtp_Crf_SetPayload
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPayload_V1(Avtp_CrfV1_t *pdu, uint8_t *payload,
+                                            uint16_t payload_length)
+{
+    memcpy((uint8_t *)pdu + AVTP_CRF_HEADER_LEN_V1, payload, payload_length);
 }
 
 /**
@@ -533,7 +676,12 @@ OPEN1722_INLINE const uint8_t *Avtp_Crf_GetPayload(const Avtp_Crf_t *const pdu)
  */
 OPEN1722_INLINE void Avtp_Crf_SetPayload(Avtp_Crf_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
-    memcpy((uint8_t *)pdu + Avtp_Crf_GetHeaderLen(pdu), payload, payload_length);
+    if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
+        AVTP_VERSION_1) {
+        Avtp_Crf_SetPayload_V1((Avtp_CrfV1_t *)pdu, payload, payload_length);
+    } else {
+        Avtp_Crf_SetPayload_V0(pdu, payload, payload_length);
+    }
 }
 
 /**
@@ -613,6 +761,472 @@ OPEN1722_INLINE bool Avtp_Crf_IsValid(const Avtp_Crf_t *const pdu, size_t buffer
     }
 
     return true;
+}
+
+/*
+ * Version-typed named accessors. These select the field layout for one
+ * explicit version and never read the version field; the version-dispatched
+ * accessors above delegate to them. Alternative header fields delegate to the
+ * shared Avtp_AlternativeHeader_* variants. See each version-dispatched
+ * accessor for the full field documentation.
+ */
+
+/**
+ * Version 0 variant of Avtp_Crf_IsSv().
+ * @see Avtp_Crf_IsSv
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsSv_V0(const Avtp_Crf_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_SV);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_IsSv().
+ * @see Avtp_Crf_IsSv
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsSv_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_SV);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_IsMr().
+ * @see Avtp_Crf_IsMr
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsMr_V0(const Avtp_Crf_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_MR);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_IsMr().
+ * @see Avtp_Crf_IsMr
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsMr_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_MR);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_IsFs().
+ * @see Avtp_Crf_IsFs
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsFs_V0(const Avtp_Crf_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_FS);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_IsFs().
+ * @see Avtp_Crf_IsFs
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsFs_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_FS);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_IsTu().
+ * @see Avtp_Crf_IsTu
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsTu_V0(const Avtp_Crf_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_TU);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_IsTu().
+ * @see Avtp_Crf_IsTu
+ */
+OPEN1722_INLINE bool Avtp_Crf_IsTu_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (bool)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_TU);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetSequenceNum(). In version 0 the sequence
+ * number is the 8-bit sequence_num_lsb field.
+ * @see Avtp_Crf_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t Avtp_Crf_GetSequenceNum_V0(const Avtp_Crf_t *const pdu)
+{
+    return (uint32_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetSequenceNum().
+ * @see Avtp_Crf_GetSequenceNum
+ */
+OPEN1722_INLINE uint32_t Avtp_Crf_GetSequenceNum_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (uint32_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetSequenceNumLsb().
+ * @see Avtp_Crf_GetSequenceNumLsb
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNumLsb_V0(const Avtp_Crf_t *const pdu)
+{
+    return (uint8_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetSequenceNumLsb().
+ * @see Avtp_Crf_GetSequenceNumLsb
+ */
+OPEN1722_INLINE uint8_t Avtp_Crf_GetSequenceNumLsb_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (uint8_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetPtpGrandmasterIdentity(). The field is
+ * absent from version 0, so this always returns 0.
+ * @see Avtp_Crf_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetPtpGrandmasterIdentity_V0(const Avtp_Crf_t *const pdu)
+{
+    return Avtp_AlternativeHeader_GetPtpGrandmasterIdentity_V0(
+        (const Avtp_AlternativeHeader_t *)pdu);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetPtpGrandmasterIdentity().
+ * @see Avtp_Crf_GetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetPtpGrandmasterIdentity_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return Avtp_AlternativeHeader_GetPtpGrandmasterIdentity_V1(
+        (const Avtp_AlternativeHeader_t *)pdu);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetType().
+ * @see Avtp_Crf_GetType
+ */
+OPEN1722_INLINE Avtp_CrfType_t Avtp_Crf_GetType_V0(const Avtp_Crf_t *const pdu)
+{
+    return (Avtp_CrfType_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_TYPE);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetType().
+ * @see Avtp_Crf_GetType
+ */
+OPEN1722_INLINE Avtp_CrfType_t Avtp_Crf_GetType_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (Avtp_CrfType_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_TYPE);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetStreamId().
+ * @see Avtp_Crf_GetStreamId
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetStreamId_V0(const Avtp_Crf_t *const pdu)
+{
+    return Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_STREAM_ID);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetStreamId().
+ * @see Avtp_Crf_GetStreamId
+ */
+OPEN1722_INLINE uint64_t Avtp_Crf_GetStreamId_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_STREAM_ID);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetPull().
+ * @see Avtp_Crf_GetPull
+ */
+OPEN1722_INLINE Avtp_CrfPull_t Avtp_Crf_GetPull_V0(const Avtp_Crf_t *const pdu)
+{
+    return (Avtp_CrfPull_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_PULL);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetPull().
+ * @see Avtp_Crf_GetPull
+ */
+OPEN1722_INLINE Avtp_CrfPull_t Avtp_Crf_GetPull_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (Avtp_CrfPull_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_PULL);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetBaseFrequency().
+ * @see Avtp_Crf_GetBaseFrequency
+ */
+OPEN1722_INLINE uint32_t Avtp_Crf_GetBaseFrequency_V0(const Avtp_Crf_t *const pdu)
+{
+    return (uint32_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetBaseFrequency().
+ * @see Avtp_Crf_GetBaseFrequency
+ */
+OPEN1722_INLINE uint32_t Avtp_Crf_GetBaseFrequency_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (uint32_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetCrfDataLength().
+ * @see Avtp_Crf_GetCrfDataLength
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetCrfDataLength_V0(const Avtp_Crf_t *const pdu)
+{
+    return (uint16_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetCrfDataLength().
+ * @see Avtp_Crf_GetCrfDataLength
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetCrfDataLength_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (uint16_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_GetTimestampInterval().
+ * @see Avtp_Crf_GetTimestampInterval
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetTimestampInterval_V0(const Avtp_Crf_t *const pdu)
+{
+    return (uint16_t)Avtp_Crf_GetField_V0(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_GetTimestampInterval().
+ * @see Avtp_Crf_GetTimestampInterval
+ */
+OPEN1722_INLINE uint16_t Avtp_Crf_GetTimestampInterval_V1(const Avtp_CrfV1_t *const pdu)
+{
+    return (uint16_t)Avtp_Crf_GetField_V1(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetSv().
+ * @see Avtp_Crf_SetSv
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSv_V0(Avtp_Crf_t *pdu, bool sv)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_SV, sv);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetSv().
+ * @see Avtp_Crf_SetSv
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSv_V1(Avtp_CrfV1_t *pdu, bool sv)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_SV, sv);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetMr().
+ * @see Avtp_Crf_SetMr
+ */
+OPEN1722_INLINE void Avtp_Crf_SetMr_V0(Avtp_Crf_t *pdu, bool mr)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_MR, mr);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetMr().
+ * @see Avtp_Crf_SetMr
+ */
+OPEN1722_INLINE void Avtp_Crf_SetMr_V1(Avtp_CrfV1_t *pdu, bool mr)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_MR, mr);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetFs().
+ * @see Avtp_Crf_SetFs
+ */
+OPEN1722_INLINE void Avtp_Crf_SetFs_V0(Avtp_Crf_t *pdu, bool fs)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_FS, fs);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetFs().
+ * @see Avtp_Crf_SetFs
+ */
+OPEN1722_INLINE void Avtp_Crf_SetFs_V1(Avtp_CrfV1_t *pdu, bool fs)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_FS, fs);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetTu().
+ * @see Avtp_Crf_SetTu
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTu_V0(Avtp_Crf_t *pdu, bool tu)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_TU, tu);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetTu().
+ * @see Avtp_Crf_SetTu
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTu_V1(Avtp_CrfV1_t *pdu, bool tu)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_TU, tu);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetSequenceNum(). The value is truncated to the
+ * 8-bit version 0 sequence_num_lsb field.
+ * @see Avtp_Crf_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSequenceNum_V0(Avtp_Crf_t *pdu, uint32_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetSequenceNum(). The eight least significant
+ * bits are also written to the sequence_num_lsb copy (CRF-25).
+ * @see Avtp_Crf_SetSequenceNum
+ */
+OPEN1722_INLINE void Avtp_Crf_SetSequenceNum_V1(Avtp_CrfV1_t *pdu, uint32_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM, value);
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetPtpGrandmasterIdentity(). The field is
+ * absent from version 0, so this is a no-op.
+ * @see Avtp_Crf_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPtpGrandmasterIdentity_V0(Avtp_Crf_t *pdu, uint64_t value)
+{
+    Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V0((Avtp_AlternativeHeader_t *)pdu, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetPtpGrandmasterIdentity().
+ * @see Avtp_Crf_SetPtpGrandmasterIdentity
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPtpGrandmasterIdentity_V1(Avtp_CrfV1_t *pdu, uint64_t value)
+{
+    Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V1((Avtp_AlternativeHeader_t *)pdu, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetType().
+ * @see Avtp_Crf_SetType
+ */
+OPEN1722_INLINE void Avtp_Crf_SetType_V0(Avtp_Crf_t *pdu, Avtp_CrfType_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_TYPE, (uint64_t)value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetType().
+ * @see Avtp_Crf_SetType
+ */
+OPEN1722_INLINE void Avtp_Crf_SetType_V1(Avtp_CrfV1_t *pdu, Avtp_CrfType_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_TYPE, (uint64_t)value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetStreamId().
+ * @see Avtp_Crf_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_Crf_SetStreamId_V0(Avtp_Crf_t *pdu, uint64_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_STREAM_ID, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetStreamId().
+ * @see Avtp_Crf_SetStreamId
+ */
+OPEN1722_INLINE void Avtp_Crf_SetStreamId_V1(Avtp_CrfV1_t *pdu, uint64_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_STREAM_ID, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetPull().
+ * @see Avtp_Crf_SetPull
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPull_V0(Avtp_Crf_t *pdu, Avtp_CrfPull_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_PULL, (uint64_t)value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetPull().
+ * @see Avtp_Crf_SetPull
+ */
+OPEN1722_INLINE void Avtp_Crf_SetPull_V1(Avtp_CrfV1_t *pdu, Avtp_CrfPull_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_PULL, (uint64_t)value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetBaseFrequency().
+ * @see Avtp_Crf_SetBaseFrequency
+ */
+OPEN1722_INLINE void Avtp_Crf_SetBaseFrequency_V0(Avtp_Crf_t *pdu, uint32_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetBaseFrequency().
+ * @see Avtp_Crf_SetBaseFrequency
+ */
+OPEN1722_INLINE void Avtp_Crf_SetBaseFrequency_V1(Avtp_CrfV1_t *pdu, uint32_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_BASE_FREQUENCY, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetCrfDataLength().
+ * @see Avtp_Crf_SetCrfDataLength
+ */
+OPEN1722_INLINE void Avtp_Crf_SetCrfDataLength_V0(Avtp_Crf_t *pdu, uint16_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetCrfDataLength().
+ * @see Avtp_Crf_SetCrfDataLength
+ */
+OPEN1722_INLINE void Avtp_Crf_SetCrfDataLength_V1(Avtp_CrfV1_t *pdu, uint16_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_CRF_DATA_LENGTH, value);
+}
+
+/**
+ * Version 0 variant of Avtp_Crf_SetTimestampInterval().
+ * @see Avtp_Crf_SetTimestampInterval
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval_V0(Avtp_Crf_t *pdu, uint16_t value)
+{
+    Avtp_Crf_SetField_V0(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, value);
+}
+
+/**
+ * Version 1 variant of Avtp_Crf_SetTimestampInterval().
+ * @see Avtp_Crf_SetTimestampInterval
+ */
+OPEN1722_INLINE void Avtp_Crf_SetTimestampInterval_V1(Avtp_CrfV1_t *pdu, uint16_t value)
+{
+    Avtp_Crf_SetField_V1(pdu, AVTP_CRF_FIELD_TIMESTAMP_INTERVAL, value);
 }
 
 #ifdef __cplusplus
