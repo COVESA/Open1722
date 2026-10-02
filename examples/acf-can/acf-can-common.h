@@ -118,7 +118,9 @@ int setup_can_socket(const char *can_ifname, bool can_fd);
  * @param can_fd true: CAN-FD, false: Classic CAN
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
  * @param stream_id: AVTP stream ID of interest
- * @param exp_cf_seqnum: Expected Control format sequence num.
+ * @param exp_cf_seqnum: Expected Control format sequence num. Version 0
+ * control formats carry an 8-bit sequence number, so only the low 8 bits are
+ * compared for them; version 1 uses the full 32 bits.
  * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
  * @return Number of CAN messages received
  */
