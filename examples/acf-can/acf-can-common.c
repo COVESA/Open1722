@@ -268,6 +268,7 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, i = 0;
     uint32_t seq_num;
     uint32_t udp_seq_num;
+    uint32_t seq_mask = UINT32_MAX;
     uint16_t proc_bytes = 0, msg_length = 0;
     uint64_t s_id;
 
@@ -329,6 +330,7 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
             msg_length += (uint16_t)(Avtp_Tscf_GetStreamDataLength_V0(tscf) + headerLen);
             s_id = Avtp_Tscf_GetStreamId_V0(tscf);
             seq_num = Avtp_Tscf_GetSequenceNum_V0(tscf);
+            seq_mask = 0xFFU;
         }
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
         if (!Avtp_Ntscf_IsValid((const Avtp_Ntscf_t *)cf_pdu, pdu_length - proc_bytes)) {
@@ -355,6 +357,7 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
             msg_length += (uint16_t)(Avtp_Ntscf_GetNtscfDataLength_V0(ntscf) + headerLen);
             s_id = Avtp_Ntscf_GetStreamId_V0(ntscf);
             seq_num = Avtp_Ntscf_GetSequenceNum_V0(ntscf);
+            seq_mask = 0xFFU;
         }
     } else {
         return -1;
@@ -365,10 +368,12 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
         return -1;
     }
 
-    // Check sequence numbers.
-    if (seq_num != *exp_cf_seqnum) {
+    // Check sequence numbers. Version 0 only carries an 8-bit sequence
+    // number, so compare modulo 256 there; version 1 uses the full 32 bits.
+    uint32_t expected_seq_num = *exp_cf_seqnum & seq_mask;
+    if ((seq_num & seq_mask) != expected_seq_num) {
         LOG_ERR("Incorrect sequence num. Expected: %" PRIu32 " Recd.: %" PRIu32 "\n",
-                *exp_cf_seqnum, seq_num);
+                expected_seq_num, seq_num);
         *exp_cf_seqnum = seq_num;
     }
 
