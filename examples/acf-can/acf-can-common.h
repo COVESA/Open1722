@@ -27,6 +27,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <stddef.h>
+
 #ifdef __linux__
 #include <linux/can.h>
 #elif defined(__ZEPHYR__)
@@ -111,6 +113,7 @@ int setup_can_socket(const char *can_ifname, bool can_fd);
  * Function that converts AVTP Frames to CAN
  *
  * @param pdu: Start of the AVTP Frame
+ * @param pdu_length: Number of received bytes in the AVTP Frame
  * @param can_frames: Array of CAM Frames to be recovered from AVTP Frames
  * @param can_fd true: CAN-FD, false: Classic CAN
  * @param use_udp 1: UDP encapsulation, 0: Ethernet
@@ -119,8 +122,8 @@ int setup_can_socket(const char *can_ifname, bool can_fd);
  * @param exp_udp_seqnum: Expected UDP Encapsulation sequence num.
  * @return Number of CAN messages received
  */
-int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
-                uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
+int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_fd, int use_udp,
+                uint64_t stream_id, uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum);
 
 /**
  * Function that converts AVTP Frames to CAN
