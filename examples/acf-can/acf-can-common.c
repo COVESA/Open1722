@@ -261,8 +261,8 @@ int can_to_avtp(frame_t *can_frames, bool can_fd, uint8_t *pdu, int use_udp, acf
     return pdu_length;
 }
 
-int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uint64_t stream_id,
-                uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
+int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_fd, int use_udp,
+                uint64_t stream_id, uint32_t *exp_cf_seqnum, uint32_t *exp_udp_seqnum)
 {
 
     uint8_t *cf_pdu, *acf_pdu, *udp_pdu, i = 0;
@@ -273,6 +273,10 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
 
     // Check for UDP encapsulation
     if (use_udp) {
+        if (pdu_length < AVTP_UDP_HEADER_LEN) {
+            LOG_ERR("Truncated UDP encapsulated frame, ignoring frame.\n");
+            return -1;
+        }
         udp_pdu = pdu;
         udp_seq_num = Avtp_Udp_GetEncapsulationSeqNo((Avtp_Udp_t *)udp_pdu);
         cf_pdu = pdu + AVTP_UDP_HEADER_LEN;
@@ -287,9 +291,24 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
         cf_pdu = pdu;
     }
 
+    /* The subtype is encoded in the first octet and the version in the
+     * second one. Both must have been received before the control format can
+     * be identified and validated below. */
+    if (pdu_length - proc_bytes < 2) {
+        LOG_ERR("Truncated AVTP frame, ignoring frame.\n");
+        return -1;
+    }
+
     // Only NTSCF and TSCF formats allowed
     uint8_t subtype = Avtp_CommonHeader_GetSubtype((Avtp_CommonHeader_t *)cf_pdu);
     if (subtype == AVTP_SUBTYPE_TSCF) {
+        /* Validate the untrusted header against the number of bytes actually
+         * received: this checks the subtype and version, that the declared
+         * header fits, and that the declared stream data length fits. */
+        if (!Avtp_Tscf_IsValid((const Avtp_Tscf_t *)cf_pdu, pdu_length - proc_bytes)) {
+            LOG_ERR("Invalid TSCF header, ignoring frame.\n");
+            return -1;
+        }
         uint8_t version =
             Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)cf_pdu);
         if (!Avtp_Version_IsSupported(AVTP_TSCF_SUPPORTED_VERSIONS, version)) {
@@ -312,6 +331,10 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
             seq_num = Avtp_Tscf_GetSequenceNum_V0(tscf);
         }
     } else if (subtype == AVTP_SUBTYPE_NTSCF) {
+        if (!Avtp_Ntscf_IsValid((const Avtp_Ntscf_t *)cf_pdu, pdu_length - proc_bytes)) {
+            LOG_ERR("Invalid NTSCF header, ignoring frame.\n");
+            return -1;
+        }
         uint8_t version =
             Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)cf_pdu);
         if (!Avtp_Version_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
@@ -358,7 +381,9 @@ int avtp_to_can(uint8_t *pdu, frame_t *can_frames, bool can_fd, int use_udp, uin
          * remaining buffer, and the resulting payload size must match
          * the CAN/CAN-FD bound encoded by the FDF bit. Without this
          * guard a malformed frame could feed garbage values to the
-         * consumers below. */
+         * consumers below. The control format header was validated
+         * against the received byte count above, so msg_length can never
+         * exceed the received frame. */
         if (!AVTP_CAN(IsValid)((AVTP_CAN(t) *)acf_pdu, msg_length - proc_bytes)) {
             LOG_ERR("Error: ACF CAN frame failed validation, ignoring frame.\n");
             return -1;

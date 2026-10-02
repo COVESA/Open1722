@@ -242,7 +242,8 @@ void *can_to_avtp_runnable(void *args)
 void *avtp_to_can_runnable(void *args)
 {
 
-    uint16_t pdu_length = 0, cf_length = 0;
+    ssize_t pdu_length = 0;
+    uint16_t cf_length = 0;
     int8_t num_can_msgs = 0;
     uint32_t exp_cf_seqnum = 0;
     uint32_t exp_udp_seqnum = 0;
@@ -258,8 +259,8 @@ void *avtp_to_can_runnable(void *args)
             continue;
         }
 
-        num_can_msgs = avtp_to_can(pdu, can_frames, can_fd, use_udp, listener_stream_id,
-                                   &exp_cf_seqnum, &exp_udp_seqnum);
+        num_can_msgs = avtp_to_can(pdu, (size_t)pdu_length, can_frames, can_fd, use_udp,
+                                   listener_stream_id, &exp_cf_seqnum, &exp_udp_seqnum);
         if (num_can_msgs <= 0) {
             continue;
         }
