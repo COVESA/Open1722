@@ -69,7 +69,7 @@ static void alternative_header_typed_fields_v0(void **state)
     Avtp_AlternativeHeader_t *ah = (Avtp_AlternativeHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTPDU_VERSION_0);
 
     for (uint8_t f = 0; f < AVTPDU_AH_FIELD_MAX; f++) {
         uint8_t bits = Avtp_AhFieldDescV0[f].bits;
@@ -91,7 +91,7 @@ static void alternative_header_typed_fields_v1(void **state)
     Avtp_AlternativeHeader_t *ah = (Avtp_AlternativeHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTPDU_VERSION_1);
 
     for (uint8_t f = 0; f < AVTPDU_AH_FIELD_MAX; f++) {
         uint8_t bits = Avtp_AhFieldDescV1[f].bits;
@@ -113,7 +113,7 @@ static void alternative_header_typed_named_v1(void **state)
     Avtp_AlternativeHeader_t *ah = (Avtp_AlternativeHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTPDU_VERSION_1);
 
     Avtp_AlternativeHeader_SetSequenceNum_V1(ah, 0x12345678);
     Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V1(ah, 0x99AABBCCDDEEFF00ULL);
@@ -137,7 +137,7 @@ static void alternative_header_typed_absent_fields(void **state)
     Avtp_AlternativeHeader_t *ah = (Avtp_AlternativeHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ah, AVTPDU_VERSION_0);
 
     /* sequence_num and ptp_grandmaster_identity do not exist in v0. */
     assert_int_equal(Avtp_AlternativeHeader_GetSequenceNum_V0(ah), 0);

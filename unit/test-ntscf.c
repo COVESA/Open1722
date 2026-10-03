@@ -163,9 +163,9 @@ static void ntscf_field_descriptors_cover_header(void **state)
         uint8_t coverage[AVTP_NTSCF_HEADER_LEN_V1 * 8] = {0};
         size_t coverageBits = sizeof(coverage);
         const Avtp_FieldDescriptor_t *ntscfDesc =
-            version == AVTP_VERSION_1 ? Avtp_NtscfFieldDescV1 : Avtp_NtscfFieldDescV0;
-        size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_NTSCF_HEADER_LEN_V1
-                                                       : (size_t)AVTP_NTSCF_HEADER_LEN_V0) *
+            version == AVTPDU_VERSION_1 ? Avtp_NtscfFieldDescV1 : Avtp_NtscfFieldDescV0;
+        size_t headerBits = (version == AVTPDU_VERSION_1 ? (size_t)AVTP_NTSCF_HEADER_LEN_V1
+                                                         : (size_t)AVTP_NTSCF_HEADER_LEN_V0) *
                             8;
 
         /* subtype and version are owned by the common header; h/sv is covered
@@ -193,9 +193,9 @@ static void ntscf_ah_field_consistency(void **state)
 
     for (uint8_t version = 0; version <= 1; version++) {
         const Avtp_FieldDescriptor_t *ntscfDesc =
-            version == AVTP_VERSION_1 ? Avtp_NtscfFieldDescV1 : Avtp_NtscfFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_NtscfFieldDescV1 : Avtp_NtscfFieldDescV0;
         const Avtp_FieldDescriptor_t *ahDesc =
-            version == AVTP_VERSION_1 ? Avtp_AhFieldDescV1 : Avtp_AhFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_AhFieldDescV1 : Avtp_AhFieldDescV0;
 
         for (uint8_t i = 0; i < AVTPDU_AH_FIELD_MAX; i++) {
             assert_int_equal(ntscfDesc[i].quadlet, ahDesc[i].quadlet);

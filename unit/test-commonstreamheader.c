@@ -77,9 +77,9 @@ static void common_stream_header_v0_layout(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
 
-    assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTP_VERSION_0);
+    assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTPDU_VERSION_0);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V0);
 
     Avtp_CommonStreamHeader_SetSv(csh, true);
@@ -124,9 +124,9 @@ static void common_stream_header_v1_layout(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_1);
 
-    assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTP_VERSION_1);
+    assert_int_equal(Avtp_CommonStreamHeader_GetVersion(csh), AVTPDU_VERSION_1);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V1);
 
     Avtp_CommonStreamHeader_SetSv(csh, true);
@@ -178,7 +178,7 @@ static void common_stream_header_absent_fields(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
 
     /* format_specific_data_0 and ptp_grandmaster_identity do not exist in v0. */
     assert_int_equal(Avtp_CommonStreamHeader_GetFormatSpecificData0(csh), 0);
@@ -197,7 +197,7 @@ static void common_stream_header_no_overlap(void **state)
     for (uint8_t version = 0; version <= 1; version++) {
         uint8_t coverage[AVTPDU_CSH_LEN_V1 * 8] = {0};
         const Avtp_FieldDescriptor_t *desc =
-            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
 
         for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
             uint8_t quadlet = desc[i].quadlet;
@@ -226,10 +226,10 @@ static void common_stream_header_typed_header_len(void **state)
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen_V0(csh), AVTPDU_CSH_LEN_V0);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen_V1(csh), AVTPDU_CSH_LEN_V1);
 
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V0);
 
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_1);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen(csh), AVTPDU_CSH_LEN_V1);
 }
 
@@ -240,7 +240,7 @@ static void common_stream_header_typed_fields_v0(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
 
     for (uint8_t f = 0; f < AVTPDU_CSH_FIELD_MAX; f++) {
         uint8_t bits = Avtp_CshFieldDescV0[f].bits;
@@ -263,7 +263,7 @@ static void common_stream_header_typed_fields_v1(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_1);
 
     for (uint8_t f = 0; f < AVTPDU_CSH_FIELD_MAX; f++) {
         uint8_t bits = Avtp_CshFieldDescV1[f].bits;
@@ -286,7 +286,7 @@ static void common_stream_header_typed_named_v0(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
 
     Avtp_CommonStreamHeader_SetSv_V0(csh, true);
     Avtp_CommonStreamHeader_SetMr_V0(csh, true);
@@ -328,7 +328,7 @@ static void common_stream_header_typed_named_v1(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_1);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_1);
 
     Avtp_CommonStreamHeader_SetSv_V1(csh, true);
     Avtp_CommonStreamHeader_SetMr_V1(csh, true);
@@ -378,7 +378,7 @@ static void common_stream_header_typed_absent_fields(void **state)
     Avtp_CommonStreamHeader_t *csh = (Avtp_CommonStreamHeader_t *)pdu;
 
     memset(pdu, 0, sizeof(pdu));
-    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTP_VERSION_0);
+    Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)csh, AVTPDU_VERSION_0);
 
     /* format_specific_data_0 and ptp_grandmaster_identity do not exist in v0. */
     assert_int_equal(Avtp_CommonStreamHeader_GetFormatSpecificData0_V0(csh), 0);

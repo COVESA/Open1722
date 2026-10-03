@@ -602,10 +602,10 @@ functions**. They are accessed through `Avtp_CommonHeader_Get/SetSubtype` and
 - `IsValid` checks it with
   `Avtp_CommonHeader_GetSubtype((const Avtp_CommonHeader_t *)pdu)`.
 
-Version numbers are available as `AVTP_VERSION_0` / `AVTP_VERSION_1`. Each
+AVTPDU version numbers are available as `AVTPDU_VERSION_0` / `AVTPDU_VERSION_1`. Each
 format declares the versions it accepts (for example
 `AVTP_TSCF_SUPPORTED_VERSIONS`) and `IsValid` checks them with
-`Avtp_Version_IsSupported(mask, version)`, rejecting reserved version values.
+`Avtp_AvtpduVersion_IsSupported(mask, version)`, rejecting reserved version values.
 
 The common header fields are not repeated in format field enums: `subtype`, `h`
 and `version` are owned by `Avtp_CommonHeaderFieldDesc`. Formats that have been

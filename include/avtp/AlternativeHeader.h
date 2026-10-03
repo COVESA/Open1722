@@ -158,7 +158,7 @@ OPEN1722_INLINE uint64_t Avtp_AlternativeHeader_GetField_V1(
 OPEN1722_INLINE uint64_t Avtp_AlternativeHeader_GetField(const Avtp_AlternativeHeader_t *const pdu,
                                                          Avtp_AlternativeHeaderField_t field)
 {
-    return Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1
+    return Avtp_AlternativeHeader_GetVersion(pdu) == AVTPDU_VERSION_1
                ? Avtp_AlternativeHeader_GetField_V1(pdu, field)
                : Avtp_AlternativeHeader_GetField_V0(pdu, field);
 }
@@ -210,7 +210,7 @@ OPEN1722_INLINE void Avtp_AlternativeHeader_SetField(Avtp_AlternativeHeader_t *p
                                                      Avtp_AlternativeHeaderField_t field,
                                                      uint64_t value)
 {
-    if (Avtp_AlternativeHeader_GetVersion(pdu) == AVTP_VERSION_1) {
+    if (Avtp_AlternativeHeader_GetVersion(pdu) == AVTPDU_VERSION_1) {
         Avtp_AlternativeHeader_SetField_V1(pdu, field, value);
     } else {
         Avtp_AlternativeHeader_SetField_V0(pdu, field, value);

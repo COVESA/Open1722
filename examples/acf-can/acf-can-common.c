@@ -312,11 +312,11 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
         }
         uint8_t version =
             Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)cf_pdu);
-        if (!Avtp_Version_IsSupported(AVTP_TSCF_SUPPORTED_VERSIONS, version)) {
+        if (!Avtp_AvtpduVersion_IsSupported(AVTP_TSCF_SUPPORTED_VERSIONS, version)) {
             LOG_ERR("Unsupported TSCF version %u, ignoring frame.\n", version);
             return -1;
         }
-        if (version == AVTP_VERSION_1) {
+        if (version == AVTPDU_VERSION_1) {
             const Avtp_TscfV1_t *tscf = (const Avtp_TscfV1_t *)cf_pdu;
             size_t headerLen = Avtp_Tscf_GetHeaderLen_V1(tscf);
             proc_bytes += (uint16_t)headerLen;
@@ -339,11 +339,11 @@ int avtp_to_can(uint8_t *pdu, size_t pdu_length, frame_t *can_frames, bool can_f
         }
         uint8_t version =
             Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)cf_pdu);
-        if (!Avtp_Version_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
+        if (!Avtp_AvtpduVersion_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
             LOG_ERR("Unsupported NTSCF version %u, ignoring frame.\n", version);
             return -1;
         }
-        if (version == AVTP_VERSION_1) {
+        if (version == AVTPDU_VERSION_1) {
             const Avtp_NtscfV1_t *ntscf = (const Avtp_NtscfV1_t *)cf_pdu;
             size_t headerLen = Avtp_Ntscf_GetHeaderLen_V1(ntscf);
             proc_bytes += (uint16_t)headerLen;

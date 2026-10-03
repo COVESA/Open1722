@@ -53,9 +53,9 @@ extern "C" {
 
 #define AVTPDU_COMMON_LEN (1 * AVTP_QUADLET_SIZE)
 
-/* Version field values (IEEE 1722-2025, 4.7.3.4). */
-#define AVTP_VERSION_0 0
-#define AVTP_VERSION_1 1
+/* AVTPDU common header version field values (IEEE 1722-2025, 4.7.3.4). */
+#define AVTPDU_VERSION_0 0
+#define AVTPDU_VERSION_1 1
 
 typedef struct {
     uint8_t header[AVTPDU_COMMON_LEN];
@@ -118,13 +118,13 @@ static const Avtp_FieldDescriptor_t Avtp_CommonHeaderFieldDesc[AVTPDU_COMMON_FIE
 };
 
 /**
- * Returns true if the given AVTP version is present in the supported-version mask.
+ * Returns true if the given AVTPDU version is present in the supported-version mask.
  *
- * @param versionMask Bit mask in which bit N marks version N as supported.
- * @param version Version number to test (0 to 7).
+ * @param versionMask Bit mask in which bit N marks AVTPDU version N as supported.
+ * @param version AVTPDU version number to test (0 to 7).
  * @returns true if the version is supported, false otherwise.
  */
-OPEN1722_INLINE bool Avtp_Version_IsSupported(uint8_t versionMask, uint8_t version)
+OPEN1722_INLINE bool Avtp_AvtpduVersion_IsSupported(uint8_t versionMask, uint8_t version)
 {
     if (version >= 8U) {
         return false;

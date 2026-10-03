@@ -66,7 +66,7 @@ extern "C" {
 #define AVTP_PCM_HEADER_LEN AVTP_PCM_HEADER_LEN_V0
 
 /* PCM (AAF) supports both versions of the common stream header (Table 7). */
-#define AVTP_PCM_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
+#define AVTP_PCM_SUPPORTED_VERSIONS ((1u << AVTPDU_VERSION_0) | (1u << AVTPDU_VERSION_1))
 
 typedef struct {
     uint8_t header[AVTP_PCM_HEADER_LEN_V0];
@@ -226,7 +226,7 @@ OPEN1722_INLINE uint64_t Avtp_Pcm_GetField_V1(const Avtp_PcmV1_t *const pdu, Avt
 OPEN1722_INLINE uint64_t Avtp_Pcm_GetField(const Avtp_Pcm_t *const pdu, Avtp_PcmFields_t field)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Pcm_GetField_V1((const Avtp_PcmV1_t *)pdu, field)
                : Avtp_Pcm_GetField_V0(pdu, field);
 }
@@ -270,7 +270,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetField_V1(Avtp_PcmV1_t *pdu, Avtp_PcmFields_t fi
 OPEN1722_INLINE void Avtp_Pcm_SetField(Avtp_Pcm_t *pdu, Avtp_PcmFields_t field, uint64_t value)
 {
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Pcm_SetField_V1((Avtp_PcmV1_t *)pdu, field, value);
     } else {
         Avtp_Pcm_SetField_V0(pdu, field, value);
@@ -306,7 +306,7 @@ OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen_V1(const Avtp_PcmV1_t *const pdu)
 OPEN1722_INLINE uint8_t Avtp_Pcm_GetHeaderLen(const Avtp_Pcm_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Pcm_GetHeaderLen_V1((const Avtp_PcmV1_t *)pdu)
                : Avtp_Pcm_GetHeaderLen_V0(pdu);
 }
@@ -687,7 +687,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload_V1(const Avtp_PcmV1_t *const 
 OPEN1722_INLINE const uint8_t *Avtp_Pcm_GetPayload(const Avtp_Pcm_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Pcm_GetPayload_V1((const Avtp_PcmV1_t *)pdu)
                : Avtp_Pcm_GetPayload_V0(pdu);
 }
@@ -730,7 +730,7 @@ OPEN1722_INLINE void Avtp_Pcm_SetPayload_V1(Avtp_PcmV1_t *pdu, uint8_t *payload,
 OPEN1722_INLINE void Avtp_Pcm_SetPayload(Avtp_Pcm_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Pcm_SetPayload_V1((Avtp_PcmV1_t *)pdu, payload, payload_length);
     } else {
         Avtp_Pcm_SetPayload_V0(pdu, payload, payload_length);
@@ -762,7 +762,7 @@ OPEN1722_INLINE void Avtp_Pcm_InitV1(Avtp_PcmV1_t *pdu)
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_PcmV1_t));
         Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_AAF);
-        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTPDU_VERSION_1);
         Avtp_Pcm_SetSv((Avtp_Pcm_t *)pdu, true);
     }
 }
