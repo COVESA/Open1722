@@ -146,8 +146,8 @@ When combining IEEE 1722 header/message structs directly in memory to form a pac
 typedef struct __attribute__((packed)) {
     // IEEE 1722 UDP encapsulation header (optional)
     Avtp_Udp_t udp;
-    // IEEE 1722 TSCF header
-    Avtp_Tscf_t tscf;
+    // IEEE 1722 TSCF header (version 0 layout; use Avtp_TscfV1_t for version 1)
+    Avtp_TscfV0_t tscf;
     // IEEE 1722 ACF message #1
     Avtp_Can_t can;
     uint8_t canPayload[CAN_PAYLOAD_LEN];
@@ -171,8 +171,10 @@ int main()
     // Init UDP encapsulation header
     Avtp_Udp_Init(&pdu.udp);
 
-    // Init TSCF header
-    Avtp_Tscf_Init(&pdu.tscf);
+    // Init TSCF header. Use Avtp_Tscf_Init(&pdu.tscf, version) to pick the
+    // version at runtime; version 0 and version 1 have different layouts and
+    // header lengths (Avtp_TscfV0_t / Avtp_TscfV1_t).
+    Avtp_Tscf_InitV0(&pdu.tscf);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)&pdu.tscf, 0);
     Avtp_Tscf_SetSequenceNum(&pdu.tscf, 123);
     Avtp_Tscf_SetStreamId(&pdu.tscf, 0xAABBCCDDEEFF);

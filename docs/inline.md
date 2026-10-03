@@ -54,7 +54,7 @@ Include the headers and call functions as usual. The compiler gets `static inlin
 #include "avtp/acf/Ntscf.h"
 
 void parse(uint8_t *frame) {
-    Avtp_Ntscf_t *pdu = (Avtp_Ntscf_t *)frame;
+    Avtp_Ntscf_t *pdu = (Avtp_Ntscf_t *)frame; /* version-agnostic handle */
     uint16_t len = Avtp_Ntscf_GetNtscfDataLength(pdu);
     // ...
 }

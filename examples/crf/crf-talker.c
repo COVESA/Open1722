@@ -152,7 +152,7 @@ static uint64_t calculate_crf_timestamp(struct timespec tspec, uint64_t rounded_
 
 static void init_pdu(Avtp_Crf_t *pdu)
 {
-    Avtp_Crf_Init(pdu);
+    Avtp_Crf_InitV0(pdu);
     Avtp_Crf_SetType_V0(pdu, AVTP_CRF_TYPE_AUDIO_SAMPLE);
     Avtp_Crf_SetStreamId_V0(pdu, STREAM_ID);
     Avtp_Crf_SetPull_V0(pdu, AVTP_CRF_PULL_MULT_BY_1);

@@ -69,7 +69,7 @@ static uint64_t mask_field_value(uint8_t bits, uint64_t value)
 /* Initializes a minimal but valid CRF frame. */
 static void init_valid_crf(Avtp_Crf_t *pdu)
 {
-    Avtp_Crf_Init(pdu);
+    Avtp_Crf_InitV0(pdu);
     Avtp_Crf_SetCrfDataLength(pdu, 8);
     Avtp_Crf_SetTimestampInterval(pdu, 1);
 }
@@ -83,9 +83,9 @@ static void crf_init(void **state)
     assert_int_equal(sizeof(Avtp_Crf_t), AVTP_CRF_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
-    Avtp_Crf_Init(NULL);
+    Avtp_Crf_InitV0(NULL);
 
-    Avtp_Crf_Init((Avtp_Crf_t *)pdu);
+    Avtp_Crf_InitV0((Avtp_Crf_t *)pdu);
     memset(init_pdu, 0, AVTP_CRF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_CRF; /* subtype = CRF */
     init_pdu[1] = 0x80;             /* sv = 1, version = 0 */
@@ -110,6 +110,30 @@ static void crf_init_v1(void **state)
     assert_memory_equal(init_pdu, pdu, AVTP_CRF_HEADER_LEN_V1);
 
     assert_int_equal(Avtp_Crf_GetHeaderLen((Avtp_Crf_t *)pdu), AVTP_CRF_HEADER_LEN_V1);
+}
+
+static void crf_init_version(void **state)
+{
+    (void)state;
+    uint8_t typed[MAX_PDU_SIZE];
+    uint8_t generic[MAX_PDU_SIZE];
+
+    assert_int_equal(sizeof(Avtp_Crf_t), sizeof(Avtp_CrfV0_t));
+
+    Avtp_Crf_InitV0((Avtp_Crf_t *)typed);
+    Avtp_Crf_Init((Avtp_Crf_t *)generic, AVTPDU_VERSION_0);
+    assert_memory_equal(typed, generic, AVTP_CRF_HEADER_LEN_V0);
+
+    Avtp_Crf_InitV1((Avtp_CrfV1_t *)typed);
+    Avtp_Crf_Init((Avtp_Crf_t *)generic, AVTPDU_VERSION_1);
+    assert_memory_equal(typed, generic, AVTP_CRF_HEADER_LEN_V1);
+
+    /* Unsupported versions initialize a version 0 PDU. */
+    Avtp_Crf_Init((Avtp_Crf_t *)generic, 2);
+    Avtp_Crf_InitV0((Avtp_Crf_t *)typed);
+    assert_memory_equal(typed, generic, AVTP_CRF_HEADER_LEN_V0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)generic),
+                     AVTPDU_VERSION_0);
 }
 
 static void crf_is_valid(void **state)
@@ -232,7 +256,7 @@ static void crf_flag_fields(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    Avtp_Crf_Init(crf);
+    Avtp_Crf_InitV0(crf);
     assert_true(Avtp_Crf_IsSv(crf));
 
     Avtp_Crf_SetSv(crf, false);
@@ -345,7 +369,7 @@ static void crf_payload(void **state)
     uint8_t payload_out[8] = {0};
     Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    Avtp_Crf_Init(crf);
+    Avtp_Crf_InitV0(crf);
     Avtp_Crf_SetPayload(crf, payload, sizeof(payload));
 
     assert_ptr_equal(Avtp_Crf_GetPayload(crf), pdu + AVTP_CRF_HEADER_LEN_V0);
@@ -384,7 +408,7 @@ static void crf_typed_fields_v0(void **state)
     uint8_t pdu[AVTP_CRF_HEADER_LEN_V1];
     Avtp_Crf_t *crf = (Avtp_Crf_t *)pdu;
 
-    Avtp_Crf_Init(crf);
+    Avtp_Crf_InitV0(crf);
 
     for (uint8_t f = 0; f < AVTP_CRF_FIELD_MAX; f++) {
         uint8_t bits = Avtp_CrfFieldDescV0[f].bits;
@@ -428,7 +452,7 @@ static void crf_typed_named(void **state)
     Avtp_CrfV1_t *v1 = (Avtp_CrfV1_t *)pdu;
 
     /* Version 0. */
-    Avtp_Crf_Init(v0);
+    Avtp_Crf_InitV0(v0);
     Avtp_Crf_SetSv_V0(v0, true);
     Avtp_Crf_SetMr_V0(v0, true);
     Avtp_Crf_SetFs_V0(v0, true);
@@ -507,7 +531,7 @@ static void crf_typed_helpers(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
 
-    Avtp_Crf_Init((Avtp_Crf_t *)pdu);
+    Avtp_Crf_InitV0((Avtp_Crf_t *)pdu);
     assert_int_equal(Avtp_Crf_GetHeaderLen_V0((Avtp_Crf_t *)pdu), AVTP_CRF_HEADER_LEN_V0);
     assert_ptr_equal(Avtp_Crf_GetPayload_V0((Avtp_Crf_t *)pdu), pdu + AVTP_CRF_HEADER_LEN_V0);
     Avtp_Crf_SetPayload_V0((Avtp_Crf_t *)pdu, payload, sizeof(payload));
@@ -525,6 +549,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(crf_init),
         cmocka_unit_test(crf_init_v1),
+        cmocka_unit_test(crf_init_version),
         cmocka_unit_test(crf_is_valid),
         cmocka_unit_test(crf_field_descriptors_cover_header),
         cmocka_unit_test(crf_ah_field_consistency),

@@ -75,9 +75,9 @@ static void tscf_init(void **state)
     assert_int_equal(sizeof(Avtp_TscfV1_t), AVTP_TSCF_HEADER_LEN_V1);
 
     /* Passing a NULL pointer must be a no-op. */
-    Avtp_Tscf_Init(NULL);
+    Avtp_Tscf_InitV0(NULL);
 
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     memset(init_pdu, 0, AVTP_TSCF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_TSCF; /* subtype = TSCF */
     init_pdu[1] = 0x80;              /* sv = 1, version = 0 */
@@ -105,6 +105,30 @@ static void tscf_init_v1(void **state)
                      AVTP_TSCF_HEADER_LEN_V1);
 }
 
+static void tscf_init_version(void **state)
+{
+    (void)state;
+    uint8_t typed[MAX_PDU_SIZE];
+    uint8_t generic[MAX_PDU_SIZE];
+
+    assert_int_equal(sizeof(Avtp_Tscf_t), sizeof(Avtp_TscfV0_t));
+
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)typed);
+    Avtp_Tscf_Init((Avtp_Tscf_t *)generic, AVTPDU_VERSION_0);
+    assert_memory_equal(typed, generic, AVTP_TSCF_HEADER_LEN_V0);
+
+    Avtp_Tscf_InitV1((Avtp_TscfV1_t *)typed);
+    Avtp_Tscf_Init((Avtp_Tscf_t *)generic, AVTPDU_VERSION_1);
+    assert_memory_equal(typed, generic, AVTP_TSCF_HEADER_LEN_V1);
+
+    /* Unsupported versions initialize a version 0 PDU. */
+    Avtp_Tscf_Init((Avtp_Tscf_t *)generic, 2);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)typed);
+    assert_memory_equal(typed, generic, AVTP_TSCF_HEADER_LEN_V0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)generic),
+                     AVTPDU_VERSION_0);
+}
+
 static void tscf_v0_layout(void **state)
 {
     (void)state;
@@ -112,7 +136,7 @@ static void tscf_v0_layout(void **state)
     uint8_t snapshot[AVTP_TSCF_HEADER_LEN_V0];
     Avtp_Tscf_t *tscf = (Avtp_Tscf_t *)pdu;
 
-    Avtp_Tscf_Init(tscf);
+    Avtp_Tscf_InitV0(tscf);
 
     Avtp_Tscf_SetSequenceNum(tscf, 0xAB);
     assert_int_equal(Avtp_Tscf_GetSequenceNum(tscf), 0xAB);
@@ -172,7 +196,7 @@ static void tscf_is_valid(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
 
     /* Valid version 0 frame with no payload. */
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     assert_true(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, AVTP_TSCF_HEADER_LEN_V0));
 
     /* Not a TSCF frame. */
@@ -180,11 +204,11 @@ static void tscf_is_valid(void **state)
     assert_false(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, MAX_PDU_SIZE));
 
     /* Buffer smaller than the version 0 header. */
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     assert_false(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, AVTP_TSCF_HEADER_LEN_V0 - 1));
 
     /* stream_data_length must fit after the header. */
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     Avtp_Tscf_SetStreamDataLength((Avtp_Tscf_t *)pdu, 10);
     assert_false(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, AVTP_TSCF_HEADER_LEN_V0 + 9));
     assert_true(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, AVTP_TSCF_HEADER_LEN_V0 + 10));
@@ -195,7 +219,7 @@ static void tscf_is_valid(void **state)
     assert_false(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, AVTP_TSCF_HEADER_LEN_V1 - 1));
 
     /* Unsupported version is rejected. */
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 2);
     assert_false(Avtp_Tscf_IsValid((Avtp_Tscf_t *)pdu, MAX_PDU_SIZE));
 }
@@ -206,7 +230,7 @@ static void tscf_payload(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     assert_ptr_equal(Avtp_Tscf_GetPayload((Avtp_Tscf_t *)pdu), pdu + AVTP_TSCF_HEADER_LEN_V0);
     Avtp_Tscf_SetPayload((Avtp_Tscf_t *)pdu, payload, sizeof(payload));
     assert_memory_equal(pdu + AVTP_TSCF_HEADER_LEN_V0, payload, sizeof(payload));
@@ -290,7 +314,7 @@ static void tscf_typed_fields_v0(void **state)
     uint8_t pdu[AVTP_TSCF_HEADER_LEN_V1];
     Avtp_Tscf_t *tscf = (Avtp_Tscf_t *)pdu;
 
-    Avtp_Tscf_Init(tscf);
+    Avtp_Tscf_InitV0(tscf);
 
     for (uint8_t f = 0; f < AVTP_TSCF_FIELD_MAX; f++) {
         uint8_t bits = Avtp_TscfFieldDescV0[f].bits;
@@ -336,7 +360,7 @@ static void tscf_typed_named(void **state)
     Avtp_TscfV1_t *v1 = (Avtp_TscfV1_t *)pdu;
 
     /* Version 0. */
-    Avtp_Tscf_Init(v0);
+    Avtp_Tscf_InitV0(v0);
     Avtp_Tscf_SetSv_V0(v0, true);
     Avtp_Tscf_SetSequenceNum_V0(v0, 0xAB);
     Avtp_Tscf_SetStreamId_V0(v0, 0x0102030405060708ULL);
@@ -393,7 +417,7 @@ static void tscf_typed_helpers(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
-    Avtp_Tscf_Init((Avtp_Tscf_t *)pdu);
+    Avtp_Tscf_InitV0((Avtp_Tscf_t *)pdu);
     assert_int_equal(Avtp_Tscf_GetHeaderLen_V0((Avtp_Tscf_t *)pdu), AVTP_TSCF_HEADER_LEN_V0);
     assert_ptr_equal(Avtp_Tscf_GetPayload_V0((Avtp_Tscf_t *)pdu), pdu + AVTP_TSCF_HEADER_LEN_V0);
     Avtp_Tscf_SetPayload_V0((Avtp_Tscf_t *)pdu, payload, sizeof(payload));
@@ -411,6 +435,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(tscf_init),
         cmocka_unit_test(tscf_init_v1),
+        cmocka_unit_test(tscf_init_version),
         cmocka_unit_test(tscf_v0_layout),
         cmocka_unit_test(tscf_v1_layout),
         cmocka_unit_test(tscf_is_valid),

@@ -74,9 +74,9 @@ static void ntscf_init(void **state)
     assert_int_equal(sizeof(Avtp_Ntscf_t), AVTP_NTSCF_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
-    Avtp_Ntscf_Init(NULL);
+    Avtp_Ntscf_InitV0(NULL);
 
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     memset(init_pdu, 0, AVTP_NTSCF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_NTSCF; /* subtype = NTSCF */
     init_pdu[1] = 0x80;               /* sv = 1, version = 0 */
@@ -103,13 +103,37 @@ static void ntscf_init_v1(void **state)
     assert_int_equal(Avtp_Ntscf_GetHeaderLen((Avtp_Ntscf_t *)pdu), AVTP_NTSCF_HEADER_LEN_V1);
 }
 
+static void ntscf_init_version(void **state)
+{
+    (void)state;
+    uint8_t typed[MAX_PDU_SIZE];
+    uint8_t generic[MAX_PDU_SIZE];
+
+    assert_int_equal(sizeof(Avtp_Ntscf_t), sizeof(Avtp_NtscfV0_t));
+
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)typed);
+    Avtp_Ntscf_Init((Avtp_Ntscf_t *)generic, AVTPDU_VERSION_0);
+    assert_memory_equal(typed, generic, AVTP_NTSCF_HEADER_LEN_V0);
+
+    Avtp_Ntscf_InitV1((Avtp_NtscfV1_t *)typed);
+    Avtp_Ntscf_Init((Avtp_Ntscf_t *)generic, AVTPDU_VERSION_1);
+    assert_memory_equal(typed, generic, AVTP_NTSCF_HEADER_LEN_V1);
+
+    /* Unsupported versions initialize a version 0 PDU. */
+    Avtp_Ntscf_Init((Avtp_Ntscf_t *)generic, 2);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)typed);
+    assert_memory_equal(typed, generic, AVTP_NTSCF_HEADER_LEN_V0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)generic),
+                     AVTPDU_VERSION_0);
+}
+
 static void ntscf_is_valid(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
 
     /* Valid version 0 frame with no payload. */
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     assert_true(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, AVTP_NTSCF_HEADER_LEN_V0));
 
     /* Not an NTSCF frame. */
@@ -117,11 +141,11 @@ static void ntscf_is_valid(void **state)
     assert_false(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, MAX_PDU_SIZE));
 
     /* Buffer smaller than the version 0 header. */
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     assert_false(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, AVTP_NTSCF_HEADER_LEN_V0 - 1));
 
     /* ntscf_data_length must fit after the header. */
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     Avtp_Ntscf_SetNtscfDataLength((Avtp_Ntscf_t *)pdu, 28);
     assert_false(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, AVTP_NTSCF_HEADER_LEN_V0 + 27));
     assert_true(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, AVTP_NTSCF_HEADER_LEN_V0 + 28));
@@ -132,7 +156,7 @@ static void ntscf_is_valid(void **state)
     assert_false(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, AVTP_NTSCF_HEADER_LEN_V1 - 1));
 
     /* Unsupported version is rejected. */
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 2);
     assert_false(Avtp_Ntscf_IsValid((Avtp_Ntscf_t *)pdu, MAX_PDU_SIZE));
 }
@@ -267,7 +291,7 @@ static void ntscf_payload(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     assert_ptr_equal(Avtp_Ntscf_GetPayload((Avtp_Ntscf_t *)pdu), pdu + AVTP_NTSCF_HEADER_LEN_V0);
     Avtp_Ntscf_SetPayload((Avtp_Ntscf_t *)pdu, payload, sizeof(payload));
     assert_memory_equal(pdu + AVTP_NTSCF_HEADER_LEN_V0, payload, sizeof(payload));
@@ -300,7 +324,7 @@ static void ntscf_typed_fields_v0(void **state)
     uint8_t pdu[AVTP_NTSCF_HEADER_LEN_V1];
     Avtp_Ntscf_t *ntscf = (Avtp_Ntscf_t *)pdu;
 
-    Avtp_Ntscf_Init(ntscf);
+    Avtp_Ntscf_InitV0(ntscf);
 
     for (uint8_t f = 0; f < AVTP_NTSCF_FIELD_MAX; f++) {
         uint8_t bits = Avtp_NtscfFieldDescV0[f].bits;
@@ -346,7 +370,7 @@ static void ntscf_typed_named(void **state)
     Avtp_NtscfV1_t *v1 = (Avtp_NtscfV1_t *)pdu;
 
     /* Version 0. */
-    Avtp_Ntscf_Init(v0);
+    Avtp_Ntscf_InitV0(v0);
     Avtp_Ntscf_SetSv_V0(v0, true);
     Avtp_Ntscf_SetSequenceNum_V0(v0, 0xAB);
     Avtp_Ntscf_SetNtscfDataLength_V0(v0, 0x123);
@@ -395,7 +419,7 @@ static void ntscf_typed_helpers(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
 
-    Avtp_Ntscf_Init((Avtp_Ntscf_t *)pdu);
+    Avtp_Ntscf_InitV0((Avtp_Ntscf_t *)pdu);
     assert_int_equal(Avtp_Ntscf_GetHeaderLen_V0((Avtp_Ntscf_t *)pdu), AVTP_NTSCF_HEADER_LEN_V0);
     assert_ptr_equal(Avtp_Ntscf_GetPayload_V0((Avtp_Ntscf_t *)pdu), pdu + AVTP_NTSCF_HEADER_LEN_V0);
     Avtp_Ntscf_SetPayload_V0((Avtp_Ntscf_t *)pdu, payload, sizeof(payload));
@@ -414,6 +438,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(ntscf_init),
         cmocka_unit_test(ntscf_init_v1),
+        cmocka_unit_test(ntscf_init_version),
         cmocka_unit_test(ntscf_is_valid),
         cmocka_unit_test(ntscf_field_descriptors_cover_header),
         cmocka_unit_test(ntscf_ah_field_consistency),

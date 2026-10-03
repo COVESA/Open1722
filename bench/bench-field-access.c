@@ -134,7 +134,7 @@ static void bench_tscf_v0_get(void)
     uint8_t buf[AVTP_TSCF_HEADER_LEN_V0];
     Avtp_Tscf_t *pdu = (Avtp_Tscf_t *)buf;
 
-    Avtp_Tscf_Init(pdu);
+    Avtp_Tscf_InitV0(pdu);
     Avtp_Tscf_SetSequenceNum_V0(pdu, 0xAB);
 
     printf("TSCF version 0, get sequence_num (8 bit):\n");
@@ -148,7 +148,7 @@ static void bench_tscf_v0_set(void)
     uint8_t buf[AVTP_TSCF_HEADER_LEN_V0];
     Avtp_Tscf_t *pdu = (Avtp_Tscf_t *)buf;
 
-    Avtp_Tscf_Init(pdu);
+    Avtp_Tscf_InitV0(pdu);
 
     printf("TSCF version 0, set sequence_num (8 bit):\n");
     BENCH("typed    Avtp_Tscf_SetSequenceNum_V0", Avtp_Tscf_SetSequenceNum_V0(pdu, bench_i);

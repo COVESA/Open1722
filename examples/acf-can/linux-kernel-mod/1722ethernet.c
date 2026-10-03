@@ -48,7 +48,7 @@
 
 void prepare_ntscf_header(Avtp_Ntscf_t *ntscf_header, struct acfcan_cfg *cfg)
 {
-    Avtp_Ntscf_Init(ntscf_header);
+    Avtp_Ntscf_InitV0(ntscf_header);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)ntscf_header, 0);
     Avtp_Ntscf_SetSequenceNum_V0(ntscf_header,
                                  cfg->sequenceNum++); // This can't be right. Increase?

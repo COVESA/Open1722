@@ -143,7 +143,7 @@ static int init_cf_pdu(uint8_t *pdu)
     if (use_tscf) {
         Avtp_Tscf_t *tscf_pdu = (Avtp_Tscf_t *)pdu;
         memset(tscf_pdu, 0, AVTP_TSCF_HEADER_LEN);
-        Avtp_Tscf_Init(tscf_pdu);
+        Avtp_Tscf_InitV0(tscf_pdu);
         Avtp_Tscf_SetTu_V0(tscf_pdu, false);
         Avtp_Tscf_SetSequenceNum_V0(tscf_pdu, seq_num++);
         Avtp_Tscf_SetStreamId_V0(tscf_pdu, STREAM_ID);
@@ -151,7 +151,7 @@ static int init_cf_pdu(uint8_t *pdu)
     } else {
         Avtp_Ntscf_t *ntscf_pdu = (Avtp_Ntscf_t *)pdu;
         memset(ntscf_pdu, 0, AVTP_NTSCF_HEADER_LEN);
-        Avtp_Ntscf_Init(ntscf_pdu);
+        Avtp_Ntscf_InitV0(ntscf_pdu);
         Avtp_Ntscf_SetSequenceNum_V0(ntscf_pdu, seq_num++);
         Avtp_Ntscf_SetStreamId_V0(ntscf_pdu, STREAM_ID);
         res = AVTP_NTSCF_HEADER_LEN;

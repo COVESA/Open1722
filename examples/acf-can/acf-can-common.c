@@ -128,7 +128,7 @@ static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, acf_can_cf_t cf, uint32
 
     if (cf == ACF_CAN_CF_NTSCF_V0) {
         Avtp_Ntscf_t *ntscf = (Avtp_Ntscf_t *)pdu;
-        Avtp_Ntscf_Init(ntscf);
+        Avtp_Ntscf_InitV0(ntscf);
         Avtp_Ntscf_SetSequenceNum_V0(ntscf, seq_num);
         Avtp_Ntscf_SetStreamId_V0(ntscf, stream_id);
         return (int)Avtp_Ntscf_GetHeaderLen_V0(ntscf);
@@ -144,7 +144,7 @@ static int init_cf_pdu(uint8_t *pdu, uint64_t stream_id, acf_can_cf_t cf, uint32
     }
 
     Avtp_Tscf_t *tscf = (Avtp_Tscf_t *)pdu;
-    Avtp_Tscf_Init(tscf);
+    Avtp_Tscf_InitV0(tscf);
     Avtp_Tscf_SetTu_V0(tscf, false);
     Avtp_Tscf_SetSequenceNum_V0(tscf, seq_num);
     Avtp_Tscf_SetStreamId_V0(tscf, stream_id);
