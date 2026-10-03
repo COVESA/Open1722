@@ -67,7 +67,7 @@ extern "C" {
 #define AVTP_RVF_RAW_HEADER_LEN (2 * AVTP_QUADLET_SIZE)
 
 /* RVF supports both versions of the common stream header (Table 7). */
-#define AVTP_RVF_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
+#define AVTP_RVF_SUPPORTED_VERSIONS ((1u << AVTPDU_VERSION_0) | (1u << AVTPDU_VERSION_1))
 
 typedef struct {
     uint8_t header[AVTP_RVF_HEADER_LEN_V0];
@@ -273,7 +273,7 @@ OPEN1722_INLINE uint64_t Avtp_Rvf_GetField_V1(const Avtp_RvfV1_t *const pdu, Avt
 OPEN1722_INLINE uint64_t Avtp_Rvf_GetField(const Avtp_Rvf_t *const pdu, Avtp_RvfFields_t field)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Rvf_GetField_V1((const Avtp_RvfV1_t *)pdu, field)
                : Avtp_Rvf_GetField_V0(pdu, field);
 }
@@ -317,7 +317,7 @@ OPEN1722_INLINE void Avtp_Rvf_SetField_V1(Avtp_RvfV1_t *pdu, Avtp_RvfFields_t fi
 OPEN1722_INLINE void Avtp_Rvf_SetField(Avtp_Rvf_t *pdu, Avtp_RvfFields_t field, uint64_t value)
 {
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Rvf_SetField_V1((Avtp_RvfV1_t *)pdu, field, value);
     } else {
         Avtp_Rvf_SetField_V0(pdu, field, value);
@@ -353,7 +353,7 @@ OPEN1722_INLINE uint8_t Avtp_Rvf_GetHeaderLen_V1(const Avtp_RvfV1_t *const pdu)
 OPEN1722_INLINE uint8_t Avtp_Rvf_GetHeaderLen(const Avtp_Rvf_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Rvf_GetHeaderLen_V1((const Avtp_RvfV1_t *)pdu)
                : Avtp_Rvf_GetHeaderLen_V0(pdu);
 }
@@ -783,7 +783,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Rvf_GetPayload_V1(const Avtp_RvfV1_t *const 
 OPEN1722_INLINE const uint8_t *Avtp_Rvf_GetPayload(const Avtp_Rvf_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Rvf_GetPayload_V1((const Avtp_RvfV1_t *)pdu)
                : Avtp_Rvf_GetPayload_V0(pdu);
 }
@@ -826,7 +826,7 @@ OPEN1722_INLINE void Avtp_Rvf_SetPayload_V1(Avtp_RvfV1_t *pdu, uint8_t *payload,
 OPEN1722_INLINE void Avtp_Rvf_SetPayload(Avtp_Rvf_t *pdu, uint8_t *payload, uint16_t payload_length)
 {
     if (Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Rvf_SetPayload_V1((Avtp_RvfV1_t *)pdu, payload, payload_length);
     } else {
         Avtp_Rvf_SetPayload_V0(pdu, payload, payload_length);
@@ -858,7 +858,7 @@ OPEN1722_INLINE void Avtp_Rvf_InitV1(Avtp_RvfV1_t *pdu)
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_RvfV1_t));
         Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_RVF);
-        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTPDU_VERSION_1);
         Avtp_Rvf_SetSv((Avtp_Rvf_t *)pdu, true);
     }
 }
@@ -890,7 +890,7 @@ OPEN1722_INLINE bool Avtp_Rvf_IsValid(const Avtp_Rvf_t *const pdu, size_t buffer
     }
 
     uint8_t version = Avtp_CommonStreamHeader_GetVersion((const Avtp_CommonStreamHeader_t *)pdu);
-    if (!Avtp_Version_IsSupported(AVTP_RVF_SUPPORTED_VERSIONS, version)) {
+    if (!Avtp_AvtpduVersion_IsSupported(AVTP_RVF_SUPPORTED_VERSIONS, version)) {
         return false;
     }
 

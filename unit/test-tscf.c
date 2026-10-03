@@ -100,7 +100,7 @@ static void tscf_init_v1(void **state)
     assert_memory_equal(init_pdu, pdu, AVTP_TSCF_HEADER_LEN_V1);
 
     assert_int_equal(Avtp_CommonStreamHeader_GetVersion((Avtp_CommonStreamHeader_t *)pdu),
-                     AVTP_VERSION_1);
+                     AVTPDU_VERSION_1);
     assert_int_equal(Avtp_CommonStreamHeader_GetHeaderLen((Avtp_CommonStreamHeader_t *)pdu),
                      AVTP_TSCF_HEADER_LEN_V1);
 }
@@ -243,9 +243,9 @@ static void tscf_header_coverage(void **state)
         uint8_t coverage[AVTP_TSCF_HEADER_LEN_V1 * 8] = {0};
         size_t coverageBits = sizeof(coverage);
         const Avtp_FieldDescriptor_t *tscfDesc =
-            version == AVTP_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
-        size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_TSCF_HEADER_LEN_V1
-                                                       : (size_t)AVTP_TSCF_HEADER_LEN_V0) *
+            version == AVTPDU_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
+        size_t headerBits = (version == AVTPDU_VERSION_1 ? (size_t)AVTP_TSCF_HEADER_LEN_V1
+                                                         : (size_t)AVTP_TSCF_HEADER_LEN_V0) *
                             8;
 
         /* subtype and version are owned by the common header; h/sv is covered
@@ -272,9 +272,9 @@ static void tscf_common_field_consistency(void **state)
 
     for (uint8_t version = 0; version <= 1; version++) {
         const Avtp_FieldDescriptor_t *tscfDesc =
-            version == AVTP_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_TscfFieldDescV1 : Avtp_TscfFieldDescV0;
         const Avtp_FieldDescriptor_t *cshDesc =
-            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
 
         for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
             assert_int_equal(tscfDesc[i].quadlet, cshDesc[i].quadlet);

@@ -177,9 +177,9 @@ static void cvf_field_descriptors_cover_header(void **state)
         uint8_t coverage[AVTP_CVF_HEADER_LEN_V1 * 8] = {0};
         size_t coverageBits = sizeof(coverage);
         const Avtp_FieldDescriptor_t *cvfDesc =
-            version == AVTP_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
-        size_t headerBits = (version == AVTP_VERSION_1 ? (size_t)AVTP_CVF_HEADER_LEN_V1
-                                                       : (size_t)AVTP_CVF_HEADER_LEN_V0) *
+            version == AVTPDU_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
+        size_t headerBits = (version == AVTPDU_VERSION_1 ? (size_t)AVTP_CVF_HEADER_LEN_V1
+                                                         : (size_t)AVTP_CVF_HEADER_LEN_V0) *
                             8;
 
         mark_descriptors(coverage, coverageBits,
@@ -202,9 +202,9 @@ static void cvf_common_field_consistency(void **state)
 
     for (uint8_t version = 0; version <= 1; version++) {
         const Avtp_FieldDescriptor_t *cvfDesc =
-            version == AVTP_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_CvfFieldDescV1 : Avtp_CvfFieldDescV0;
         const Avtp_FieldDescriptor_t *cshDesc =
-            version == AVTP_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
+            version == AVTPDU_VERSION_1 ? Avtp_CshFieldDescV1 : Avtp_CshFieldDescV0;
 
         for (uint8_t i = 0; i < AVTPDU_CSH_FIELD_MAX; i++) {
             assert_int_equal(cvfDesc[i].quadlet, cshDesc[i].quadlet);

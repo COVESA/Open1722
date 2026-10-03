@@ -65,7 +65,7 @@ extern "C" {
 #define AVTP_NTSCF_HEADER_LEN AVTP_NTSCF_HEADER_LEN_V0
 
 /* NTSCF supports both versions of the alternative header (Table 7). */
-#define AVTP_NTSCF_SUPPORTED_VERSIONS ((1u << AVTP_VERSION_0) | (1u << AVTP_VERSION_1))
+#define AVTP_NTSCF_SUPPORTED_VERSIONS ((1u << AVTPDU_VERSION_0) | (1u << AVTPDU_VERSION_1))
 
 typedef struct {
     uint8_t header[AVTP_NTSCF_HEADER_LEN_V0];
@@ -174,7 +174,7 @@ OPEN1722_INLINE uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t *const pdu,
                                              Avtp_NtscfFields_t field)
 {
     return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Ntscf_GetField_V1((const Avtp_NtscfV1_t *)pdu, field)
                : Avtp_Ntscf_GetField_V0(pdu, field);
 }
@@ -223,7 +223,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetField(Avtp_Ntscf_t *pdu, Avtp_NtscfFields_t f
                                          uint64_t value)
 {
     if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Ntscf_SetField_V1((Avtp_NtscfV1_t *)pdu, field, value);
     } else {
         Avtp_Ntscf_SetField_V0(pdu, field, value);
@@ -259,7 +259,7 @@ OPEN1722_INLINE uint8_t Avtp_Ntscf_GetHeaderLen_V1(const Avtp_NtscfV1_t *const p
 OPEN1722_INLINE uint8_t Avtp_Ntscf_GetHeaderLen(const Avtp_Ntscf_t *const pdu)
 {
     return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Ntscf_GetHeaderLen_V1((const Avtp_NtscfV1_t *)pdu)
                : Avtp_Ntscf_GetHeaderLen_V0(pdu);
 }
@@ -298,7 +298,7 @@ OPEN1722_INLINE uint16_t Avtp_Ntscf_GetNtscfDataLength(const Avtp_Ntscf_t *const
 OPEN1722_INLINE uint32_t Avtp_Ntscf_GetSequenceNum(const Avtp_Ntscf_t *const pdu)
 {
     return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? (uint32_t)Avtp_Ntscf_GetField_V1((const Avtp_NtscfV1_t *)pdu,
                                                   AVTP_NTSCF_FIELD_SEQUENCE_NUM)
                : (uint8_t)Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM_LSB);
@@ -375,7 +375,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetNtscfDataLength(Avtp_Ntscf_t *pdu, uint16_t v
 OPEN1722_INLINE void Avtp_Ntscf_SetSequenceNum(Avtp_Ntscf_t *pdu, uint32_t value)
 {
     if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Ntscf_SetField_V1((Avtp_NtscfV1_t *)pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM, value);
         Avtp_Ntscf_SetField_V1((Avtp_NtscfV1_t *)pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM_LSB,
                                (uint8_t)(value & 0xFFU));
@@ -441,7 +441,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Ntscf_GetPayload_V1(const Avtp_NtscfV1_t *co
 OPEN1722_INLINE const uint8_t *Avtp_Ntscf_GetPayload(const Avtp_Ntscf_t *const pdu)
 {
     return Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-                   AVTP_VERSION_1
+                   AVTPDU_VERSION_1
                ? Avtp_Ntscf_GetPayload_V1((const Avtp_NtscfV1_t *)pdu)
                : Avtp_Ntscf_GetPayload_V0(pdu);
 }
@@ -485,7 +485,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetPayload(Avtp_Ntscf_t *pdu, uint8_t *payload,
                                            uint16_t payload_length)
 {
     if (Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu) ==
-        AVTP_VERSION_1) {
+        AVTPDU_VERSION_1) {
         Avtp_Ntscf_SetPayload_V1((Avtp_NtscfV1_t *)pdu, payload, payload_length);
     } else {
         Avtp_Ntscf_SetPayload_V0(pdu, payload, payload_length);
@@ -513,7 +513,7 @@ OPEN1722_INLINE bool Avtp_Ntscf_IsValid(const Avtp_Ntscf_t *const pdu, size_t bu
     }
 
     uint8_t version = Avtp_AlternativeHeader_GetVersion((const Avtp_AlternativeHeader_t *)pdu);
-    if (!Avtp_Version_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
+    if (!Avtp_AvtpduVersion_IsSupported(AVTP_NTSCF_SUPPORTED_VERSIONS, version)) {
         return false;
     }
 
@@ -557,7 +557,7 @@ OPEN1722_INLINE void Avtp_Ntscf_InitV1(Avtp_NtscfV1_t *pdu)
     if (pdu != NULL) {
         memset(pdu, 0, sizeof(Avtp_NtscfV1_t));
         Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_NTSCF);
-        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTP_VERSION_1);
+        Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, AVTPDU_VERSION_1);
         Avtp_Ntscf_SetSv((Avtp_Ntscf_t *)pdu, true);
     }
 }

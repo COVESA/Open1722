@@ -171,7 +171,7 @@ Avtp_CommonStreamHeader_GetHeaderLen_V1(const Avtp_CommonStreamHeader_t *const p
 OPEN1722_INLINE uint8_t
 Avtp_CommonStreamHeader_GetHeaderLen(const Avtp_CommonStreamHeader_t *const pdu)
 {
-    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
+    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTPDU_VERSION_1
                ? Avtp_CommonStreamHeader_GetHeaderLen_V1(pdu)
                : Avtp_CommonStreamHeader_GetHeaderLen_V0(pdu);
 }
@@ -219,7 +219,7 @@ OPEN1722_INLINE uint64_t Avtp_CommonStreamHeader_GetField_V1(
 OPEN1722_INLINE uint64_t Avtp_CommonStreamHeader_GetField(
     const Avtp_CommonStreamHeader_t *const pdu, Avtp_CommonStreamHeaderField_t field)
 {
-    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1
+    return Avtp_CommonStreamHeader_GetVersion(pdu) == AVTPDU_VERSION_1
                ? Avtp_CommonStreamHeader_GetField_V1(pdu, field)
                : Avtp_CommonStreamHeader_GetField_V0(pdu, field);
 }
@@ -271,7 +271,7 @@ OPEN1722_INLINE void Avtp_CommonStreamHeader_SetField(Avtp_CommonStreamHeader_t 
                                                       Avtp_CommonStreamHeaderField_t field,
                                                       uint64_t value)
 {
-    if (Avtp_CommonStreamHeader_GetVersion(pdu) == AVTP_VERSION_1) {
+    if (Avtp_CommonStreamHeader_GetVersion(pdu) == AVTPDU_VERSION_1) {
         Avtp_CommonStreamHeader_SetField_V1(pdu, field, value);
     } else {
         Avtp_CommonStreamHeader_SetField_V0(pdu, field, value);

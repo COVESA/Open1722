@@ -88,17 +88,18 @@ static void common_header_subtypes(void **state)
 static void common_header_version_support(void **state)
 {
     (void)state;
-    uint8_t both = (uint8_t)((1U << AVTP_VERSION_0) | (1U << AVTP_VERSION_1));
+    uint8_t both = (uint8_t)((1U << AVTPDU_VERSION_0) | (1U << AVTPDU_VERSION_1));
 
-    assert_int_equal(AVTP_VERSION_0, 0);
-    assert_int_equal(AVTP_VERSION_1, 1);
+    assert_int_equal(AVTPDU_VERSION_0, 0);
+    assert_int_equal(AVTPDU_VERSION_1, 1);
 
-    assert_true(Avtp_Version_IsSupported(both, AVTP_VERSION_0));
-    assert_true(Avtp_Version_IsSupported(both, AVTP_VERSION_1));
-    assert_false(Avtp_Version_IsSupported(both, 2));
-    assert_false(Avtp_Version_IsSupported((uint8_t)(1U << AVTP_VERSION_0), AVTP_VERSION_1));
-    assert_false(Avtp_Version_IsSupported(0, AVTP_VERSION_0));
-    assert_false(Avtp_Version_IsSupported(0xFF, 8));
+    assert_true(Avtp_AvtpduVersion_IsSupported(both, AVTPDU_VERSION_0));
+    assert_true(Avtp_AvtpduVersion_IsSupported(both, AVTPDU_VERSION_1));
+    assert_false(Avtp_AvtpduVersion_IsSupported(both, 2));
+    assert_false(
+        Avtp_AvtpduVersion_IsSupported((uint8_t)(1U << AVTPDU_VERSION_0), AVTPDU_VERSION_1));
+    assert_false(Avtp_AvtpduVersion_IsSupported(0, AVTPDU_VERSION_0));
+    assert_false(Avtp_AvtpduVersion_IsSupported(0xFF, 8));
 }
 
 int main(void)
