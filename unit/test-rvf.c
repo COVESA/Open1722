@@ -71,7 +71,7 @@ static uint64_t mask_field_value(uint8_t bits, uint64_t value)
 /* Initializes a minimal but valid RVF frame. */
 static void init_valid_rvf(Avtp_Rvf_t *pdu)
 {
-    Avtp_Rvf_Init(pdu);
+    Avtp_Rvf_InitV0(pdu);
     Avtp_Rvf_SetStreamDataLength(pdu, AVTP_RVF_RAW_HEADER_LEN);
 }
 
@@ -84,9 +84,9 @@ static void rvf_init(void **state)
     assert_int_equal(sizeof(Avtp_Rvf_t), AVTP_RVF_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
-    Avtp_Rvf_Init(NULL);
+    Avtp_Rvf_InitV0(NULL);
 
-    Avtp_Rvf_Init((Avtp_Rvf_t *)pdu);
+    Avtp_Rvf_InitV0((Avtp_Rvf_t *)pdu);
     memset(init_pdu, 0, AVTP_RVF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_RVF; /* subtype = RVF */
     init_pdu[1] = 0x80;             /* sv = 1, version = 0 */
@@ -111,6 +111,30 @@ static void rvf_init_v1(void **state)
     assert_memory_equal(init_pdu, pdu, AVTP_RVF_HEADER_LEN_V1);
 
     assert_int_equal(Avtp_Rvf_GetHeaderLen((Avtp_Rvf_t *)pdu), AVTP_RVF_HEADER_LEN_V1);
+}
+
+static void rvf_init_version(void **state)
+{
+    (void)state;
+    uint8_t typed[MAX_PDU_SIZE];
+    uint8_t generic[MAX_PDU_SIZE];
+
+    assert_int_equal(sizeof(Avtp_Rvf_t), sizeof(Avtp_RvfV0_t));
+
+    Avtp_Rvf_InitV0((Avtp_Rvf_t *)typed);
+    Avtp_Rvf_Init((Avtp_Rvf_t *)generic, AVTPDU_VERSION_0);
+    assert_memory_equal(typed, generic, AVTP_RVF_HEADER_LEN_V0);
+
+    Avtp_Rvf_InitV1((Avtp_RvfV1_t *)typed);
+    Avtp_Rvf_Init((Avtp_Rvf_t *)generic, AVTPDU_VERSION_1);
+    assert_memory_equal(typed, generic, AVTP_RVF_HEADER_LEN_V1);
+
+    /* Unsupported versions initialize a version 0 PDU. */
+    Avtp_Rvf_Init((Avtp_Rvf_t *)generic, 2);
+    Avtp_Rvf_InitV0((Avtp_Rvf_t *)typed);
+    assert_memory_equal(typed, generic, AVTP_RVF_HEADER_LEN_V0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)generic),
+                     AVTPDU_VERSION_0);
 }
 
 static void rvf_is_valid(void **state)
@@ -226,7 +250,7 @@ static void rvf_flag_fields(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Rvf_t *rvf = (Avtp_Rvf_t *)pdu;
 
-    Avtp_Rvf_Init(rvf);
+    Avtp_Rvf_InitV0(rvf);
     assert_true(Avtp_Rvf_IsSv(rvf));
 
     Avtp_Rvf_SetSv(rvf, false);
@@ -382,7 +406,7 @@ static void rvf_payload(void **state)
     uint8_t payload_out[12] = {0};
     Avtp_Rvf_t *rvf = (Avtp_Rvf_t *)pdu;
 
-    Avtp_Rvf_Init(rvf);
+    Avtp_Rvf_InitV0(rvf);
     Avtp_Rvf_SetPayload(rvf, payload, sizeof(payload));
 
     assert_ptr_equal(Avtp_Rvf_GetPayload(rvf), pdu + AVTP_RVF_HEADER_LEN_V0);
@@ -557,7 +581,7 @@ static void rvf_raw_header_overlay(void **state)
     Avtp_Rvf_t *rvf = (Avtp_Rvf_t *)pdu;
     Avtp_RvfRawHeader_t *raw = (Avtp_RvfRawHeader_t *)rvf->payload;
 
-    Avtp_Rvf_Init(rvf);
+    Avtp_Rvf_InitV0(rvf);
     Avtp_Rvf_SetStreamDataLength(rvf, AVTP_RVF_RAW_HEADER_LEN);
     Avtp_RvfRawHeader_Init(raw);
 
@@ -573,7 +597,7 @@ static void rvf_typed_fields_v0(void **state)
     uint8_t pdu[AVTP_RVF_HEADER_LEN_V1];
     Avtp_Rvf_t *rvf = (Avtp_Rvf_t *)pdu;
 
-    Avtp_Rvf_Init(rvf);
+    Avtp_Rvf_InitV0(rvf);
 
     for (uint8_t f = 0; f < AVTP_RVF_FIELD_MAX; f++) {
         uint8_t bits = Avtp_RvfFieldDescV0[f].bits;
@@ -617,7 +641,7 @@ static void rvf_typed_named(void **state)
     Avtp_RvfV1_t *v1 = (Avtp_RvfV1_t *)pdu;
 
     /* Version 0. */
-    Avtp_Rvf_Init(v0);
+    Avtp_Rvf_InitV0(v0);
     Avtp_Rvf_SetSv_V0(v0, true);
     Avtp_Rvf_SetSequenceNum_V0(v0, 0x55);
     Avtp_Rvf_SetStreamId_V0(v0, 0xAABBCCDDEEFF0001ULL);
@@ -706,7 +730,7 @@ static void rvf_typed_helpers(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
 
-    Avtp_Rvf_Init((Avtp_Rvf_t *)pdu);
+    Avtp_Rvf_InitV0((Avtp_Rvf_t *)pdu);
     assert_int_equal(Avtp_Rvf_GetHeaderLen_V0((Avtp_Rvf_t *)pdu), AVTP_RVF_HEADER_LEN_V0);
     assert_ptr_equal(Avtp_Rvf_GetPayload_V0((Avtp_Rvf_t *)pdu), pdu + AVTP_RVF_HEADER_LEN_V0);
     Avtp_Rvf_SetPayload_V0((Avtp_Rvf_t *)pdu, payload, sizeof(payload));
@@ -724,6 +748,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(rvf_init),
         cmocka_unit_test(rvf_init_v1),
+        cmocka_unit_test(rvf_init_version),
         cmocka_unit_test(rvf_is_valid),
         cmocka_unit_test(rvf_field_descriptors_cover_header),
         cmocka_unit_test(rvf_common_field_consistency),

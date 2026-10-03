@@ -69,12 +69,19 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_CVF_HEADER_LEN_V0];
     uint8_t payload[0];
-} __attribute__((packed)) Avtp_Cvf_t;
+} __attribute__((packed)) Avtp_CvfV0_t;
 
 typedef struct {
     uint8_t header[AVTP_CVF_HEADER_LEN_V1];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_CvfV1_t;
+
+/**
+ * Version-agnostic handle for CVF PDUs. It is an alias of the version 0
+ * layout and is the pointer type of the version-agnostic accessors; version 1
+ * PDUs use Avtp_CvfV1_t. For version 0 use Avtp_CvfV0_t.
+ */
+typedef Avtp_CvfV0_t Avtp_Cvf_t;
 
 /**
  * CVF 'format' field values (IEEE 1722-2025, Table 20). Values 0x00-0x01 and
@@ -190,7 +197,7 @@ static const Avtp_FieldDescriptor_t Avtp_CvfFieldDescV1[AVTP_CVF_FIELD_MAX] = {
  * @returns This function returns the value of the field.
  * @see Avtp_Cvf_GetField
  */
-OPEN1722_INLINE uint64_t Avtp_Cvf_GetField_V0(const Avtp_Cvf_t *const pdu, Avtp_CvfFields_t field)
+OPEN1722_INLINE uint64_t Avtp_Cvf_GetField_V0(const Avtp_CvfV0_t *const pdu, Avtp_CvfFields_t field)
 {
     return Avtp_GetField(Avtp_CvfFieldDescV0, AVTP_CVF_FIELD_MAX, (const uint8_t *)pdu,
                          (uint8_t)field);
@@ -236,7 +243,7 @@ OPEN1722_INLINE uint64_t Avtp_Cvf_GetField(const Avtp_Cvf_t *const pdu, Avtp_Cvf
  * @param value The value to set.
  * @see Avtp_Cvf_SetField
  */
-OPEN1722_INLINE void Avtp_Cvf_SetField_V0(Avtp_Cvf_t *pdu, Avtp_CvfFields_t field, uint64_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetField_V0(Avtp_CvfV0_t *pdu, Avtp_CvfFields_t field, uint64_t value)
 {
     Avtp_SetField(Avtp_CvfFieldDescV0, AVTP_CVF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field, value);
 }
@@ -278,7 +285,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetField(Avtp_Cvf_t *pdu, Avtp_CvfFields_t field, 
  * pointer is not read; it keeps the signature aligned with the
  * version-dispatched accessors.
  */
-OPEN1722_INLINE uint8_t Avtp_Cvf_GetHeaderLen_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_Cvf_GetHeaderLen_V0(const Avtp_CvfV0_t *const pdu)
 {
     (void)pdu;
     return (uint8_t)AVTP_CVF_HEADER_LEN_V0;
@@ -635,7 +642,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetEvt(Avtp_Cvf_t *pdu, uint8_t value)
  * @return Pointer to CVF stream data
  * @see Avtp_Cvf_GetPayload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Cvf_GetPayload_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Cvf_GetPayload_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (const uint8_t *)pdu + AVTP_CVF_HEADER_LEN_V0;
 }
@@ -678,7 +685,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Cvf_GetPayload(const Avtp_Cvf_t *const pdu)
  * @param payload_length Length of the payload
  * @see Avtp_Cvf_SetPayload
  */
-OPEN1722_INLINE void Avtp_Cvf_SetPayload_V0(Avtp_Cvf_t *pdu, uint8_t *payload,
+OPEN1722_INLINE void Avtp_Cvf_SetPayload_V0(Avtp_CvfV0_t *pdu, uint8_t *payload,
                                             uint16_t payload_length)
 {
     memcpy((uint8_t *)pdu + AVTP_CVF_HEADER_LEN_V0, payload, payload_length);
@@ -720,10 +727,10 @@ OPEN1722_INLINE void Avtp_Cvf_SetPayload(Avtp_Cvf_t *pdu, uint8_t *payload, uint
  *
  * @param pdu Pointer to the first bit of a 1722 CVF PDU.
  */
-OPEN1722_INLINE void Avtp_Cvf_Init(Avtp_Cvf_t *pdu)
+OPEN1722_INLINE void Avtp_Cvf_InitV0(Avtp_CvfV0_t *pdu)
 {
     if (pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Cvf_t));
+        memset(pdu, 0, sizeof(Avtp_CvfV0_t));
         Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_CVF);
         Avtp_Cvf_SetFormat(pdu, AVTP_CVF_FORMAT_RFC);
         Avtp_Cvf_SetSv(pdu, true);
@@ -788,6 +795,25 @@ OPEN1722_INLINE bool Avtp_Cvf_IsValid(const Avtp_Cvf_t *const pdu, size_t buffer
     return true;
 }
 
+/**
+ * Initializes a CVF PDU of the given version. The caller must provide a
+ * buffer of at least AVTP_CVF_HEADER_LEN_V1 octets for version 1 (for
+ * example an Avtp_CvfV1_t); version 0 uses AVTP_CVF_HEADER_LEN_V0
+ * octets. Any version other than AVTPDU_VERSION_1 initializes a version 0 PDU.
+ *
+ * @param pdu Pointer to the first bit of a 1722 PDU. This is typically an AVTP-
+ * or an ACF header.
+ * @param version AVTPDU header version (AVTPDU_VERSION_0 or AVTPDU_VERSION_1).
+ */
+OPEN1722_INLINE void Avtp_Cvf_Init(Avtp_Cvf_t *pdu, uint8_t version)
+{
+    if (version == AVTPDU_VERSION_1) {
+        Avtp_Cvf_InitV1((Avtp_CvfV1_t *)pdu);
+    } else {
+        Avtp_Cvf_InitV0(pdu);
+    }
+}
+
 /*
  * Version-typed named accessors. These select the field layout for one
  * explicit version and never read the version field; the version-dispatched
@@ -800,7 +826,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsValid(const Avtp_Cvf_t *const pdu, size_t buffer
  * Version 0 variant of Avtp_Cvf_IsSv().
  * @see Avtp_Cvf_IsSv
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsSv_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsSv_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_IsSv_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -818,7 +844,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsSv_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_IsMr().
  * @see Avtp_Cvf_IsMr
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsMr_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsMr_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_IsMr_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -836,7 +862,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsMr_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_IsTv().
  * @see Avtp_Cvf_IsTv
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsTv_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsTv_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_IsTv_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -854,7 +880,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsTv_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_IsTu().
  * @see Avtp_Cvf_IsTu
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsTu_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsTu_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_IsTu_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -873,7 +899,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsTu_V1(const Avtp_CvfV1_t *const pdu)
  * 8-bit version 0 field width.
  * @see Avtp_Cvf_GetSequenceNum
  */
-OPEN1722_INLINE uint32_t Avtp_Cvf_GetSequenceNum_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint32_t Avtp_Cvf_GetSequenceNum_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetSequenceNum_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -891,7 +917,7 @@ OPEN1722_INLINE uint32_t Avtp_Cvf_GetSequenceNum_V1(const Avtp_CvfV1_t *const pd
  * Version 0 variant of Avtp_Cvf_GetStreamId().
  * @see Avtp_Cvf_GetStreamId
  */
-OPEN1722_INLINE uint64_t Avtp_Cvf_GetStreamId_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Cvf_GetStreamId_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetStreamId_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -909,7 +935,7 @@ OPEN1722_INLINE uint64_t Avtp_Cvf_GetStreamId_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_GetAvtpTimestamp().
  * @see Avtp_Cvf_GetAvtpTimestamp
  */
-OPEN1722_INLINE uint64_t Avtp_Cvf_GetAvtpTimestamp_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Cvf_GetAvtpTimestamp_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetAvtpTimestamp_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -928,7 +954,7 @@ OPEN1722_INLINE uint64_t Avtp_Cvf_GetAvtpTimestamp_V1(const Avtp_CvfV1_t *const 
  * absent from version 0, so this always returns 0.
  * @see Avtp_Cvf_GetPtpGrandmasterIdentity
  */
-OPEN1722_INLINE uint64_t Avtp_Cvf_GetPtpGrandmasterIdentity_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Cvf_GetPtpGrandmasterIdentity_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetPtpGrandmasterIdentity_V0(
         (const Avtp_CommonStreamHeader_t *)pdu);
@@ -948,7 +974,7 @@ OPEN1722_INLINE uint64_t Avtp_Cvf_GetPtpGrandmasterIdentity_V1(const Avtp_CvfV1_
  * Version 0 variant of Avtp_Cvf_GetFormat().
  * @see Avtp_Cvf_GetFormat
  */
-OPEN1722_INLINE Avtp_CvfFormat_t Avtp_Cvf_GetFormat_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE Avtp_CvfFormat_t Avtp_Cvf_GetFormat_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (Avtp_CvfFormat_t)Avtp_Cvf_GetField_V0(pdu, AVTP_CVF_FIELD_FORMAT);
 }
@@ -966,7 +992,7 @@ OPEN1722_INLINE Avtp_CvfFormat_t Avtp_Cvf_GetFormat_V1(const Avtp_CvfV1_t *const
  * Version 0 variant of Avtp_Cvf_GetFormatSubtype().
  * @see Avtp_Cvf_GetFormatSubtype
  */
-OPEN1722_INLINE Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (Avtp_CvfFormatSubtype_t)Avtp_Cvf_GetField_V0(pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE);
 }
@@ -984,7 +1010,7 @@ OPEN1722_INLINE Avtp_CvfFormatSubtype_t Avtp_Cvf_GetFormatSubtype_V1(const Avtp_
  * Version 0 variant of Avtp_Cvf_GetStreamDataLength().
  * @see Avtp_Cvf_GetStreamDataLength
  */
-OPEN1722_INLINE uint16_t Avtp_Cvf_GetStreamDataLength_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint16_t Avtp_Cvf_GetStreamDataLength_V0(const Avtp_CvfV0_t *const pdu)
 {
     return Avtp_CommonStreamHeader_GetStreamDataLength_V0((const Avtp_CommonStreamHeader_t *)pdu);
 }
@@ -1002,7 +1028,7 @@ OPEN1722_INLINE uint16_t Avtp_Cvf_GetStreamDataLength_V1(const Avtp_CvfV1_t *con
  * Version 0 variant of Avtp_Cvf_IsPtv().
  * @see Avtp_Cvf_IsPtv
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsPtv_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsPtv_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (bool)Avtp_Cvf_GetField_V0(pdu, AVTP_CVF_FIELD_PTV);
 }
@@ -1020,7 +1046,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsPtv_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_IsM().
  * @see Avtp_Cvf_IsM
  */
-OPEN1722_INLINE bool Avtp_Cvf_IsM_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Cvf_IsM_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (bool)Avtp_Cvf_GetField_V0(pdu, AVTP_CVF_FIELD_M);
 }
@@ -1038,7 +1064,7 @@ OPEN1722_INLINE bool Avtp_Cvf_IsM_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_GetEvt().
  * @see Avtp_Cvf_GetEvt
  */
-OPEN1722_INLINE uint8_t Avtp_Cvf_GetEvt_V0(const Avtp_Cvf_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_Cvf_GetEvt_V0(const Avtp_CvfV0_t *const pdu)
 {
     return (uint8_t)Avtp_Cvf_GetField_V0(pdu, AVTP_CVF_FIELD_EVT);
 }
@@ -1056,7 +1082,7 @@ OPEN1722_INLINE uint8_t Avtp_Cvf_GetEvt_V1(const Avtp_CvfV1_t *const pdu)
  * Version 0 variant of Avtp_Cvf_SetSv().
  * @see Avtp_Cvf_SetSv
  */
-OPEN1722_INLINE void Avtp_Cvf_SetSv_V0(Avtp_Cvf_t *pdu, bool sv)
+OPEN1722_INLINE void Avtp_Cvf_SetSv_V0(Avtp_CvfV0_t *pdu, bool sv)
 {
     Avtp_CommonStreamHeader_SetSv_V0((Avtp_CommonStreamHeader_t *)pdu, sv);
 }
@@ -1074,7 +1100,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetSv_V1(Avtp_CvfV1_t *pdu, bool sv)
  * Version 0 variant of Avtp_Cvf_SetMr().
  * @see Avtp_Cvf_SetMr
  */
-OPEN1722_INLINE void Avtp_Cvf_SetMr_V0(Avtp_Cvf_t *pdu, bool mr)
+OPEN1722_INLINE void Avtp_Cvf_SetMr_V0(Avtp_CvfV0_t *pdu, bool mr)
 {
     Avtp_CommonStreamHeader_SetMr_V0((Avtp_CommonStreamHeader_t *)pdu, mr);
 }
@@ -1092,7 +1118,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetMr_V1(Avtp_CvfV1_t *pdu, bool mr)
  * Version 0 variant of Avtp_Cvf_SetTv().
  * @see Avtp_Cvf_SetTv
  */
-OPEN1722_INLINE void Avtp_Cvf_SetTv_V0(Avtp_Cvf_t *pdu, bool tv)
+OPEN1722_INLINE void Avtp_Cvf_SetTv_V0(Avtp_CvfV0_t *pdu, bool tv)
 {
     Avtp_CommonStreamHeader_SetTv_V0((Avtp_CommonStreamHeader_t *)pdu, tv);
 }
@@ -1110,7 +1136,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetTv_V1(Avtp_CvfV1_t *pdu, bool tv)
  * Version 0 variant of Avtp_Cvf_SetTu().
  * @see Avtp_Cvf_SetTu
  */
-OPEN1722_INLINE void Avtp_Cvf_SetTu_V0(Avtp_Cvf_t *pdu, bool tu)
+OPEN1722_INLINE void Avtp_Cvf_SetTu_V0(Avtp_CvfV0_t *pdu, bool tu)
 {
     Avtp_CommonStreamHeader_SetTu_V0((Avtp_CommonStreamHeader_t *)pdu, tu);
 }
@@ -1129,7 +1155,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetTu_V1(Avtp_CvfV1_t *pdu, bool tu)
  * 8-bit version 0 field width.
  * @see Avtp_Cvf_SetSequenceNum
  */
-OPEN1722_INLINE void Avtp_Cvf_SetSequenceNum_V0(Avtp_Cvf_t *pdu, uint32_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetSequenceNum_V0(Avtp_CvfV0_t *pdu, uint32_t value)
 {
     Avtp_CommonStreamHeader_SetSequenceNum_V0((Avtp_CommonStreamHeader_t *)pdu, value);
 }
@@ -1147,7 +1173,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetSequenceNum_V1(Avtp_CvfV1_t *pdu, uint32_t valu
  * Version 0 variant of Avtp_Cvf_SetStreamId().
  * @see Avtp_Cvf_SetStreamId
  */
-OPEN1722_INLINE void Avtp_Cvf_SetStreamId_V0(Avtp_Cvf_t *pdu, uint64_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetStreamId_V0(Avtp_CvfV0_t *pdu, uint64_t value)
 {
     Avtp_CommonStreamHeader_SetStreamId_V0((Avtp_CommonStreamHeader_t *)pdu, value);
 }
@@ -1165,7 +1191,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetStreamId_V1(Avtp_CvfV1_t *pdu, uint64_t value)
  * Version 0 variant of Avtp_Cvf_SetAvtpTimestamp().
  * @see Avtp_Cvf_SetAvtpTimestamp
  */
-OPEN1722_INLINE void Avtp_Cvf_SetAvtpTimestamp_V0(Avtp_Cvf_t *pdu, uint64_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetAvtpTimestamp_V0(Avtp_CvfV0_t *pdu, uint64_t value)
 {
     Avtp_CommonStreamHeader_SetAvtpTimestamp_V0((Avtp_CommonStreamHeader_t *)pdu, value);
 }
@@ -1184,7 +1210,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetAvtpTimestamp_V1(Avtp_CvfV1_t *pdu, uint64_t va
  * absent from version 0, so this is a no-op.
  * @see Avtp_Cvf_SetPtpGrandmasterIdentity
  */
-OPEN1722_INLINE void Avtp_Cvf_SetPtpGrandmasterIdentity_V0(Avtp_Cvf_t *pdu, uint64_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetPtpGrandmasterIdentity_V0(Avtp_CvfV0_t *pdu, uint64_t value)
 {
     Avtp_CommonStreamHeader_SetPtpGrandmasterIdentity_V0((Avtp_CommonStreamHeader_t *)pdu, value);
 }
@@ -1202,7 +1228,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetPtpGrandmasterIdentity_V1(Avtp_CvfV1_t *pdu, ui
  * Version 0 variant of Avtp_Cvf_SetFormat().
  * @see Avtp_Cvf_SetFormat
  */
-OPEN1722_INLINE void Avtp_Cvf_SetFormat_V0(Avtp_Cvf_t *pdu, Avtp_CvfFormat_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetFormat_V0(Avtp_CvfV0_t *pdu, Avtp_CvfFormat_t value)
 {
     Avtp_Cvf_SetField_V0(pdu, AVTP_CVF_FIELD_FORMAT, (uint64_t)value);
 }
@@ -1220,7 +1246,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetFormat_V1(Avtp_CvfV1_t *pdu, Avtp_CvfFormat_t v
  * Version 0 variant of Avtp_Cvf_SetFormatSubtype().
  * @see Avtp_Cvf_SetFormatSubtype
  */
-OPEN1722_INLINE void Avtp_Cvf_SetFormatSubtype_V0(Avtp_Cvf_t *pdu, Avtp_CvfFormatSubtype_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetFormatSubtype_V0(Avtp_CvfV0_t *pdu, Avtp_CvfFormatSubtype_t value)
 {
     Avtp_Cvf_SetField_V0(pdu, AVTP_CVF_FIELD_FORMAT_SUBTYPE, (uint64_t)value);
 }
@@ -1238,7 +1264,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetFormatSubtype_V1(Avtp_CvfV1_t *pdu, Avtp_CvfFor
  * Version 0 variant of Avtp_Cvf_SetStreamDataLength().
  * @see Avtp_Cvf_SetStreamDataLength
  */
-OPEN1722_INLINE void Avtp_Cvf_SetStreamDataLength_V0(Avtp_Cvf_t *pdu, uint16_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetStreamDataLength_V0(Avtp_CvfV0_t *pdu, uint16_t value)
 {
     Avtp_CommonStreamHeader_SetStreamDataLength_V0((Avtp_CommonStreamHeader_t *)pdu, value);
 }
@@ -1256,7 +1282,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetStreamDataLength_V1(Avtp_CvfV1_t *pdu, uint16_t
  * Version 0 variant of Avtp_Cvf_SetPtv().
  * @see Avtp_Cvf_SetPtv
  */
-OPEN1722_INLINE void Avtp_Cvf_SetPtv_V0(Avtp_Cvf_t *pdu, bool ptv)
+OPEN1722_INLINE void Avtp_Cvf_SetPtv_V0(Avtp_CvfV0_t *pdu, bool ptv)
 {
     Avtp_Cvf_SetField_V0(pdu, AVTP_CVF_FIELD_PTV, ptv);
 }
@@ -1274,7 +1300,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetPtv_V1(Avtp_CvfV1_t *pdu, bool ptv)
  * Version 0 variant of Avtp_Cvf_SetM().
  * @see Avtp_Cvf_SetM
  */
-OPEN1722_INLINE void Avtp_Cvf_SetM_V0(Avtp_Cvf_t *pdu, bool m)
+OPEN1722_INLINE void Avtp_Cvf_SetM_V0(Avtp_CvfV0_t *pdu, bool m)
 {
     Avtp_Cvf_SetField_V0(pdu, AVTP_CVF_FIELD_M, m);
 }
@@ -1292,7 +1318,7 @@ OPEN1722_INLINE void Avtp_Cvf_SetM_V1(Avtp_CvfV1_t *pdu, bool m)
  * Version 0 variant of Avtp_Cvf_SetEvt().
  * @see Avtp_Cvf_SetEvt
  */
-OPEN1722_INLINE void Avtp_Cvf_SetEvt_V0(Avtp_Cvf_t *pdu, uint8_t value)
+OPEN1722_INLINE void Avtp_Cvf_SetEvt_V0(Avtp_CvfV0_t *pdu, uint8_t value)
 {
     Avtp_Cvf_SetField_V0(pdu, AVTP_CVF_FIELD_EVT, value);
 }

@@ -138,7 +138,7 @@ static struct argp argp = {options, parser};
 
 static void init_pdu(Avtp_Cvf_t *cvf)
 {
-    Avtp_Cvf_Init(cvf);
+    Avtp_Cvf_InitV0(cvf);
     Avtp_Cvf_SetFormatSubtype_V0(cvf, AVTP_CVF_FORMAT_SUBTYPE_H264);
     Avtp_Cvf_SetTv_V0(cvf, true);
     Avtp_Cvf_SetStreamId_V0(cvf, STREAM_ID);

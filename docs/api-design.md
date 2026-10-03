@@ -176,16 +176,21 @@ layers of field accessors:
 | Version-typed generic | `Avtp_<Format>_GetField_V0` / `_V1` | `Avtp_Tscf_GetField_V1(pdu, field)` |
 | Version-agnostic | `Avtp_<Format>_<Verb><Field>` | `Avtp_Tscf_GetSequenceNum` |
 
-The version-typed variants take the matching PDU struct (`Avtp_<Format>_t` for
-`_V0`, `Avtp_<Format>V1_t` for `_V1`), never read the version field and select
-the field layout at compile time. The version-agnostic variant reads the version
-once and forwards to the matching typed variant. Setters keep the
-version-specific semantics: for example `SetSequenceNum_V1` on TSCF/NTSCF/CRF
-also writes the `sequence_num_lsb` copy, while the version 0 variant writes the
-8-bit `sequence_num_lsb` field that is the sequence number there.
+The version-typed variants take the matching PDU struct (`Avtp_<Format>V0_t`
+for `_V0`, `Avtp_<Format>V1_t` for `_V1`), never read the version field and
+select the field layout at compile time. The version-agnostic variant takes the
+generic `Avtp_<Format>_t` handle - an alias of the version 0 struct - reads the
+version once and forwards to the matching typed variant. Version-agnostic
+setters dispatch on the wire version, so they must follow one of
+`Avtp_<Format>_Init`, `Avtp_<Format>_InitV0` or `Avtp_<Format>_InitV1`; the
+version-agnostic init selects the layout from its `version` argument. Setters
+keep the version-specific semantics: for example `SetSequenceNum_V1` on
+TSCF/NTSCF/CRF also writes the `sequence_num_lsb` copy, while the version 0
+variant writes the 8-bit `sequence_num_lsb` field that is the sequence number
+there.
 
 Use the typed variants whenever the version is known - a talker after
-`Init`/`InitV1`, or a listener after checking the version once - and the
+`InitV0`/`InitV1`, or a listener after checking the version once - and the
 agnostic variant for mixed-version receive paths. The common stream header
 fields are implemented once in
 [`CommonStreamHeader.h`](../include/avtp/CommonStreamHeader.h) and delegated to
@@ -250,11 +255,16 @@ also be `packed` so the compiler inserts no padding between them:
 
 ```c
 typedef struct __attribute__((packed)) {
-    Avtp_Tscf_t tscf;
+    Avtp_TscfV0_t tscf;
     Avtp_Can_t  can;
     uint8_t     canPayload[8];
 } My1722Pdu_t;
 ```
+
+Formats with more than one header version name their concrete wire structs
+`Avtp_<Format>V0_t` and `Avtp_<Format>V1_t`; embed the struct matching the
+version you are building. `Avtp_<Format>_t` is an alias of the version 0 struct
+and is the generic handle used by the version-agnostic accessors.
 
 ## Accessor semantics & the safety contract
 
@@ -374,6 +384,12 @@ used):
 | Enum terminator | `AVTP_<FORMAT>_FIELD_MAX` | `AVTP_CAN_FIELD_MAX` |
 | Header length | `AVTP_<FORMAT>_HEADER_LEN` | `AVTP_CAN_HEADER_LEN` |
 | ACF message type | `AVTP_ACF_TYPE_<NAME>` | `AVTP_ACF_TYPE_CAN` |
+
+Formats that support more than one header version additionally define
+`Avtp_<Format>V0_t` and `Avtp_<Format>V1_t` for the two wire layouts and keep
+`Avtp_<Format>_t` as an alias of the version 0 struct, used as the generic
+handle by the version-agnostic accessors. `InitV0`/`InitV1` initialise one
+version explicitly and the generic `Init(pdu, version)` selects at runtime.
 
 Field enum values are always declared with the terminator `..._FIELD_MAX` as the
 last entry. This value is never a real field; it exists to give the field-count
@@ -674,12 +690,15 @@ asserts that they equal the style module's entries for the same version.
 `GetHeaderLen` is used by the payload helpers so `Avtp_<Format>_Get/SetPayload`
 work for both versions.
 
-The version 1 PDU struct (for example `Avtp_TscfV1_t`) is sized for the larger
-header and is used for allocation and embedding. Version-typed accessors take
-the matching struct (`Avtp_<Format>_t` for `_V0`, `Avtp_<Format>V1_t` for
-`_V1`), so version 1 callers keep the typed pointer. The version-agnostic
-accessors still take the version 0 struct pointer and version 1 callers cast
-once.
+The version 0 and version 1 PDU structs (for example `Avtp_TscfV0_t` and
+`Avtp_TscfV1_t`) are used for allocation and embedding. Version-typed accessors
+take the matching struct (`Avtp_<Format>V0_t` for `_V0`, `Avtp_<Format>V1_t`
+for `_V1`), so version 1 callers keep the typed pointer. The version-agnostic
+accessors take the generic `Avtp_<Format>_t` handle (an alias of the version 0
+struct) and version 1 callers cast once. `InitV0`/`InitV1` initialise one
+version explicitly; the generic `Init(pdu, version)` selects the layout at
+runtime. Version-agnostic setters require one of those inits first, since they
+dispatch on the wire version field.
 
 The "every bit described exactly once" rule becomes a cross-module test: for
 each version, the common header fields (`subtype`, `version`; `h` is covered by
@@ -898,4 +917,7 @@ For a format that supports more than one header version, also follow
 [Accessor API](header-versions.md#accessor-api) in the migration guide: declare
 a complete descriptor table per version and add `_V0`/`_V1` variants for every
 accessor, delegating the common fields to `CommonStreamHeader.h` (or
-`AlternativeHeader.h` for the alternative header).
+`AlternativeHeader.h` for the alternative header). Name the concrete structs
+`Avtp_<Format>V0_t`/`Avtp_<Format>V1_t`, keep `Avtp_<Format>_t` as the generic
+handle alias of the version 0 struct, and provide `InitV0`/`InitV1` plus the
+version-parameterised `Init`.

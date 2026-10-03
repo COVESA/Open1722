@@ -70,12 +70,19 @@ extern "C" {
 typedef struct {
     uint8_t header[AVTP_NTSCF_HEADER_LEN_V0];
     uint8_t payload[0];
-} __attribute__((packed)) Avtp_Ntscf_t;
+} __attribute__((packed)) Avtp_NtscfV0_t;
 
 typedef struct {
     uint8_t header[AVTP_NTSCF_HEADER_LEN_V1];
     uint8_t payload[0];
 } __attribute__((packed)) Avtp_NtscfV1_t;
+
+/**
+ * Version-agnostic handle for NTSCF PDUs. It is an alias of the version 0
+ * layout and is the pointer type of the version-agnostic accessors; version 1
+ * PDUs use Avtp_NtscfV1_t. For version 0 use Avtp_NtscfV0_t.
+ */
+typedef Avtp_NtscfV0_t Avtp_Ntscf_t;
 
 typedef enum {
 
@@ -139,7 +146,7 @@ static const Avtp_FieldDescriptor_t Avtp_NtscfFieldDescV1[AVTP_NTSCF_FIELD_MAX] 
  * @returns This function returns the value of the field.
  * @see Avtp_Ntscf_GetField
  */
-OPEN1722_INLINE uint64_t Avtp_Ntscf_GetField_V0(const Avtp_Ntscf_t *const pdu,
+OPEN1722_INLINE uint64_t Avtp_Ntscf_GetField_V0(const Avtp_NtscfV0_t *const pdu,
                                                 Avtp_NtscfFields_t field)
 {
     return Avtp_GetField(Avtp_NtscfFieldDescV0, AVTP_NTSCF_FIELD_MAX, (const uint8_t *)pdu,
@@ -188,7 +195,7 @@ OPEN1722_INLINE uint64_t Avtp_Ntscf_GetField(const Avtp_Ntscf_t *const pdu,
  * @param value The value to set.
  * @see Avtp_Ntscf_SetField
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetField_V0(Avtp_Ntscf_t *pdu, Avtp_NtscfFields_t field,
+OPEN1722_INLINE void Avtp_Ntscf_SetField_V0(Avtp_NtscfV0_t *pdu, Avtp_NtscfFields_t field,
                                             uint64_t value)
 {
     Avtp_SetField(Avtp_NtscfFieldDescV0, AVTP_NTSCF_FIELD_MAX, (uint8_t *)pdu, (uint8_t)field,
@@ -235,7 +242,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetField(Avtp_Ntscf_t *pdu, Avtp_NtscfFields_t f
  * pointer is not read; it keeps the signature aligned with the
  * version-dispatched accessors.
  */
-OPEN1722_INLINE uint8_t Avtp_Ntscf_GetHeaderLen_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_Ntscf_GetHeaderLen_V0(const Avtp_NtscfV0_t *const pdu)
 {
     (void)pdu;
     return (uint8_t)AVTP_NTSCF_HEADER_LEN_V0;
@@ -414,7 +421,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetStreamId(Avtp_Ntscf_t *pdu, uint64_t value)
  * @return Pointer to the NTSCF frame payload.
  * @see Avtp_Ntscf_GetPayload
  */
-OPEN1722_INLINE const uint8_t *Avtp_Ntscf_GetPayload_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE const uint8_t *Avtp_Ntscf_GetPayload_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return (const uint8_t *)pdu + AVTP_NTSCF_HEADER_LEN_V0;
 }
@@ -454,7 +461,7 @@ OPEN1722_INLINE const uint8_t *Avtp_Ntscf_GetPayload(const Avtp_Ntscf_t *const p
  * @param payload_length Length of the payload.
  * @see Avtp_Ntscf_SetPayload
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetPayload_V0(Avtp_Ntscf_t *pdu, uint8_t *payload,
+OPEN1722_INLINE void Avtp_Ntscf_SetPayload_V0(Avtp_NtscfV0_t *pdu, uint8_t *payload,
                                               uint16_t payload_length)
 {
     memcpy((uint8_t *)pdu + AVTP_NTSCF_HEADER_LEN_V0, payload, payload_length);
@@ -536,10 +543,10 @@ OPEN1722_INLINE bool Avtp_Ntscf_IsValid(const Avtp_Ntscf_t *const pdu, size_t bu
  * @param pdu Pointer to the first bit of a 1722 PDU. This is typically an AVTP-
  * or an ACF header.
  */
-OPEN1722_INLINE void Avtp_Ntscf_Init(Avtp_Ntscf_t *pdu)
+OPEN1722_INLINE void Avtp_Ntscf_InitV0(Avtp_NtscfV0_t *pdu)
 {
     if (pdu != NULL) {
-        memset(pdu, 0, sizeof(Avtp_Ntscf_t));
+        memset(pdu, 0, sizeof(Avtp_NtscfV0_t));
         Avtp_CommonHeader_SetSubtype((Avtp_CommonHeader_t *)pdu, AVTP_SUBTYPE_NTSCF);
         Avtp_Ntscf_SetSv(pdu, true);
     }
@@ -562,6 +569,25 @@ OPEN1722_INLINE void Avtp_Ntscf_InitV1(Avtp_NtscfV1_t *pdu)
     }
 }
 
+/**
+ * Initializes an NTSCF PDU of the given version. The caller must provide a
+ * buffer of at least AVTP_NTSCF_HEADER_LEN_V1 octets for version 1 (for
+ * example an Avtp_NtscfV1_t); version 0 uses AVTP_NTSCF_HEADER_LEN_V0
+ * octets. Any version other than AVTPDU_VERSION_1 initializes a version 0 PDU.
+ *
+ * @param pdu Pointer to the first bit of a 1722 PDU. This is typically an AVTP-
+ * or an ACF header.
+ * @param version AVTPDU header version (AVTPDU_VERSION_0 or AVTPDU_VERSION_1).
+ */
+OPEN1722_INLINE void Avtp_Ntscf_Init(Avtp_Ntscf_t *pdu, uint8_t version)
+{
+    if (version == AVTPDU_VERSION_1) {
+        Avtp_Ntscf_InitV1((Avtp_NtscfV1_t *)pdu);
+    } else {
+        Avtp_Ntscf_InitV0(pdu);
+    }
+}
+
 /*
  * Version-typed named accessors. These select the field layout for one
  * explicit version and never read the version field; the version-dispatched
@@ -574,7 +600,7 @@ OPEN1722_INLINE void Avtp_Ntscf_InitV1(Avtp_NtscfV1_t *pdu)
  * Version 0 variant of Avtp_Ntscf_IsSv().
  * @see Avtp_Ntscf_IsSv
  */
-OPEN1722_INLINE bool Avtp_Ntscf_IsSv_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE bool Avtp_Ntscf_IsSv_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return (bool)Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_SV);
 }
@@ -592,7 +618,7 @@ OPEN1722_INLINE bool Avtp_Ntscf_IsSv_V1(const Avtp_NtscfV1_t *const pdu)
  * Version 0 variant of Avtp_Ntscf_GetNtscfDataLength().
  * @see Avtp_Ntscf_GetNtscfDataLength
  */
-OPEN1722_INLINE uint16_t Avtp_Ntscf_GetNtscfDataLength_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint16_t Avtp_Ntscf_GetNtscfDataLength_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return (uint16_t)Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH);
 }
@@ -611,7 +637,7 @@ OPEN1722_INLINE uint16_t Avtp_Ntscf_GetNtscfDataLength_V1(const Avtp_NtscfV1_t *
  * number is the 8-bit sequence_num_lsb field.
  * @see Avtp_Ntscf_GetSequenceNum
  */
-OPEN1722_INLINE uint32_t Avtp_Ntscf_GetSequenceNum_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint32_t Avtp_Ntscf_GetSequenceNum_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return (uint32_t)Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM_LSB);
 }
@@ -629,7 +655,7 @@ OPEN1722_INLINE uint32_t Avtp_Ntscf_GetSequenceNum_V1(const Avtp_NtscfV1_t *cons
  * Version 0 variant of Avtp_Ntscf_GetSequenceNumLsb().
  * @see Avtp_Ntscf_GetSequenceNumLsb
  */
-OPEN1722_INLINE uint8_t Avtp_Ntscf_GetSequenceNumLsb_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint8_t Avtp_Ntscf_GetSequenceNumLsb_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return (uint8_t)Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM_LSB);
 }
@@ -648,7 +674,7 @@ OPEN1722_INLINE uint8_t Avtp_Ntscf_GetSequenceNumLsb_V1(const Avtp_NtscfV1_t *co
  * absent from version 0, so this always returns 0.
  * @see Avtp_Ntscf_GetPtpGrandmasterIdentity
  */
-OPEN1722_INLINE uint64_t Avtp_Ntscf_GetPtpGrandmasterIdentity_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Ntscf_GetPtpGrandmasterIdentity_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return Avtp_AlternativeHeader_GetPtpGrandmasterIdentity_V0(
         (const Avtp_AlternativeHeader_t *)pdu);
@@ -668,7 +694,7 @@ OPEN1722_INLINE uint64_t Avtp_Ntscf_GetPtpGrandmasterIdentity_V1(const Avtp_Ntsc
  * Version 0 variant of Avtp_Ntscf_GetStreamId().
  * @see Avtp_Ntscf_GetStreamId
  */
-OPEN1722_INLINE uint64_t Avtp_Ntscf_GetStreamId_V0(const Avtp_Ntscf_t *const pdu)
+OPEN1722_INLINE uint64_t Avtp_Ntscf_GetStreamId_V0(const Avtp_NtscfV0_t *const pdu)
 {
     return Avtp_Ntscf_GetField_V0(pdu, AVTP_NTSCF_FIELD_STREAM_ID);
 }
@@ -686,7 +712,7 @@ OPEN1722_INLINE uint64_t Avtp_Ntscf_GetStreamId_V1(const Avtp_NtscfV1_t *const p
  * Version 0 variant of Avtp_Ntscf_SetSv().
  * @see Avtp_Ntscf_SetSv
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetSv_V0(Avtp_Ntscf_t *pdu, bool sv)
+OPEN1722_INLINE void Avtp_Ntscf_SetSv_V0(Avtp_NtscfV0_t *pdu, bool sv)
 {
     Avtp_Ntscf_SetField_V0(pdu, AVTP_NTSCF_FIELD_SV, sv);
 }
@@ -704,7 +730,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetSv_V1(Avtp_NtscfV1_t *pdu, bool sv)
  * Version 0 variant of Avtp_Ntscf_SetNtscfDataLength().
  * @see Avtp_Ntscf_SetNtscfDataLength
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetNtscfDataLength_V0(Avtp_Ntscf_t *pdu, uint16_t value)
+OPEN1722_INLINE void Avtp_Ntscf_SetNtscfDataLength_V0(Avtp_NtscfV0_t *pdu, uint16_t value)
 {
     Avtp_Ntscf_SetField_V0(pdu, AVTP_NTSCF_FIELD_NTSCF_DATA_LENGTH, value);
 }
@@ -723,7 +749,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetNtscfDataLength_V1(Avtp_NtscfV1_t *pdu, uint1
  * the 8-bit version 0 sequence_num_lsb field.
  * @see Avtp_Ntscf_SetSequenceNum
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetSequenceNum_V0(Avtp_Ntscf_t *pdu, uint32_t value)
+OPEN1722_INLINE void Avtp_Ntscf_SetSequenceNum_V0(Avtp_NtscfV0_t *pdu, uint32_t value)
 {
     Avtp_Ntscf_SetField_V0(pdu, AVTP_NTSCF_FIELD_SEQUENCE_NUM_LSB, (uint8_t)(value & 0xFFU));
 }
@@ -744,7 +770,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetSequenceNum_V1(Avtp_NtscfV1_t *pdu, uint32_t 
  * absent from version 0, so this is a no-op.
  * @see Avtp_Ntscf_SetPtpGrandmasterIdentity
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetPtpGrandmasterIdentity_V0(Avtp_Ntscf_t *pdu, uint64_t value)
+OPEN1722_INLINE void Avtp_Ntscf_SetPtpGrandmasterIdentity_V0(Avtp_NtscfV0_t *pdu, uint64_t value)
 {
     Avtp_AlternativeHeader_SetPtpGrandmasterIdentity_V0((Avtp_AlternativeHeader_t *)pdu, value);
 }
@@ -762,7 +788,7 @@ OPEN1722_INLINE void Avtp_Ntscf_SetPtpGrandmasterIdentity_V1(Avtp_NtscfV1_t *pdu
  * Version 0 variant of Avtp_Ntscf_SetStreamId().
  * @see Avtp_Ntscf_SetStreamId
  */
-OPEN1722_INLINE void Avtp_Ntscf_SetStreamId_V0(Avtp_Ntscf_t *pdu, uint64_t value)
+OPEN1722_INLINE void Avtp_Ntscf_SetStreamId_V0(Avtp_NtscfV0_t *pdu, uint64_t value)
 {
     Avtp_Ntscf_SetField_V0(pdu, AVTP_NTSCF_FIELD_STREAM_ID, value);
 }

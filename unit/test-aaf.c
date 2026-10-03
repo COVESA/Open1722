@@ -74,9 +74,9 @@ static void aaf_init(void **state)
     assert_int_equal(sizeof(Avtp_Aaf_t), AVTP_AAF_HEADER_LEN_V0);
 
     /* Passing a NULL pointer must be a no-op. */
-    Avtp_Aaf_Init(NULL);
+    Avtp_Aaf_InitV0(NULL);
 
-    Avtp_Aaf_Init((Avtp_Aaf_t *)pdu);
+    Avtp_Aaf_InitV0((Avtp_Aaf_t *)pdu);
     memset(init_pdu, 0, AVTP_AAF_HEADER_LEN_V0);
     init_pdu[0] = AVTP_SUBTYPE_AAF; /* subtype = AAF */
     init_pdu[1] = 0x80;             /* sv = 1, version = 0 */
@@ -103,13 +103,37 @@ static void aaf_init_v1(void **state)
     assert_int_equal(Avtp_Aaf_GetHeaderLen((Avtp_Aaf_t *)pdu), AVTP_AAF_HEADER_LEN_V1);
 }
 
+static void aaf_init_version(void **state)
+{
+    (void)state;
+    uint8_t typed[MAX_PDU_SIZE];
+    uint8_t generic[MAX_PDU_SIZE];
+
+    assert_int_equal(sizeof(Avtp_Aaf_t), sizeof(Avtp_AafV0_t));
+
+    Avtp_Aaf_InitV0((Avtp_Aaf_t *)typed);
+    Avtp_Aaf_Init((Avtp_Aaf_t *)generic, AVTPDU_VERSION_0);
+    assert_memory_equal(typed, generic, AVTP_AAF_HEADER_LEN_V0);
+
+    Avtp_Aaf_InitV1((Avtp_AafV1_t *)typed);
+    Avtp_Aaf_Init((Avtp_Aaf_t *)generic, AVTPDU_VERSION_1);
+    assert_memory_equal(typed, generic, AVTP_AAF_HEADER_LEN_V1);
+
+    /* Unsupported versions initialize a version 0 PDU. */
+    Avtp_Aaf_Init((Avtp_Aaf_t *)generic, 2);
+    Avtp_Aaf_InitV0((Avtp_Aaf_t *)typed);
+    assert_memory_equal(typed, generic, AVTP_AAF_HEADER_LEN_V0);
+    assert_int_equal(Avtp_CommonHeader_GetVersion((Avtp_CommonHeader_t *)generic),
+                     AVTPDU_VERSION_0);
+}
+
 static void aaf_is_valid(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Aaf_t *aaf = (Avtp_Aaf_t *)pdu;
 
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     assert_true(Avtp_Aaf_IsValid(aaf, AVTP_AAF_HEADER_LEN_V0));
 
     /* NULL pdu. */
@@ -120,11 +144,11 @@ static void aaf_is_valid(void **state)
     assert_false(Avtp_Aaf_IsValid(aaf, MAX_PDU_SIZE));
 
     /* Buffer smaller than the AAF header. */
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     assert_false(Avtp_Aaf_IsValid(aaf, AVTP_AAF_HEADER_LEN_V0 - 1));
 
     /* stream_data_length does not fit into the buffer. */
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     Avtp_Aaf_SetStreamDataLength(aaf, 10);
     assert_false(Avtp_Aaf_IsValid(aaf, AVTP_AAF_HEADER_LEN_V0 + 9));
     assert_true(Avtp_Aaf_IsValid(aaf, AVTP_AAF_HEADER_LEN_V0 + 10));
@@ -137,7 +161,7 @@ static void aaf_is_valid(void **state)
     assert_false(Avtp_Aaf_IsValid((Avtp_Aaf_t *)pdu, AVTP_AAF_HEADER_LEN_V1 - 1));
 
     /* Unsupported version is rejected. */
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     Avtp_CommonHeader_SetVersion((Avtp_CommonHeader_t *)pdu, 2);
     assert_false(Avtp_Aaf_IsValid(aaf, MAX_PDU_SIZE));
 }
@@ -215,7 +239,7 @@ static void aaf_flag_fields(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Aaf_t *aaf = (Avtp_Aaf_t *)pdu;
 
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     assert_true(Avtp_Aaf_IsSv(aaf));
 
     Avtp_Aaf_SetSv(aaf, false);
@@ -345,7 +369,7 @@ static void aaf_payload(void **state)
     uint8_t payload_out[8] = {0};
     Avtp_Aaf_t *aaf = (Avtp_Aaf_t *)pdu;
 
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
     Avtp_Aaf_SetPayload(aaf, payload, sizeof(payload));
 
     assert_ptr_equal(Avtp_Aaf_GetPayload(aaf), pdu + AVTP_AAF_HEADER_LEN_V0);
@@ -386,7 +410,7 @@ static void aaf_typed_fields_v0(void **state)
     uint8_t pdu[AVTP_AAF_HEADER_LEN_V1];
     Avtp_Aaf_t *aaf = (Avtp_Aaf_t *)pdu;
 
-    Avtp_Aaf_Init(aaf);
+    Avtp_Aaf_InitV0(aaf);
 
     for (uint8_t f = 0; f < AVTP_AAF_FIELD_MAX; f++) {
         uint8_t bits = Avtp_AafFieldDescV0[f].bits;
@@ -430,7 +454,7 @@ static void aaf_typed_named(void **state)
     Avtp_AafV1_t *v1 = (Avtp_AafV1_t *)pdu;
 
     /* Version 0. */
-    Avtp_Aaf_Init(v0);
+    Avtp_Aaf_InitV0(v0);
     Avtp_Aaf_SetSv_V0(v0, true);
     Avtp_Aaf_SetMr_V0(v0, true);
     Avtp_Aaf_SetTv_V0(v0, true);
@@ -516,7 +540,7 @@ static void aaf_typed_helpers(void **state)
     uint8_t pdu[MAX_PDU_SIZE];
     uint8_t payload[8] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
 
-    Avtp_Aaf_Init((Avtp_Aaf_t *)pdu);
+    Avtp_Aaf_InitV0((Avtp_Aaf_t *)pdu);
     assert_int_equal(Avtp_Aaf_GetHeaderLen_V0((Avtp_Aaf_t *)pdu), AVTP_AAF_HEADER_LEN_V0);
     assert_ptr_equal(Avtp_Aaf_GetPayload_V0((Avtp_Aaf_t *)pdu), pdu + AVTP_AAF_HEADER_LEN_V0);
     Avtp_Aaf_SetPayload_V0((Avtp_Aaf_t *)pdu, payload, sizeof(payload));
@@ -534,6 +558,7 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(aaf_init),
         cmocka_unit_test(aaf_init_v1),
+        cmocka_unit_test(aaf_init_version),
         cmocka_unit_test(aaf_is_valid),
         cmocka_unit_test(aaf_field_descriptors_cover_header),
         cmocka_unit_test(aaf_common_field_consistency),

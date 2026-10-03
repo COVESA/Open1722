@@ -122,7 +122,7 @@ static struct argp argp = {options, parser};
 
 static void init_pdu(Avtp_Pcm_t *pdu)
 {
-    Avtp_Pcm_Init(pdu);
+    Avtp_Pcm_InitV0(pdu);
     Avtp_Pcm_SetTv_V0(pdu, true);
     Avtp_Pcm_SetStreamId_V0(pdu, STREAM_ID);
     Avtp_Pcm_SetFormat_V0(pdu, AVTP_AAF_FORMAT_INT_16BIT);
