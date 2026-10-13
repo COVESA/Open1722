@@ -37,9 +37,18 @@
  * descriptors and field indices can be folded into direct bit manipulation by
  * the compiler. The shared library exports the same functions as regular
  * symbols (see src/avtp/export/InlineExports.c) for FFI users.
+ *
+ * The engine makes no alignment assumptions: quadlets are loaded and stored
+ * with memcpy, so a PDU may live at any byte offset. IEEE 1722 only defines
+ * the wire ordering of fields, not the memory alignment of a frame. Compilers
+ * lower the fixed-size memcpy to a single load or store on targets that allow
+ * unaligned accesses; see docs/alignment.md for the performance details and
+ * for how to hint a guaranteed alignment on strict-alignment targets.
  */
 
 #pragma once
+
+#include <string.h>
 
 #include "avtp/Inline.h"
 #include "avtp/Defines.h"
@@ -65,9 +74,12 @@ static inline uint8_t Avtp_MinU8(uint8_t a, uint8_t b)
  * @param fieldDescriptors Pointer to the field descriptor table.
  * @param numFields Number of entries in the descriptor table.
  * @param pdu Pointer to the first bit of an 1722 PDU. This is typically an 1722
- * AVTP- or an ACF header.
+ * AVTP- or an ACF header. The pointer may have any alignment.
  * @param field Specifies the position of the data field to be read
  * @returns This function returns the field value from the PDU.
+ *
+ * @note The PDU may have any alignment; quadlets are read with memcpy. See
+ * docs/alignment.md for performance details and alignment hints.
  */
 OPEN1722_INLINE uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t *fieldDescriptors,
                                        uint8_t numFields, const uint8_t *const pdu, uint8_t field)
@@ -90,8 +102,9 @@ OPEN1722_INLINE uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t *fieldDescri
                 quadletShift = (uint8_t)(32 - quadletBits);
             }
             uint32_t quadletMask = (uint32_t)(((1ULL << quadletBits) - 1ULL) << quadletShift);
-            const uint32_t *quadletPtr = (const uint32_t *)(pdu + quadletId * 4);
-            uint32_t quadletHostOrder = Avtp_BeToCpu32(*quadletPtr);
+            uint32_t quadletWireOrder;
+            memcpy(&quadletWireOrder, pdu + quadletId * 4, sizeof(quadletWireOrder));
+            uint32_t quadletHostOrder = Avtp_BeToCpu32(quadletWireOrder);
             uint32_t partialValue = (quadletHostOrder & quadletMask) >> quadletShift;
             result |= (uint64_t)(partialValue)
                       << (fieldDescriptor->bits - processedBits - quadletBits);
@@ -110,9 +123,12 @@ OPEN1722_INLINE uint64_t Avtp_GetField(const Avtp_FieldDescriptor_t *fieldDescri
  * @param fieldDescriptors Pointer to the field descriptor table.
  * @param numFields Number of entries in the descriptor table.
  * @param pdu Pointer to the first bit of a 1722 PDU. This is typically an AVTP-
- * or an ACF header.
+ * or an ACF header. The pointer may have any alignment.
  * @param field Specifies the position of the data field to be written
  * @param value The value to set.
+ *
+ * @note The PDU may have any alignment; quadlets are written with memcpy. See
+ * docs/alignment.md for performance details and alignment hints.
  */
 OPEN1722_INLINE void Avtp_SetField(const Avtp_FieldDescriptor_t *fieldDescriptors,
                                    uint8_t numFields, uint8_t *pdu, uint8_t field, uint64_t value)
@@ -136,11 +152,13 @@ OPEN1722_INLINE void Avtp_SetField(const Avtp_FieldDescriptor_t *fieldDescriptor
             uint32_t partialValue =
                 (uint32_t)(value >> (fieldDescriptor->bits - processedBits - quadletBits));
             uint32_t quadletMask = (uint32_t)(((1ULL << quadletBits) - 1ULL) << quadletShift);
-            uint32_t *quadletPtr = (uint32_t *)(pdu + quadletId * 4);
-            uint32_t quadletHostOrder = Avtp_BeToCpu32(*quadletPtr);
+            uint32_t quadletWireOrder;
+            memcpy(&quadletWireOrder, pdu + quadletId * 4, sizeof(quadletWireOrder));
+            uint32_t quadletHostOrder = Avtp_BeToCpu32(quadletWireOrder);
             quadletHostOrder =
                 (quadletHostOrder & ~quadletMask) | ((partialValue << quadletShift) & quadletMask);
-            *quadletPtr = Avtp_CpuToBe32(quadletHostOrder);
+            quadletWireOrder = Avtp_CpuToBe32(quadletHostOrder);
+            memcpy(pdu + quadletId * 4, &quadletWireOrder, sizeof(quadletWireOrder));
 
             quadletOffset += 1;
             processedBits += quadletBits;

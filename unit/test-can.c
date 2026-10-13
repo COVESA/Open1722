@@ -85,6 +85,7 @@ static void can_set_payload(void **state)
 {
 
     uint8_t pdu[MAX_PDU_SIZE];
+    uint32_t can_identifier_wire;
     uint32_t set_frame_id = 0x7ff;
     uint8_t set_payload[CAN_PAYLOAD_SIZE] = {0, 1, 2, 3, 4, 5, 6, 7};
 
@@ -94,7 +95,8 @@ static void can_set_payload(void **state)
     // Set payload and check for EFF
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               false);
-    assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
+    memcpy(&can_identifier_wire, pdu + 12, sizeof(can_identifier_wire));
+    assert_int_equal(htonl(set_frame_id), can_identifier_wire);
     assert_memory_equal(set_payload, pdu + 16, CAN_PAYLOAD_SIZE);
     assert_int_equal(0x0, *(pdu + 2) & 0x08); // Check EFF
 
@@ -102,7 +104,8 @@ static void can_set_payload(void **state)
     set_frame_id = 0x800;
     Avtp_Can_CreateAcfMessage((Avtp_Can_t *)pdu, set_frame_id, set_payload, CAN_PAYLOAD_SIZE,
                               false);
-    assert_int_equal(htonl(set_frame_id), (uint32_t) * ((int *)pdu + 3));
+    memcpy(&can_identifier_wire, pdu + 12, sizeof(can_identifier_wire));
+    assert_int_equal(htonl(set_frame_id), can_identifier_wire);
     assert_int_equal(0x8, *(pdu + 2) & 0x08); // Check EFF
 
     // Check padding bytes and length field

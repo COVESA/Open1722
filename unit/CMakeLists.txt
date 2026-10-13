@@ -48,11 +48,24 @@ function(add_dual_test TEST_NAME SOURCE_FILE)
     set(EXTRA_LIBS ${ARGN})
     set(BASE_LIBS open1722 cmocka ${EXTRA_LIBS})
 
+    # Alignment guard: flag pointer casts that increase the required alignment
+    # (e.g. uint8_t* to uint32_t*), which fault on strict-alignment targets.
+    # On GCC, -Werror=cast-align must precede -Wcast-align=strict or the level
+    # assignment downgrades the error back to a warning. Clang's -Wcast-align
+    # already warns on every target.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CAST_ALIGN_FLAGS -Werror=cast-align -Wcast-align=strict)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(CAST_ALIGN_FLAGS -Werror=cast-align -Wcast-align)
+    else()
+        set(CAST_ALIGN_FLAGS)
+    endif()
+
     # C version
     add_executable(${TEST_NAME} ${SOURCE_FILE})
     target_link_libraries(${TEST_NAME} ${BASE_LIBS})
     target_include_directories(${TEST_NAME} PUBLIC ../include)
-    target_compile_options(${TEST_NAME} PRIVATE -coverage)
+    target_compile_options(${TEST_NAME} PRIVATE -coverage ${CAST_ALIGN_FLAGS})
     target_link_options(${TEST_NAME} PRIVATE -coverage)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 
@@ -61,7 +74,7 @@ function(add_dual_test TEST_NAME SOURCE_FILE)
     add_executable(${TEST_NAME}-cpp ${SOURCE_FILE})
     target_link_libraries(${TEST_NAME}-cpp ${BASE_LIBS})
     target_include_directories(${TEST_NAME}-cpp PUBLIC ../include)
-    target_compile_options(${TEST_NAME}-cpp PRIVATE -coverage)
+    target_compile_options(${TEST_NAME}-cpp PRIVATE -coverage ${CAST_ALIGN_FLAGS})
     target_link_options(${TEST_NAME}-cpp PRIVATE -coverage)
     add_test(NAME ${TEST_NAME}-cpp COMMAND ${TEST_NAME}-cpp)
 
@@ -96,3 +109,4 @@ add_dual_test(test-can-brief-v2 test-can-brief-v2.c)
 add_dual_test(test-canxl test-canxl.c)
 add_dual_test(test-canxl-brief test-canxl-brief.c)
 add_dual_test(test-i2c test-i2c.c)
+add_dual_test(test-align test-align.c open1722custom)

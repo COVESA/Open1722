@@ -40,6 +40,8 @@ Companion documents:
 
 - [`inline.md`](inline.md) - how inline accessors are also exported as shared
   library symbols.
+- [`alignment.md`](alignment.md) - the alignment contract of the accessors, why
+  the field engine is not slower, and alignment hints for strict targets.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) - licence, commit and style rules.
 
 ---
@@ -249,6 +251,12 @@ network buffer. The flexible `payload[0]` means the payload lives in the memory
 immediately following the header: after casting a buffer to `Avtp_Can_t *`, you
 read and write payload bytes through `pdu->payload` and the header fields
 through the accessors.
+
+The buffer may have any alignment. The PDU struct only contains byte arrays and
+is `packed` (alignment 1), so it can be overlaid at any address, and the
+accessors load and store quadlets with alignment-safe `memcpy` operations. See
+[`alignment.md`](alignment.md) for the performance implications and for how to
+hint a guaranteed alignment on strict-alignment targets.
 
 When several PDU structs are combined into one frame, the outer struct must
 also be `packed` so the compiler inserts no padding between them:
@@ -803,6 +811,15 @@ the table lookup and the extraction loop into direct loads, shifts and masks.
 The shared library still exports regular `Avtp_GetField`/`Avtp_SetField`
 symbols for FFI users (see
 [Inline accessors & symbol export](#inline-accessors--symbol-export)).
+
+The engine makes no alignment assumptions: it loads and stores each quadlet
+with a fixed-size `memcpy` (`Utils.h`), and the custom VSS parser does the same
+through `vss_load_be16/32/64` / `vss_store_be16/32/64` (`Vss.c`). Compilers
+fold that `memcpy` into a single access where the target allows unaligned
+memory reads and into a safe byte-wise sequence where it does not, so the
+folding property above is preserved. Casts that increase the required
+alignment are rejected by `-Wcast-align`; see [`alignment.md`](alignment.md)
+for the details.
 
 The descriptor type is defined in [`Defines.h`](../include/avtp/Defines.h):
 

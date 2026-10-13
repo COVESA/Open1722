@@ -204,6 +204,10 @@ int main()
 
 To learn what you can expect from the Open1722 API and to get a starting point in case you want to extend Open1722 see the [API design documentation](docs/api-design.md).
 
+## Alignment and Performance
+
+PDUs may sit at any byte offset in a buffer: the accessors make no alignment assumptions, and on targets with hardware unaligned access the field-access engine still compiles to single-instruction reads and writes. See [alignment.md](docs/alignment.md) for the spec background, the generated-code details, and how to hint a guaranteed alignment on strict-alignment targets.
+
 ## Inline Functions and Shared Library Exports
 
 Open1722 uses `static inline` functions for field accessors to enable compiler optimizations on embedded targets. These same functions are also exported as regular symbols in the shared library for FFI users. See [inline.md](docs/inline.md) for details.

@@ -32,3 +32,22 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: false
         verbose: true
+
+  ubsan:
+    runs-on: ubuntu-latest
+    name: Unit tests under UBSan
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y libcmocka0 libcmocka-dev
+    - name: Configure with alignment sanitizer
+      run: >
+        cmake -S . -B build-ubsan -DCMAKE_BUILD_TYPE=Debug
+        -DCMAKE_C_FLAGS="-fsanitize=undefined,alignment -fno-sanitize-recover=all"
+        -DCMAKE_CXX_FLAGS="-fsanitize=undefined,alignment -fno-sanitize-recover=all"
+    - name: Build unit tests
+      run: cmake --build build-ubsan --target unittests -j"$(nproc)"
+    - name: Run unit tests
+      run: ctest --test-dir build-ubsan --output-on-failure
