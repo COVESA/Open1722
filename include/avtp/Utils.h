@@ -47,10 +47,14 @@
  */
 
 #pragma once
-
-#include <string.h>
-
 #include "avtp/Inline.h"
+
+#ifdef LINUX_KERNEL1722
+#include <linux/string.h>
+#else
+#include <string.h>
+#endif
+
 #include "avtp/Defines.h"
 #include "avtp/Byteorder.h"
 
