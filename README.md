@@ -1,6 +1,8 @@
 ![Linux Build Status](https://img.shields.io/github/actions/workflow/status/COVESA/Open1722/build-all.yml?branch=main&style=for-the-badge&logo=linux)
 ![Zephyr Build Status](https://img.shields.io/github/actions/workflow/status/COVESA/Open1722/build-zephyr.yml?branch=main&style=for-the-badge&label=zephyr)
 ![Linux Kernel Module Build Status](https://img.shields.io/github/actions/workflow/status/COVESA/Open1722/build-linuxkernelmod.yml?branch=main&style=for-the-badge&label=Linux%20Kernel%20Module)
+![Codecov](https://img.shields.io/codecov/c/github/COVESA/Open1722?style=for-the-badge&label=Codecov)
+
 
 
 <a name="readme-top"></a>
