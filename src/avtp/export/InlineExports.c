@@ -75,6 +75,7 @@
 #include "avtp/acf/CanXl.h"
 #include "avtp/acf/CanXlBrief.h"
 #include "avtp/acf/Crc.h"
+#include "avtp/acf/Checksum.h"
 #include "avtp/acf/FlexRay.h"
 #include "avtp/acf/Gbb.h"
 #include "avtp/acf/Gisf.h"
