@@ -884,8 +884,10 @@ For VSS:
 - VSS accessors therefore remain self-checking: reads are clamped against the
   *declared* message length, and truncated or internally inconsistent fields
   (e.g. a path or data length prefix that exceeds the declared message)
-  no-op or return conservative values instead of trusting the wire data. The
-  remaining validation lives in the getters, not in `IsValid`.
+  no-op or return conservative values instead of trusting the wire data.
+  `Avtp_Vss_CalcVssPathLength()` reports 0 for a truncated or inconsistent
+  path instead of wrapping or reading past the declared frame. The remaining
+  validation lives in the getters, not in `IsValid`.
 - Because of that complexity, VSS accessors are implemented in the `.c` file
   (non-inline) rather than as inline header functions.
 
