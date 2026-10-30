@@ -197,6 +197,11 @@ static void crc_is_valid_fixed_length_types(void **state)
         /* Too long: fits the buffer but exceeds the fixed length. */
         Avtp_Crc_CreateAcfMessage(crc, type, payload, 8);
         assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
+
+        /* Zero length */
+        Avtp_Crc_CreateAcfMessage(crc, type, payload, 8);
+        Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 0);
+        assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
     }
 }
 
