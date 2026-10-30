@@ -245,6 +245,13 @@ OPEN1722_INLINE bool Avtp_Crc_IsValid(const Avtp_Crc_t *const pdu, size_t buffer
 
     uint16_t msg_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    if (Avtp_Crc_GetCrcType(pdu) == AVTP_CRC_TYPE_CRC_ETH ||
+        Avtp_Crc_GetCrcType(pdu) == AVTP_CRC_TYPE_CRC_32P4) {
+        if (msg_length_bytes != (AVTP_CRC_HEADER_LEN + 4)) {
+            return false;
+        }
+    }
+
     if (msg_length_bytes > bufferSize) {
         return false;
     }

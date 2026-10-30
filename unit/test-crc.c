@@ -175,12 +175,56 @@ static void crc_is_valid(void **state)
     assert_false(Avtp_Crc_IsValid(crc, 7));
 }
 
+/* CRC_ETH and CRC_32P4 carry a fixed 4 byte CRC, so the message must be exactly 8 bytes. */
+static void crc_is_valid_fixed_length_types(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[8] = {0};
+    Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
+    const Avtp_CrcType_t types[] = {AVTP_CRC_TYPE_CRC_ETH, AVTP_CRC_TYPE_CRC_32P4};
+
+    for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
+        Avtp_CrcType_t type = types[i];
+
+        Avtp_Crc_CreateAcfMessage(crc, type, payload, 4);
+        assert_true(Avtp_Crc_IsValid(crc, sizeof(pdu)));
+
+        /* Too short: header only, and below the fixed length. */
+        Avtp_Crc_CreateAcfMessage(crc, type, payload, 0);
+        assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
+
+        /* Too long: fits the buffer but exceeds the fixed length. */
+        Avtp_Crc_CreateAcfMessage(crc, type, payload, 8);
+        assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
+    }
+}
+
+/* CRC_USER has a variable payload length, so lengths other than 8 bytes remain valid. */
+static void crc_is_valid_user_type_variable_length(void **state)
+{
+    (void)state;
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[16] = {0};
+    Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
+
+    for (uint16_t payload_length = 0; payload_length <= sizeof(payload); payload_length += 4) {
+        Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_USER, payload, payload_length);
+        assert_true(Avtp_Crc_IsValid(crc, AVTP_CRC_HEADER_LEN + payload_length));
+    }
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(crc_init),           cmocka_unit_test(crc_field_descriptors_cover_header),
-        cmocka_unit_test(crc_fields),         cmocka_unit_test(crc_payload_and_length),
-        cmocka_unit_test(crc_create_message), cmocka_unit_test(crc_is_valid),
+        cmocka_unit_test(crc_init),
+        cmocka_unit_test(crc_field_descriptors_cover_header),
+        cmocka_unit_test(crc_fields),
+        cmocka_unit_test(crc_payload_and_length),
+        cmocka_unit_test(crc_create_message),
+        cmocka_unit_test(crc_is_valid),
+        cmocka_unit_test(crc_is_valid_fixed_length_types),
+        cmocka_unit_test(crc_is_valid_user_type_variable_length),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
