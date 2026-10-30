@@ -101,8 +101,7 @@ static void vss_store_be64(uint8_t *ptr, uint64_t value)
 
 /* Read a 16‑bit big‑endian length prefix at *ptr and clamp it so that
  * ptr + 2 + length does not exceed the declared PDU size (msg_length in
- * quadlets × 4).  When msg_length is 0 (PDU not framed yet) the wire
- * length is returned unchanged.
+ * quadlets × 4).  A prefix that does not fit the declared PDU yields 0.
  *
  * The prefix is only dereferenced when offset + 2 ≤ declared so that an
  * out‑of‑frame data pointer never produces an OOB read before clamping.
@@ -133,9 +132,9 @@ static uint16_t vss_read_clamped_length(const Avtp_Vss_t *pdu, const uint8_t *pt
 
 /* Getter‑side path length in bytes, clamped so that
  * AVTP_VSS_FIXED_HEADER_LEN + path_length ≤ declared PDU size.
- * Setters use CalcVssPathLength (raw) instead; this helper is for the
- * read path only so that the data‑pointer computation never leaves the
- * frame.  */
+ * Setters use CalcVssPathLength instead, which preserves the unframed
+ * construction case; this helper is for the read path only so that the
+ * data‑pointer computation never leaves the frame. */
 static uint16_t vss_get_clamped_path_length(const Avtp_Vss_t *pdu)
 {
     uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
@@ -294,19 +293,52 @@ void Avtp_Vss_GetVssPath(const Avtp_Vss_t *const pdu, VssPath_t *val)
 
 uint16_t Avtp_Vss_CalcVssPathLength(const Avtp_Vss_t *const pdu)
 {
-
-    const uint8_t *vss_path_ptr = (const uint8_t *const)pdu + AVTP_VSS_FIXED_HEADER_LEN;
-
-    // Check the used VSS addressing mode
-    Vss_AddrMode_t addr_mode = Avtp_Vss_GetAddrMode(pdu);
-    uint16_t path_length = 0;
-
-    if (addr_mode == VSS_STATIC_ID_MODE) {
-        path_length = 4;
-    } else if (addr_mode == VSS_INTEROP_MODE) {
-        path_length = vss_load_be16(vss_path_ptr) + 2;
+    if (pdu == NULL) {
+        return 0;
     }
-    return path_length;
+
+    Vss_AddrMode_t addr_mode = Avtp_Vss_GetAddrMode(pdu);
+    uint16_t declared = Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
+    const uint8_t *vss_path_ptr = (const uint8_t *)pdu + AVTP_VSS_FIXED_HEADER_LEN;
+
+    if (declared != 0) {
+        if (declared < AVTP_VSS_FIXED_HEADER_LEN) {
+            return 0;
+        }
+
+        uint32_t available = (uint32_t)declared - (uint32_t)AVTP_VSS_FIXED_HEADER_LEN;
+
+        if (addr_mode == VSS_STATIC_ID_MODE) {
+            return (available >= 4U) ? 4 : 0;
+        }
+
+        if (addr_mode != VSS_INTEROP_MODE || available < 2U) {
+            return 0;
+        }
+
+        uint32_t total_length = (uint32_t)vss_load_be16(vss_path_ptr) + 2U;
+        if (total_length > available) {
+            return 0;
+        }
+        return (uint16_t)total_length;
+    }
+
+    /* The ACF length is set last when building a frame, so an unframed PDU
+     * must use the on‑wire path prefix without clamping it to the declared
+     * length. */
+    if (addr_mode == VSS_STATIC_ID_MODE) {
+        return 4;
+    }
+
+    if (addr_mode != VSS_INTEROP_MODE) {
+        return 0;
+    }
+
+    uint32_t total_length = (uint32_t)vss_load_be16(vss_path_ptr) + 2U;
+    if (total_length > UINT16_MAX) {
+        return 0;
+    }
+    return (uint16_t)total_length;
 }
 
 uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t *const str_array)
@@ -619,9 +651,16 @@ void Avtp_Vss_SetVssPath(Avtp_Vss_t *pdu, VssPath_t *val)
 void Avtp_Vss_SetVssData(Avtp_Vss_t *pdu, VssData_t *val)
 {
 
+    uint16_t vss_path_length = Avtp_Vss_CalcVssPathLength(pdu);
+
+    /* No valid path (truncated, inconsistent, or reserved addressing mode):
+     * do not overwrite the path area with payload data. */
+    if (vss_path_length == 0) {
+        return;
+    }
+
     // Get a pointer to the start of the VSS data
-    uint8_t *vss_data_ptr =
-        (uint8_t *)pdu + AVTP_VSS_FIXED_HEADER_LEN + Avtp_Vss_CalcVssPathLength(pdu);
+    uint8_t *vss_data_ptr = (uint8_t *)pdu + AVTP_VSS_FIXED_HEADER_LEN + vss_path_length;
     Vss_Datatype_t datatype = Avtp_Vss_GetDatatype(pdu);
 
     uint32_t temp_float;
