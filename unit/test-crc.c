@@ -63,11 +63,12 @@ static void crc_init(void **state)
 static void crc_field_descriptors_cover_header(void **state)
 {
     (void)state;
-    uint8_t coverage[(AVTP_CRC_HEADER_LEN + AVTP_QUADLET_SIZE) * 8] = {0};
+    uint8_t coverage[AVTP_CRC_HEADER_LEN * 8] = {0};
 
     for (uint8_t field = 0; field < AVTP_CRC_FIELD_MAX; field++) {
-        const Avtp_FieldDescriptor_t *desc = &Avtp_CrcFieldDesc[field];
+        const Avtp_FieldDescriptor_t *desc = &Avtp_CrcHeaderFieldDesc[field];
 
+        assert_int_equal(desc->quadlet, 0);
         for (uint8_t bit = 0; bit < desc->bits; bit++) {
             size_t bit_index = (desc->quadlet * 32) + desc->offset + bit;
 
@@ -94,9 +95,10 @@ static void crc_fields(void **state)
     Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_32P4);
     assert_int_equal(Avtp_Crc_GetCrcType(crc), AVTP_CRC_TYPE_CRC_32P4);
 
-    Avtp_SetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED, 0xABC);
+    Avtp_SetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED, 0xABC);
     assert_int_equal(
-        Avtp_GetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED), 0xABC);
+        Avtp_GetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED),
+        0xABC);
     assert_int_equal(Avtp_Crc_GetCrcType(crc), AVTP_CRC_TYPE_CRC_32P4);
 
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 1);
@@ -140,7 +142,7 @@ static void crc_create_message(void **state)
     Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
 
     memset(pdu, 0xAA, sizeof(pdu));
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, (uint8_t *)&crcdata, sizeof(crcdata));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, crcdata);
 
     assert_int_equal(Avtp_AcfCommon_GetAcfMsgType((Avtp_AcfCommon_t *)crc), AVTP_ACF_TYPE_CRC);
     assert_int_equal(Avtp_Crc_GetCrcType(crc), AVTP_CRC_TYPE_CRC_ETH);
@@ -154,11 +156,11 @@ static void crc_is_valid(void **state)
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
     Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
-    uint8_t payload[] = {0, 1, 2, 3};
+    uint32_t payload = 0xDEADBEEF;
 
     assert_false(Avtp_Crc_IsValid(NULL, sizeof(pdu)));
 
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload, sizeof(payload));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload);
     assert_true(Avtp_Crc_IsValid(crc, 8));
 
     assert_false(Avtp_Crc_IsValid(crc, AVTP_CRC_HEADER_LEN - 1));
@@ -166,11 +168,15 @@ static void crc_is_valid(void **state)
     Avtp_AcfCommon_SetAcfMsgType((Avtp_AcfCommon_t *)crc, AVTP_ACF_TYPE_GPC);
     assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
 
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload, sizeof(payload));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload);
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 0);
     assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
 
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload, sizeof(payload));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 12);
+    assert_false(Avtp_Crc_IsValid(crc, 8));
+
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload);
     assert_false(Avtp_Crc_IsValid(crc, 7));
 }
 
@@ -179,7 +185,7 @@ static void crc_is_valid_fixed_length_types(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t payload[8] = {0};
+    uint32_t payload = 0xDEADBEEF;
     Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
     const Avtp_CrcType_t types[] = {AVTP_CRC_TYPE_CRC_ETH, AVTP_CRC_TYPE_CRC_32P4,
                                     AVTP_CRC_TYPE_CRC_USER};
@@ -187,16 +193,16 @@ static void crc_is_valid_fixed_length_types(void **state)
     for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
         Avtp_CrcType_t type = types[i];
 
-        Avtp_Crc_CreateAcfMessage(crc, type, payload, 4);
+        Avtp_Crc_CreateAcfMessage(crc, type, payload);
         assert_true(Avtp_Crc_IsValid(crc, sizeof(pdu)));
 
         /* Too short: header only, and below the fixed length. */
-        Avtp_Crc_CreateAcfMessage(crc, type, payload, 0);
+        Avtp_Crc_CreateAcfMessage(crc, type, payload);
         Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 0);
         assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
 
         /* Too long: fits the buffer but exceeds the fixed length. */
-        Avtp_Crc_CreateAcfMessage(crc, type, payload, 12);
+        Avtp_Crc_CreateAcfMessage(crc, type, payload);
         Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 3);
         if (type == AVTP_CRC_TYPE_CRC_ETH || type == AVTP_CRC_TYPE_CRC_32P4) {
             assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
@@ -205,7 +211,7 @@ static void crc_is_valid_fixed_length_types(void **state)
         }
 
         /* Zero length */
-        Avtp_Crc_CreateAcfMessage(crc, type, payload, 8);
+        Avtp_Crc_CreateAcfMessage(crc, type, payload);
         Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 0);
         assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
     }
@@ -220,12 +226,18 @@ static void crc_is_valid_user_type_variable_length(void **state)
     Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
 
     for (uint16_t payload_length = 0; payload_length < 4; payload_length += 4) {
-        Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_USER, payload, payload_length);
+        Avtp_Crc_Init(crc);
+        Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_USER);
+        Avtp_Crc_SetPayload(crc, payload, payload_length);
+        Avtp_Crc_SetPayloadLength(crc, payload_length);
         assert_false(Avtp_Crc_IsValid(crc, AVTP_CRC_HEADER_LEN + payload_length));
     }
 
     for (uint16_t payload_length = 8; payload_length <= sizeof(payload); payload_length += 4) {
-        Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_USER, payload, payload_length);
+        Avtp_Crc_Init(crc);
+        Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_USER);
+        Avtp_Crc_SetPayload(crc, payload, payload_length);
+        Avtp_Crc_SetPayloadLength(crc, payload_length);
         assert_true(Avtp_Crc_IsValid(crc, AVTP_CRC_HEADER_LEN + payload_length));
     }
 }
@@ -234,13 +246,13 @@ static void crc_get_payload_length_fixed_types(void **state)
 {
     (void)state;
     uint8_t pdu[MAX_PDU_SIZE];
-    uint8_t payload[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+    uint32_t payload = 0xDEADBEEF;
     Avtp_Crc_t *crc = (Avtp_Crc_t *)pdu;
 
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload, sizeof(payload));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_ETH, payload);
     assert_int_equal(Avtp_Crc_GetPayloadLength(crc), 4);
 
-    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_32P4, payload, sizeof(payload));
+    Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_32P4, payload);
     assert_int_equal(Avtp_Crc_GetPayloadLength(crc), 4);
 }
 
@@ -256,7 +268,10 @@ static void crc_get_payload_length_user_type_includes_padding(void **state)
         uint16_t padded_length =
             ((payload_length + AVTP_QUADLET_SIZE - 1) / AVTP_QUADLET_SIZE) * AVTP_QUADLET_SIZE;
 
-        Avtp_Crc_CreateAcfMessage(crc, AVTP_CRC_TYPE_CRC_USER, payload, payload_length);
+        Avtp_Crc_Init(crc);
+        Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_USER);
+        Avtp_Crc_SetPayload(crc, payload, payload_length);
+        Avtp_Crc_SetPayloadLength(crc, payload_length);
         assert_int_equal(Avtp_Crc_GetPayloadLength(crc), padded_length);
     }
 }
@@ -312,8 +327,7 @@ static void crc_wire_format_create_message(void **state)
     uint32_t crc_data = 0x11223344;
 
     memset(pdu, 0xAA, sizeof(pdu));
-    Avtp_Crc_CreateAcfMessage((Avtp_Crc_t *)pdu, AVTP_CRC_TYPE_CRC_32P4, (uint8_t *)&crc_data,
-                              sizeof(crc_data));
+    Avtp_Crc_CreateAcfMessage((Avtp_Crc_t *)pdu, AVTP_CRC_TYPE_CRC_32P4, crc_data);
     assert_memory_equal(pdu, expected, sizeof(expected));
 }
 
