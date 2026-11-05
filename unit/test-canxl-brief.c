@@ -182,6 +182,38 @@ static void Test_CanXlBrief_GetPayloadLength_NoPadding(void **state)
     assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 4);
 }
 
+static void Test_CanXlBrief_GetPayloadLength_Over255(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0x24, 0x4F, 0x00};
+    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
+    assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 300);
+}
+
+static void Test_CanXlBrief_GetPayloadLength_Boundary255(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x24, 0x44, 0x40};
+    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
+    assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 255);
+}
+
+static void Test_CanXlBrief_GetPayloadLength_Boundary256(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x24, 0x44, 0x00};
+    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
+    assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 256);
+}
+
+static void Test_CanXlBrief_GetPayloadLength_MaxAcfLength(void **state)
+{
+    const size_t msg_len = 2044;
+    uint8_t msg[msg_len] = {0x25, 0xFF, 0x00};
+    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
+    assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 2028);
+}
+
 static void Test_CanXlBrief_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 4;
@@ -389,6 +421,25 @@ static void Test_CanXlBrief_CreateAcfMessage(void **state)
     assert_int_equal(Avtp_CanXlBrief_GetVcid(canxl), 0xBF);
 }
 
+static void Test_CanXlBrief_CreateAcfMessage_LargePayload(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0};
+    uint8_t payload[299];
+    Avtp_CanXlBrief_t *canxl = (Avtp_CanXlBrief_t *)msg;
+
+    for (size_t i = 0; i < sizeof(payload); i++) {
+        payload[i] = (uint8_t)i;
+    }
+
+    Avtp_CanXlBrief_CreateAcfMessage(canxl, 0x5FF, 0xBFFFFFFFul, 0xBF, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_CanXlBrief_GetPayloadLength(canxl), 299);
+    assert_int_equal(Avtp_CanXlBrief_GetPad(canxl), 1);
+    assert_memory_equal(payload, msg + AVTP_CANXL_BRIEF_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_CanXlBrief_IsValid(canxl, msg_len), 1);
+}
+
 static void Test_CanXlBrief_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_CANXL_BRIEF_HEADER_LEN + 8;
@@ -437,38 +488,44 @@ static void Test_CanXlBrief_IsValid(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {cmocka_unit_test(Test_CanXlBrief_Init),
-                                       cmocka_unit_test(Test_CanXlBrief_GetPad),
-                                       cmocka_unit_test(Test_CanXlBrief_IsMtv),
-                                       cmocka_unit_test(Test_CanXlBrief_GetCanBusId),
-                                       cmocka_unit_test(Test_CanXlBrief_GetVcid),
-                                       cmocka_unit_test(Test_CanXlBrief_GetSdt),
-                                       cmocka_unit_test(Test_CanXlBrief_IsRrs),
-                                       cmocka_unit_test(Test_CanXlBrief_IsSec),
-                                       cmocka_unit_test(Test_CanXlBrief_GetPriorityId),
-                                       cmocka_unit_test(Test_CanXlBrief_GetAcceptanceField),
-                                       cmocka_unit_test(Test_CanXlBrief_GetTransactionNum),
-                                       cmocka_unit_test(Test_CanXlBrief_IsMs),
-                                       cmocka_unit_test(Test_CanXlBrief_GetSegmentNum),
-                                       cmocka_unit_test(Test_CanXlBrief_GetPayloadLength),
-                                       cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_CanXlBrief_SetMtv),
-                                       cmocka_unit_test(Test_CanXlBrief_SetCanBusId),
-                                       cmocka_unit_test(Test_CanXlBrief_SetVcid),
-                                       cmocka_unit_test(Test_CanXlBrief_SetSdt),
-                                       cmocka_unit_test(Test_CanXlBrief_SetRrs),
-                                       cmocka_unit_test(Test_CanXlBrief_SetSec),
-                                       cmocka_unit_test(Test_CanXlBrief_SetPriorityId),
-                                       cmocka_unit_test(Test_CanXlBrief_SetAcceptanceField),
-                                       cmocka_unit_test(Test_CanXlBrief_SetTransactionNum),
-                                       cmocka_unit_test(Test_CanXlBrief_SetMs),
-                                       cmocka_unit_test(Test_CanXlBrief_SetSegmentNum),
-                                       cmocka_unit_test(Test_CanXlBrief_SetPayloadLength),
-                                       cmocka_unit_test(Test_CanXlBrief_SetPayloadLength_NoPadding),
-                                       cmocka_unit_test(Test_CanXlBrief_Payload),
-                                       cmocka_unit_test(Test_CanXlBrief_CreateAcfMessage),
-                                       cmocka_unit_test(Test_CanXlBrief_CreateFromGarbage),
-                                       cmocka_unit_test(Test_CanXlBrief_IsValid)};
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(Test_CanXlBrief_Init),
+        cmocka_unit_test(Test_CanXlBrief_GetPad),
+        cmocka_unit_test(Test_CanXlBrief_IsMtv),
+        cmocka_unit_test(Test_CanXlBrief_GetCanBusId),
+        cmocka_unit_test(Test_CanXlBrief_GetVcid),
+        cmocka_unit_test(Test_CanXlBrief_GetSdt),
+        cmocka_unit_test(Test_CanXlBrief_IsRrs),
+        cmocka_unit_test(Test_CanXlBrief_IsSec),
+        cmocka_unit_test(Test_CanXlBrief_GetPriorityId),
+        cmocka_unit_test(Test_CanXlBrief_GetAcceptanceField),
+        cmocka_unit_test(Test_CanXlBrief_GetTransactionNum),
+        cmocka_unit_test(Test_CanXlBrief_IsMs),
+        cmocka_unit_test(Test_CanXlBrief_GetSegmentNum),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_NoPadding),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_Over255),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_Boundary255),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_Boundary256),
+        cmocka_unit_test(Test_CanXlBrief_GetPayloadLength_MaxAcfLength),
+        cmocka_unit_test(Test_CanXlBrief_SetMtv),
+        cmocka_unit_test(Test_CanXlBrief_SetCanBusId),
+        cmocka_unit_test(Test_CanXlBrief_SetVcid),
+        cmocka_unit_test(Test_CanXlBrief_SetSdt),
+        cmocka_unit_test(Test_CanXlBrief_SetRrs),
+        cmocka_unit_test(Test_CanXlBrief_SetSec),
+        cmocka_unit_test(Test_CanXlBrief_SetPriorityId),
+        cmocka_unit_test(Test_CanXlBrief_SetAcceptanceField),
+        cmocka_unit_test(Test_CanXlBrief_SetTransactionNum),
+        cmocka_unit_test(Test_CanXlBrief_SetMs),
+        cmocka_unit_test(Test_CanXlBrief_SetSegmentNum),
+        cmocka_unit_test(Test_CanXlBrief_SetPayloadLength),
+        cmocka_unit_test(Test_CanXlBrief_SetPayloadLength_NoPadding),
+        cmocka_unit_test(Test_CanXlBrief_Payload),
+        cmocka_unit_test(Test_CanXlBrief_CreateAcfMessage),
+        cmocka_unit_test(Test_CanXlBrief_CreateAcfMessage_LargePayload),
+        cmocka_unit_test(Test_CanXlBrief_CreateFromGarbage),
+        cmocka_unit_test(Test_CanXlBrief_IsValid)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

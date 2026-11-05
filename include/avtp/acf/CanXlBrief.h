@@ -446,12 +446,12 @@ OPEN1722_INLINE void Avtp_CanXlBrief_SetPayloadLength(Avtp_CanXlBrief_t *pdu,
  * @param pdu Pointer to the first bit of a 1722 ACF CAN XL Brief PDU.
  * @return  Length of CAN payload in bytes
  */
-OPEN1722_INLINE uint8_t Avtp_CanXlBrief_GetPayloadLength(const Avtp_CanXlBrief_t *const pdu)
+OPEN1722_INLINE uint16_t Avtp_CanXlBrief_GetPayloadLength(const Avtp_CanXlBrief_t *const pdu)
 {
     uint8_t pad_length = Avtp_CanXlBrief_GetPad(pdu);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
-    return (uint8_t)(acf_length_bytes - AVTP_CANXL_BRIEF_HEADER_LEN - pad_length);
+    return (uint16_t)(acf_length_bytes - AVTP_CANXL_BRIEF_HEADER_LEN - pad_length);
 }
 
 /**
