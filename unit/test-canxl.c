@@ -202,6 +202,38 @@ static void Test_CanXl_GetPayloadLength_NoPadding(void **state)
     assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 4);
 }
 
+static void Test_CanXl_GetPayloadLength_Over255(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0x22, 0x51, 0x00};
+    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
+    assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 300);
+}
+
+static void Test_CanXl_GetPayloadLength_Boundary255(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x22, 0x46, 0x40};
+    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
+    assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 255);
+}
+
+static void Test_CanXl_GetPayloadLength_Boundary256(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x22, 0x46, 0x00};
+    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
+    assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 256);
+}
+
+static void Test_CanXl_GetPayloadLength_MaxAcfLength(void **state)
+{
+    const size_t msg_len = 2044;
+    uint8_t msg[msg_len] = {0x23, 0xFF, 0x00};
+    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
+    assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 2020);
+}
+
 static void Test_CanXl_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_CANXL_HEADER_LEN + 4;
@@ -437,6 +469,25 @@ static void Test_CanXl_CreateAcfMessage(void **state)
     assert_int_equal(Avtp_CanXl_GetMessageTimestamp(canxl), 0x123456789ABCDEF0ULL);
 }
 
+static void Test_CanXl_CreateAcfMessage_LargePayload(void **state)
+{
+    const size_t msg_len = AVTP_CANXL_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0};
+    uint8_t payload[299];
+    Avtp_CanXl_t *canxl = (Avtp_CanXl_t *)msg;
+
+    for (size_t i = 0; i < sizeof(payload); i++) {
+        payload[i] = (uint8_t)i;
+    }
+
+    Avtp_CanXl_CreateAcfMessage(canxl, 0x5FF, 0xBFFFFFFFul, 0xBF, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_CanXl_GetPayloadLength(canxl), 299);
+    assert_int_equal(Avtp_CanXl_GetPad(canxl), 1);
+    assert_memory_equal(payload, msg + AVTP_CANXL_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_CanXl_IsValid(canxl, msg_len), 1);
+}
+
 static void Test_CanXl_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_CANXL_HEADER_LEN + 8;
@@ -501,6 +552,10 @@ int main(void)
                                        cmocka_unit_test(Test_CanXl_GetSegmentNum),
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength),
                                        cmocka_unit_test(Test_CanXl_GetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_CanXl_GetPayloadLength_Over255),
+                                       cmocka_unit_test(Test_CanXl_GetPayloadLength_Boundary255),
+                                       cmocka_unit_test(Test_CanXl_GetPayloadLength_Boundary256),
+                                       cmocka_unit_test(Test_CanXl_GetPayloadLength_MaxAcfLength),
                                        cmocka_unit_test(Test_CanXl_SetMtv),
                                        cmocka_unit_test(Test_CanXl_SetCanBusId),
                                        cmocka_unit_test(Test_CanXl_SetMessageTimestamp),
@@ -517,6 +572,7 @@ int main(void)
                                        cmocka_unit_test(Test_CanXl_SetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_CanXl_Payload),
                                        cmocka_unit_test(Test_CanXl_CreateAcfMessage),
+                                       cmocka_unit_test(Test_CanXl_CreateAcfMessage_LargePayload),
                                        cmocka_unit_test(Test_CanXl_CreateFromGarbage),
                                        cmocka_unit_test(Test_CanXl_IsValid)};
 

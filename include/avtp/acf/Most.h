@@ -365,12 +365,12 @@ OPEN1722_INLINE void Avtp_Most_SetPayloadLength(Avtp_Most_t *pdu, uint16_t paylo
  * @param pdu Pointer to the first bit of an 1722 ACF Most PDU.
  * @return  Length of Most payload in bytes
  */
-OPEN1722_INLINE uint8_t Avtp_Most_GetPayloadLength(const Avtp_Most_t *const pdu)
+OPEN1722_INLINE uint16_t Avtp_Most_GetPayloadLength(const Avtp_Most_t *const pdu)
 {
     uint8_t pad_length = Avtp_Most_GetPad(pdu);
     uint16_t acf_length_bytes =
         Avtp_AcfCommon_GetAcfMsgLengthInBytes((const Avtp_AcfCommon_t *)pdu);
-    return (uint8_t)(acf_length_bytes - AVTP_MOST_HEADER_LEN - pad_length);
+    return (uint16_t)(acf_length_bytes - AVTP_MOST_HEADER_LEN - pad_length);
 }
 
 /**

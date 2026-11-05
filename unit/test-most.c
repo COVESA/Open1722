@@ -43,6 +43,7 @@ extern "C" {
 #include "avtp/acf/Most.h"
 
 #define MAX_PDU_SIZE 1500
+#define MAX_ACF_SIZE 2044
 
 static void most_init(void **state)
 {
@@ -119,6 +120,45 @@ static void most_is_valid(void **state)
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, 9), 0);
 }
 
+static void most_check_payload_length(uint8_t *pdu, uint16_t quadlets, uint8_t pad,
+                                      uint16_t expected)
+{
+    Avtp_Most_Init((Avtp_Most_t *)pdu);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)pdu, quadlets);
+    Avtp_Most_SetPad((Avtp_Most_t *)pdu, pad);
+    assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t *)pdu), expected);
+}
+
+static void most_get_payload_length_over_255(void **state)
+{
+    uint8_t pdu[MAX_ACF_SIZE];
+    most_check_payload_length(pdu, 80, 0, 300);
+}
+
+static void most_get_payload_length_over_255_with_padding(void **state)
+{
+    uint8_t pdu[MAX_ACF_SIZE];
+    most_check_payload_length(pdu, 80, 3, 297);
+}
+
+static void most_get_payload_length_boundary_255(void **state)
+{
+    uint8_t pdu[MAX_ACF_SIZE];
+    most_check_payload_length(pdu, 69, 1, 255);
+}
+
+static void most_get_payload_length_boundary_256(void **state)
+{
+    uint8_t pdu[MAX_ACF_SIZE];
+    most_check_payload_length(pdu, 69, 0, 256);
+}
+
+static void most_get_payload_length_max_acf_length(void **state)
+{
+    uint8_t pdu[MAX_ACF_SIZE];
+    most_check_payload_length(pdu, 511, 0, 2024);
+}
+
 static void most_create_message(void **state)
 {
     uint8_t pdu[MAX_PDU_SIZE];
@@ -135,6 +175,24 @@ static void most_create_message(void **state)
     assert_int_equal(Avtp_Most_GetOpType((Avtp_Most_t *)pdu), 0x0F);
     assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t *)pdu), 8);
+    assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 1);
+}
+
+static void most_create_large_payload(void **state)
+{
+    uint8_t pdu[MAX_PDU_SIZE];
+    uint8_t payload[299];
+
+    for (size_t i = 0; i < sizeof(payload); i++) {
+        payload[i] = (uint8_t)i;
+    }
+
+    Avtp_Most_CreateAcfMessage((Avtp_Most_t *)pdu, 0x1234, 0xAB, 0x12, 0x456, 0x0F, payload,
+                               sizeof(payload));
+
+    assert_int_equal(Avtp_Most_GetPayloadLength((Avtp_Most_t *)pdu), 299);
+    assert_int_equal(Avtp_Most_GetPad((Avtp_Most_t *)pdu), 1);
+    assert_memory_equal(payload, pdu + AVTP_MOST_HEADER_LEN, sizeof(payload));
     assert_int_equal(Avtp_Most_IsValid((Avtp_Most_t *)pdu, MAX_PDU_SIZE), 1);
 }
 
@@ -162,7 +220,13 @@ int main(void)
         cmocka_unit_test(most_init),
         cmocka_unit_test(most_get_set_fields),
         cmocka_unit_test(most_is_valid),
+        cmocka_unit_test(most_get_payload_length_over_255),
+        cmocka_unit_test(most_get_payload_length_over_255_with_padding),
+        cmocka_unit_test(most_get_payload_length_boundary_255),
+        cmocka_unit_test(most_get_payload_length_boundary_256),
+        cmocka_unit_test(most_get_payload_length_max_acf_length),
         cmocka_unit_test(most_create_message),
+        cmocka_unit_test(most_create_large_payload),
         cmocka_unit_test(most_create_from_garbage),
     };
 

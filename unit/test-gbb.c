@@ -200,6 +200,38 @@ static void Test_Gbb_GetPayloadLength_NoPadding(void **state)
     assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 4);
 }
 
+static void Test_Gbb_GetPayloadLength_Over255(void **state)
+{
+    const size_t msg_len = AVTP_GBB_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0x1A, 0x4F, 0x00};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 300);
+}
+
+static void Test_Gbb_GetPayloadLength_Boundary255(void **state)
+{
+    const size_t msg_len = AVTP_GBB_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x1A, 0x44, 0x40};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 255);
+}
+
+static void Test_Gbb_GetPayloadLength_Boundary256(void **state)
+{
+    const size_t msg_len = AVTP_GBB_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x1A, 0x44, 0x00};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 256);
+}
+
+static void Test_Gbb_GetPayloadLength_MaxAcfLength(void **state)
+{
+    const size_t msg_len = 2044;
+    uint8_t msg[msg_len] = {0x1B, 0xFF, 0x00};
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+    assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 2028);
+}
+
 static void Test_Gbb_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 4;
@@ -430,6 +462,25 @@ static void Test_Gbb_CreateAcfMessage(void **state)
     assert_int_equal(Avtp_Gbb_GetMessageTimestamp(gbb), 0x123456789ABCDEF0ULL);
 }
 
+static void Test_Gbb_CreateAcfMessage_LargePayload(void **state)
+{
+    const size_t msg_len = AVTP_GBB_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0};
+    uint8_t payload[299];
+    Avtp_Gbb_t *gbb = (Avtp_Gbb_t *)msg;
+
+    for (size_t i = 0; i < sizeof(payload); i++) {
+        payload[i] = (uint8_t)i;
+    }
+
+    Avtp_Gbb_CreateAcfMessage(gbb, 0x5FF, true, 0xBF, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_Gbb_GetPayloadLength(gbb), 299);
+    assert_int_equal(Avtp_Gbb_GetPad(gbb), 1);
+    assert_memory_equal(payload, msg + AVTP_GBB_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Gbb_IsValid(gbb, msg_len), 1);
+}
+
 static void Test_Gbb_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_GBB_HEADER_LEN + 8;
@@ -496,6 +547,10 @@ int main(void)
                                        cmocka_unit_test(Test_Gbb_GetSegmentNum),
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength),
                                        cmocka_unit_test(Test_Gbb_GetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength_Over255),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength_Boundary255),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength_Boundary256),
+                                       cmocka_unit_test(Test_Gbb_GetPayloadLength_MaxAcfLength),
                                        cmocka_unit_test(Test_Gbb_SetMtv),
                                        cmocka_unit_test(Test_Gbb_SetByteBusId),
                                        cmocka_unit_test(Test_Gbb_SetMessageTimestamp),
@@ -513,6 +568,7 @@ int main(void)
                                        cmocka_unit_test(Test_Gbb_SetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_Gbb_Payload),
                                        cmocka_unit_test(Test_Gbb_CreateAcfMessage),
+                                       cmocka_unit_test(Test_Gbb_CreateAcfMessage_LargePayload),
                                        cmocka_unit_test(Test_Gbb_CreateFromGarbage),
                                        cmocka_unit_test(Test_Gbb_IsValid)};
 

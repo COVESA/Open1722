@@ -175,6 +175,38 @@ static void Test_Abb_GetPayloadLength_NoPadding(void **state)
     assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 4);
 }
 
+static void Test_Abb_GetPayloadLength_Over255(void **state)
+{
+    const size_t msg_len = AVTP_ABB_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0x1C, 0x4D, 0x00};
+    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
+    assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 300);
+}
+
+static void Test_Abb_GetPayloadLength_Boundary255(void **state)
+{
+    const size_t msg_len = AVTP_ABB_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x1C, 0x42, 0x40};
+    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
+    assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 255);
+}
+
+static void Test_Abb_GetPayloadLength_Boundary256(void **state)
+{
+    const size_t msg_len = AVTP_ABB_HEADER_LEN + 256;
+    uint8_t msg[msg_len] = {0x1C, 0x42, 0x00};
+    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
+    assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 256);
+}
+
+static void Test_Abb_GetPayloadLength_MaxAcfLength(void **state)
+{
+    const size_t msg_len = 2044;
+    uint8_t msg[msg_len] = {0x1D, 0xFF, 0x00};
+    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
+    assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 2036);
+}
+
 static void Test_Abb_SetMtv(void **state)
 {
     const size_t msg_len = AVTP_ABB_HEADER_LEN + 4;
@@ -375,6 +407,25 @@ static void Test_Abb_CreateAcfMessage(void **state)
     assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 8);
 }
 
+static void Test_Abb_CreateAcfMessage_LargePayload(void **state)
+{
+    const size_t msg_len = AVTP_ABB_HEADER_LEN + 300;
+    uint8_t msg[msg_len] = {0};
+    uint8_t payload[299];
+    Avtp_Abb_t *abb = (Avtp_Abb_t *)msg;
+
+    for (size_t i = 0; i < sizeof(payload); i++) {
+        payload[i] = (uint8_t)i;
+    }
+
+    Avtp_Abb_CreateAcfMessage(abb, 0x5FF, true, 0xBF, payload, sizeof(payload));
+
+    assert_int_equal(Avtp_Abb_GetPayloadLength(abb), 299);
+    assert_int_equal(Avtp_Abb_GetPad(abb), 1);
+    assert_memory_equal(payload, msg + AVTP_ABB_HEADER_LEN, sizeof(payload));
+    assert_int_equal(Avtp_Abb_IsValid(abb, msg_len), 1);
+}
+
 static void Test_Abb_CreateFromGarbage(void **state)
 {
     const size_t msg_len = AVTP_ABB_HEADER_LEN + 8;
@@ -440,6 +491,10 @@ int main(void)
                                        cmocka_unit_test(Test_Abb_GetSegmentNum),
                                        cmocka_unit_test(Test_Abb_GetPayloadLength),
                                        cmocka_unit_test(Test_Abb_GetPayloadLength_NoPadding),
+                                       cmocka_unit_test(Test_Abb_GetPayloadLength_Over255),
+                                       cmocka_unit_test(Test_Abb_GetPayloadLength_Boundary255),
+                                       cmocka_unit_test(Test_Abb_GetPayloadLength_Boundary256),
+                                       cmocka_unit_test(Test_Abb_GetPayloadLength_MaxAcfLength),
                                        cmocka_unit_test(Test_Abb_SetMtv),
                                        cmocka_unit_test(Test_Abb_SetByteBusId),
                                        cmocka_unit_test(Test_Abb_SetEvt),
@@ -456,6 +511,7 @@ int main(void)
                                        cmocka_unit_test(Test_Abb_SetPayloadLength_NoPadding),
                                        cmocka_unit_test(Test_Abb_Payload),
                                        cmocka_unit_test(Test_Abb_CreateAcfMessage),
+                                       cmocka_unit_test(Test_Abb_CreateAcfMessage_LargePayload),
                                        cmocka_unit_test(Test_Abb_CreateFromGarbage),
                                        cmocka_unit_test(Test_Abb_IsValid)};
 
