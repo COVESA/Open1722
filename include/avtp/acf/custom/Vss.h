@@ -310,6 +310,23 @@ void Avtp_Vss_GetVssPath(const Avtp_Vss_t *const pdu, VssPath_t *val);
  */
 void Avtp_Vss_GetVssData(const Avtp_Vss_t *const pdu, VssData_t *val);
 uint16_t Avtp_Vss_GetVSSDataStringArrayLength(const VssDataStringArray_t *str_array);
+
+/**
+ * Returns the total length of the VSS path in bytes, including the 2-byte
+ * length prefix used in VSS_INTEROP_MODE.
+ *
+ * The result is 0 when the PDU has no valid path: an unknown addressing mode,
+ * a path prefix that does not fit the declared ACF message length, or a total
+ * length that cannot be represented in uint16_t.
+ *
+ * For an unframed PDU (ACF message length 0) the on-wire path prefix is used
+ * without clamping to the declared length, so this function can be used while
+ * building a frame with Avtp_Vss_SetVssPath(), Avtp_Vss_SetVssData() and
+ * Avtp_Vss_SetPayloadLength() in that order.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
+ * @returns Path length in bytes, or 0 if no valid path is present.
+ */
 uint16_t Avtp_Vss_CalcVssPathLength(const Avtp_Vss_t *const pdu);
 void Avtp_Vss_DeserializeStringArray(const VssDataStringArray_t *const vss_data_string_array,
                                      VssDataString_t *strings[], uint16_t num_strings);
@@ -320,6 +337,17 @@ void Avtp_Vss_SetOpCode(Avtp_Vss_t *pdu, Vss_OpCode_t val);
 void Avtp_Vss_SetDatatype(Avtp_Vss_t *pdu, Vss_Datatype_t val);
 void Avtp_Vss_SetMessageTimestamp(Avtp_Vss_t *pdu, uint64_t val);
 void Avtp_Vss_SetVssPath(Avtp_Vss_t *pdu, VssPath_t *val);
+
+/**
+ * Serializes VSS data into an ACF VSS PDU after the VSS path.
+ *
+ * The caller must provide a buffer large enough for the fixed header, path and
+ * data. If the PDU has no valid path (for example a truncated frame or an
+ * unrepresentable path length), this function does nothing.
+ *
+ * @param pdu Pointer to the first bit of an 1722 ACF VSS PDU.
+ * @param val Pointer to the VSS data union to serialize.
+ */
 void Avtp_Vss_SetVssData(Avtp_Vss_t *pdu, VssData_t *val);
 void Avtp_Vss_SerializeStringArray(VssDataStringArray_t *vss_data_string_array,
                                    VssDataString_t *strings[], uint16_t num_strings);

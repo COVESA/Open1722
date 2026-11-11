@@ -40,6 +40,7 @@ extern "C" {
 #include <arpa/inet.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -486,7 +487,7 @@ static void vss_data_string(void **state)
     char str_value_recv[vss_data_get.data_string->data_length];
     vss_data_string_get.data = str_value_recv;
     Avtp_Vss_GetVssData(vss_pdu, &vss_data_get);
-    assert_string_equal(vss_data_get.data_string->data, str_value);
+    assert_memory_equal(vss_data_get.data_string->data, str_value, strlen(str_value));
 }
 
 static void vss_data_uint8_array(void **state)
@@ -999,7 +1000,8 @@ static void vss_data_string_array(void **state)
     vss_str3.data_length = strlen(str3);
 
     VssDataString_t *arr[] = {&vss_str1, &vss_str2, &vss_str3};
-    uint8_t buffer[strlen(str1) + strlen(str2) + strlen(str3) + 2];
+    /* Each string entry is prefixed by a 2-byte length field. */
+    uint8_t buffer[strlen(str1) + strlen(str2) + strlen(str3) + 2 * 3];
     VssDataStringArray_t vss_str_array = {0};
     vss_str_array.data = buffer;
     Avtp_Vss_SerializeStringArray(&vss_str_array, arr, 3);
@@ -1168,11 +1170,104 @@ static void vss_path_interop_oob(void **state)
     assert_int_equal(get_path.vss_interop_path.path_length, 6);
     assert_memory_equal(path_buf, "AB\0\0\0\0", 6);
 
-    /* CalcVssPathLength returns the raw wire value (0xFFFF + 2 = 1 in
-     * uint16_t arithmetic).  It is intentionally not clamped — setters
-     * (SetVssPath, SetVssData, Pad) use it and need the real on‑wire
-     * length.  Only the getters apply vss_read_clamped_length. */
-    assert_int_equal(Avtp_Vss_CalcVssPathLength(pdu), 1);
+    /* The wire prefix 0xFFFF does not fit the declared frame, so there is
+     * no valid path length to report.  CalcVssPathLength must not wrap to
+     * 1 or read beyond the declared message. */
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(pdu), 0);
+}
+
+static void vss_calc_path_length_header_only(void **state)
+{
+    (void)state;
+
+    /* INTEROP: a header-only frame passes IsValid, but there is no room for
+     * the 2-byte path prefix.  Heap allocation makes a stale prefixed read
+     * visible under ASan. */
+    uint8_t *interop = (uint8_t *)malloc(AVTP_VSS_FIXED_HEADER_LEN);
+    assert_non_null(interop);
+
+    Avtp_Vss_Init((Avtp_Vss_t *)interop);
+    Avtp_Vss_SetAddrMode((Avtp_Vss_t *)interop, VSS_INTEROP_MODE);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)interop,
+                                   AVTP_VSS_FIXED_HEADER_LEN / AVTP_QUADLET_SIZE);
+    assert_true(Avtp_Vss_IsValid((Avtp_Vss_t *)interop, AVTP_VSS_FIXED_HEADER_LEN));
+    assert_int_equal(Avtp_Vss_CalcVssPathLength((Avtp_Vss_t *)interop), 0);
+    free(interop);
+
+    /* STATIC_ID: same header-only frame has no room for the 4-byte ID. */
+    uint8_t *static_id = (uint8_t *)malloc(AVTP_VSS_FIXED_HEADER_LEN);
+    assert_non_null(static_id);
+
+    Avtp_Vss_Init((Avtp_Vss_t *)static_id);
+    Avtp_Vss_SetAddrMode((Avtp_Vss_t *)static_id, VSS_STATIC_ID_MODE);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)static_id,
+                                   AVTP_VSS_FIXED_HEADER_LEN / AVTP_QUADLET_SIZE);
+    assert_true(Avtp_Vss_IsValid((Avtp_Vss_t *)static_id, AVTP_VSS_FIXED_HEADER_LEN));
+    assert_int_equal(Avtp_Vss_CalcVssPathLength((Avtp_Vss_t *)static_id), 0);
+    free(static_id);
+}
+
+static void vss_calc_path_length_unframed(void **state)
+{
+    (void)state;
+
+    uint8_t pdu[MAX_PDU_SIZE];
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
+    memset(pdu, 0, sizeof(pdu));
+    Avtp_Vss_Init(vss_pdu);
+
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(NULL), 0);
+
+    /* Default mode is INTEROP.  A prefix of 13 gives 15 bytes including the
+     * 2-byte prefix. */
+    pdu[AVTP_VSS_FIXED_HEADER_LEN] = 0x00;
+    pdu[AVTP_VSS_FIXED_HEADER_LEN + 1] = 0x0D;
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 15);
+
+    /* Totals that do not fit uint16_t must not wrap. */
+    pdu[AVTP_VSS_FIXED_HEADER_LEN] = 0xFF;
+    pdu[AVTP_VSS_FIXED_HEADER_LEN + 1] = 0xFE;
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 0);
+
+    pdu[AVTP_VSS_FIXED_HEADER_LEN + 1] = 0xFF;
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 0);
+
+    /* STATIC_ID is a fixed 4-byte path, even before the frame is finalized. */
+    Avtp_Vss_SetAddrMode(vss_pdu, VSS_STATIC_ID_MODE);
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 4);
+
+    /* Reserved addressing modes have no defined path layout. */
+    Avtp_Vss_SetAddrMode(vss_pdu, (Vss_AddrMode_t)2);
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(vss_pdu), 0);
+}
+
+static void vss_set_data_malformed_path_no_write(void **state)
+{
+    (void)state;
+
+    uint8_t pdu[20];
+    uint8_t expected[8];
+    Avtp_Vss_t *vss_pdu = (Avtp_Vss_t *)pdu;
+
+    memset(pdu, 0, sizeof(pdu));
+    memset(expected, 0x5A, sizeof(expected));
+    expected[0] = 0xFF;
+    expected[1] = 0xFF;
+    memcpy(pdu + AVTP_VSS_FIXED_HEADER_LEN, expected, sizeof(expected));
+
+    Avtp_Vss_Init(vss_pdu);
+    Avtp_Vss_SetAddrMode(vss_pdu, VSS_INTEROP_MODE);
+    Avtp_Vss_SetDatatype(vss_pdu, VSS_UINT16);
+    Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)vss_pdu, 5); /* 20 bytes */
+
+    VssData_t data;
+    memset(&data, 0, sizeof(data));
+    data.data_uint16 = 0xBEEF;
+    Avtp_Vss_SetVssData(vss_pdu, &data);
+
+    /* The malformed 0xFFFF prefix describes no valid path, so SetVssData
+     * must leave the path area untouched. */
+    assert_memory_equal(pdu + AVTP_VSS_FIXED_HEADER_LEN, expected, sizeof(expected));
 }
 
 /* ── Avtp_Vss_GetVssData  –  memcpy group (wire length→memcpy) ──────── */
@@ -1494,9 +1589,8 @@ static void vss_data_double_array_oob(void **state)
 
 /* Helper for the inflated-path tests: build an INTEROP-mode PDU where the
  * on‑wire path_length (0xFFFD) claims far more path bytes than the declared
- * msg_length allows.  CalcVssPathLength would return 0xFFFD + 2 = 0xFFFF
- * (65535 — no uint16_t wrap), pushing the computed data pointer 65547 bytes
- * past the PDU start — well beyond any plausible frame. */
+ * msg_length allows.  CalcVssPathLength reports 0 because the path does not
+ * fit the declared frame; the getters clamp the path instead. */
 static Avtp_Vss_t *vss_build_inflated_path_pdu(uint8_t *buf, size_t buf_size, uint8_t msg_quadlets,
                                                Vss_Datatype_t datatype)
 {
@@ -1728,6 +1822,9 @@ static void vss_is_valid_header_only_frame(void **state)
     /* Smallest frame that still passes: declared == buffer == header. */
     assert_true(Avtp_Vss_IsValid(pdu, sizeof(buf)));
     assert_false(Avtp_Vss_IsValid(pdu, sizeof(buf) - 1));
+
+    /* There is no room for a path prefix or static ID in this frame. */
+    assert_int_equal(Avtp_Vss_CalcVssPathLength(pdu), 0);
 }
 
 /* A valid full frame (talker-built, interop path + float data) must pass
@@ -1781,6 +1878,8 @@ int main(void)
         cmocka_unit_test(vss_is_valid_declared_larger_than_buffer),
         cmocka_unit_test(vss_is_valid_declared_smaller_than_header),
         cmocka_unit_test(vss_is_valid_header_only_frame),
+        cmocka_unit_test(vss_calc_path_length_header_only),
+        cmocka_unit_test(vss_calc_path_length_unframed),
         cmocka_unit_test(vss_is_valid_roundtrip),
         cmocka_unit_test(vss_static_path),
         cmocka_unit_test(vss_interop_path),
@@ -1810,6 +1909,7 @@ int main(void)
         cmocka_unit_test(vss_data_string_array),
         cmocka_unit_test(vss_data_string_array_malformed),
         cmocka_unit_test(vss_path_interop_oob),
+        cmocka_unit_test(vss_set_data_malformed_path_no_write),
         cmocka_unit_test(vss_data_string_oob),
         cmocka_unit_test(vss_data_uint8_array_oob),
         cmocka_unit_test(vss_data_int8_array_oob),
