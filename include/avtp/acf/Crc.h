@@ -48,9 +48,9 @@ extern "C" {
 #include "avtp/acf/AcfCommon.h"
 
 #define GET_CRC_FIELD(field)                                                                       \
-    (Avtp_GetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, (const uint8_t *)pdu, field))
+    (Avtp_GetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, (const uint8_t *)pdu, field))
 #define SET_CRC_FIELD(field, value)                                                                \
-    (Avtp_SetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, (uint8_t *)pdu, field, value))
+    (Avtp_SetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, (uint8_t *)pdu, field, value))
 
 /**
  * Length of ACF_CRC message header in bytes.
@@ -60,7 +60,7 @@ extern "C" {
 #define AVTP_CRC_HEADER_LEN (1 * AVTP_QUADLET_SIZE)
 
 /**
- * Length of ACF_CRC message with minimum payload in bytes.
+ * Minimum length of the ACF_CRC payload in bytes.
  */
 #define AVTP_CRC_PAYLOAD_MIN_LEN (1 * AVTP_QUADLET_SIZE)
 
@@ -109,7 +109,7 @@ typedef enum {
 /**
  * This table describes all the offsets of the ACF_CRC header fields.
  */
-static const Avtp_FieldDescriptor_t Avtp_CrcHeaderFieldDesc[AVTP_CRC_FIELD_MAX] = {
+static const Avtp_FieldDescriptor_t Avtp_CrcFieldDesc[AVTP_CRC_FIELD_MAX] = {
     /* ACF common header fields */
     [AVTP_CRC_FIELD_ACF_MSG_TYPE] = {.quadlet = 0, .offset = 0, .bits = 7},
     [AVTP_CRC_FIELD_ACF_MSG_LENGTH] = {.quadlet = 0, .offset = 7, .bits = 9},
@@ -170,9 +170,10 @@ OPEN1722_INLINE uint32_t Avtp_Crc_GetCrcData(const Avtp_Crc_t *const pdu)
 
 /**
  * Returns pointer to payload of an ACF CRC frame.
- * Use this function to access the CRC data if it is more than 4 bytes long.
- * This is the case for CRC_USER type, which has a variable-length payload.
- * For CRC_ETH and CRC_32P4 types, use Avtp_Crc_GetCrcData() to access CRC data.
+ *
+ * Use this function to access the raw network order CRC data.
+ * This is useful for CRC_USER types that may have different length than the standard CRC_ETH
+ * and CRC_32P4 types. For CRC_ETH and CRC_32P4 types, use Avtp_Crc_GetCrcData() to access CRC data.
  *
  * @param pdu Pointer to the first bit of a 1722 ACF CRC PDU.
  * @return Pointer to ACF CRC frame payload
@@ -184,9 +185,10 @@ OPEN1722_INLINE const uint8_t *Avtp_Crc_GetPayload(const Avtp_Crc_t *const pdu)
 
 /**
  * Sets the CRC Data in an ACF CRC frame.
- * Use this function to set the CRC data ONLY if it is more than 4 bytes long.
- * This is the case for CRC_USER type, which has a variable-length payload.
- * For CRC_ETH and CRC_32P4 types, use Avtp_Crc_SetCrcData() to set CRC data.
+ *
+ * Use this function to set CRC data directly. Bytes are copied verbatim into the network buffer.
+ * This is useful for CRC_USER types that may have different length than the standard CRC_ETH and
+ * CRC_32P4 types. For CRC_ETH and CRC_32P4 types, use Avtp_Crc_SetCrcData() to set CRC data.
  *
  * @param pdu Pointer to the first bit of a 1722 ACF CRC PDU.
  * @param payload Pointer to the payload byte array
@@ -269,7 +271,7 @@ OPEN1722_INLINE void Avtp_Crc_Init(Avtp_Crc_t *pdu)
 }
 
 /**
- * Copies the payload data and CRC type into the ACF CRC frame.
+ * Sets the CRC type and 32 bit CRC data.
  *
  * Note: This function will create a valid ACF CRC frame for CRC_ETH and CRC_32P4 types only.
  *
@@ -333,7 +335,7 @@ OPEN1722_INLINE bool Avtp_Crc_IsValid(const Avtp_Crc_t *const pdu, size_t buffer
     // payload)
     Avtp_CrcType_t crc_type = Avtp_Crc_GetCrcType(pdu);
     if (crc_type == AVTP_CRC_TYPE_CRC_ETH || crc_type == AVTP_CRC_TYPE_CRC_32P4) {
-        if (msg_length_bytes != (AVTP_CRC_HEADER_LEN + 4)) {
+        if (msg_length_bytes != (AVTP_CRC_HEADER_LEN + AVTP_CRC_PAYLOAD_MIN_LEN)) {
             return false;
         }
     }
