@@ -106,6 +106,7 @@ The following is the list of the formats currently supported by Open1722:
     - CAN-XL
     - CAN-XL Brief
     - CRC
+    - Checksum
     - Flexray
     - LIN
     - MOST
