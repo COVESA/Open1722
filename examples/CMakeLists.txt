@@ -62,6 +62,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif()
 
     add_subdirectory(aaf)
+    add_subdirectory(acf-lin)
     add_subdirectory(crf)
     add_subdirectory(cvf)
     add_subdirectory(hello-world)
