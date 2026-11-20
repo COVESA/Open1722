@@ -66,7 +66,7 @@ static void crc_field_descriptors_cover_header(void **state)
     uint8_t coverage[AVTP_CRC_HEADER_LEN * 8] = {0};
 
     for (uint8_t field = 0; field < AVTP_CRC_FIELD_MAX; field++) {
-        const Avtp_FieldDescriptor_t *desc = &Avtp_CrcHeaderFieldDesc[field];
+        const Avtp_FieldDescriptor_t *desc = &Avtp_CrcFieldDesc[field];
 
         assert_int_equal(desc->quadlet, 0);
         for (uint8_t bit = 0; bit < desc->bits; bit++) {
@@ -95,10 +95,9 @@ static void crc_fields(void **state)
     Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_32P4);
     assert_int_equal(Avtp_Crc_GetCrcType(crc), AVTP_CRC_TYPE_CRC_32P4);
 
-    Avtp_SetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED, 0xABC);
+    Avtp_SetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED, 0xABC);
     assert_int_equal(
-        Avtp_GetField(Avtp_CrcHeaderFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED),
-        0xABC);
+        Avtp_GetField(Avtp_CrcFieldDesc, AVTP_CRC_FIELD_MAX, pdu, AVTP_CRC_FIELD_RESERVED), 0xABC);
     assert_int_equal(Avtp_Crc_GetCrcType(crc), AVTP_CRC_TYPE_CRC_32P4);
 
     Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 1);
@@ -200,6 +199,8 @@ static void crc_is_valid_fixed_length_types(void **state)
         Avtp_Crc_CreateAcfMessage(crc, type, payload);
         Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 0);
         assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
+        Avtp_AcfCommon_SetAcfMsgLength((Avtp_AcfCommon_t *)crc, 1);
+        assert_false(Avtp_Crc_IsValid(crc, sizeof(pdu)));
 
         /* Too long: fits the buffer but exceeds the fixed length. */
         Avtp_Crc_CreateAcfMessage(crc, type, payload);
@@ -233,7 +234,7 @@ static void crc_is_valid_user_type_variable_length(void **state)
         assert_false(Avtp_Crc_IsValid(crc, AVTP_CRC_HEADER_LEN + payload_length));
     }
 
-    for (uint16_t payload_length = 8; payload_length <= sizeof(payload); payload_length += 4) {
+    for (uint16_t payload_length = 4; payload_length <= sizeof(payload); payload_length += 4) {
         Avtp_Crc_Init(crc);
         Avtp_Crc_SetCrcType(crc, AVTP_CRC_TYPE_CRC_USER);
         Avtp_Crc_SetPayload(crc, payload, payload_length);
